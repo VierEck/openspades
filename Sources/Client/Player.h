@@ -115,6 +115,7 @@ namespace spades {
 			bool blockCursorDragging;
 			IntVector3 blockCursorPos;
 			IntVector3 blockCursorDragPos;
+			IntVector3 blockCursorIndentPos;
 			bool lastSingleBlockBuildSeqDone;
 			float lastReloadingTime;
 
@@ -160,6 +161,9 @@ namespace spades {
 			bool IsLocalPlayer();
 			BuildType GetBuildType() { return buildtype; }
 
+			bool Painting;
+			float BuildDistance;
+			bool BuildFar;
 			float walkFlySpeed;
 			float sprintFlySpeed;
 			float sneakFlySpeed;

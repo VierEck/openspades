@@ -89,6 +89,10 @@ namespace spades {
 			this->sprintFlySpeed = 10.0f;
 			this->sneakFlySpeed = 0.5f;
 
+			Painting = false;
+			BuildFar = false;
+			BuildDistance = 3.0f;
+
 			buildtype = ToolBlockSingle;
 		}
 
@@ -129,7 +133,7 @@ namespace spades {
 			if (!IsAlive())
 				return;
 
-			if (input.sprint && !input.crouch &&
+			if (!world.BuildMode && input.sprint && !input.crouch &&
 			    (input.moveBackward || input.moveForward || input.moveLeft || input.moveRight)) {
 				newInput.primary = false;
 				newInput.secondary = false;
@@ -172,10 +176,8 @@ namespace spades {
 			} else if (tool == ToolBlock) {
 				// work-around for bug that placing block
 				// occasionally becomes impossible
-				if (nextBlockTime >
-				    world.GetTime() + std::max(GetToolPrimaryDelay(), GetToolSecondaryDelay())) {
-					nextBlockTime =
-					  world.GetTime() + std::max(GetToolPrimaryDelay(), GetToolSecondaryDelay());
+				if (nextBlockTime > world.GetTime() + std::max(GetToolPrimaryDelay(), GetToolSecondaryDelay())) {
+					nextBlockTime = world.GetTime() + std::max(GetToolPrimaryDelay(), GetToolSecondaryDelay());
 				}
 
 				if (world.GetTime() < nextBlockTime) {
@@ -184,11 +186,46 @@ namespace spades {
 				}
 				if (newInput.secondary)
 					newInput.primary = false;
-				if (newInput.secondary != weapInput.secondary) {
-					if (newInput.secondary) {
+				if (newInput.primary && newInput.secondary && world.BuildMode) {
+					newInput.primary = false;
+					newInput.secondary = false;
+					weapInput.primary = false;
+					weapInput.secondary = false;
+				}
+				if (newInput.secondary != weapInput.secondary || (newInput.primary != weapInput.primary && this->GetTeamId() >= 2)) {
+					if ((newInput.secondary || newInput.primary) && buildtype == ToolBlockSingle && this->GetTeamId() >= 2) {
+						if (IsBlockCursorActive()) {
+							if (listener && this == world.GetLocalPlayer()) {
+								IntVector3 blockPos = blockCursorPos;
+								int action = 0;
+								if (this->Painting) {
+									action = 1;
+									if (this->BuildFar || this->GetBuildType() == Player::ToolBlockSingle) {
+										blockPos = blockCursorIndentPos;
+									}
+								} else if (newInput.secondary != weapInput.secondary) {
+									action = 2;
+									if (this->BuildFar || this->GetBuildType() == Player::ToolBlockSingle) {
+										blockPos = blockCursorIndentPos;
+									}
+								}
+								listener->LocalPlayerCreatedLineBlock(blockPos, blockPos, action);
+							}
+							lastSingleBlockBuildSeqDone = true;
+							// blockStocks--; decrease when created
+							nextBlockTime = world.GetTime() + GetToolPrimaryDelay();
+							blockCursorDragging = false;
+							blockCursorActive = false;
+						}
+					}
+					if ((newInput.secondary || (newInput.primary && this->GetTeamId() >= 2)) && buildtype != ToolBlockSingle) {
 						if (IsBlockCursorActive()) {
 							blockCursorDragging = true;
-							blockCursorDragPos = blockCursorPos;
+							if ((newInput.secondary || this->Painting) && BuildFar) {
+								blockCursorDragPos = blockCursorIndentPos;
+							} else {
+								blockCursorDragPos = blockCursorPos;
+							}
 						} else {
 							// cannot build; invalid position.
 							if (listener && this == world.GetLocalPlayer()) {
@@ -200,11 +237,16 @@ namespace spades {
 						if (IsBlockCursorDragging()) {
 							if (IsBlockCursorActive()) {
 								std::vector<IntVector3> blocks =
-								  GetWorld().CubeLine(blockCursorDragPos, blockCursorPos, 256);
-								if ((int)blocks.size() <= blockStocks) {
+								  GetWorld().CubeLine(blockCursorDragPos, blockCursorPos, 512);
+								if ((int)blocks.size() <= blockStocks || this->IsSpectator()) {
+									int action = 0;
+									if (newInput.secondary != weapInput.secondary && !this->Painting)
+										action = 2;
+									if (this->Painting)
+										action = 1;
 									if (listener && this == world.GetLocalPlayer())
 										listener->LocalPlayerCreatedLineBlock(blockCursorDragPos,
-										                                      blockCursorPos);
+										                                      blockCursorPos, action);
 									// blockStocks -= blocks.size(); decrease when created
 								} else {
 									// cannot build; insufficient blocks.
@@ -227,7 +269,7 @@ namespace spades {
 						blockCursorActive = false;
 					}
 				}
-				if (newInput.primary != weapInput.primary || newInput.primary) {
+				if ((newInput.primary != weapInput.primary || newInput.primary) && this->GetTeamId() < 2) {
 					if (newInput.primary) {
 
 						if (!weapInput.primary)
@@ -423,7 +465,15 @@ namespace spades {
 				Handle<GameMap> map = GetWorld().GetMap();
 				SPAssert(map);
 
-				result = map->CastRay2(GetEye(), GetFront(), 12);
+				float BuildDist = BuildDistance;
+				if (BuildFar) {
+					BuildDist = 1088.0f;
+				}
+				if (!this->IsSpectator()) {
+					BuildDist = 3.0f;
+				}
+
+				result = map->CastRay2(GetEye(), GetFront(), BuildDist);
 				canPending = false;
 
 				if (blockCursorDragging) {
@@ -438,22 +488,27 @@ namespace spades {
 						// still okay
 					} else {
 						// cannot build; floating
-						if (listener && this == world.GetLocalPlayer()) {
-							listener->LocalPlayerBuildError(BuildFailureReason::InvalidPosition);
-						}
-						blockCursorDragging = false;
+						if (!world.GetLocalPlayer()->IsSpectator()) {
+							if (listener && this == world.GetLocalPlayer()) {
+								listener->LocalPlayerBuildError(BuildFailureReason::InvalidPosition);
+							}
+							blockCursorDragging = false;
+						} 
 					}
 				}
-
-				if (result.hit && (result.hitBlock + result.normal).z < 62 &&
+				if (this->GetTeamId() >= 2 && (weapInput.secondary || this->Painting) && BuildFar) {
+					result.normal = {0,0,0};
+				}
+				if (result.hit && ((result.hitBlock + result.normal).z < 62 || world.BuildMode) &&
 				    (!OverlapsWithOneBlock(result.hitBlock + result.normal)) &&
-				    BoxDistanceToBlock(result.hitBlock + result.normal) < 3.f &&
-				    (result.hitBlock + result.normal).z >= 0 && !pendingPlaceBlock) {
+				    BoxDistanceToBlock(result.hitBlock + result.normal) < BuildDist &&
+				    (result.hitBlock + result.normal).z >= 0 && !pendingPlaceBlock &&
+					map->IsValidBuildCoord(result.hitBlock + result.normal)) {
 
 					// Building is possible, and there's no delayed block placement.
 					blockCursorActive = true;
-					blockCursorPos = result.hitBlock + result.normal;
-
+					blockCursorIndentPos = result.hitBlock;
+					blockCursorPos = blockCursorIndentPos + result.normal;
 				} else if (pendingPlaceBlock) {
 
 					// Delayed Block Placement: When player attempts to place a block while jumping
@@ -461,15 +516,16 @@ namespace spades {
 					// placing block is currently impossible, building will be delayed until it
 					// becomes
 					// possible, as long as player is airborne.
-					if (airborne == false || blockStocks <= 0) {
+					if ((airborne == false || blockStocks <= 0) && this->GetTeamId() < 2) {
 						// player is no longer airborne, or doesn't have a block to place.
 						pendingPlaceBlock = false;
 						lastSingleBlockBuildSeqDone = true;
 						if (blockStocks > 0) {
 							// cannot build; invalid position.
 						}
-					} else if ((!OverlapsWithOneBlock(pendingPlaceBlockPos)) &&
-					           BoxDistanceToBlock(pendingPlaceBlockPos) < 3.f) {
+					} else if (!OverlapsWithOneBlock(pendingPlaceBlockPos) &&
+					           BoxDistanceToBlock(pendingPlaceBlockPos) < BuildDist &&
+							   map->IsValidBuildCoord(pendingPlaceBlockPos)) {
 						// now building became possible.
 						SPAssert(this == world.GetLocalPlayer());
 
@@ -488,21 +544,31 @@ namespace spades {
 					// Delayed Block Placement can be activated only when the only reason making
 					// placement
 					// impossible is that block to be placed overlaps with the player's hitbox.
-					canPending = result.hit && (result.hitBlock + result.normal).z < 62 &&
-					             BoxDistanceToBlock(result.hitBlock + result.normal) < 3.f;
+					canPending = (result.hit && (result.hitBlock + result.normal).z < 62 || world.BuildMode) &&
+					             BoxDistanceToBlock(result.hitBlock + result.normal) < BuildDist &&
+								 map->IsValidBuildCoord(result.hitBlock + result.normal);
 
-					blockCursorActive = false;
-					int dist = 11;
-					for (; dist >= 1 && BoxDistanceToBlock(result.hitBlock + result.normal) > 3.f;
+					if (this->GetTeamId() < 2) {
+						blockCursorActive = false;
+					} else {
+						if (map->IsValidBuildCoord(result.hitBlock + result.normal)) {
+							blockCursorActive = true;
+						} else {
+							blockCursorActive = false;
+						}
+					}
+					int dist = BuildDist;
+					for (; dist >= 1 && BoxDistanceToBlock(result.hitBlock + result.normal) > BuildDist;
 					     dist--) {
 						result = GetWorld().GetMap()->CastRay2(GetEye(), GetFront(), dist);
 					}
-					for (; dist < 12 && BoxDistanceToBlock(result.hitBlock + result.normal) < 3.f;
+					for (; dist < 12 && BoxDistanceToBlock(result.hitBlock + result.normal) < BuildDist;
 					     dist++) {
 						result = GetWorld().GetMap()->CastRay2(GetEye(), GetFront(), dist);
 					}
 
-					blockCursorPos = result.hitBlock + result.normal;
+					blockCursorIndentPos = result.hitBlock;
+					blockCursorPos = blockCursorIndentPos + result.normal;
 				}
 
 			} else if (tool == ToolWeapon) {
