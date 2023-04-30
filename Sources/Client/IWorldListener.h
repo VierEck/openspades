@@ -88,7 +88,7 @@ namespace spades {
 
 			virtual void LocalPlayerPulledGrenadePin() = 0;
 			virtual void LocalPlayerBlockAction(IntVector3, BlockActionType type) = 0;
-			virtual void LocalPlayerCreatedLineBlock(IntVector3, IntVector3) = 0;
+			virtual void LocalPlayerCreatedLineBlock(IntVector3, IntVector3, int action) = 0;
 			virtual void LocalPlayerHurt(HurtType type, bool sourceGiven, Vector3 source) = 0;
 			virtual void LocalPlayerBuildError(BuildFailureReason reason) = 0;
 		};

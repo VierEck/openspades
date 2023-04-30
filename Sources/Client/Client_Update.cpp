@@ -1269,9 +1269,14 @@ namespace spades {
 			SPADES_MARK_FUNCTION();
 			net->SendBlockAction(v, type);
 		}
-		void Client::LocalPlayerCreatedLineBlock(spades::IntVector3 v1, spades::IntVector3 v2) {
+		void Client::LocalPlayerCreatedLineBlock(spades::IntVector3 v1, spades::IntVector3 v2, int secondaryaction) {
 			SPADES_MARK_FUNCTION();
-			net->SendBlockLine(v1, v2);
+			stmp::optional<Player &> p = world->GetLocalPlayer();
+			if (world->BuildMode && p->IsSpectator()) {
+				net->SendBlockVolume(v1, v2, p->GetBuildType(), secondaryaction); 
+			} else {
+				net->SendBlockLine(v1, v2);
+			}
 		}
 
 		void Client::LocalPlayerHurt(HurtType type, bool sourceGiven, spades::Vector3 source) {

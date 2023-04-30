@@ -497,7 +497,7 @@ namespace spades {
 
 			void LocalPlayerPulledGrenadePin() override;
 			void LocalPlayerBlockAction(IntVector3, BlockActionType type) override;
-			void LocalPlayerCreatedLineBlock(IntVector3, IntVector3) override;
+			void LocalPlayerCreatedLineBlock(IntVector3, IntVector3, int action) override;
 			void LocalPlayerHurt(HurtType type, bool sourceGiven, Vector3 source) override;
 			void LocalPlayerBuildError(BuildFailureReason reason) override;
 			// IWorldListener end
