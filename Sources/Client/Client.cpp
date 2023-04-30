@@ -340,8 +340,15 @@ namespace spades {
 			mumbleLink.setContext(hostname.ToString(false));
 			mumbleLink.setIdentity(playerName);
 
-			SPLog("Started connecting to '%s'", hostname.ToString(true).c_str());
 			net = stmp::make_unique<NetClient>(this);
+
+			if (LocalEditor) {
+				LoadLocalEditor();
+				SPLog("Started local Map Editor '%s'", map_file.c_str());
+				return;
+			}
+
+			SPLog("Started connecting to '%s'", hostname.ToString(true).c_str());
 			net->Connect(hostname);
 
 			// decide log file name
@@ -397,18 +404,20 @@ namespace spades {
 			timeSinceInit += std::min(dt, .03f);
 
 			// update network
-			try {
-				if (net->GetStatus() == NetClientStatusConnected)
-					net->DoEvents(0);
-				else
-					net->DoEvents(10);
-			} catch (const std::exception &ex) {
-				if (net->GetStatus() == NetClientStatusNotConnected) {
-					SPLog("Disconnected because of error:\n%s", ex.what());
-					NetLog("Disconnected because of error:\n%s", ex.what());
-					throw;
-				} else {
-					SPLog("Exception while processing network packets (ignored):\n%s", ex.what());
+			if (!LocalEditor) {
+				try {
+					if (net->GetStatus() == NetClientStatusConnected)
+						net->DoEvents(0);
+					else
+						net->DoEvents(10);
+				} catch (const std::exception &ex) {
+					if (net->GetStatus() == NetClientStatusNotConnected) {
+						SPLog("Disconnected because of error:\n%s", ex.what());
+						NetLog("Disconnected because of error:\n%s", ex.what());
+						throw;
+					} else {
+						SPLog("Exception while processing network packets (ignored):\n%s", ex.what());
+					}
 				}
 			}
 
@@ -430,19 +439,21 @@ namespace spades {
 			killfeedWindow->Update(dt);
 			limbo->Update(dt);
 
-			// The loading screen
-			if (net->GetStatus() == NetClientStatusReceivingMap) {
-				// Apply temporal smoothing on the progress value
-				float progress = net->GetMapReceivingProgress();
-
-				if (mapReceivingProgressSmoothed > progress) {
-					mapReceivingProgressSmoothed = progress;
+			if (!LocalEditor) {
+				// The loading screen
+				if (net->GetStatus() == NetClientStatusReceivingMap) {
+					// Apply temporal smoothing on the progress value
+					float progress = net->GetMapReceivingProgress();
+	
+					if (mapReceivingProgressSmoothed > progress) {
+						mapReceivingProgressSmoothed = progress;
+					} else {
+						mapReceivingProgressSmoothed +=
+						  (progress - mapReceivingProgressSmoothed) * (1.0 - powf(.05f, dt));
+					}
 				} else {
-					mapReceivingProgressSmoothed +=
-					  (progress - mapReceivingProgressSmoothed) * (1.0 - powf(.05f, dt));
+					mapReceivingProgressSmoothed = 0.0;
 				}
-			} else {
-				mapReceivingProgressSmoothed = 0.0;
 			}
 
 			// CreateSceneDefinition also can be used for sounds
