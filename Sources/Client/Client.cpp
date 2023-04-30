@@ -787,6 +787,10 @@ namespace spades {
 			}
 
 			chatWindow->AddMessage(msg);
+
+			if (msg.substr(0, 5) == "Map: ") {
+				map_file = msg.substr(5);
+			}
 		}
 
 #pragma mark - Follow / Spectate
