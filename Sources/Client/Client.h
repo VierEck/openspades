@@ -406,7 +406,7 @@ namespace spades {
 
 		public:
 			Client(Handle<IRenderer>, Handle<IAudioDevice>, const ServerAddress &host,
-			       Handle<FontManager>);
+			       Handle<FontManager>, bool localEditor, std::string MapFile, std::string Canvas);
 
 			void RunFrame(float dt) override;
 			void RunFrameLate(float dt) override;
@@ -492,6 +492,10 @@ namespace spades {
 			void LocalPlayerHurt(HurtType type, bool sourceGiven, Vector3 source) override;
 			void LocalPlayerBuildError(BuildFailureReason reason) override;
 			// IWorldListener end
+
+			bool LocalEditor;
+			std::string map_file;
+			std::string canvas_file;
 		};
 	} // namespace client
 } // namespace spades

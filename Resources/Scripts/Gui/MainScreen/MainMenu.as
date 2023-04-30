@@ -76,11 +76,13 @@ namespace spades {
         spades::ui::ListView @serverList;
         MainScreenServerListLoadingView @loadingView;
         MainScreenServerListErrorView @errorView;
-        bool loading = false, loaded = false;
+        bool loading = false, loaded = false, LocalEditor = false, CreateNewMap = false;
+		string MapFile = "";
 
         private ConfigItem cg_protocolVersion("cg_protocolVersion", "3");
         private ConfigItem cg_lastQuickConnectHost("cg_lastQuickConnectHost", "127.0.0.1");
         private ConfigItem cg_serverlistSort("cg_serverlistSort", "16385");
+		MainScreenServerItem@[]@ savedlist = array<spades::MainScreenServerItem@>();
 
         MainScreenMainMenu(MainScreenUI @ui) {
             super(ui.manager);
@@ -258,6 +260,13 @@ namespace spades {
                 errorView.Bounds = AABB2(contentsLeft, 240.f, contentsWidth, 100.f);
                 errorView.Visible = false;
                 AddChild(errorView);
+			}
+			{
+                spades::ui::Button button(Manager);
+                button.Caption = _Tr("MainScreen", "Map Folder / Server List");
+				button.Bounds = AABB2(contentsLeft, 165, 180.f, 35.f);
+                @button.Activated = spades::ui::EventHandler(this.OnChangeListPressed);
+                AddChild(button);
             }
             LoadServerList();
         }
@@ -271,12 +280,18 @@ namespace spades {
             @serverList.Model = spades::ui::ListViewModel(); // empty
             errorView.Visible = false;
             loadingView.Visible = true;
-            helper.StartQuery();
+			CreateNewMap = false;
+            helper.StartQuery(LocalEditor, CreateNewMap);
+			CreateNewMap = false;
         }
 
         void ServerListItemActivated(ServerListModel @sender, MainScreenServerItem @item) {
-            addressField.Text = item.Address;
-            cg_lastQuickConnectHost = addressField.Text;
+            if (!LocalEditor) {
+				addressField.Text = item.Address;
+				cg_lastQuickConnectHost = addressField.Text;
+			} else {
+				addressField.Text = item.Name;
+			}
             if (item.Protocol == "0.75") {
                 SetProtocolVersion(3);
             } else if (item.Protocol == "0.76") {
@@ -293,19 +308,52 @@ namespace spades {
         }
 
         void ServerListItemRightClicked(ServerListModel @sender, MainScreenServerItem @item) {
+			if (LocalEditor) {
+				return;
+			}
             helper.SetServerFavorite(item.Address, !item.Favorite);
             UpdateServerList();
         }
 
-        private void SortServerListByPing(spades::ui::UIElement @sender) { SortServerList(0); }
+        private void SortServerListByPing(spades::ui::UIElement @sender) { 
+			if (LocalEditor) {
+				return;
+			}
+			SortServerList(0);
+		}
         private void SortServerListByNumPlayers(spades::ui::UIElement @sender) {
+			if (LocalEditor) {
+				return;
+			}
             SortServerList(1);
         }
-        private void SortServerListByName(spades::ui::UIElement @sender) { SortServerList(2); }
-        private void SortServerListByMapName(spades::ui::UIElement @sender) { SortServerList(3); }
-        private void SortServerListByGameMode(spades::ui::UIElement @sender) { SortServerList(4); }
-        private void SortServerListByProtocol(spades::ui::UIElement @sender) { SortServerList(5); }
-        private void SortServerListByCountry(spades::ui::UIElement @sender) { SortServerList(6); }
+        private void SortServerListByName(spades::ui::UIElement @sender) { 
+			SortServerList(2); 
+		}
+        private void SortServerListByMapName(spades::ui::UIElement @sender) { 
+			if (LocalEditor) {
+				return;
+			}
+			SortServerList(3); 
+		}
+        private void SortServerListByGameMode(spades::ui::UIElement @sender) { 
+			if (LocalEditor) {
+				return;
+			}
+			SortServerList(4); 
+		}
+        private void SortServerListByProtocol(spades::ui::UIElement @sender) { 
+			if (LocalEditor) {
+				return;
+			}
+			SortServerList(5); 
+		}
+        private void SortServerListByCountry(spades::ui::UIElement @sender) { 
+			if (LocalEditor) {
+				return;
+			}
+			SortServerList(6); 
+		}
 
         private void SortServerList(int keyId) {
             int sort = cg_serverlistSort.IntValue;
@@ -329,6 +377,9 @@ namespace spades {
                 case 5: key = "Protocol"; break;
                 case 6: key = "Country"; break;
             }
+			if (LocalEditor) {
+				key = "Name";
+			}
             MainScreenServerItem @[] @list =
                 helper.GetServerList(key, (cg_serverlistSort.IntValue & 0x4000) != 0);
             if ((list is null)or(loading)) {
@@ -342,20 +393,22 @@ namespace spades {
             bool filterEmpty = filterEmptyButton.Toggled;
             bool filterFull = filterFullButton.Toggled;
             string filterText = filterField.Text;
-            MainScreenServerItem @[] @list2 = array<spades::MainScreenServerItem @>();
+            savedlist.resize(0);
             for (int i = 0, count = list.length; i < count; i++) {
                 MainScreenServerItem @item = list[i];
-                if (filterProtocol3 and(item.Protocol != "0.75")) {
-                    continue;
-                }
-                if (filterProtocol4 and(item.Protocol != "0.76")) {
-                    continue;
-                }
-                if (filterEmpty and(item.NumPlayers > 0)) {
-                    continue;
-                }
-                if (filterFull and(item.NumPlayers >= item.MaxPlayers)) {
-                    continue;
+                if (!LocalEditor) {
+					if (filterProtocol3 and(item.Protocol != "0.75")) {
+						continue;
+					}
+					if (filterProtocol4 and(item.Protocol != "0.76")) {
+						continue;
+					}
+					if (filterEmpty and(item.NumPlayers > 0)) {
+						continue;
+					}
+					if (filterFull and(item.NumPlayers >= item.MaxPlayers)) {
+						continue;
+					}
                 }
                 if (filterText.length > 0) {
                     if (not(StringContainsCaseInsensitive(item.Name, filterText)
@@ -364,10 +417,10 @@ namespace spades {
                         continue;
                     }
                 }
-                list2.insertLast(item);
+                savedlist.insertLast(item);
             }
 
-            ServerListModel model(Manager, list2);
+            ServerListModel model(Manager, savedlist);
             @serverList.Model = model;
             @model.ItemActivated = ServerListItemEventHandler(this.ServerListItemActivated);
             @model.ItemDoubleClicked = ServerListItemEventHandler(this.ServerListItemDoubleClicked);
@@ -397,6 +450,9 @@ namespace spades {
         }
 
         private void OnAddressChanged(spades::ui::UIElement @sender) {
+			if (LocalEditor) {
+				return;
+			}
             cg_lastQuickConnectHost = addressField.Text;
         }
 
@@ -406,23 +462,45 @@ namespace spades {
             cg_protocolVersion = ver;
         }
 
-        private void OnProtocol3Pressed(spades::ui::UIElement @sender) { SetProtocolVersion(3); }
+        private void OnProtocol3Pressed(spades::ui::UIElement @sender) { 
+			if (LocalEditor) {
+				return;
+			}
+			SetProtocolVersion(3); 
+		}
 
-        private void OnProtocol4Pressed(spades::ui::UIElement @sender) { SetProtocolVersion(4); }
+        private void OnProtocol4Pressed(spades::ui::UIElement @sender) { 
+			if (LocalEditor) {
+				return;
+			}
+			SetProtocolVersion(4); 
+		}
 
         private void OnFilterProtocol3Pressed(spades::ui::UIElement @sender) {
+			if (LocalEditor) {
+				return;
+			}
             filterProtocol4Button.Toggled = false;
             UpdateServerList();
         }
         private void OnFilterProtocol4Pressed(spades::ui::UIElement @sender) {
+			if (LocalEditor) {
+				return;
+			}
             filterProtocol3Button.Toggled = false;
             UpdateServerList();
         }
         private void OnFilterFullPressed(spades::ui::UIElement @sender) {
+			if (LocalEditor) {
+				return;
+			}
             filterEmptyButton.Toggled = false;
             UpdateServerList();
         }
         private void OnFilterEmptyPressed(spades::ui::UIElement @sender) {
+			if (LocalEditor) {
+				return;
+			}
             filterFullButton.Toggled = false;
             UpdateServerList();
         }
@@ -444,7 +522,50 @@ namespace spades {
         }
 
         private void Connect() {
-            string msg = helper.ConnectServer(addressField.Text, cg_protocolVersion.IntValue);
+            if (addressField.Text == "") {
+				return;
+			} 
+			string Canvas = "";
+			string FieldText = addressField.Text;
+			if (LocalEditor) {
+				bool Found = false; 
+				for(int i = 0, count = savedlist.length; i < count; i++) {
+					MainScreenServerItem@ item = savedlist[i];
+					if (item.Name == addressField.Text) {
+						Found = true;
+						break;
+					}
+				}
+				if (!Found) {
+					if (!CreateNewMap) {
+						if (loading) {
+							return;
+						}
+						loaded = false;
+						loading = true;
+						@serverList.Model = spades::ui::ListViewModel(); // empty
+						errorView.Visible = false;
+						loadingView.Visible = true;
+						CreateNewMap = true;
+						helper.StartQuery(LocalEditor, CreateNewMap);
+						MapFile = "Maps/" + addressField.Text;
+						if (MapFile.findFirst(".vxl") < 0) {
+							MapFile += ".vxl";
+						}
+						return;
+					} 
+					return;
+				} else {
+					if (CreateNewMap) {
+						Canvas = "Maps/Canvas/" + addressField.Text;
+					} else {
+						MapFile = "Maps/" + addressField.Text;
+						Canvas = "";
+					}
+					FieldText = "aos://16777343:32887";
+				}
+			}
+            string msg = helper.ConnectServer(FieldText, cg_protocolVersion.IntValue, LocalEditor, MapFile, Canvas);
             if (msg.length > 0) {
                 // failde to initialize client.
                 AlertScreen al(this, msg);
@@ -455,7 +576,7 @@ namespace spades {
         private void OnConnectPressed(spades::ui::UIElement @sender) { Connect(); }
 
         void HotKey(string key) {
-            if (IsEnabled and key == "Enter") {
+            if (IsEnabled and key == "Enter" and !CreateNewMap) {
                 Connect();
             } else if (IsEnabled and key == "Escape") {
                 ui.shouldExit = true;
@@ -492,6 +613,15 @@ namespace spades {
                 }
             }
         }
+		
+		private void OnChangeListPressed(spades::ui::UIElement @sender) {
+			LocalEditor = !LocalEditor;
+			if (LocalEditor) {
+				addressField.Text = "";
+			} else {
+				addressField.Text = cg_lastQuickConnectHost.StringValue;
+			}
+			LoadServerList();
+		}
     }
-
 }

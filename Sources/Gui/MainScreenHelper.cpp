@@ -57,6 +57,7 @@ namespace spades {
 
 	public:
 		static ServerItem *Create(Json::Value &val);
+		static ServerItem *MakeMapItem(std::string file_name, bool txtExtension);
 
 		inline const std::string &GetName() const { return mName; }
 		inline const std::string &GetAddress() const { return mIp; }
@@ -104,6 +105,21 @@ namespace spades {
 		return item;
 	}
 
+	ServerItem *ServerItem::MakeMapItem(std::string file_name, bool txtExtension) {
+		ServerItem *item = NULL;
+		std::string name, ip, map = "", gameMode = "", country = "", version = "";
+		int ping = 0, players = 0, maxPlayers = 1;
+
+		name = file_name;
+		ip = "aos://16777343:32887";
+		if (txtExtension)
+			map = ".txt extension file found";
+
+		item = new ServerItem(name, ip, map, gameMode, country, version, ping, players, maxPlayers);
+
+		return item;
+	}
+
 	namespace gui {
 		constexpr auto FAVORITE_PATH = "/favorite_servers.json";
 
@@ -137,35 +153,109 @@ namespace spades {
 				ReturnResult(std::move(resp));
 			}
 
+			void GetMapList() {
+				std::unique_ptr<MainScreenServerList> resp{new MainScreenServerList()};
+
+				WIN32_FIND_DATA FileInfo;
+				std::vector<std::string> FileNames;
+
+				char buffer[MAX_PATH];
+				GetModuleFileNameA(NULL, buffer, MAX_PATH);
+
+				std::string fullPath = spades::FileManager::GetRootPath() + "\\Maps" + "/*.vxl";
+
+			    HANDLE hFind = ::FindFirstFile(fullPath.c_str(), &FileInfo); 
+			    if(hFind != INVALID_HANDLE_VALUE) { 
+			        do {
+			            if(!(FileInfo.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+			                FileNames.push_back(FileInfo.cFileName);
+			            }
+			        }while(::FindNextFile(hFind, &FileInfo)); 
+			        ::FindClose(hFind); 
+			    } 
+
+				for (int i = 0; i < (int)FileNames.size(); i++) {
+					std::unique_ptr<ServerItem> srv{ServerItem::MakeMapItem(FileNames[i], false)};
+
+					if (srv) {
+						resp->list.emplace_back(new MainScreenServerItem(srv.get(), owner->favorites.count(srv->GetAddress()) >= 1),false);
+					}
+				}
+				ReturnResult(std::move(resp));
+			}
+
+			void GetCanvasList() {
+				std::unique_ptr<MainScreenServerList> resp{new MainScreenServerList()};
+
+				WIN32_FIND_DATA FileInfo;
+				std::vector<std::string> FileNames;
+
+				char buffer[MAX_PATH];
+				GetModuleFileNameA(NULL, buffer, MAX_PATH);
+
+				std::string fullPath = spades::FileManager::GetRootPath() + "Maps/" + "\\Canvas" + "/*.vxl";
+
+			    HANDLE hFind = ::FindFirstFile(fullPath.c_str(), &FileInfo); 
+			    if(hFind != INVALID_HANDLE_VALUE) { 
+			        do {
+			            if(!(FileInfo.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+			                FileNames.push_back(FileInfo.cFileName);
+			            }
+			        }while(::FindNextFile(hFind, &FileInfo)); 
+			        ::FindClose(hFind); 
+			    } 
+
+				for (int i = 0; i < (int)FileNames.size(); i++) {
+					std::unique_ptr<ServerItem> srv{ServerItem::MakeMapItem(FileNames[i], false)};
+
+					if (srv) {
+						resp->list.emplace_back(new MainScreenServerItem(srv.get(), owner->favorites.count(srv->GetAddress()) >= 1),false);
+					}
+				}
+				ReturnResult(std::move(resp));
+			}
+
 		public:
-			ServerListQuery(MainScreenHelper *owner) : owner{owner} {}
+			bool LocalEditor, Canvas;
+			ServerListQuery(MainScreenHelper *owner, bool localEditor, bool canvas) : owner{owner} {
+				LocalEditor = localEditor;
+				Canvas = canvas;
+			}
 
 			void Run() override {
 				try {
-					std::unique_ptr<CURL, CURLEasyDeleter> cHandle{curl_easy_init()};
-					if (cHandle) {
-						size_t (*curlWriteCallback)(void *, size_t, size_t, ServerListQuery *) =
-						  [](void *ptr, size_t size, size_t nmemb,
-						     ServerListQuery *self) -> size_t {
-							size_t numBytes = size * nmemb;
-							self->buffer.append(reinterpret_cast<char *>(ptr), numBytes);
-							return numBytes;
-						};
-						curl_easy_setopt(cHandle.get(), CURLOPT_USERAGENT, OpenSpades_VER_STR);
-						curl_easy_setopt(cHandle.get(), CURLOPT_URL, cl_serverListUrl.CString());
-						curl_easy_setopt(cHandle.get(), CURLOPT_WRITEFUNCTION, curlWriteCallback);
-						curl_easy_setopt(cHandle.get(), CURLOPT_WRITEDATA, this);
-						curl_easy_setopt(cHandle.get(), CURLOPT_LOW_SPEED_TIME, 30l);
-						curl_easy_setopt(cHandle.get(), CURLOPT_LOW_SPEED_LIMIT, 15l);
-						curl_easy_setopt(cHandle.get(), CURLOPT_CONNECTTIMEOUT, 30l);
-						auto reqret = curl_easy_perform(cHandle.get());
-						if (CURLE_OK == reqret) {
-							ProcessResponse();
+					if (!LocalEditor) {
+						std::unique_ptr<CURL, CURLEasyDeleter> cHandle{curl_easy_init()};
+						if (cHandle) {
+							size_t (*curlWriteCallback)(void *, size_t, size_t, ServerListQuery *) =
+							  [](void *ptr, size_t size, size_t nmemb,
+							     ServerListQuery *self) -> size_t {
+								size_t numBytes = size * nmemb;
+								self->buffer.append(reinterpret_cast<char *>(ptr), numBytes);
+								return numBytes;
+							};
+							curl_easy_setopt(cHandle.get(), CURLOPT_USERAGENT, OpenSpades_VER_STR);
+							curl_easy_setopt(cHandle.get(), CURLOPT_URL, cl_serverListUrl.CString());
+							curl_easy_setopt(cHandle.get(), CURLOPT_WRITEFUNCTION, curlWriteCallback);
+							curl_easy_setopt(cHandle.get(), CURLOPT_WRITEDATA, this);
+							curl_easy_setopt(cHandle.get(), CURLOPT_LOW_SPEED_TIME, 30l);
+							curl_easy_setopt(cHandle.get(), CURLOPT_LOW_SPEED_LIMIT, 15l);
+							curl_easy_setopt(cHandle.get(), CURLOPT_CONNECTTIMEOUT, 30l);
+							auto reqret = curl_easy_perform(cHandle.get());
+							if (CURLE_OK == reqret) {
+								ProcessResponse();
+							} else {
+								SPRaise("HTTP request error (%s).", curl_easy_strerror(reqret));
+							}
 						} else {
-							SPRaise("HTTP request error (%s).", curl_easy_strerror(reqret));
+							SPRaise("Failed to create cURL object.");
 						}
 					} else {
-						SPRaise("Failed to create cURL object.");
+						if (Canvas) {
+							GetCanvasList();
+						} else {
+							GetMapList();
+						}
 					}
 				} catch (std::exception &ex) {
 					auto lst = stmp::make_unique<MainScreenServerList>();
@@ -260,13 +350,13 @@ namespace spades {
 			return false;
 		}
 
-		void MainScreenHelper::StartQuery() {
+		void MainScreenHelper::StartQuery(bool localEditor, bool Canvas) {
 			if (query) {
 				// There already is an ongoing query
 				return;
 			}
 
-			query = new ServerListQuery(this);
+			query = new ServerListQuery(this, localEditor, Canvas);
 			query->Start();
 		}
 
@@ -374,12 +464,11 @@ namespace spades {
 			return arr;
 		}
 
-		std::string MainScreenHelper::ConnectServer(std::string hostname, int protocolVersion) {
+		std::string MainScreenHelper::ConnectServer(std::string hostname, int protocolVersion, bool localEditor, std::string MapFile, std::string Canvas) {
 			if (mainScreen == NULL) {
 				return "mainScreen == NULL";
 			}
-			return mainScreen->Connect(ServerAddress(
-			  hostname, protocolVersion == 3 ? ProtocolVersion::v075 : ProtocolVersion::v076));
+			return mainScreen->Connect(ServerAddress(hostname, protocolVersion == 3 ? ProtocolVersion::v075 : ProtocolVersion::v076), localEditor, MapFile, Canvas);
 		}
 
 		std::string MainScreenHelper::GetServerListQueryMessage() {

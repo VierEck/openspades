@@ -68,7 +68,7 @@ namespace spades {
 	namespace client {
 
 		Client::Client(Handle<IRenderer> r, Handle<IAudioDevice> audioDev,
-		               const ServerAddress &host, Handle<FontManager> fontManager)
+		               const ServerAddress &host, Handle<FontManager> fontManager, bool localEditor, std::string MapFile, std::string Canvas)
 		    : playerName(cg_playerName.operator std::string().substr(0, 15)),
 		      logStream(nullptr),
 		      hostname(host),
@@ -77,6 +77,10 @@ namespace spades {
 
 		      time(0.f),
 		      readyToClose(false),
+
+			  LocalEditor(localEditor),
+			  map_file(MapFile),
+			  canvas_file(Canvas),
 
 		      worldSubFrame(0.f),
 		      frameToRendererInit(5),
