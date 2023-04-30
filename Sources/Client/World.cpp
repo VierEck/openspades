@@ -246,18 +246,20 @@ namespace spades {
 
 			cells = mapWrapper->RemoveBlocks(cells);
 
-			auto clusters = ClusterizeBlocks(cells);
-			std::vector<IntVector3> cells2;
+			if (!BuildMode) {
+				auto clusters = ClusterizeBlocks(cells);
+				std::vector<IntVector3> cells2;
 
-			for (const auto &cluster : clusters) {
-				cells2.resize(cluster.size());
-				for (std::size_t i = 0; i < cluster.size(); i++) {
-					auto p = cluster[i];
-					cells2[i] = IntVector3(p.x, p.y, p.z);
-					map->Set(p.x, p.y, p.z, false, 0);
+				for (const auto &cluster : clusters) {
+					cells2.resize(cluster.size());
+					for (std::size_t i = 0; i < cluster.size(); i++) {
+						auto p = cluster[i];
+						cells2[i] = IntVector3(p.x, p.y, p.z);
+						map->Set(p.x, p.y, p.z, false, 0);
+					}
+					if (listener)
+						listener->BlocksFell(cells2);
 				}
-				if (listener)
-					listener->BlocksFell(cells2);
 			}
 
 			createdBlocks.clear();
@@ -273,11 +275,9 @@ namespace spades {
 		}
 		void World::DestroyBlock(std::vector<spades::IntVector3> &pos) {
 			std::vector<CellPos> cells;
-			bool allowToDestroyLand = pos.size() == 1;
 			for (size_t i = 0; i < pos.size(); i++) {
-				const IntVector3 &p = pos[i];
-				if (p.z >= (allowToDestroyLand ? 63 : 62) || p.z < 0 || p.x < 0 || p.y < 0 ||
-				    p.x >= map->Width() || p.y >= map->Height())
+				const IntVector3 &p = pos[i];	
+				if (p.z > 62 || p.z < 0 || p.x < 0 || p.y < 0 || p.x >= map->Width() || p.y >= map->Height())
 					continue;
 
 				CellPos cellp(p.x, p.y, p.z);
@@ -356,7 +356,7 @@ namespace spades {
 				if (ret.size() == (size_t)maxLength)
 					break;
 
-				if (c.x == v2.x && c.y == v2.y && c.z == v2.z)
+				if (c == v2)
 					break;
 
 				if ((dz <= dx) && (dz <= dy)) {
@@ -367,12 +367,12 @@ namespace spades {
 				} else {
 					if (dx < dy) {
 						c.x += ixi;
-						if ((unsigned long)c.x >= VSID)
+						if (c.x < 0 || c.x >= VSID)
 							break;
 						dx += dxi;
 					} else {
 						c.y += iyi;
-						if ((unsigned long)c.y >= VSID)
+						if (c.y < 0 || c.y >= VSID)
 							break;
 						dy += dyi;
 					}

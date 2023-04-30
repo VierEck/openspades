@@ -171,6 +171,8 @@ namespace spades {
 
 			void SetListener(IWorldListener *newListener) { listener = newListener; }
 			IWorldListener *GetListener() { return listener; }
+
+			bool BuildMode = false;
 		};
 	} // namespace client
 } // namespace spades
