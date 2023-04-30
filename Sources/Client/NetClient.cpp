@@ -94,6 +94,8 @@ namespace spades {
 				PacketTypeVersionSend = 34,     // C2S
 				PacketTypeExtensionInfo = 60,
 
+				PacketTypeBuildMode = 100,
+				PacketTypeBlockVolume = 101,
 			};
 
 			enum class VersionInfoPropertyId : std::uint8_t {
@@ -1477,6 +1479,86 @@ namespace spades {
 					// weapon...
 					// p->SetWeaponType(wType);
 				} break;
+
+				case PacketTypeBuildMode: {
+					//do this in extension packet later maybe instead of its own packet. 
+					GetWorld()->BuildMode = true;
+					if (peer) {
+						NetPacketWriter wri(PacketTypeBuildMode);
+						enet_peer_send(peer, 0, wri.CreatePacket());
+					}
+				} break;
+				case PacketTypeBlockVolume: {
+					if (!GetWorld()->BuildMode)
+						break;
+					stmp::optional<Player &> p = GetPlayerOrNull(reader.ReadByte());
+					int action = reader.ReadByte();
+					if (action > 9)
+						SPRaise("Received invalid block volume action: %d", action);
+					int actionSecondary = reader.ReadByte();
+					if (actionSecondary > 2)
+						SPRaise("Received invalid block volume secondary action: %d", actionSecondary);
+
+					IntVector3 pos1, pos2;
+					pos1.x = reader.ReadInt();
+					pos1.y = reader.ReadInt();
+					pos1.z = reader.ReadInt();
+					if (action != Player::ToolBlockSingle) {
+						pos2.x = reader.ReadInt();
+						pos2.y = reader.ReadInt();
+						pos2.z = reader.ReadInt();
+					}
+
+					std::vector<IntVector3> cells;
+					switch(action) {
+						case Player::ToolBlockSingle:
+							cells.push_back(pos1);
+							break;
+						case Player::ToolBlockLine:
+							cells = GetWorld()->CubeLine(pos1, pos2, 1088);
+							break;
+						case Player::ToolBox:
+							cells = GetWorld()->CubeBox(pos1, pos2);
+							break;
+						case Player::ToolBall:
+							//get sphere cells
+							break;
+						case Player::ToolCylinderZ:
+						case Player::ToolCylinderX:
+						case Player::ToolCylinderY:
+							//get cylinder cells
+							break;
+						default: SPRaise("Received invalid block volume action: %d", action);
+					}
+
+					if (actionSecondary < 2) {
+						IntVector3 col = p ? p->GetBlockColor() : temporaryPlayerBlockColor;
+						for (size_t i = 0; i < cells.size(); i++) {
+							if (!actionSecondary) {//build over everything
+								GetWorld()->CreateBlock(cells[i], col);
+							}
+							/*
+							//build only over non-solids
+								if (!GetWorld()->GetMap()->IsSolid(cells[i].x, cells[i].y, cells[i].z)) {
+									GetWorld()->CreateBlock(cells[i], col);
+								}
+							*/
+							if (actionSecondary) {//paint (=build only over solids)
+								if (GetWorld()->GetMap()->IsSolid(cells[i].x, cells[i].y, cells[i].z)) {
+									GetWorld()->CreateBlock(cells[i], col);
+								}
+							}
+						}
+						if (p) {
+							client->PlayerCreatedBlock(*p);
+						}
+					} else {//destroy
+						GetWorld()->DestroyBlock(cells);
+						if (p) {
+							client->PlayerDigBlockSound(*p);
+						}
+					}
+				} break;
 				default:
 					printf("WARNING: dropped packet %d\n", (int)reader.GetType());
 					reader.DumpDebug();
@@ -1843,6 +1925,29 @@ namespace spades {
 			}
 			SPLog("Sending extension support.");
 			enet_peer_send(peer, 0, wri.CreatePacket());
+		}
+
+		void NetClient::SendBlockVolume(spades::IntVector3 v1, spades::IntVector3 v2, int action, int secondaryAction) {
+			SPADES_MARK_FUNCTION();
+			NetPacketWriter wri(PacketTypeBlockVolume);
+			wri.Write((uint8_t)GetLocalPlayer().GetId());
+			wri.Write((uint8_t)action);
+			wri.Write((uint8_t)secondaryAction);
+
+			wri.Write((uint32_t)v1.x);
+			wri.Write((uint32_t)v1.y);
+			wri.Write((uint32_t)v1.z);
+			wri.Write((uint32_t)v2.x);
+			wri.Write((uint32_t)v2.y);
+			wri.Write((uint32_t)v2.z);
+
+			
+			if (peer) {
+				enet_peer_send(peer, 0, wri.CreatePacket());
+			} else {
+				NetPacketReader read(wri.CreatePacket());
+				HandleGamePacket(read);
+			}
 		}
 
 		void NetClient::MapLoaded() {

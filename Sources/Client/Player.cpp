@@ -329,6 +329,14 @@ namespace spades {
 				world.GetListener()->PlayerChangedTool(*this);
 		}
 
+		void Player::SetBuildType(spades::client::Player::BuildType b) {
+			buildtype = b;
+			blockCursorActive = false;
+			blockCursorDragging = false;
+			WeaponInput inp;
+			SetWeaponInput(inp);
+		}
+
 		void Player::SetHeldBlockColor(spades::IntVector3 col) { blockColor = col; }
 
 		void Player::SetPosition(const spades::Vector3 &v) {

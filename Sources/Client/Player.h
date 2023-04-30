@@ -61,6 +61,7 @@ namespace spades {
 		class Player {
 		public:
 			enum ToolType { ToolSpade = 0, ToolBlock, ToolWeapon, ToolGrenade };
+			enum BuildType { ToolBlockSingle = 0, ToolBlockLine, ToolBox, ToolBall, ToolCylinderZ, ToolCylinderX, ToolCylinderY };
 			struct HitBoxes {
 				OBB3 torso;
 				OBB3 limbs[3];
@@ -79,6 +80,8 @@ namespace spades {
 			bool airborne;
 			bool wade;
 			ToolType tool;
+
+			BuildType buildtype;
 
 			WeaponType weaponType;
 			std::unique_ptr<Weapon> weapon;
@@ -155,12 +158,14 @@ namespace spades {
 			IntVector3 GetBlockColor() { return blockColor; }
 			ToolType GetTool() { return tool; }
 			bool IsLocalPlayer();
+			BuildType GetBuildType() { return buildtype; }
 
 			PlayerInput GetInput() { return input; }
 			WeaponInput GetWeaponInput() { return weapInput; }
 			void SetInput(PlayerInput);
 			void SetWeaponInput(WeaponInput);
 			void SetTool(ToolType);
+			void SetBuildType(BuildType);
 			void SetHeldBlockColor(IntVector3);
 			void ForceJump();
 			bool IsBlockCursorActive();

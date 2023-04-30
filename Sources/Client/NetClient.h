@@ -198,6 +198,8 @@ namespace spades {
 			void SendTeamChange(int team);
 			void SendHandShakeValid(int challenge);
 
+			void SendBlockVolume(IntVector3 v1, IntVector3 v2, int action, int secondaryAction);
+
 			double GetDownlinkBps() { return bandwidthMonitor->GetDownlinkBps(); }
 			double GetUplinkBps() { return bandwidthMonitor->GetUplinkBps(); }
 		};
