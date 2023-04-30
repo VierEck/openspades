@@ -96,6 +96,8 @@ namespace spades {
 
 				PacketTypeBuildMode = 100,
 				PacketTypeBlockVolume = 101,
+				PacketTypeSetFlySpeed = 102,
+				PacketTypeSetMapObject = 103,
 			};
 
 			enum class VersionInfoPropertyId : std::uint8_t {
@@ -1558,6 +1560,36 @@ namespace spades {
 							client->PlayerDigBlockSound(*p);
 						}
 					}
+				} break;
+				case PacketTypeSetFlySpeed: {
+					if (!GetWorld()->BuildMode)
+						break;
+					stmp::optional<Player &> p = GetPlayerOrNull(reader.ReadByte());
+					if (!p)
+						break;
+					//we dont need speed higher than 25.5 anyway
+					float walk = reader.ReadByte() * 0.1f;
+					float sprint = reader.ReadByte() * 0.1f;
+					float sneak = reader.ReadByte() * 0.1f;
+
+					if (walk == 0.0f || sprint == 0.0f || sneak == 0.0f)
+						SPRaise("Received invalid FlySpeed value of 0");
+
+					p->walkFlySpeed = walk;
+					p->sprintFlySpeed = sprint;
+					p->sneakFlySpeed = sneak;
+				} break;
+				case PacketTypeSetMapObject: {
+					if (!GetWorld()->BuildMode)
+						break;
+					uint8_t type = reader.ReadByte();
+					int action = reader.ReadByte();
+					Vector3 pos;
+					pos.x = reader.ReadFloat();
+					pos.y = reader.ReadFloat();
+					pos.z = reader.ReadFloat();
+
+					//action -> create new mapobjects or move or delete already existing mapobjects
 				} break;
 				default:
 					printf("WARNING: dropped packet %d\n", (int)reader.GetType());

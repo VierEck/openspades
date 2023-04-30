@@ -84,6 +84,12 @@ namespace spades {
 			holdingGrenade = false;
 			reloadingServerSide = false;
 			canPending = false;
+
+			this->walkFlySpeed = 2.0f;
+			this->sprintFlySpeed = 10.0f;
+			this->sneakFlySpeed = 0.5f;
+
+			buildtype = ToolBlockSingle;
 		}
 
 		Player::~Player() { SPADES_MARK_FUNCTION(); }
@@ -1039,12 +1045,17 @@ namespace spades {
 			float ny = f * velocity.y + position.y;
 			bool climb = false;
 			float offset, m;
-			if (input.crouch) {
-				offset = .45f;
-				m = .9f;
+			if (this->GetTeamId() < 2) {
+				if (input.crouch) {
+					offset = .45f;
+					m = .9f;
+				} else {
+					offset = .9f;
+					m = 1.35f;
+				}
 			} else {
-				offset = .9f;
-				m = 1.35f;
+				offset = 0;
+				m = 0;
 			}
 
 			float nz = position.z + offset;
@@ -1151,6 +1162,52 @@ namespace spades {
 		}
 
 		void Player::MovePlayer(float fsynctics) {
+
+			if (world.BuildMode && this->GetTeamId() >= 2) {
+				float f = fsynctics;
+				if (input.sneak)
+					f *= sneakFlySpeed;
+				else if (input.sprint)
+					f *= sprintFlySpeed;
+				else
+					f *= walkFlySpeed;
+				if ((input.moveForward || input.moveBackward) && (input.moveRight || input.moveLeft) && (input.crouch || input.jump))
+					f /= sqrtf(2.f);
+
+				Vector3 front = GetFront();
+				Vector3 down = {0, 0, 1};
+				Vector3 right = -Vector3::Cross(down, front).Normalize();
+				Vector3 down2 = Vector3::Cross(right, front).Normalize();
+
+				front *= f;
+				right *= f;
+				down2 *= f;
+
+				if (input.moveForward) {
+					velocity += front;
+				} else if (input.moveBackward) {
+					velocity -= front;
+				}
+				if (input.moveLeft) {
+					velocity += right;
+				} else if (input.moveRight) {
+					velocity -= right;
+				}
+				if (input.crouch) {
+					velocity += down2;
+				} else if (input.jump) {
+					velocity -= down2;
+				}
+				f = fsynctics * 4.f + 1.f;
+				velocity.x /= f;
+				velocity.y /= f;
+				velocity.z /= f;
+
+				BoxClipMove(fsynctics);
+
+				return;
+			}
+
 			if (input.jump && (!lastJump) && IsOnGroundOrWade()) {
 				velocity.z = -0.36f;
 				lastJump = true;

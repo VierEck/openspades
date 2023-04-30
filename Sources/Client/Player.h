@@ -160,6 +160,10 @@ namespace spades {
 			bool IsLocalPlayer();
 			BuildType GetBuildType() { return buildtype; }
 
+			float walkFlySpeed;
+			float sprintFlySpeed;
+			float sneakFlySpeed;
+
 			PlayerInput GetInput() { return input; }
 			WeaponInput GetWeaponInput() { return weapInput; }
 			void SetInput(PlayerInput);
