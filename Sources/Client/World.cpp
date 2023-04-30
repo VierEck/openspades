@@ -382,6 +382,62 @@ namespace spades {
 			return ret;
 		}
 
+		std::vector<IntVector3> World::CubeBox(spades::IntVector3 v1, spades::IntVector3 v2) {
+			SPADES_MARK_FUNCTION_DEBUG();
+
+			IntVector3 c = v1;
+			IntVector3 d = v2 - v1;
+			long ixi, iyi, izi, cx, cy;
+			std::vector<IntVector3> ret;
+
+			int VSID = map->Width();
+			SPAssert(VSID == map->Height());
+
+			int MAXZDIM = map->Depth();
+
+			cx = c.x;
+			cy = c.y;
+
+			if (d.x < 0)
+				ixi = -1;
+			else
+				ixi = 1;
+			if (d.y < 0)
+				iyi = -1;
+			else
+				iyi = 1;
+			if (d.z < 0)
+				izi = -1;
+			else
+				izi = 1;
+
+			while (1) {
+				ret.push_back(c);
+
+				if (c.x == v2.x && c.y == v2.y && c.z == v2.z)
+					break;
+				
+				if (c.x != v2.x) {
+					c.x += ixi;
+					if (c.x < 0 || c.x >= VSID)
+						break;
+				} else if (c.y != v2.y) {
+					c.x = cx;
+					c.y += iyi;
+					if (c.y < 0 || c.y >= VSID)
+						break;
+				} else if (c.z != v2.z) {
+					c.x = cx;
+					c.y = cy;
+					c.z += izi;
+					if (c.z < 0 || c.z >= MAXZDIM)
+						break;
+				}
+			}
+
+			return ret;
+		}
+
 		World::WeaponRayCastResult World::WeaponRayCast(spades::Vector3 startPos,
 		                                                spades::Vector3 dir,
 		                                                stmp::optional<int> excludePlayerId) {
