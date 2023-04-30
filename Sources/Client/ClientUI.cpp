@@ -62,6 +62,10 @@ namespace spades {
 			helper->ClientUIDestroyed();
 		}
 
+		void ClientUI::SaveMap() {
+			client->TakeMapShot(true);
+		}
+
 		void ClientUI::SendChat(const std::string &msg, bool isGlobal) {
 			if (!client)
 				return;

@@ -54,5 +54,9 @@ namespace spades {
 				return;
 			ui->AlertError(text);
 		}
+
+		void ClientUIHelper::SaveMap() {
+			ui->SaveMap();
+		}
 	} // namespace client
 } // namespace spades

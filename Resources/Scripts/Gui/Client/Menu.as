@@ -76,6 +76,13 @@ namespace spades {
                 @button.Activated = spades::ui::EventHandler(this.OnDisconnect);
                 AddChild(button);
             }
+			{
+                spades::ui::Button button(Manager);
+                button.Caption = _Tr("Client", "Save Map");
+                button.Bounds = AABB2(winX, winY - 48.f, winW, 30.f);
+                @button.Activated = spades::ui::EventHandler(this.OnSaveMap);
+                AddChild(button);
+            }
         }
 
         private void OnBackToGame(spades::ui::UIElement @sender) { @ui.ActiveUI = null; }
@@ -91,6 +98,10 @@ namespace spades {
             ui.chatLogWindow.ScrollToEnd();
         }
         private void OnDisconnect(spades::ui::UIElement @sender) { ui.shouldExit = true; }
+		
+		private void OnSaveMap(spades::ui::UIElement @sender) {
+			ui.helper.SaveMap();
+		}
 
         void HotKey(string key) {
             if (IsEnabled and key == "Escape") {

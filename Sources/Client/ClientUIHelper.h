@@ -41,6 +41,8 @@ namespace spades {
 			void AlertNotice(const std::string &);
 			void AlertWarning(const std::string &);
 			void AlertError(const std::string &);
+
+			void SaveMap();
 		};
 	} // namespace client
 } // namespace spades

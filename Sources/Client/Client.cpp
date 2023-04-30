@@ -581,10 +581,16 @@ namespace spades {
 
 #pragma mark - Snapshots
 
-		void Client::TakeMapShot() {
+		void Client::TakeMapShot(bool BuildMode) {
 
 			try {
-				std::string name = MapShotPath();
+				std::string name;
+				if (!BuildMode) {
+					name = MapShotPath();
+				} else {
+					name = map_file;
+				}
+
 				{
 					std::unique_ptr<IStream> stream(FileManager::OpenForWriting(name.c_str()));
 					try {

@@ -36,7 +36,7 @@ namespace spades {
 					SPLog("Usage: %s (no arguments)", CMD_SAVEMAP);
 					return true;
 				}
-				TakeMapShot();
+				TakeMapShot(false);
 				return true;
 			} else {
 				return false;

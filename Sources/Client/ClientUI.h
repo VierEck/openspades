@@ -84,6 +84,8 @@ namespace spades {
 			void EnterCommandWindow();
 			void CloseUI();
 
+			void SaveMap();
+
 			// lm: so the chat does not have the initial chat key
 			bool isIgnored(const std::string &key);
 			void setIgnored(const std::string &key);
