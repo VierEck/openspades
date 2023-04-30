@@ -65,24 +65,24 @@ namespace spades {
 			int Height() const { return DefaultHeight; }
 			int Depth() const { return DefaultDepth; }
 			inline bool IsSolid(int x, int y, int z) const {
-				SPAssert(x >= 0);
-				SPAssert(x < Width());
-				SPAssert(y >= 0);
-				SPAssert(y < Height());
-				SPAssert(z >= 0);
-				SPAssert(z < Depth());
+				SPAssert(IsValidMapCoord(x, y, z));
 				return ((solidMap[x][y] >> (uint64_t)z) & 1ULL) != 0;
 			}
 
 			/** @return 0xHHBBGGRR where HH is health (up to 100) */
 			inline uint32_t GetColor(int x, int y, int z) const {
-				SPAssert(x >= 0);
-				SPAssert(x < Width());
-				SPAssert(y >= 0);
-				SPAssert(y < Height());
-				SPAssert(z >= 0);
-				SPAssert(z < Depth());
+				SPAssert(IsValidMapCoord(x, y, z));
 				return colorMap[x][y][z];
+			}
+
+			inline bool IsValidMapCoord(const int x, const int y, const int z) const {
+				return x >= 0 && y >= 0 && z >= 0 && x < Width() && y < Height() && z < Depth();
+			}
+
+			inline bool IsValidBuildCoord(const IntVector3 v) const {
+				return IsValidMapCoord(v.x, v.y, v.z) && 0 < v.z < DefaultDepth; 
+				//fix from zerospades
+				//https://github.com/siecvi/zerospades/commit/6606edfd6f929e854205ee8aa20cae8a0ddb74b7
 			}
 
 			inline uint64_t GetSolidMapWrapped(int x, int y) const {
@@ -90,9 +90,7 @@ namespace spades {
 			}
 
 			inline bool IsSolidWrapped(int x, int y, int z) const {
-				if (z < 0)
-					return false;
-				if (z >= Depth())
+				if (z < 0 || z > Depth() || x < 0 || x > (Width() - 1) || y < 0 || y > (Height() - 1))
 					return true;
 				return ((solidMap[x & (Width() - 1)][y & (Height() - 1)] >> (uint64_t)z) & 1ULL) !=
 				       0;
@@ -103,12 +101,7 @@ namespace spades {
 			}
 
 			inline void Set(int x, int y, int z, bool solid, uint32_t color, bool unsafe = false) {
-				SPAssert(x >= 0);
-				SPAssert(x < Width());
-				SPAssert(y >= 0);
-				SPAssert(y < Height());
-				SPAssert(z >= 0);
-				SPAssert(z < Depth());
+				SPAssert(IsValidMapCoord(x, y, z));
 				uint64_t mask = 1ULL << z;
 				uint64_t value = solidMap[x][y];
 				bool changed = false;
