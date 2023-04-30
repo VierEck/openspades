@@ -452,6 +452,7 @@ namespace spades {
 
 			void PlayerCapturedIntel(Player &);
 			void PlayerCreatedBlock(Player &);
+			void PlayerDigBlockSound(Player &);
 			void PlayerPickedIntel(Player &);
 			void PlayerDropIntel(Player &);
 			void TeamCapturedTerritory(int teamId, int territoryId);
