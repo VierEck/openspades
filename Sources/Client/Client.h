@@ -38,6 +38,8 @@
 #include <Core/Stopwatch.h>
 #include <Gui/View.h>
 
+#include "GameProperties.h"
+
 namespace spades {
 	class IStream;
 	class Stopwatch;
@@ -68,6 +70,8 @@ namespace spades {
 
 		class ClientUI;
 
+		struct GameProperties;
+
 		class Client : public IWorldListener, public gui::View {
 			friend class ScoreboardView;
 			friend class LimboView;
@@ -96,6 +100,8 @@ namespace spades {
 				void MarkFrame();
 				double GetFps() { return lastFps; }
 			};
+
+			std::shared_ptr<GameProperties> makeproperties;
 
 			FPSCounter fpsCounter;
 			FPSCounter upsCounter;
@@ -398,6 +404,8 @@ namespace spades {
 
 			std::string MapShotPath();
 			void TakeMapShot(bool BuildMode);
+
+			void LoadLocalEditor();
 
 			void NetLog(const char *format, ...);
 

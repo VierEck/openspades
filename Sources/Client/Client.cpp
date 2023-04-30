@@ -55,6 +55,8 @@
 
 #include "NetClient.h"
 
+#include "CTFGameMode.h"
+
 DEFINE_SPADES_SETTING(cg_chatBeep, "1");
 DEFINE_SPADES_SETTING(cg_alertSounds, "1");
 
@@ -638,6 +640,68 @@ namespace spades {
 			}
 
 			SPRaise("No free file name");
+		}
+
+		void Client::LoadLocalEditor() {
+			std::unique_ptr<IStream> stream;
+			if (canvas_file != "") {
+				stream = FileManager::OpenForReading(canvas_file.c_str());
+			} else {
+				stream = FileManager::OpenForReading(map_file.c_str());
+			}
+			const Handle<GameMap> &map = GameMap::LoadLocal(stream.get());
+			SPLog("The game map was decoded successfully.");
+
+			// now initialize world
+			makeproperties.reset(new GameProperties(hostname.GetProtocolVersion()));
+			World *w = new World(makeproperties);
+			w->SetMap(map);
+			map->Release();
+			SPLog("World initialized.");
+
+			SetWorld(w);
+
+			SPAssert(world);
+
+			SPLog("World set.");
+
+			world->BuildMode = true;
+
+			IntVector3 colorBlue = {0, 0, 255};
+
+			World::Team &t1 = world->GetTeam(0);
+			World::Team &t2 = world->GetTeam(1);
+			t1.color = t2.color = colorBlue;
+			t1.name = t2.name = "blue";
+
+			world->SetFogColor({128, 128, 255});
+			world->SetLocalPlayerIndex(0);
+
+			auto mode = stmp::make_unique<CTFGameMode>();
+
+			CTFGameMode::Team &mt1 = mode->GetTeam(0);
+			CTFGameMode::Team &mt2 = mode->GetTeam(1);
+
+			mt1.score = mt2.score = 0;
+			mode->SetCaptureLimit(10);
+
+			mt1.hasIntel = mt2.hasIntel = false;
+
+			mt1.flagPos = mt2.flagPos = mt1.basePos = mt2.basePos = {0, 0, 0};
+
+			world->SetMode(std::move(mode));
+			JoinedGame();
+
+			auto p = stmp::make_unique<Player>(*world, 0, RIFLE_WEAPON, 2,
+			                                   MakeVector3(256, 256, 30),
+			                                   world->GetTeam(2).color);
+			p->SetHeldBlockColor({256, 256, 256});
+			p->SetTool(Player::ToolBlock);
+			world->SetPlayer(0, std::move(p));
+			World::PlayerPersistent &pers = world->GetPlayerPersistent(0);
+			pers.name = cg_playerName;
+			pers.kills = 0;
+			SPLog("LocalEditor set");
 		}
 
 #pragma mark - Chat Messages

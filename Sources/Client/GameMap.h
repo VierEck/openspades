@@ -57,6 +57,7 @@ namespace spades {
 			 *					 (up to `DefaultWidth * DefaultHeight`).
 			 */
 			static GameMap *Load(IStream *, std::function<void(int)> onProgress = {});
+			static GameMap *LoadLocal(IStream *);
 
 			void Save(IStream *);
 

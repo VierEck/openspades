@@ -594,5 +594,78 @@ namespace spades {
 
 			return std::move(map).Unmanage();
 		}
+
+		GameMap *GameMap::LoadLocal(spades::IStream *stream) {
+			SPADES_MARK_FUNCTION();
+
+			//shoulda summarize this in Load instead of copy pasting it as LoadLocal
+
+			RandomAccessAdaptor view{*stream};
+
+			size_t pos = 0;
+
+			auto map = Handle<GameMap>::New();
+
+			for (int y = 0; y < 512; y++) {
+				for (int x = 0; x < 512; x++) {
+					map->solidMap[x][y] = 0xffffffffffffffffULL;
+
+					int z = 0;
+					for (;;) {
+						// Read a block ahead in attempt to minimize the number of calls to
+						// `IStream::Read`
+						view.Prefetch(pos + 512);
+
+						int i;
+						int number_4byte_chunks = view.Read<int8_t>(pos);
+						int top_color_start = view.Read<int8_t>(pos + 1);
+						int top_color_end = view.Read<int8_t>(pos + 2);
+						int bottom_color_start;
+						int bottom_color_end;
+						int len_top;
+						int len_bottom;
+
+						for (i = z; i < top_color_start; i++)
+							map->Set(x, y, i, false, 0, true);
+
+						size_t colorOffset = pos + 4;
+						for (z = top_color_start; z <= top_color_end; z++) {
+							uint32_t col = swapColor(view.Read<uint32_t>(colorOffset));
+							map->Set(x, y, z, true, col, true);
+							colorOffset += 4;
+						}
+
+						if (top_color_end == 62) {
+							map->Set(x, y, 63, true, map->GetColor(x, y, 62), true);
+						}
+
+						len_bottom = top_color_end - top_color_start + 1;
+
+						if (number_4byte_chunks == 0) {
+							pos += 4 * (len_bottom + 1);
+							break;
+						}
+
+						len_top = (number_4byte_chunks - 1) - len_bottom;
+
+						pos += (int)view.Read<int8_t>(pos) * 4;
+
+						bottom_color_end = view.Read<int8_t>(pos + 3);
+						bottom_color_start = bottom_color_end - len_top;
+
+						for (z = bottom_color_start; z < bottom_color_end; z++) {
+							uint32_t col = swapColor(view.Read<uint32_t>(colorOffset));
+							map->Set(x, y, z, true, col, true);
+							colorOffset += 4;
+						}
+						if (bottom_color_end == 63) {
+							map->Set(x, y, 63, true, map->GetColor(x, y, 62), true);
+						}
+					}
+				}
+			}
+
+			return std::move(map).Unmanage();
+		}
 	} // namespace client
 } // namespace spades
