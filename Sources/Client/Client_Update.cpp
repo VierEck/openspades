@@ -91,7 +91,7 @@ namespace spades {
 				return false;
 			}
 
-			if (GetSprintState() > 0 || world->GetLocalPlayer()->GetInput().sprint) {
+			if ((GetSprintState() > 0 || world->GetLocalPlayer()->GetInput().sprint) && !world->BuildMode) {
 				// Player is unable to use a tool while/soon after sprinting
 				return false;
 			}
@@ -177,7 +177,7 @@ namespace spades {
 					playerInput = PlayerInput();
 				}
 
-				if (player->GetTeamId() >= 2) {
+				if (player->GetTeamId() >= 2 && !world->BuildMode) {
 					UpdateLocalSpectator(dt);
 				} else {
 					UpdateLocalPlayer(dt);
@@ -261,7 +261,7 @@ namespace spades {
 
 			if (time > lastPosSentTime + 1.f && world->GetLocalPlayer()) {
 				stmp::optional<Player &> p = world->GetLocalPlayer();
-				if (p->IsAlive() && p->GetTeamId() < 2) {
+				if ((p->IsAlive() && (p->GetTeamId() < 2 || world->BuildMode) && !LocalEditor)) {
 					net->SendPosition();
 					lastPosSentTime = time;
 				}
@@ -397,14 +397,14 @@ namespace spades {
 			}
 
 			// Can't use a tool while sprinting or switching to another tool, etc.
-			if (!CanLocalPlayerUseToolNow()) {
+			if (!CanLocalPlayerUseToolNow() && !player.IsSpectator()) {
 				winp.primary = false;
 				winp.secondary = false;
 			}
 
 			// don't allow jumping in the air
 			if (inp.jump) {
-				if (!player.IsOnGroundOrWade())
+				if (!player.IsOnGroundOrWade() && player.GetTeamId() < 2)
 					inp.jump = false;
 			}
 
@@ -456,7 +456,7 @@ namespace spades {
 			}
 
 			// is the selected tool no longer usable (ex. out of ammo)?
-			if (!player.IsToolSelectable(player.GetTool())) {
+			if (!player.IsToolSelectable(player.GetTool()) && !player.IsSpectator()) {
 				// release mouse button before auto-switching tools
 				winp.primary = false;
 				winp.secondary = false;
@@ -549,7 +549,9 @@ namespace spades {
 				lastHealth = player.GetHealth();
 			}
 
-			inp.jump = false;
+			if (!world->BuildMode && !player.IsSpectator()) {
+				inp.jump = false;
+			}
 		}
 
 #pragma mark - IWorldListener Handlers

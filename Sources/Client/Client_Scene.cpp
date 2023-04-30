@@ -61,7 +61,7 @@ namespace spades {
 				return ClientCameraMode::NotJoined;
 			}
 
-			if (p->IsAlive() && !p->IsSpectator()) {
+			if ((p->IsAlive() && !p->IsSpectator()) || world->BuildMode) {
 				// There exists an alive (non-spectator) local player
 				if ((int)cg_thirdperson != 0 && world->GetNumPlayers() <= 1) {
 					return ClientCameraMode::ThirdPersonLocal;

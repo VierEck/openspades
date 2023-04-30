@@ -134,6 +134,9 @@ namespace spades {
 			    cameraTargetPlayer.GetTeamId() < 2) {
 				return {};
 			}
+			if (player.GetTeamId() >= 2)
+				return {};
+
 			return std::tuple<Player &, hitTag_t>{player, result.hitFlag};
 		}
 

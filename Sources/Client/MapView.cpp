@@ -491,11 +491,11 @@ namespace spades {
 					continue;
 				}
 				if (p.IsSpectator() && &p == &localPlayer &&
-				    HasTargetPlayer(client->GetCameraMode())) {
+				    HasTargetPlayer(client->GetCameraMode()) && !world->BuildMode) {
 					// Don't draw white icon when spectating a player
 					continue;
 				}
-				if (p.IsSpectator() && &p != &localPlayer) {
+				if (p.IsSpectator() && &p != &localPlayer && !world->BuildMode) {
 					// Don't draw other spectators
 					continue;
 				}

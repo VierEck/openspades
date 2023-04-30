@@ -817,7 +817,11 @@ namespace spades {
 						DrawSpectateHUD();
 					}
 				} else {
-					DrawSpectateHUD();
+					if (world->BuildMode) {
+						DrawJoinedAlivePlayerHUD();
+					} else {
+						DrawSpectateHUD();
+					}
 				}
 
 				if (!cg_hideHud) {
