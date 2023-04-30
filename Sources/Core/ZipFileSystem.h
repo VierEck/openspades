@@ -70,5 +70,7 @@ namespace spades {
 		std::unique_ptr<IStream> OpenForReading(const char *) override;
 		std::unique_ptr<IStream> OpenForWriting(const char *) override;
 		bool FileExists(const char *) override;
+
+		std::string GetRootPath() override;
 	};
 }

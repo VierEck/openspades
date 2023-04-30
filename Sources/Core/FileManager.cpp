@@ -147,4 +147,10 @@ namespace spades {
 			delete fs;
 		}
 	}
+
+	std::string FileManager::GetRootPath() {
+		for (auto *fs : g_fileSystems) {
+			return fs->GetRootPath();
+		}
+	}
 } // namespace spades

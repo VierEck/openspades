@@ -202,4 +202,6 @@ namespace spades {
 		}
 		return false;
 	}
+
+	std::string DirectoryFileSystem::GetRootPath() { return rootPath + '/';} 
 } // namespace spades
