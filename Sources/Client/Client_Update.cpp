@@ -496,11 +496,11 @@ namespace spades {
 					switch (player.GetBuildType()) {
 						case Player::ToolBlockLine: {
 							IntVector3 diagonal = player.GetBlockCursorDragPos() - player.GetBlockCursorPos();
-							diagonal.x += 1 - 2 * (diagonal.x < 0);
-
 							diagonal.x *= 1 - 2 * (diagonal.x < 0);
 							diagonal.y *= 1 - 2 * (diagonal.y < 0);
 							diagonal.z *= 1 - 2 * (diagonal.z < 0);
+
+							diagonal.x += 1;
 							int blockCount = diagonal.x + diagonal.y + diagonal.z;
 							msg = _TrN("Client", "{0} block", "{0} blocks", blockCount);
 							type = AlertType::Notice;
@@ -511,21 +511,18 @@ namespace spades {
 							diagonal.y += 1 - 2 * (diagonal.y < 0);
 							diagonal.z += 1 - 2 * (diagonal.z < 0);
 
-							diagonal.x *= 1 - 2 * (diagonal.x < 0);
-							diagonal.y *= 1 - 2 * (diagonal.y < 0);
-							diagonal.z *= 1 - 2 * (diagonal.z < 0);
 							int blockCount = diagonal.x * diagonal.y * diagonal.z;
-							blockCount *= 0 - (blockCount < 0) + (blockCount > 0);
+							blockCount *= 1 - 2 * (blockCount < 0);
 							msg = _TrN("Client", "{0} block", "{0} blocks", blockCount);
 							type = AlertType::Notice;
 						} break;
 						default:{//blockline with normal block tool.
 							IntVector3 diagonal = player.GetBlockCursorDragPos() - player.GetBlockCursorPos();
-							diagonal.x += 1 - 2 * (diagonal.x < 0);
-
 							diagonal.x *= 1 - 2 * (diagonal.x < 0);
 							diagonal.y *= 1 - 2 * (diagonal.y < 0);
 							diagonal.z *= 1 - 2 * (diagonal.z < 0);
+
+							diagonal.x += 1;
 							int blockCount = diagonal.x + diagonal.y + diagonal.z;
 							msg = _TrN("Client", "{0} block", "{0} blocks", blockCount);
 							type = static_cast<int>(blockCount)> player.GetNumBlocks() ? AlertType::Warning : AlertType::Notice;
