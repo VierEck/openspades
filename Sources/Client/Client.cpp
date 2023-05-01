@@ -601,7 +601,11 @@ namespace spades {
 				if (!BuildMode) {
 					name = MapShotPath();
 				} else {
-					name = map_file;
+					if (map_file == "") {
+						name = MapShotPath();
+					} else {
+						name = map_file;
+					}
 				}
 
 				{
