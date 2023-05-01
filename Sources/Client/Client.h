@@ -383,6 +383,8 @@ namespace spades {
 			 */
 			void DrawSpectateHUD();
 
+			void DrawBuildMode();
+
 			void DrawHottrackedPlayerName();
 			void DrawHurtScreenEffect();
 			void DrawHurtSprites();

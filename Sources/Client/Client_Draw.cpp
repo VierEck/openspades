@@ -672,6 +672,37 @@ namespace spades {
 			mapView->Draw();
 		}
 
+		void Client::DrawBuildMode() { //should do this in Resources with angelscript instead for more customizability.
+			Player &p = GetWorld()->GetLocalPlayer().value();
+			float scrX = renderer->ScreenWidth() * 0.51f;
+			float scrY = renderer->ScreenHeight() * 0.51f;
+
+			Handle<IImage> imgTool;
+			switch (p.GetBuildType()) {
+				case Player::ToolBlockSingle: {
+					imgTool = renderer->RegisterImage("Gfx/BuildMode/SingleBlock.png");
+				} break;
+				case Player::ToolBlockLine: {
+					imgTool = renderer->RegisterImage("Gfx/BuildMode/BlockLine.png");
+				} break;
+				case Player::ToolBox: {
+					imgTool = renderer->RegisterImage("Gfx/BuildMode/Box.png");
+				} break;
+				default: return;
+			}
+			renderer->DrawImage(imgTool, MakeVector2(scrX, scrY));
+
+			Handle<IImage> imgMode;
+			if (p.Painting) {
+				imgMode = renderer->RegisterImage("Gfx/BuildMode/Paint.png");
+			} else if (p.GetWeaponInput().secondary) {
+				imgMode = renderer->RegisterImage("Gfx/BuildMode/Destroy.png");
+			} else {
+				return;
+			}
+			renderer->DrawImage(imgMode, MakeVector2(scrX + 16.0f, scrY));
+		}
+
 		void Client::DrawAlert() {
 			SPADES_MARK_FUNCTION();
 
@@ -819,6 +850,7 @@ namespace spades {
 				} else {
 					if (world->BuildMode) {
 						DrawJoinedAlivePlayerHUD();
+						DrawBuildMode();
 					} else {
 						DrawSpectateHUD();
 					}
