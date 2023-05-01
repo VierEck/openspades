@@ -683,6 +683,15 @@ namespace spades {
             super(manager);
 
             StandardPreferenceLayouter layouter(this, fontManager);
+			layouter.AddHeading(_Tr("Preferences", "BuildMode"));
+			layouter.AddControl(_Tr("Preferences", "Paint"), "cg_keyToolPaint");
+			layouter.AddControl(_Tr("Preferences", "Toggle Build Distance"), "cg_keyScaleBuildDistance");
+			layouter.AddControl(_Tr("Preferences", "Equip Single Block"), "cg_keyToolSingleBlock");
+			layouter.AddControl(_Tr("Preferences", "Equip BlockLine"), "cg_keyToolBlockLine");
+			layouter.AddControl(_Tr("Preferences", "Equip Box"), "cg_keyToolBox");
+			//layouter.AddControl(_Tr("Preferences", "Equip Ball"), "cg_keyToolBall");
+			//layouter.AddControl(_Tr("Preferences", "Equip Cylinder"), "cg_keyToolCylinder");
+			
             layouter.AddHeading(_Tr("Preferences", "Weapons/Tools"));
             layouter.AddControl(_Tr("Preferences", "Attack"), "cg_keyAttack");
             layouter.AddControl(_Tr("Preferences", "Alt. Attack"), "cg_keyAltAttack");
@@ -724,7 +733,8 @@ namespace spades {
             layouter.AddControl(_Tr("Preferences", "Global Chat"), "cg_keyGlobalChat");
             layouter.AddControl(_Tr("Preferences", "Team Chat"), "cg_keyTeamChat");
             layouter.AddControl(_Tr("Preferences", "Limbo Menu"), "cg_keyLimbo");
-            layouter.AddControl(_Tr("Preferences", "Save Map"), "cg_keySaveMap");
+			layouter.AddToggleField(_Tr("Preferences", "Save Map instead Mapshot"), "cg_MapShotBuildMode");
+            layouter.AddControl(_Tr("Preferences", "Save Map or Mapshot"), "cg_keySaveMap");
             layouter.AddControl(_Tr("Preferences", "Save Sceneshot"), "cg_keySceneshot");
             layouter.AddControl(_Tr("Preferences", "Save Screenshot"), "cg_keyScreenshot");
 
