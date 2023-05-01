@@ -488,15 +488,50 @@ namespace spades {
 			lastKills = world->GetPlayerPersistent(player.GetId()).kills;
 
 			// show block count when building block lines.
-			if (player.IsAlive() && player.GetTool() == Player::ToolBlock &&
-			    player.GetWeaponInput().secondary && player.IsBlockCursorDragging()) {
+			if (player.IsAlive() && player.GetTool() == Player::ToolBlock && player.IsBlockCursorDragging()) {
 				if (player.IsBlockCursorActive()) {
-					auto blocks = world->CubeLine(player.GetBlockCursorDragPos(),
-					                              player.GetBlockCursorPos(), 256);
-					auto msg = _TrN("Client", "{0} block", "{0} blocks", blocks.size());
-					AlertType type = static_cast<int>(blocks.size()) > player.GetNumBlocks()
-					                   ? AlertType::Warning
-					                   : AlertType::Notice;
+					std::vector<IntVector3> blocks;
+					std::string msg;
+					AlertType type;
+					switch (player.GetBuildType()) {
+						case Player::ToolBlockLine: {
+							IntVector3 diagonal = player.GetBlockCursorDragPos() - player.GetBlockCursorPos();
+							diagonal.x += 1 - 2 * (diagonal.x < 0);
+
+							diagonal.x *= 1 - 2 * (diagonal.x < 0);
+							diagonal.y *= 1 - 2 * (diagonal.y < 0);
+							diagonal.z *= 1 - 2 * (diagonal.z < 0);
+							int blockCount = diagonal.x + diagonal.y + diagonal.z;
+							msg = _TrN("Client", "{0} block", "{0} blocks", blockCount);
+							type = AlertType::Notice;
+						} break;
+						case Player::ToolBox: {
+							IntVector3 diagonal = player.GetBlockCursorDragPos() - player.GetBlockCursorPos();
+							diagonal.x += 1 - 2 * (diagonal.x < 0);
+							diagonal.y += 1 - 2 * (diagonal.y < 0);
+							diagonal.z += 1 - 2 * (diagonal.z < 0);
+
+							diagonal.x *= 1 - 2 * (diagonal.x < 0);
+							diagonal.y *= 1 - 2 * (diagonal.y < 0);
+							diagonal.z *= 1 - 2 * (diagonal.z < 0);
+							int blockCount = diagonal.x * diagonal.y * diagonal.z;
+							blockCount *= 0 - (blockCount < 0) + (blockCount > 0);
+							msg = _TrN("Client", "{0} block", "{0} blocks", blockCount);
+							type = AlertType::Notice;
+						} break;
+						default:{//blockline with normal block tool.
+							IntVector3 diagonal = player.GetBlockCursorDragPos() - player.GetBlockCursorPos();
+							diagonal.x += 1 - 2 * (diagonal.x < 0);
+
+							diagonal.x *= 1 - 2 * (diagonal.x < 0);
+							diagonal.y *= 1 - 2 * (diagonal.y < 0);
+							diagonal.z *= 1 - 2 * (diagonal.z < 0);
+							int blockCount = diagonal.x + diagonal.y + diagonal.z;
+							msg = _TrN("Client", "{0} block", "{0} blocks", blockCount);
+							type = static_cast<int>(blockCount)> player.GetNumBlocks() ? AlertType::Warning : AlertType::Notice;
+						} break;
+					}
+					
 					ShowAlert(msg, type, 0.f, true);
 				} else {
 					// invalid
