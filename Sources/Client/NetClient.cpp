@@ -1992,13 +1992,13 @@ namespace spades {
 			wri.Write((uint8_t)GetLocalPlayer().GetId());
 
 			float sendByte = cg_FlySpeedWalk;
-			wri.Write((uint8_t)sendByte * 10.f);
+			wri.Write((uint8_t)(int)(sendByte * 10.f));
 
 			sendByte = cg_FlySpeedSprint;
-			wri.Write((uint8_t)sendByte * 10.f);
+			wri.Write((uint8_t)(int)(sendByte * 10.f));
 
 			sendByte = cg_FlySpeedSneak;
-			wri.Write((uint8_t)sendByte * 10.f);
+			wri.Write((uint8_t)(int)(sendByte * 10.f));
 
 			if (peer) {
 				enet_peer_send(peer, 0, wri.CreatePacket());
