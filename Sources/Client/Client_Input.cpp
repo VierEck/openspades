@@ -58,6 +58,15 @@ DEFINE_SPADES_SETTING(cg_keyReloadWeapon, "r");
 DEFINE_SPADES_SETTING(cg_keyFlashlight, "f");
 DEFINE_SPADES_SETTING(cg_keyLastTool, "");
 
+DEFINE_SPADES_SETTING(cg_MapShotBuildMode, "1");
+DEFINE_SPADES_SETTING(cg_keyToolPaint, "g");
+DEFINE_SPADES_SETTING(cg_keyScaleBuildDistance, "MiddleMouseButton");
+DEFINE_SPADES_SETTING(cg_keyToolSingleBlock, "1");
+DEFINE_SPADES_SETTING(cg_keyToolBlockLine, "2");
+DEFINE_SPADES_SETTING(cg_keyToolBox, "3");
+DEFINE_SPADES_SETTING(cg_keyToolBall, "4");
+DEFINE_SPADES_SETTING(cg_keyToolCylinder, "5");
+
 DEFINE_SPADES_SETTING(cg_keyMoveLeft, "a");
 DEFINE_SPADES_SETTING(cg_keyMoveRight, "d");
 DEFINE_SPADES_SETTING(cg_keyMoveForward, "w");
@@ -324,46 +333,48 @@ namespace spades {
 					case ClientCameraMode::FirstPersonFollow:
 					case ClientCameraMode::ThirdPersonFollow:
 					case ClientCameraMode::Free:
-						if (CheckKey(cg_keyAttack, name)) {
-							if (down) {
-								if (cameraMode == ClientCameraMode::Free ||
-								    cameraMode == ClientCameraMode::ThirdPersonLocal) {
-									// Start with the local player
-									followedPlayerId = world->GetLocalPlayerIndex().value();
+						if (!world->BuildMode) {
+							if (CheckKey(cg_keyAttack, name)) {
+								if (down) {
+									if (cameraMode == ClientCameraMode::Free ||
+									    cameraMode == ClientCameraMode::ThirdPersonLocal) {
+										// Start with the local player
+										followedPlayerId = world->GetLocalPlayerIndex().value();
+									}
+									if (world->GetLocalPlayer()->IsSpectator() ||
+									    time > lastAliveTime + 1.3f) {
+										FollowNextPlayer(false);
+									}
 								}
-								if (world->GetLocalPlayer()->IsSpectator() ||
-								    time > lastAliveTime + 1.3f) {
-									FollowNextPlayer(false);
+								return;
+							} else if (CheckKey(cg_keyAltAttack, name)) {
+								if (down) {
+									if (cameraMode == ClientCameraMode::Free ||
+									    cameraMode == ClientCameraMode::ThirdPersonLocal) {
+										// Start with the local player
+										followedPlayerId = world->GetLocalPlayerIndex().value();
+									}
+									if (world->GetLocalPlayer()->IsSpectator() ||
+									    time > lastAliveTime + 1.3f) {
+										FollowNextPlayer(true);
+									}
 								}
-							}
-							return;
-						} else if (CheckKey(cg_keyAltAttack, name)) {
-							if (down) {
-								if (cameraMode == ClientCameraMode::Free ||
-								    cameraMode == ClientCameraMode::ThirdPersonLocal) {
-									// Start with the local player
-									followedPlayerId = world->GetLocalPlayerIndex().value();
+								return;
+							} else if (CheckKey(cg_keyJump, name) &&
+							           cameraMode != ClientCameraMode::Free) {
+								if (down && GetCameraTargetPlayer().IsAlive()) {
+									followCameraState.firstPerson = !followCameraState.firstPerson;
 								}
-								if (world->GetLocalPlayer()->IsSpectator() ||
-								    time > lastAliveTime + 1.3f) {
-									FollowNextPlayer(true);
+								return;
+							} else if (CheckKey(cg_keyReloadWeapon, name) &&
+							           world->GetLocalPlayer()->IsSpectator() &&
+							           followCameraState.enabled) {
+								if (down) {
+									// Unfollow
+									followCameraState.enabled = false;
 								}
+								return;
 							}
-							return;
-						} else if (CheckKey(cg_keyJump, name) &&
-						           cameraMode != ClientCameraMode::Free) {
-							if (down && GetCameraTargetPlayer().IsAlive()) {
-								followCameraState.firstPerson = !followCameraState.firstPerson;
-							}
-							return;
-						} else if (CheckKey(cg_keyReloadWeapon, name) &&
-						           world->GetLocalPlayer()->IsSpectator() &&
-						           followCameraState.enabled) {
-							if (down) {
-								// Unfollow
-								followCameraState.enabled = false;
-							}
-							return;
 						}
 						break;
 				}
@@ -391,6 +402,91 @@ namespace spades {
 							}
 						}
 					}
+
+					if (!p.IsSpectator()) {
+						if (CheckKey(cg_keyToolSpade, name) && down) {
+							if (world->GetLocalPlayer()->GetTeamId() < 2 &&
+							    world->GetLocalPlayer()->IsAlive() &&
+							    world->GetLocalPlayer()->IsToolSelectable(Player::ToolSpade)) {
+								SetSelectedTool(Player::ToolSpade);
+							}
+						} else if (CheckKey(cg_keyToolBlock, name) && down) {
+							if (world->GetLocalPlayer()->GetTeamId() < 2 &&
+							    world->GetLocalPlayer()->IsAlive()) {
+								if (world->GetLocalPlayer()->IsToolSelectable(Player::ToolBlock)) {
+									SetSelectedTool(Player::ToolBlock);
+								} else {
+									if (cg_alerts)
+										ShowAlert(_Tr("Client", "Out of Blocks"), AlertType::Error);
+									else
+										PlayAlertSound();
+								}
+							}
+						} else if (CheckKey(cg_keyToolWeapon, name) && down) {
+							if (world->GetLocalPlayer()->GetTeamId() < 2 &&
+							    world->GetLocalPlayer()->IsAlive()) {
+							if (world->GetLocalPlayer()->IsToolSelectable(Player::ToolWeapon)) {
+									SetSelectedTool(Player::ToolWeapon);
+								} else {
+									if (cg_alerts)
+										ShowAlert(_Tr("Client", "Out of Ammo"), AlertType::Error);
+									else
+										PlayAlertSound();
+								}
+							}
+						} else if (CheckKey(cg_keyToolGrenade, name) && down) {
+							if (world->GetLocalPlayer()->GetTeamId() < 2 &&
+							    world->GetLocalPlayer()->IsAlive()) {
+								if (world->GetLocalPlayer()->IsToolSelectable(Player::ToolGrenade)) {
+									SetSelectedTool(Player::ToolGrenade);
+								} else {
+									if (cg_alerts)
+										ShowAlert(_Tr("Client", "Out of Grenades"), AlertType::Error);
+									else
+										PlayAlertSound();
+								}
+							}
+						}
+					} else if (world->BuildMode) {
+						if (CheckKey(cg_keyToolSingleBlock, name) && down) {
+							p.SetBuildType(Player::ToolBlockSingle);
+							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
+							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+						} else if (CheckKey(cg_keyToolBlockLine, name) && down) {
+							p.SetBuildType(Player::ToolBlockLine);
+							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
+							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+						} else if (CheckKey(cg_keyToolBox, name) && down) {
+							p.SetBuildType(Player::ToolBox);
+							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
+							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+						/*} else if (CheckKey(cg_keyToolBall, name) && down) {
+							p.SetBuildType(Player::ToolBall);
+							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
+							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+						} else if (CheckKey(cg_keyToolCylinder, name) && down) {
+							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
+							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());*/
+						} else if (CheckKey(cg_keyToolPaint, name) && down) {
+							p.Painting = !p.Painting;
+							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
+							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+						} else if (CheckKey(cg_keyScaleBuildDistance, name) && down) {
+							p.BuildFar = !p.BuildFar;
+						} else if (down) {
+							bool rev = (int)cg_switchToolByWheel > 0;
+							if (name == (rev ? "WheelDown" : "WheelUp")) {
+								if (p.BuildDistance > 3.0f) {
+									p.BuildDistance -= 1.0f;
+								}
+							} else if (name == (rev ? "WheelUp" : "WheelDown")) {
+								if (p.BuildDistance < 512) {
+									p.BuildDistance += 1.0f;
+								}
+							}
+						}
+					}
+
 					if (CheckKey(cg_keyMoveLeft, name)) {
 						playerInput.moveLeft = down;
 						keypadInput.left = down;
@@ -469,48 +565,6 @@ namespace spades {
 							world->GetLocalPlayer()->Reload();
 							net->SendReload();
 						}
-					} else if (CheckKey(cg_keyToolSpade, name) && down) {
-						if (world->GetLocalPlayer()->GetTeamId() < 2 &&
-						    world->GetLocalPlayer()->IsAlive() &&
-						    world->GetLocalPlayer()->IsToolSelectable(Player::ToolSpade)) {
-							SetSelectedTool(Player::ToolSpade);
-						}
-					} else if (CheckKey(cg_keyToolBlock, name) && down) {
-						if (world->GetLocalPlayer()->GetTeamId() < 2 &&
-						    world->GetLocalPlayer()->IsAlive()) {
-							if (world->GetLocalPlayer()->IsToolSelectable(Player::ToolBlock)) {
-								SetSelectedTool(Player::ToolBlock);
-							} else {
-								if (cg_alerts)
-									ShowAlert(_Tr("Client", "Out of Blocks"), AlertType::Error);
-								else
-									PlayAlertSound();
-							}
-						}
-					} else if (CheckKey(cg_keyToolWeapon, name) && down) {
-						if (world->GetLocalPlayer()->GetTeamId() < 2 &&
-						    world->GetLocalPlayer()->IsAlive()) {
-							if (world->GetLocalPlayer()->IsToolSelectable(Player::ToolWeapon)) {
-								SetSelectedTool(Player::ToolWeapon);
-							} else {
-								if (cg_alerts)
-									ShowAlert(_Tr("Client", "Out of Ammo"), AlertType::Error);
-								else
-									PlayAlertSound();
-							}
-						}
-					} else if (CheckKey(cg_keyToolGrenade, name) && down) {
-						if (world->GetLocalPlayer()->GetTeamId() < 2 &&
-						    world->GetLocalPlayer()->IsAlive()) {
-							if (world->GetLocalPlayer()->IsToolSelectable(Player::ToolGrenade)) {
-								SetSelectedTool(Player::ToolGrenade);
-							} else {
-								if (cg_alerts)
-									ShowAlert(_Tr("Client", "Out of Grenades"), AlertType::Error);
-								else
-									PlayAlertSound();
-							}
-						}
 					} else if (CheckKey(cg_keyLastTool, name) && down) {
 						if (hasLastTool && world->GetLocalPlayer()->GetTeamId() < 2 &&
 						    world->GetLocalPlayer()->IsAlive() &&
@@ -561,7 +615,7 @@ namespace spades {
 					} else if (CheckKey(cg_keyScreenshot, name) && down) {
 						TakeScreenShot(false);
 					} else if (CheckKey(cg_keySaveMap, name) && down) {
-						TakeMapShot();
+						TakeMapShot(cg_MapShotBuildMode && world->BuildMode);
 					} else if (CheckKey(cg_keyFlashlight, name) && down) {
 						// spectators and dead players should not be able to toggle the flashlight
 						if (world->GetLocalPlayer()->IsSpectator() ||
