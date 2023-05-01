@@ -640,6 +640,17 @@ namespace spades {
                 _Tr("Preferences", "Player Name"), "cg_playerName", not options.GameActive);
             nameField.MaxLength = 15;
             nameField.DenyNonAscii = true;
+			
+			layouter.AddHeading(_Tr("Preferences", "BuildMode"));
+			layouter.AddSliderField(_Tr("Preferences", "Flying Speed Walk"),
+                                    "cg_FlySpeedWalk", 0.1, 20.0, 0.1,
+                                    ConfigNumberFormatter(1, "x"));
+			layouter.AddSliderField(_Tr("Preferences", "Flying Speed Sprint"),
+                                    "cg_FlySpeedSprint", 0.1, 20.0, 0.1,
+                                    ConfigNumberFormatter(1, "x"));
+			layouter.AddSliderField(_Tr("Preferences", "Flying Speed Sneak"),
+                                    "cg_FlySpeedSneak", 0.1, 20.0, 0.1,
+                                    ConfigNumberFormatter(1, "x"));
 
             layouter.AddHeading(_Tr("Preferences", "Effects"));
             layouter.AddToggleField(_Tr("Preferences", "Blood"), "cg_blood");

@@ -61,6 +61,10 @@ SPADES_SETTING(cg_shake);
 
 SPADES_SETTING(cg_holdAimDownSight);
 
+DEFINE_SPADES_SETTING(cg_FlySpeedWalk, "2");
+DEFINE_SPADES_SETTING(cg_FlySpeedSprint, "10");
+DEFINE_SPADES_SETTING(cg_FlySpeedSneak, "0.5");
+
 namespace spades {
 	namespace client {
 
@@ -175,6 +179,23 @@ namespace spades {
 						weapInput.secondary = false;
 					}
 					playerInput = PlayerInput();
+				} else {
+					if (world->BuildMode) {
+						float compare = cg_FlySpeedWalk;
+						if (compare != player->walkFlySpeed) {
+							net->SendSetFlySpeed();
+						} else {
+							compare = cg_FlySpeedSprint;
+							if (compare != player->sprintFlySpeed) {
+								net->SendSetFlySpeed();
+							} else {
+								compare = cg_FlySpeedSneak;
+								if (compare != player->sneakFlySpeed) {
+									net->SendSetFlySpeed();
+								}
+							}
+						}
+					}
 				}
 
 				if (player->GetTeamId() >= 2 && !world->BuildMode) {

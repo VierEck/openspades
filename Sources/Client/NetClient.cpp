@@ -47,6 +47,10 @@
 
 DEFINE_SPADES_SETTING(cg_unicode, "1");
 
+SPADES_SETTING(cg_FlySpeedWalk, "2");
+SPADES_SETTING(cg_FlySpeedSprint, "10");
+SPADES_SETTING(cg_FlySpeedSneak, "0.5");
+
 namespace spades {
 	namespace client {
 
@@ -1974,6 +1978,28 @@ namespace spades {
 			wri.Write((uint32_t)v2.z);
 
 			
+			if (peer) {
+				enet_peer_send(peer, 0, wri.CreatePacket());
+			} else {
+				NetPacketReader read(wri.CreatePacket());
+				HandleGamePacket(read);
+			}
+		}
+
+		void NetClient::SendSetFlySpeed() {
+			SPADES_MARK_FUNCTION();
+			NetPacketWriter wri(PacketTypeSetFlySpeed);
+			wri.Write((uint8_t)GetLocalPlayer().GetId());
+
+			float sendByte = cg_FlySpeedWalk;
+			wri.Write((uint8_t)sendByte * 10.f);
+
+			sendByte = cg_FlySpeedSprint;
+			wri.Write((uint8_t)sendByte * 10.f);
+
+			sendByte = cg_FlySpeedSneak;
+			wri.Write((uint8_t)sendByte * 10.f);
+
 			if (peer) {
 				enet_peer_send(peer, 0, wri.CreatePacket());
 			} else {
