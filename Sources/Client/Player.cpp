@@ -1109,19 +1109,33 @@ namespace spades {
 			float f = fsynctics * 32.f;
 			float nx = f * velocity.x + position.x;
 			float ny = f * velocity.y + position.y;
+
+			if (world.BuildMode && this->GetTeamId() >= 2) {
+				float nz = f * velocity.z + position.z;
+				const Handle<GameMap> &map = world.GetMap();
+
+				nx += 512.f * (nx < 0.f) - 512.f * (nx > 513.f);
+				position.x = nx;
+
+				ny += 512.f * (ny < 0.f) - 512.f * (ny > 513.f);
+				position.y = ny;
+
+				if (nz < 63.f)
+					position.z = nz;
+
+				RepositionPlayer(position);
+				return;
+			}
+
 			bool climb = false;
 			float offset, m;
-			if (this->GetTeamId() < 2) {
-				if (input.crouch) {
-					offset = .45f;
-					m = .9f;
-				} else {
-					offset = .9f;
-					m = 1.35f;
-				}
+
+			if (input.crouch) {
+				offset = .45f;
+				m = .9f;
 			} else {
-				offset = 0;
-				m = 0;
+				offset = .9f;
+				m = 1.35f;
 			}
 
 			float nz = position.z + offset;
