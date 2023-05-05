@@ -108,16 +108,18 @@ namespace spades {
 
 			if (newInput.crouch != input.crouch) {
 				if (newInput.crouch) {
-					if (!airborne) {
+					if (!airborne && this->GetTeamId() < 2) {
 						position.z += 0.9f;
 					}
 				} else {
 					// Refuse the standing-up request if there's no room
-					if (!TryUncrouch()) {
-						// ... But if the request is from the server,
-						// don't ask questions
-						if (IsLocalPlayer()) {
-							newInput.crouch = true;
+					if (this->GetTeamId() < 2) {
+						if (!TryUncrouch()) {
+							// ... But if the request is from the server,
+							// don't ask questions
+							if (IsLocalPlayer()) {
+								newInput.crouch = true;
+							}
 						}
 					}
 				}
@@ -1098,7 +1100,8 @@ namespace spades {
 		Vector3 Player::GetOrigin() {
 			SPADES_MARK_FUNCTION_DEBUG();
 			Vector3 v = eye;
-			v.z += (input.crouch ? .45f : .9f);
+			if (this->GetTeamId() < 2)
+				v.z += (input.crouch ? .45f : .9f);
 			v.z += .3f;
 			return v;
 		}
