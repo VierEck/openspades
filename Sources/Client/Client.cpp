@@ -710,7 +710,7 @@ namespace spades {
 			auto p = stmp::make_unique<Player>(*world, 0, RIFLE_WEAPON, 2,
 			                                   MakeVector3(256, 256, 30),
 			                                   world->GetTeam(2).color);
-			p->SetHeldBlockColor({256, 256, 256});
+			p->SetHeldBlockColor({128, 128, 128});
 			p->SetTool(Player::ToolBlock);
 			world->SetPlayer(0, std::move(p));
 			World::PlayerPersistent &pers = world->GetPlayerPersistent(0);
