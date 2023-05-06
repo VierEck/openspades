@@ -509,6 +509,14 @@ namespace spades {
 			WeaponType weap = limbo->GetSelectedWeapon();
 			int team = limbo->GetSelectedTeam();
 			inGameLimbo = false;
+			if (LocalEditor) {
+				world->GetLocalPlayer()->SetTeam(team);
+				if (team == 2)
+					world->GetLocalPlayer()->SetTool(Player::ToolBlock);
+				else
+					world->GetLocalPlayer()->SetBuildType(Player::ToolBlockSingle);
+				return;
+			}
 			if (team == 2)
 				team = 255;
 
