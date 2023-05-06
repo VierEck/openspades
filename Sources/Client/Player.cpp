@@ -1115,7 +1115,6 @@ namespace spades {
 
 			if (world.BuildMode && this->GetTeamId() >= 2) {
 				float nz = f * velocity.z + position.z;
-				const Handle<GameMap> &map = world.GetMap();
 
 				nx += 512.f * (nx < 0.f) - 512.f * (nx > 513.f);
 				position.x = nx;
