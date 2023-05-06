@@ -1122,7 +1122,7 @@ namespace spades {
 				ny += 512.f * (ny < 0.f) - 512.f * (ny > 513.f);
 				position.y = ny;
 
-				if (nz < 63.f)
+				if (nz < 62.5f)
 					position.z = nz;
 
 				RepositionPlayer(position);
