@@ -59,7 +59,7 @@ DEFINE_SPADES_SETTING(cg_keyFlashlight, "f");
 DEFINE_SPADES_SETTING(cg_keyLastTool, "");
 
 DEFINE_SPADES_SETTING(cg_MapShotBuildMode, "1");
-DEFINE_SPADES_SETTING(cg_keyToolPaint, "g");
+DEFINE_SPADES_SETTING(cg_keyToolPaint, "f");
 DEFINE_SPADES_SETTING(cg_keyScaleBuildDistance, "MiddleMouseButton");
 DEFINE_SPADES_SETTING(cg_keyToolSingleBlock, "1");
 DEFINE_SPADES_SETTING(cg_keyToolBlockLine, "2");
