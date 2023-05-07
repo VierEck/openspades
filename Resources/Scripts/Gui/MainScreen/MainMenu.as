@@ -548,7 +548,7 @@ namespace spades {
 						loadingView.Visible = true;
 						CreateNewMap = true;
 						helper.StartQuery(LocalEditor, CreateNewMap);
-						MapFile = "Maps/" + addressField.Text;
+						MapFile = "MapsEditor/" + addressField.Text;
 						if (MapFile.findFirst(".vxl") < 0) {
 							MapFile += ".vxl";
 						}
@@ -559,7 +559,7 @@ namespace spades {
 					if (CreateNewMap) {
 						Canvas = "Maps/Canvas/" + addressField.Text;
 					} else {
-						MapFile = "Maps/" + addressField.Text;
+						MapFile = "MapsEditor/" + addressField.Text;
 						Canvas = "";
 					}
 					FieldText = "aos://16777343:32887";

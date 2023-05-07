@@ -461,8 +461,4 @@ namespace spades {
 
 		return files.find(f) != files.end();
 	}
-
-	std::string ZipFileSystem::GetRootPath() {
-		SPRaise("idk wtf im doing here ok");
-	}
 }

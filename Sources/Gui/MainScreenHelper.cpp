@@ -153,59 +153,19 @@ namespace spades {
 				ReturnResult(std::move(resp));
 			}
 
-			void GetMapList() {
-				std::unique_ptr<MainScreenServerList> resp{new MainScreenServerList()};
-
-				WIN32_FIND_DATA FileInfo;
+			void GetMapList(bool canvas) {
 				std::vector<std::string> FileNames;
-
-				char buffer[MAX_PATH];
-				GetModuleFileNameA(NULL, buffer, MAX_PATH);
-
-				std::string fullPath = spades::FileManager::GetRootPath() + "\\Maps" + "/*.vxl";
-
-			    HANDLE hFind = ::FindFirstFile(fullPath.c_str(), &FileInfo); 
-			    if(hFind != INVALID_HANDLE_VALUE) { 
-			        do {
-			            if(!(FileInfo.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
-			                FileNames.push_back(FileInfo.cFileName);
-			            }
-			        }while(::FindNextFile(hFind, &FileInfo)); 
-			        ::FindClose(hFind); 
-			    } 
-
-				for (int i = 0; i < (int)FileNames.size(); i++) {
-					std::unique_ptr<ServerItem> srv{ServerItem::MakeMapItem(FileNames[i], false)};
-
-					if (srv) {
-						resp->list.emplace_back(new MainScreenServerItem(srv.get(), owner->favorites.count(srv->GetAddress()) >= 1),false);
-					}
+				if (canvas) {
+					FileNames = FileManager::EnumFiles("Maps/Canvas");
+				} else {
+					FileNames = FileManager::EnumFiles("MapsEditor");
 				}
-				ReturnResult(std::move(resp));
-			}
 
-			void GetCanvasList() {
 				std::unique_ptr<MainScreenServerList> resp{new MainScreenServerList()};
-
-				WIN32_FIND_DATA FileInfo;
-				std::vector<std::string> FileNames;
-
-				char buffer[MAX_PATH];
-				GetModuleFileNameA(NULL, buffer, MAX_PATH);
-
-				std::string fullPath = spades::FileManager::GetRootPath() + "Maps/" + "\\Canvas" + "/*.vxl";
-
-			    HANDLE hFind = ::FindFirstFile(fullPath.c_str(), &FileInfo); 
-			    if(hFind != INVALID_HANDLE_VALUE) { 
-			        do {
-			            if(!(FileInfo.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
-			                FileNames.push_back(FileInfo.cFileName);
-			            }
-			        }while(::FindNextFile(hFind, &FileInfo)); 
-			        ::FindClose(hFind); 
-			    } 
-
 				for (int i = 0; i < (int)FileNames.size(); i++) {
+					if (FileNames[i].substr(FileNames[i].size() - 4, 4) != ".vxl")
+						continue;
+
 					std::unique_ptr<ServerItem> srv{ServerItem::MakeMapItem(FileNames[i], false)};
 
 					if (srv) {
@@ -252,9 +212,9 @@ namespace spades {
 						}
 					} else {
 						if (Canvas) {
-							GetCanvasList();
+							GetMapList(true);
 						} else {
-							GetMapList();
+							GetMapList(false);
 						}
 					}
 				} catch (std::exception &ex) {

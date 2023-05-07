@@ -40,7 +40,5 @@ namespace spades {
 		static std::vector<std::string> EnumFiles(const char *);
 		static std::string ReadAllBytes(const char *);
 		static void Close();
-
-		static std::string GetRootPath();
 	};
 }; // namespace spades
