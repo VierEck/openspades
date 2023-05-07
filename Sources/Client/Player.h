@@ -180,6 +180,7 @@ namespace spades {
 			bool IsBlockCursorDragging();
 			IntVector3 GetBlockCursorPos() { return blockCursorPos; }
 			IntVector3 GetBlockCursorDragPos() { return blockCursorDragPos; }
+			IntVector3 GetBlockCursorIndentPos() { return blockCursorIndentPos; }
 			bool CanActivateDelayedBlockPlacement() { return canPending; }
 			bool IsReadyToUseTool();
 

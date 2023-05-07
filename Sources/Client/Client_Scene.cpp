@@ -637,11 +637,11 @@ namespace spades {
 
 				// Draw block cursor
 				if (p) {
-					if (p->IsReadyToUseTool() && p->GetTool() == Player::ToolBlock &&
+					if ((p->IsReadyToUseTool() || p->IsSpectator()) && p->GetTool() == Player::ToolBlock &&
 					    p->IsAlive()) {
 						std::vector<IntVector3> blocks;
 						if (p->IsBlockCursorDragging()) {
-							if (p->GetBuildType() == Player::ToolBlockLine) {
+							if (p->GetBuildType() == Player::ToolBlockLine || !p->IsSpectator()) {
 								blocks = world->CubeLine(p->GetBlockCursorDragPos(), p->GetBlockCursorPos(), 1088);
 							}
 						} else {
