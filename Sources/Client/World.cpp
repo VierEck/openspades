@@ -390,11 +390,6 @@ namespace spades {
 			long ixi, iyi, izi, cx, cy;
 			std::vector<IntVector3> ret;
 
-			int VSID = map->Width();
-			SPAssert(VSID == map->Height());
-
-			int MAXZDIM = map->Depth();
-
 			cx = c.x;
 			cy = c.y;
 
@@ -420,19 +415,13 @@ namespace spades {
 				
 				if (c.x != v2.x) {
 					c.x += ixi;
-					if (c.x < 0 || c.x >= VSID)
-						continue;
 				} else if (c.y != v2.y) {
 					c.x = cx;
 					c.y += iyi;
-					if (c.y < 0 || c.y >= VSID)
-						continue;
 				} else if (c.z != v2.z) {
 					c.x = cx;
 					c.y = cy;
 					c.z += izi;
-					if (c.z < 0 || c.z >= MAXZDIM)
-						continue;
 				}
 			}
 
