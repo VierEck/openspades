@@ -412,7 +412,8 @@ namespace spades {
 				izi = 1;
 
 			while (1) {
-				ret.push_back(c);
+				if (map->IsValidBuildCoord(c))
+					ret.push_back(c);
 
 				if (c.x == v2.x && c.y == v2.y && c.z == v2.z)
 					break;
@@ -420,18 +421,18 @@ namespace spades {
 				if (c.x != v2.x) {
 					c.x += ixi;
 					if (c.x < 0 || c.x >= VSID)
-						break;
+						continue;
 				} else if (c.y != v2.y) {
 					c.x = cx;
 					c.y += iyi;
 					if (c.y < 0 || c.y >= VSID)
-						break;
+						continue;
 				} else if (c.z != v2.z) {
 					c.x = cx;
 					c.y = cy;
 					c.z += izi;
 					if (c.z < 0 || c.z >= MAXZDIM)
-						break;
+						continue;
 				}
 			}
 

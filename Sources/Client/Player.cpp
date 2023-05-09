@@ -92,6 +92,10 @@ namespace spades {
 			this->sneakFlySpeed = 0.5f;
 
 			Painting = false;
+
+			Brushing = false;
+			BrushSize = 5;
+
 			BuildFar = false;
 			BuildDistance = 3.0f;
 
@@ -209,8 +213,14 @@ namespace spades {
 
 									nextBlockTime = world.GetTime() + delay;
 								} else {
-									blockCursorDragging = true;
-									blockCursorDragPos = blockCursor;
+									if (this->Brushing) {
+										int brushHalfSize = this->BrushSize / 2;
+										IntVector3 brushHalfDiagonal = {brushHalfSize, brushHalfSize, brushHalfSize};
+										listener->LocalPlayerCreatedLineBlock(blockCursor + brushHalfDiagonal, blockCursor - brushHalfDiagonal, action);
+									} else {
+										blockCursorDragging = true;
+										blockCursorDragPos = blockCursor;
+									}
 								}
 							} else if (IsBlockCursorDragging()) {
 								if (listener && this == world.GetLocalPlayer())

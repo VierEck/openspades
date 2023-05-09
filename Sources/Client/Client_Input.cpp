@@ -60,6 +60,7 @@ DEFINE_SPADES_SETTING(cg_keyLastTool, "");
 
 DEFINE_SPADES_SETTING(cg_MapShotBuildMode, "1");
 DEFINE_SPADES_SETTING(cg_keyToolPaint, "f");
+DEFINE_SPADES_SETTING(cg_keyToolBrush, "r");
 DEFINE_SPADES_SETTING(cg_keyScaleBuildDistance, "MiddleMouseButton");
 DEFINE_SPADES_SETTING(cg_keyToolSingleBlock, "1");
 DEFINE_SPADES_SETTING(cg_keyToolBlockLine, "2");
@@ -449,13 +450,17 @@ namespace spades {
 						}
 					} else if (world->BuildMode) {
 						if (CheckKey(cg_keyToolSingleBlock, name) && down) {
-							p.SetBuildType(Player::ToolBlockSingle);
-							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
-							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+							if (!p.Brushing) {
+								p.SetBuildType(Player::ToolBlockSingle);
+								Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
+								audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+							}
 						} else if (CheckKey(cg_keyToolBlockLine, name) && down) {
-							p.SetBuildType(Player::ToolBlockLine);
-							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
-							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+							if (!p.Brushing) {
+								p.SetBuildType(Player::ToolBlockLine);
+								Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
+								audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+							}
 						} else if (CheckKey(cg_keyToolBox, name) && down) {
 							p.SetBuildType(Player::ToolBox);
 							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
@@ -471,17 +476,32 @@ namespace spades {
 							p.Painting = !p.Painting;
 							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
 							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+						} else if (CheckKey(cg_keyToolBrush, name) && down) {
+							if (p.GetBuildType() > Player::ToolBlockLine) {
+								p.Brushing = !p.Brushing;
+								Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
+								audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+							}
 						} else if (CheckKey(cg_keyScaleBuildDistance, name) && down) {
 							p.BuildFar = !p.BuildFar;
-						} else if (down) {
+						}
+						if (down) {
 							bool rev = (int)cg_switchToolByWheel > 0;
 							if (name == (rev ? "WheelDown" : "WheelUp")) {
-								if (p.BuildDistance > 3.0f) {
-									p.BuildDistance -= 1.0f;
+								if (p.Brushing && p.BrushSize > 0) {
+									p.BrushSize -= 1;
+								} else {
+									if (p.BuildDistance > 3.0f) {
+										p.BuildDistance -= 1.0f;
+									}
 								}
 							} else if (name == (rev ? "WheelUp" : "WheelDown")) {
-								if (p.BuildDistance < 512) {
-									p.BuildDistance += 1.0f;
+								if (p.Brushing && p.BrushSize < 50000) {
+									p.BrushSize += 1;
+								} else {
+									if (p.BuildDistance < 1088) {
+										p.BuildDistance += 1.0f;
+									}
 								}
 							}
 						}

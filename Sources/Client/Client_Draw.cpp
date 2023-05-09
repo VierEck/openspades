@@ -706,6 +706,11 @@ namespace spades {
 			}
 			renderer->DrawImage(imgTool, MakeVector2(iconX, iconY));
 
+			if (p.Brushing) {
+				Handle<IImage> imgBrush = renderer->RegisterImage("Gfx/BuildMode/Brush.png");;
+				renderer->DrawImage(imgBrush, MakeVector2(iconX, iconY + imgTool->GetHeight()));
+			}
+
 			Handle<IImage> imgMode;
 			if (p.Painting) {
 				imgMode = renderer->RegisterImage("Gfx/BuildMode/Paint.png");

@@ -162,8 +162,13 @@ namespace spades {
 			BuildType GetBuildType() { return buildtype; }
 
 			bool Painting;
+
+			bool Brushing;
+			int BrushSize;
+
 			float BuildDistance;
 			bool BuildFar;
+
 			float walkFlySpeed;
 			float sprintFlySpeed;
 			float sneakFlySpeed;
