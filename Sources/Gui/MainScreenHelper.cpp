@@ -158,7 +158,7 @@ namespace spades {
 				if (canvas) {
 					FileNames = FileManager::EnumFiles("Maps/Canvas");
 				} else {
-					FileNames = FileManager::EnumFiles("MapsEditor");
+					FileNames = FileManager::EnumFiles("MapEditor/Maps");
 				}
 
 				std::unique_ptr<MainScreenServerList> resp{new MainScreenServerList()};
