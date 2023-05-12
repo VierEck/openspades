@@ -55,6 +55,16 @@ namespace spades {
 			ui->AlertError(text);
 		}
 
+		void ClientUIHelper::EditCurrentColor() {
+			if (!ui)
+				return;
+			ui->EditCurrentColor();
+		}
+		void ClientUIHelper::ChangePalettePage(int next) {
+			if (!ui)
+				return;
+			ui->ChangePalettePage(next);
+		}
 		void ClientUIHelper::SaveMap() {
 			ui->SaveMap();
 		}

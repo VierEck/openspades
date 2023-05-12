@@ -64,6 +64,9 @@ SPADES_SETTING(cg_holdAimDownSight);
 DEFINE_SPADES_SETTING(cg_FlySpeedWalk, "2");
 DEFINE_SPADES_SETTING(cg_FlySpeedSprint, "10");
 DEFINE_SPADES_SETTING(cg_FlySpeedSneak, "0.5");
+SPADES_SETTING(cg_CurrentColorRed, "0");
+SPADES_SETTING(cg_CurrentColorGreen, "0");
+SPADES_SETTING(cg_CurrentColorBlue, "0");
 
 namespace spades {
 	namespace client {
@@ -179,6 +182,10 @@ namespace spades {
 						weapInput.secondary = false;
 					}
 					playerInput = PlayerInput();
+
+					if (world->BuildMode && paletteView->currentPalettePage >= 0) {
+						paletteView->CompareCurrentColor();
+					}
 				} else {
 					if (world->BuildMode) {
 						float compare = cg_FlySpeedWalk;

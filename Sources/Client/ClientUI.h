@@ -26,6 +26,8 @@
 #include <Gui/View.h>
 #include <ScriptBindings/ScriptManager.h>
 
+#include "PaletteView.h"
+
 namespace spades {
 	namespace client {
 		class FontManager;
@@ -84,6 +86,9 @@ namespace spades {
 			void EnterCommandWindow();
 			void CloseUI();
 
+			void EnterPaletteWindow();
+			void EditCurrentColor();
+			void ChangePalettePage(int next);
 			void SaveMap();
 
 			// lm: so the chat does not have the initial chat key

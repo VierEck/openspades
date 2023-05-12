@@ -33,11 +33,31 @@ namespace spades {
 			IRenderer &renderer;
 
 			int defaultColor;
+			int currentColor;
 			std::vector<IntVector3> colors;
 			int GetSelectedIndex();
 			int GetSelectedOrDefaultIndex();
 
 			void SetSelectedIndex(int);
+
+			int paletteRow;
+			int paletteColumn;
+
+			std::string PalettePath(int i);
+
+			std::string WriteColor(IntVector3 color);
+
+			void DefaultPalette();
+
+			std::vector<std::string> paletteList;
+			void LoadPaletteList();
+			void WritePaletteList();
+			void SwapPaletteListElements(int a, int b);
+
+			void LoadPalettePage(std::string name);
+			void WriteCurrentPalettePage(std::string name);
+
+			void NewPalettePage();
 
 		public:
 			PaletteView(Client *);
@@ -47,6 +67,11 @@ namespace spades {
 
 			void Update();
 			void Draw();
+
+			int currentPalettePage;
+			void ChangePalettePage(int id);
+			void EditCurrentColor();
+			void CompareCurrentColor();
 		};
 	} // namespace client
 } // namespace spades

@@ -42,6 +42,8 @@ namespace spades {
 			void AlertWarning(const std::string &);
 			void AlertError(const std::string &);
 
+			void EditCurrentColor();
+			void ChangePalettePage(int next);
 			void SaveMap();
 		};
 	} // namespace client

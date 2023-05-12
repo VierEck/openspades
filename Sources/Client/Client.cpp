@@ -690,12 +690,14 @@ namespace spades {
 
 			world->BuildMode = true;
 
-			IntVector3 colorBlue = {0, 0, 255};
-
 			World::Team &t1 = world->GetTeam(0);
 			World::Team &t2 = world->GetTeam(1);
-			t1.color = t2.color = colorBlue;
-			t1.name = t2.name = "blue";
+			World::Team &spec = world->GetTeam(2);
+			t1.color = {0, 0, 255};
+			t1.color = {0, 255, 0};
+			t1.name = "blue";
+			t2.name = "Green";
+			spec.color = {0, 0, 0};
 
 			world->SetFogColor({128, 128, 255});
 			world->SetLocalPlayerIndex(0);

@@ -81,6 +81,14 @@ namespace spades {
 													  "void SaveMap()",
 													  asMETHOD(ClientUIHelper, SaveMap),
 													  asCALL_THISCALL);
+						r = eng->RegisterObjectMethod("ClientUIHelper",
+													  "void EditCurrentColor()",
+													  asMETHOD(ClientUIHelper, EditCurrentColor),
+													  asCALL_THISCALL);
+						r = eng->RegisterObjectMethod("ClientUIHelper",
+													  "void ChangePalettePage(int)",
+													  asMETHOD(ClientUIHelper, ChangePalettePage),
+													  asCALL_THISCALL);
 						manager->CheckError(r);
 						break;
 					default:

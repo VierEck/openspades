@@ -59,6 +59,7 @@ DEFINE_SPADES_SETTING(cg_keyFlashlight, "f");
 DEFINE_SPADES_SETTING(cg_keyLastTool, "");
 
 DEFINE_SPADES_SETTING(cg_MapShotBuildMode, "1");
+DEFINE_SPADES_SETTING(cg_keyEditColor, "c");
 DEFINE_SPADES_SETTING(cg_keyToolPaint, "f");
 DEFINE_SPADES_SETTING(cg_keyToolBrush, "r");
 DEFINE_SPADES_SETTING(cg_keyScaleBuildDistance, "MiddleMouseButton");
@@ -482,6 +483,10 @@ namespace spades {
 								Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
 								audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
 							}
+						} else if (CheckKey(cg_keyEditColor, name) && down) {
+							scriptedUI->EnterPaletteWindow();
+							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
+							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
 						} else if (CheckKey(cg_keyScaleBuildDistance, name) && down) {
 							p.BuildFar = !p.BuildFar;
 						}
