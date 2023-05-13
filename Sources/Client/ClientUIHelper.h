@@ -44,6 +44,11 @@ namespace spades {
 
 			void EditCurrentColor();
 			void ChangePalettePage(int next);
+			void SaveCurrentPalettePage();
+			void LoadCurrentPalettePage();
+			void NewPalettePage();
+			void DeleteCurrentPalettePage();
+
 			void SaveMap();
 		};
 	} // namespace client

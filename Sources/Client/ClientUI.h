@@ -89,6 +89,11 @@ namespace spades {
 			void EnterPaletteWindow();
 			void EditCurrentColor();
 			void ChangePalettePage(int next);
+			void SaveCurrentPalettePage();
+			void LoadCurrentPalettePage();
+			void NewPalettePage();
+			void DeleteCurrentPalettePage();
+
 			void SaveMap();
 
 			// lm: so the chat does not have the initial chat key

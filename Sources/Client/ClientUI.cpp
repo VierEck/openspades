@@ -80,6 +80,19 @@ namespace spades {
 		void ClientUI::ChangePalettePage(int next) {
 			client->paletteView->ChangePalettePage(next);
 		}
+		void ClientUI::SaveCurrentPalettePage() {
+			client->paletteView->SaveCurrentPalettePage();
+		}
+		void ClientUI::LoadCurrentPalettePage() {
+			client->paletteView->LoadCurrentPalettePage();
+		}
+		void ClientUI::NewPalettePage() {
+			client->paletteView->NewPalettePage();
+		}
+		void ClientUI::DeleteCurrentPalettePage() {
+			client->paletteView->DeleteCurrentPalettePage();
+		}
+
 		void ClientUI::SaveMap() {
 			client->TakeMapShot(true);
 		}

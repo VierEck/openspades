@@ -55,9 +55,6 @@ namespace spades {
 			void SwapPaletteListElements(int a, int b);
 
 			void LoadPalettePage(std::string name);
-			void WriteCurrentPalettePage(std::string name);
-
-			void NewPalettePage();
 
 		public:
 			PaletteView(Client *);
@@ -70,6 +67,10 @@ namespace spades {
 
 			int currentPalettePage;
 			void ChangePalettePage(int id);
+			void LoadCurrentPalettePage();
+			void SaveCurrentPalettePage();
+			void NewPalettePage();
+			void DeleteCurrentPalettePage();
 			void EditCurrentColor();
 			void CompareCurrentColor();
 		};

@@ -31,6 +31,7 @@
 #include <Core/FileManager.h>
 #include <Core/IStream.h>
 #include "Fonts.h"
+#include "ClientUI.h"
 
 DEFINE_SPADES_SETTING(cg_keyPaletteLeft, "Left");
 DEFINE_SPADES_SETTING(cg_keyPaletteRight, "Right");
@@ -233,8 +234,19 @@ namespace spades {
 			SPLog("Palette Page loaded: %s", name.c_str());
 		}
 
-		void PaletteView::WriteCurrentPalettePage(std::string name) {
-			std::unique_ptr<IStream> stream(FileManager::OpenForWriting(name.c_str()));
+		void PaletteView::LoadCurrentPalettePage() {
+			if (currentPalettePage < 0 || currentPalettePage >= (int)paletteList.size())
+				return;
+
+			LoadPalettePage(paletteList[currentPalettePage]);
+			client->scriptedUI->EnterPaletteWindow(); //updates palette window
+		}
+
+		void PaletteView::SaveCurrentPalettePage() {
+			if (currentPalettePage < 0 || currentPalettePage >= (int)paletteList.size())
+				return;
+
+			std::unique_ptr<IStream> stream(FileManager::OpenForWriting(paletteList[currentPalettePage].c_str()));
 
 			char buf[256];
 
@@ -254,9 +266,11 @@ namespace spades {
 
 			stream->Write(page);
 
-			page = "Palette Page saved: " + name;
+			client->scriptedUI->EnterPaletteWindow();
+
+			page = "Palette Page saved: " + paletteList[currentPalettePage];
 			client->ShowAlert(page, Client::AlertType::Notice);
-			SPLog("Palette Page saved: %s", name.c_str());
+			SPLog("Palette Page saved: %s", paletteList[currentPalettePage].c_str());
 		}
 
 		void PaletteView::NewPalettePage() {
@@ -285,9 +299,19 @@ namespace spades {
 
 			std::string page = PalettePath(-1);
 			paletteList.push_back(page);
-			WriteCurrentPalettePage(page);
+			currentPalettePage = (int)paletteList.size() - 1;
+			SaveCurrentPalettePage();
 
 			WritePaletteList();
+		}
+
+		void PaletteView::DeleteCurrentPalettePage() { //only removes page from palette list
+			if (currentPalettePage < 0 || currentPalettePage >= (int)paletteList.size())
+				return;
+
+			paletteList.erase(paletteList.begin() + currentPalettePage);
+			WritePaletteList();
+			ChangePalettePage(-1);
 		}
 
 		void PaletteView::ChangePalettePage(int next) {
@@ -302,16 +326,17 @@ namespace spades {
 			}
 
 			if (currentPalettePage >= (int)paletteList.size()) {
-				NewPalettePage();
+				currentPalettePage--;
 				return;
 			}
 
 			if (!FileManager::FileExists(paletteList[currentPalettePage].c_str())) {
-				NewPalettePage();
+				DeleteCurrentPalettePage();
 				return;
 			}
 
 			LoadPalettePage(paletteList[currentPalettePage]);
+			client->scriptedUI->EnterPaletteWindow();
 		}
 
 		void PaletteView::EditCurrentColor() {

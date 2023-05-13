@@ -19,14 +19,6 @@ namespace spades {
 			
 			winX = winX - 20.f;
 			
-			/*{
-                spades::ui::Button button(Manager);
-                button.Caption = _Tr("Client", "New");
-                button.Bounds = AABB2(winX - 110.f, winY, 50.f, 30.f);
-                @button.Activated = spades::ui::EventHandler(this.OnNew);
-                AddChild(button);
-                @doButton = button;
-            }*/
 			{
                 spades::ui::Button button(Manager);
                 button.Caption = _Tr("Client", ">");
@@ -59,6 +51,22 @@ namespace spades {
                 AddChild(button);
                 @doButton = button;
             }
+			{
+                spades::ui::Button button(Manager);
+                button.Caption = _Tr("Client", "New");
+                button.Bounds = AABB2(winX - 163.f, winY, 50.f, 30.f);
+                @button.Activated = spades::ui::EventHandler(this.OnNew);
+                AddChild(button);
+                @doButton = button;
+            }
+			{
+                spades::ui::Button button(Manager);
+                button.Caption = _Tr("Client", "Delete");
+                button.Bounds = AABB2(winX - 163.f, winY + 33.f, 50.f, 30.f);
+                @button.Activated = spades::ui::EventHandler(this.OnDel);
+                AddChild(button);
+                @doButton = button;
+            }
 			
 			layouter.AddSliderField(_Tr("Preferences", ""),
                                     "cg_CurrentColorRed", 0, 255, 1,
@@ -73,13 +81,16 @@ namespace spades {
         }
 		
 		private void OnSave(spades::ui::UIElement @sender) {
-			//todo: save current page
+			ui.helper.SaveCurrentPalettePage();
         }
 		private void OnReload(spades::ui::UIElement @sender) {
-			//todo: reload current page's file
+			ui.helper.LoadCurrentPalettePage();
         }
 		private void OnNew(spades::ui::UIElement @sender) {
-			//new page
+			ui.helper.NewPalettePage();
+        }
+		private void OnDel(spades::ui::UIElement @sender) {
+			ui.helper.DeleteCurrentPalettePage();
         }
 		
 		private void OnNext(spades::ui::UIElement @sender) {
@@ -126,23 +137,6 @@ namespace spades {
             return elem;
         }
 
-        ConfigField @AddInputField(string caption, string configName, bool enabled = true) {
-            spades::ui::UIElement @container = CreateItem();
-
-            spades::ui::Label label(Parent.Manager);
-            label.Text = caption;
-            label.Alignment = Vector2(0.f, 0.5f);
-            label.Bounds = AABB2(10.f, 0.f, 300.f, 32.f);
-            container.AddChild(label);
-
-            ConfigField field(Parent.Manager, configName);
-            field.Bounds = AABB2(FieldX, 1.f, FieldWidth, 30.f);
-            field.Enable = enabled;
-            container.AddChild(field);
-
-            return field;
-        }
-
         ConfigSlider
             @AddSliderField(string caption, string configName, float minRange, float maxRange,
                             float step, ConfigNumberFormatter @formatter, bool enabled = true) {
@@ -166,7 +160,7 @@ namespace spades {
             spades::ui::ListView list(Parent.Manager);
             @list.Model = StandardPreferenceLayouterModel(items);
             list.RowHeight = 20.f;
-            list.Bounds = AABB2(winX - 500.0f, winY + 2.0f, 360.f, 70.f);
+            list.Bounds = AABB2(winX - 550.0f, winY + 2.0f, 360.f, 70.f);
             Parent.AddChild(list);
         }
     }

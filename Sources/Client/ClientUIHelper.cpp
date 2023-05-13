@@ -65,6 +65,27 @@ namespace spades {
 				return;
 			ui->ChangePalettePage(next);
 		}
+		void ClientUIHelper::SaveCurrentPalettePage() {
+			if (!ui)
+				return;
+			ui->SaveCurrentPalettePage();
+		}
+		void ClientUIHelper::LoadCurrentPalettePage() {
+			if (!ui)
+				return;
+			ui->LoadCurrentPalettePage();
+		}
+		void ClientUIHelper::NewPalettePage() {
+			if (!ui)
+				return;
+			ui->NewPalettePage();
+		}
+		void ClientUIHelper::DeleteCurrentPalettePage() {
+			if (!ui)
+				return;
+			ui->DeleteCurrentPalettePage();
+		}
+
 		void ClientUIHelper::SaveMap() {
 			ui->SaveMap();
 		}
