@@ -85,6 +85,11 @@ namespace spades {
 				return;
 			ui->DeleteCurrentPalettePage();
 		}
+		void ClientUIHelper::PaletteKeyInput(const std::string &key) {
+			if (!ui)
+				return;
+			ui->PaletteKeyInput(key);
+		}
 
 		void ClientUIHelper::SaveMap() {
 			ui->SaveMap();

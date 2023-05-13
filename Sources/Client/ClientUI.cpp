@@ -92,6 +92,10 @@ namespace spades {
 		void ClientUI::DeleteCurrentPalettePage() {
 			client->paletteView->DeleteCurrentPalettePage();
 		}
+		void ClientUI::PaletteKeyInput(const std::string &key) {
+			client->paletteView->KeyInput(key);
+			client->paletteView->UpdatePaletteWindow();
+		}
 
 		void ClientUI::SaveMap() {
 			client->TakeMapShot(true);

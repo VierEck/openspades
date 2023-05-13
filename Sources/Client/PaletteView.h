@@ -73,6 +73,7 @@ namespace spades {
 			void DeleteCurrentPalettePage();
 			void EditCurrentColor();
 			void CompareCurrentColor();
+			void UpdatePaletteWindow();
 		};
 	} // namespace client
 } // namespace spades

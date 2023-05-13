@@ -104,7 +104,7 @@ namespace spades {
 		
 		void HotKey(string key) {
 			if (IsEnabled and (key == "Up" or key == "Down" or key == "Left" or key == "Right")) {
-				//todo enable palette navigation
+				ui.helper.PaletteKeyInput(key);
 				return;
             } 
             if (IsEnabled and (key == "Escape" or key == "Enter" or key == "C")) {

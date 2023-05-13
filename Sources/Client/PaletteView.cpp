@@ -239,7 +239,7 @@ namespace spades {
 				return;
 
 			LoadPalettePage(paletteList[currentPalettePage]);
-			client->scriptedUI->EnterPaletteWindow(); //updates palette window
+			UpdatePaletteWindow();
 		}
 
 		void PaletteView::SaveCurrentPalettePage() {
@@ -266,7 +266,7 @@ namespace spades {
 
 			stream->Write(page);
 
-			client->scriptedUI->EnterPaletteWindow();
+			UpdatePaletteWindow();
 
 			page = "Palette Page saved: " + paletteList[currentPalettePage];
 			client->ShowAlert(page, Client::AlertType::Notice);
@@ -336,7 +336,7 @@ namespace spades {
 			}
 
 			LoadPalettePage(paletteList[currentPalettePage]);
-			client->scriptedUI->EnterPaletteWindow();
+			UpdatePaletteWindow();
 		}
 
 		void PaletteView::EditCurrentColor() {
@@ -357,6 +357,10 @@ namespace spades {
 				col.z != (int)cg_CurrentColorBlue) {
 				EditCurrentColor();
 			}
+		}
+
+		void PaletteView::UpdatePaletteWindow() {
+			client->scriptedUI->EnterPaletteWindow();
 		}
 
 		int PaletteView::GetSelectedIndex() {

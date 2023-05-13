@@ -105,6 +105,10 @@ namespace spades {
 													  "void DeleteCurrentPalettePage()",
 													  asMETHOD(ClientUIHelper, DeleteCurrentPalettePage),
 													  asCALL_THISCALL);
+						r = eng->RegisterObjectMethod("ClientUIHelper",
+													  "void PaletteKeyInput(const string& in)",
+													  asMETHOD(ClientUIHelper, PaletteKeyInput),
+													  asCALL_THISCALL);
 						manager->CheckError(r);
 						break;
 					default:

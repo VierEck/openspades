@@ -93,6 +93,7 @@ namespace spades {
 			void LoadCurrentPalettePage();
 			void NewPalettePage();
 			void DeleteCurrentPalettePage();
+			void PaletteKeyInput(const std::string &);
 
 			void SaveMap();
 
