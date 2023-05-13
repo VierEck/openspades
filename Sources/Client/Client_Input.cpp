@@ -477,11 +477,14 @@ namespace spades {
 							p.Painting = !p.Painting;
 							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
 							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
-						} else if (CheckKey(cg_keyToolBrush, name) && down) {
-							if (p.GetBuildType() > Player::ToolBlockLine) {
+						} else if (CheckKey(cg_keyToolBrush, name)) {
+							if (p.GetBuildType() > Player::ToolBlockLine && down) {
 								p.Brushing = !p.Brushing;
 								Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
 								audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+							}
+							if (p.Brushing) {
+								scaleBrush = down;
 							}
 						} else if (CheckKey(cg_keyScaleBuildDistance, name) && down) {
 							p.BuildFar = !p.BuildFar;
@@ -489,7 +492,7 @@ namespace spades {
 						if (down) {
 							bool rev = (int)cg_switchToolByWheel > 0;
 							if (name == (rev ? "WheelDown" : "WheelUp")) {
-								if (p.Brushing && p.BrushSize > 0) {
+								if (scaleBrush && p.BrushSize > 0) {
 									p.BrushSize -= 1;
 								} else {
 									if (p.BuildDistance > 3.0f) {
@@ -497,7 +500,7 @@ namespace spades {
 									}
 								}
 							} else if (name == (rev ? "WheelUp" : "WheelDown")) {
-								if (p.Brushing && p.BrushSize < 50000) {
+								if (scaleBrush && p.BrushSize < 50000) {
 									p.BrushSize += 1;
 								} else {
 									if (p.BuildDistance < 1088) {

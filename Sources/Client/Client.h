@@ -414,6 +414,8 @@ namespace spades {
 
 			void NetLog(const char *format, ...);
 
+			bool scaleBrush = false;
+
 		protected:
 			~Client();
 
