@@ -500,7 +500,11 @@ namespace spades {
 					BuildDist = 1088.0f;
 				}
 
-				result = map->CastRay2(GetEye(), GetFront(), BuildDist);
+				if (this->GetTeamId() >= 2 && world.BuildMode) {
+					result = map->CastRay2(GetEye(), GetFront(), BuildDist);
+				} else {
+					result = map->CastRay2(GetEye(), GetFront(), 12);
+				}
 				canPending = false;
 
 				if (blockCursorDragging) {
