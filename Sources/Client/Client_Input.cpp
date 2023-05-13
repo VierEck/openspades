@@ -483,10 +483,6 @@ namespace spades {
 								Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
 								audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
 							}
-						} else if (CheckKey(cg_keyEditColor, name) && down) {
-							scriptedUI->EnterPaletteWindow();
-							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
-							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
 						} else if (CheckKey(cg_keyScaleBuildDistance, name) && down) {
 							p.BuildFar = !p.BuildFar;
 						}
@@ -613,6 +609,10 @@ namespace spades {
 						scriptedUI->setIgnored(name);
 					} else if (CheckKey(cg_keyCaptureColor, name) && down) {
 						CaptureColor();
+					} else if (CheckKey(cg_keyEditColor, name) && down) {
+							scriptedUI->EnterPaletteWindow();
+							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
+							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
 					} else if (CheckKey(cg_keyChangeMapScale, name) && down) {
 						mapView->SwitchScale();
 						Handle<IAudioChunk> chunk =
