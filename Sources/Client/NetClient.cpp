@@ -2016,7 +2016,6 @@ namespace spades {
 					wri.Write((uint8_t)col.z);
 				}
 			}
-
 			
 			if (peer) {
 				enet_peer_send(peer, 0, wri.CreatePacket());

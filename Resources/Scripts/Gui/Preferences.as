@@ -696,6 +696,8 @@ namespace spades {
             StandardPreferenceLayouter layouter(this, fontManager);
 			layouter.AddHeading(_Tr("Preferences", "BuildMode"));
 			layouter.AddControl(_Tr("Preferences", "Paint"), "cg_keyToolPaint");
+			layouter.AddControl(_Tr("Preferences", "Brush"), "cg_keyToolBrush");
+			layouter.AddControl(_Tr("Preferences", "Color Palette Setting"), "cg_keyEditColor");
 			layouter.AddControl(_Tr("Preferences", "Toggle Build Distance"), "cg_keyScaleBuildDistance");
 			layouter.AddControl(_Tr("Preferences", "Equip Single Block"), "cg_keyToolSingleBlock");
 			layouter.AddControl(_Tr("Preferences", "Equip BlockLine"), "cg_keyToolBlockLine");
