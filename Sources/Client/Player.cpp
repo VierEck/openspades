@@ -99,7 +99,7 @@ namespace spades {
 			BuildFar = false;
 			BuildDistance = 3.0f;
 
-			buildtype = ToolBlockSingle;
+			volumetype = ToolBlockSingle;
 		}
 
 		Player::~Player() { SPADES_MARK_FUNCTION(); }
@@ -208,7 +208,7 @@ namespace spades {
 					if (newInput.secondary != weapInput.secondary || newInput.primary != weapInput.primary) {
 						if (IsBlockCursorActive()) {
 							if (newInput.primary || newInput.secondary) {
-								if (buildtype == ToolBlockSingle) {
+								if (volumetype == ToolBlockSingle) {
 									listener->LocalPlayerCreatedLineBlock(blockCursor, blockCursor, action);
 
 									nextBlockTime = world.GetTime() + delay;
@@ -234,7 +234,7 @@ namespace spades {
 							}
 						}
 					} else if ((newInput.primary || newInput.secondary) && world.GetTime() >= nextBlockTime) {
-						if (buildtype == ToolBlockSingle) {
+						if (volumetype == ToolBlockSingle) {
 							listener->LocalPlayerCreatedLineBlock(blockCursor, blockCursor, action);
 
 							nextBlockTime = world.GetTime() + delay;
@@ -407,8 +407,8 @@ namespace spades {
 				world.GetListener()->PlayerChangedTool(*this);
 		}
 
-		void Player::SetBuildType(spades::client::Player::BuildType b) {
-			buildtype = b;
+		void Player::SetVolumeType(spades::client::Player::VolumeType b) {
+			volumetype = b;
 			blockCursorActive = false;
 			blockCursorDragging = false;
 			WeaponInput inp;

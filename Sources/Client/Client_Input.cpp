@@ -452,22 +452,22 @@ namespace spades {
 					} else if (world->BuildMode) {
 						if (CheckKey(cg_keyToolSingleBlock, name) && down) {
 							if (!p.Brushing) {
-								p.SetBuildType(Player::ToolBlockSingle);
+								p.SetVolumeType(Player::ToolBlockSingle);
 								Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
 								audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
 							}
 						} else if (CheckKey(cg_keyToolBlockLine, name) && down) {
 							if (!p.Brushing) {
-								p.SetBuildType(Player::ToolBlockLine);
+								p.SetVolumeType(Player::ToolBlockLine);
 								Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
 								audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
 							}
 						} else if (CheckKey(cg_keyToolBox, name) && down) {
-							p.SetBuildType(Player::ToolBox);
+							p.SetVolumeType(Player::ToolBox);
 							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
 							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
 						/*} else if (CheckKey(cg_keyToolBall, name) && down) {
-							p.SetBuildType(Player::ToolBall);
+							p.SetVolumeType(Player::ToolBall);
 							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
 							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
 						} else if (CheckKey(cg_keyToolCylinder, name) && down) {

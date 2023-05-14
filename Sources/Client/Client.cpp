@@ -514,7 +514,7 @@ namespace spades {
 				if (team == 2)
 					world->GetLocalPlayer()->SetTool(Player::ToolBlock);
 				else
-					world->GetLocalPlayer()->SetBuildType(Player::ToolBlockSingle);
+					world->GetLocalPlayer()->SetVolumeType(Player::ToolBlockSingle);
 				return;
 			}
 			if (team == 2)
