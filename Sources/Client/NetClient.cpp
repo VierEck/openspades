@@ -1537,32 +1537,47 @@ namespace spades {
 						default: SPRaise("Received invalid block volume action: %d", action);
 					}
 
-					if (actionSecondary < 2) {
-						IntVector3 col = p ? p->GetBlockColor() : temporaryPlayerBlockColor;
-						for (size_t i = 0; i < cells.size(); i++) {
-							if (!actionSecondary) {//build over everything
+					switch (actionSecondary) {
+						case Player::Destroy: {
+							GetWorld()->DestroyBlock(cells);
+							if (p) {
+								client->PlayerDigBlockSound(*p);
+							}
+						} break;
+						case Player::Build: { //builds over everything
+							IntVector3 col = p ? p->GetBlockColor() : temporaryPlayerBlockColor;
+							for (size_t i = 0; i < cells.size(); i++) {
 								GetWorld()->CreateBlock(cells[i], col);
 							}
-							/*
-							//build only over non-solids
+							if (p) {
+								client->PlayerCreatedBlock(*p);
+							}
+						} break;
+						/* build only over nonsolid
+						case Player::NonSolid: {
+							IntVector3 col = p ? p->GetBlockColor() : temporaryPlayerBlockColor;
+							for (size_t i = 0; i < cells.size(); i++) {
 								if (!GetWorld()->GetMap()->IsSolid(cells[i].x, cells[i].y, cells[i].z)) {
 									GetWorld()->CreateBlock(cells[i], col);
 								}
-							*/
-							if (actionSecondary) {//paint (=build only over solids)
+							}
+							if (p) {
+								client->PlayerCreatedBlock(*p);
+							}
+						} break;
+						*/
+						case Player::Paint: { // = build only over solids
+							IntVector3 col = p ? p->GetBlockColor() : temporaryPlayerBlockColor;
+							for (size_t i = 0; i < cells.size(); i++) {
 								if (GetWorld()->GetMap()->IsSolid(cells[i].x, cells[i].y, cells[i].z)) {
 									GetWorld()->CreateBlock(cells[i], col);
 								}
 							}
-						}
-						if (p) {
-							client->PlayerCreatedBlock(*p);
-						}
-					} else {//destroy
-						GetWorld()->DestroyBlock(cells);
-						if (p) {
-							client->PlayerDigBlockSound(*p);
-						}
+							if (p) {
+								client->PlayerCreatedBlock(*p);
+							}
+						} break;
+						default: SPRaise("Received invalid BlockVolume secondaryaction: %d", actionSecondary);
 					}
 				} break;
 				case PacketTypeSetFlySpeed: {

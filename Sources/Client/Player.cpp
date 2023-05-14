@@ -190,11 +190,11 @@ namespace spades {
 						weapInput.secondary = false;
 					}
 
-					int action = 0;
+					int action = Build;
 					if (newInput.secondary != weapInput.secondary) {
-						action = 2;
+						action = Destroy;
 					} else if (this->Painting) {
-						action = 1;
+						action = Paint;
 					}
 
 					IntVector3 blockCursor;
@@ -275,7 +275,7 @@ namespace spades {
 									if ((int)blocks.size() <= blockStocks) {
 										if (listener && this == world.GetLocalPlayer())
 											listener->LocalPlayerCreatedLineBlock(blockCursorDragPos,
-										                                      blockCursorPos, 0);
+										                                      blockCursorPos, Build);
 										// blockStocks -= blocks.size(); decrease when created
 									} else {
 										// cannot build; insufficient blocks.
