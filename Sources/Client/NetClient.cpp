@@ -45,6 +45,8 @@
 #include <Core/Strings.h>
 #include <Core/TMPUtils.h>
 
+#include "PaletteView.h"
+
 DEFINE_SPADES_SETTING(cg_unicode, "1");
 
 SPADES_SETTING(cg_FlySpeedWalk, "2");
@@ -1499,10 +1501,10 @@ namespace spades {
 						break;
 					stmp::optional<Player &> p = GetPlayerOrNull(reader.ReadByte());
 					int action = reader.ReadByte();
-					if (action > 9)
+					if (action >= Player::VOLUMETYPEMAX)
 						SPRaise("Received invalid block volume action: %d", action);
 					int actionSecondary = reader.ReadByte();
-					if (actionSecondary > 2)
+					if (actionSecondary >= Player::BUILDTYPEMAX)
 						SPRaise("Received invalid block volume secondary action: %d", actionSecondary);
 
 					IntVector3 pos1, pos2;
@@ -1569,6 +1571,21 @@ namespace spades {
 						case Player::Paint: { // = build only over solids
 							IntVector3 col = p ? p->GetBlockColor() : temporaryPlayerBlockColor;
 							for (size_t i = 0; i < cells.size(); i++) {
+								if (GetWorld()->GetMap()->IsSolid(cells[i].x, cells[i].y, cells[i].z)) {
+									GetWorld()->CreateBlock(cells[i], col);
+								}
+							}
+							if (p) {
+								client->PlayerCreatedBlock(*p);
+							}
+						} break;
+						case Player::Texture: {
+							IntVector3 col;
+							int rgb = 3;
+							for (size_t i = 0; i < cells.size(); i++) {
+								col.x = reader.ReadByte();
+								col.y = reader.ReadByte();
+								col.z = reader.ReadByte();
 								if (GetWorld()->GetMap()->IsSolid(cells[i].x, cells[i].y, cells[i].z)) {
 									GetWorld()->CreateBlock(cells[i], col);
 								}
@@ -1991,6 +2008,14 @@ namespace spades {
 			wri.Write((uint32_t)v2.x);
 			wri.Write((uint32_t)v2.y);
 			wri.Write((uint32_t)v2.z);
+
+			if (secondaryAction == Player::Texture) {
+				for (auto col : TextureColors) {
+					wri.Write((uint8_t)col.x);
+					wri.Write((uint8_t)col.y);
+					wri.Write((uint8_t)col.z);
+				}
+			}
 
 			
 			if (peer) {

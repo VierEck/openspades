@@ -199,6 +199,7 @@ namespace spades {
 			void SendHandShakeValid(int challenge);
 
 			void SendBlockVolume(IntVector3 v1, IntVector3 v2, int action, int secondaryAction);
+			std::vector<IntVector3> TextureColors;
 			void SendSetFlySpeed();
 
 			double GetDownlinkBps() { return bandwidthMonitor->GetDownlinkBps(); }

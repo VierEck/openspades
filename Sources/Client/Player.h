@@ -61,8 +61,8 @@ namespace spades {
 		class Player {
 		public:
 			enum ToolType { ToolSpade = 0, ToolBlock, ToolWeapon, ToolGrenade };
-			enum VolumeType { ToolBlockSingle = 0, ToolBlockLine, ToolBox, ToolBall, ToolCylinderZ, ToolCylinderX, ToolCylinderY };
-			enum BuildType { Destroy = 0, Build, Paint};
+			enum VolumeType { ToolBlockSingle = 0, ToolBlockLine, ToolBox, ToolBall, ToolCylinderZ, ToolCylinderX, ToolCylinderY, VOLUMETYPEMAX };
+			enum BuildType { Destroy = 0, Build, Paint, Texture, BUILDTYPEMAX};
 			struct HitBoxes {
 				OBB3 torso;
 				OBB3 limbs[3];
