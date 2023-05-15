@@ -311,7 +311,11 @@ namespace spades {
 
 			paletteList.erase(paletteList.begin() + currentPalettePage);
 			WritePaletteList();
-			ChangePalettePage(-1);
+			if (currentPalettePage >= (int)paletteList.size()) {
+				ChangePalettePage(-1);
+			} else {
+				LoadCurrentPalettePage();
+			}
 		}
 
 		void PaletteView::ChangePalettePage(int next) {
