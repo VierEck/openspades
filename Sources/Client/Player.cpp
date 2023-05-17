@@ -236,14 +236,15 @@ namespace spades {
 							}
 						}
 					} else if ((newInput.primary || newInput.secondary) && world.GetTime() >= nextBlockTime) {
-						nextBlockTime = world.GetTime() + delay;
 						if (IsBlockCursorActive()) {
 							if (this->Brushing) {
 								int brushHalfSize = this->BrushSize / 2;
 								IntVector3 brushHalfDiagonal = {brushHalfSize, brushHalfSize, brushHalfSize};
 								listener->LocalPlayerCreatedLineBlock(blockCursor + brushHalfDiagonal, blockCursor - brushHalfDiagonal, action);
-							} else {
+								nextBlockTime = world.GetTime() + delay;
+							} else if (volumetype == ToolBlockSingle) {
 								listener->LocalPlayerCreatedLineBlock(blockCursor, blockCursor, action);
+								nextBlockTime = world.GetTime() + delay;
 							}
 						} else {
 							if (listener && this == world.GetLocalPlayer()) {
