@@ -430,7 +430,6 @@ namespace spades {
 
 		std::vector<IntVector3> World::CubeBall(spades::IntVector3 v1, spades::IntVector3 v2) {
 			SPADES_MARK_FUNCTION_DEBUG();
-			//todo. fix no blocks when ellipsoid is only 1 or 2 thick at 1 or 2 of the axes
 			IntVector3 c = v1;
 			std::vector<IntVector3> ret;
 			if (c == v2) {
@@ -438,7 +437,25 @@ namespace spades {
 					ret.push_back(c);
 				return ret;
 			}
+
 			IntVector3 d = v2 - v1;
+			int x = d.x * (1 - 2 * (d.x < 0));
+			int y = d.y * (1 - 2 * (d.y < 0));
+			int z = d.z * (1 - 2 * (d.z < 0));
+			if (x < 3 && y < 3 ||
+				y < 3 && z < 3 ||
+				z < 3 && x < 3 ||
+				x < 3 && y < 3 && z < 3) {
+				return CubeBox(c, v2);
+			}
+			if (x < 3)
+				return CubeCylinder(c, v2, Player::ToolCylinderX);
+			if (y < 3)
+				return CubeCylinder(c, v2, Player::ToolCylinderY);
+			if (z < 3)
+				return CubeCylinder(c, v2, Player::ToolCylinderZ);
+			
+
 			long ixi, iyi, izi, cx, cy;
 
 			cx = c.x;
