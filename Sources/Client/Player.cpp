@@ -501,7 +501,31 @@ namespace spades {
 				}
 
 				if (this->GetTeamId() >= 2 && world.BuildMode) {
-					result = map->CastRay2(GetEye(), GetFront(), BuildDist);
+					Vector3 pos = GetEye();
+					Vector3 ori = GetFront();
+					if (pos.z < 0.f) {
+						if (ori.z > 0.f) {
+							//if above z = 0 but looking down on map
+							float w = pos.z / ori.z;
+							pos -= ori * w;
+							BuildDist -= (ori * w).GetLength();
+							if (BuildDist > 1) {
+								result = map->CastRay2(pos, ori, BuildDist);
+							} else {
+								result.hitBlock.x = pos.x;
+								result.hitBlock.y = pos.y;
+								result.hitBlock.z = pos.z;
+								result.normal = {0, 0, 0};
+							}
+						} else {
+							//if not looking down on map give an invalid result to prevent building
+							result.hitBlock.x = pos.x;
+							result.hitBlock.y = pos.y;
+							result.hitBlock.z = pos.z;
+						}
+					} else {
+						result = map->CastRay2(pos, ori, BuildDist);
+					}
 				} else {
 					result = map->CastRay2(GetEye(), GetFront(), 12);
 				}
@@ -541,6 +565,8 @@ namespace spades {
 						blockCursorActive = true;
 						blockCursorIndentPos = result.hitBlock;
 						blockCursorPos = blockCursor;
+					} else {
+						blockCursorActive = false;
 					}
 				} else {
 					if (result.hit && !pendingPlaceBlock &&
