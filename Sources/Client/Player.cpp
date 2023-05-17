@@ -198,8 +198,14 @@ namespace spades {
 					}
 
 					IntVector3 blockCursor;
-					if ((newInput.secondary != weapInput.secondary || this->Painting) && BuildFar) {
-						blockCursor = GetBlockCursorIndentPos();
+					if ((newInput.secondary != weapInput.secondary || this->Painting)) {
+						Handle<GameMap> map = GetWorld().GetMap();
+						IntVector3 indent = GetBlockCursorIndentPos();
+						if (map->IsSolid(indent.x, indent.y, indent.z)) {
+							blockCursor = indent;
+						} else {
+							blockCursor = GetBlockCursorPos();
+						}
 					} else {
 						blockCursor = GetBlockCursorPos();
 					}
@@ -568,8 +574,13 @@ namespace spades {
 						result.normal = {0,0,0};
 					}*/
 					IntVector3 blockCursor;
-					if ((weapInput.secondary || this->Painting) && BuildFar) {
-						blockCursor = result.hitBlock;
+					if ((weapInput.secondary || this->Painting)) {
+						blockCursorIndentPos = result.hitBlock;
+						if (map->IsSolid(blockCursorIndentPos.x, blockCursorIndentPos.y, blockCursorIndentPos.z)) {
+							blockCursor = blockCursorIndentPos;
+						} else {
+							blockCursor = result.hitBlock + result.normal;
+						}
 					} else {
 						blockCursor = result.hitBlock + result.normal;
 					}
