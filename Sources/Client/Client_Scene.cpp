@@ -658,74 +658,71 @@ namespace spades {
 								color = MakeVector3(1.f, 0.f, 0.f);
 						}
 
-						Handle<IModel> curLine =
-						  renderer->RegisterModel("Models/MapObjects/BlockCursorLine.kv6");
-						Handle<IModel> curSingle =
-						  renderer->RegisterModel("Models/MapObjects/BlockCursorSingle.kv6");
-						if (p->GetBuildType() == Player::ToolBox) {
-							int x = p->GetBlockCursorPos().x;
-							int y = p->GetBlockCursorPos().y;
-							int z = p->GetBlockCursorPos().z;
-							int dx = 1, dy = 1, dz = 1;
-							if (p->IsBlockCursorDragging() || p->Brushing) {
-								if (p->Brushing) {
-									int brushHalfSize = p->BrushSize / 2;
-									x -= brushHalfSize;
-									y -= brushHalfSize;
-									z -= brushHalfSize;
-
-									brushHalfSize *= 2;
-									dx = (x + brushHalfSize) - x;
-									dy = (y + brushHalfSize) - y;
-									dz = (z + brushHalfSize) - z;
-								} else {
-									dx = p->GetBlockCursorDragPos().x - x;
-									dy = p->GetBlockCursorDragPos().y - y;
-									dz = p->GetBlockCursorDragPos().z - z;
+						switch (p->GetBuildType()) {
+							case Player::ToolBall:
+								//todo. draw an actual ellipsoid instead of box
+							case Player::ToolBox: {
+								int x = p->GetBlockCursorPos().x;
+								int y = p->GetBlockCursorPos().y;
+								int z = p->GetBlockCursorPos().z;
+								int dx = 1, dy = 1, dz = 1;
+								if (p->IsBlockCursorDragging() || p->Brushing) {
+									if (p->Brushing) {
+										int brushHalfSize = p->BrushSize / 2;
+										x -= brushHalfSize;
+										y -= brushHalfSize;
+										z -= brushHalfSize;
+	
+										brushHalfSize *= 2;
+										dx = (x + brushHalfSize) - x;
+										dy = (y + brushHalfSize) - y;
+										dz = (z + brushHalfSize) - z;
+									} else {
+										dx = p->GetBlockCursorDragPos().x - x;
+										dy = p->GetBlockCursorDragPos().y - y;
+										dz = p->GetBlockCursorDragPos().z - z;
+									}
+									dx += (dx >= 0);
+									dy += (dy >= 0);
+									dz += (dz >= 0);
+									
+									x += (dx < 0);
+									y += (dy < 0);
+									z += (dz < 0);
+									dx -= (dx < 0);
+									dy -= (dy < 0);
+									dz -= (dz < 0);
 								}
-								dx += (dx >= 0);
-								dy += (dy >= 0);
-								dz += (dz >= 0);
-								
-								x += (dx < 0);
-								y += (dy < 0);
-								z += (dz < 0);
-								dx -= (dx < 0);
-								dy -= (dy < 0);
-								dz -= (dz < 0);
-							}
-							Vector4 color = {1,1,1,1};
-							renderer->AddDebugLine(MakeVector3(x     , y     , z     ), MakeVector3(x + dx, y     , z     ), color);
-							renderer->AddDebugLine(MakeVector3(x     , y + dy, z     ), MakeVector3(x + dx, y + dy, z     ), color);
-							renderer->AddDebugLine(MakeVector3(x     , y     , z + dz), MakeVector3(x + dx, y     , z + dz), color);
-							renderer->AddDebugLine(MakeVector3(x     , y + dy, z + dz), MakeVector3(x + dx, y + dy, z + dz), color);
+								Vector4 color = {1,1,1,1};
+								renderer->AddDebugLine(MakeVector3(x     , y     , z     ), MakeVector3(x + dx, y     , z     ), color);
+								renderer->AddDebugLine(MakeVector3(x     , y + dy, z     ), MakeVector3(x + dx, y + dy, z     ), color);
+								renderer->AddDebugLine(MakeVector3(x     , y     , z + dz), MakeVector3(x + dx, y     , z + dz), color);
+								renderer->AddDebugLine(MakeVector3(x     , y + dy, z + dz), MakeVector3(x + dx, y + dy, z + dz), color);
 
-							renderer->AddDebugLine(MakeVector3(x     , y     , z     ), MakeVector3(x     , y + dy, z     ), color);
-							renderer->AddDebugLine(MakeVector3(x     , y     , z + dz), MakeVector3(x     , y + dy, z + dz), color);
-							renderer->AddDebugLine(MakeVector3(x + dx, y     , z     ), MakeVector3(x + dx, y + dy, z     ), color);
-							renderer->AddDebugLine(MakeVector3(x + dx, y     , z + dz), MakeVector3(x + dx, y + dy, z + dz), color);
+								renderer->AddDebugLine(MakeVector3(x     , y     , z     ), MakeVector3(x     , y + dy, z     ), color);
+								renderer->AddDebugLine(MakeVector3(x     , y     , z + dz), MakeVector3(x     , y + dy, z + dz), color);
+								renderer->AddDebugLine(MakeVector3(x + dx, y     , z     ), MakeVector3(x + dx, y + dy, z     ), color);
+								renderer->AddDebugLine(MakeVector3(x + dx, y     , z + dz), MakeVector3(x + dx, y + dy, z + dz), color);
 
-							renderer->AddDebugLine(MakeVector3(x     , y     , z     ), MakeVector3(x     , y     , z + dz), color);
-							renderer->AddDebugLine(MakeVector3(x     , y + dy, z     ), MakeVector3(x     , y + dy, z + dz), color);
-							renderer->AddDebugLine(MakeVector3(x + dx, y     , z     ), MakeVector3(x + dx, y     , z + dz), color);
-							renderer->AddDebugLine(MakeVector3(x + dx, y + dy, z     ), MakeVector3(x + dx, y + dy, z + dz), color);
-						} else {
-							for (size_t i = 0; i < blocks.size(); i++) {
-								IntVector3 &v = blocks[i];
-								bool solid = blocks.size() > 2 && map->IsSolid(v.x, v.y, v.z);
-								ModelRenderParam param;
-								param.ghost = true;
-								param.opacity = active && !solid ? .7f : .3f;
-								param.customColor = color;
-								param.matrix =
-								  Matrix4::Translate(MakeVector3(v.x + .5f, v.y + .5f, v.z + .5f));
-								param.matrix =
-								  param.matrix *
-								  Matrix4::Scale(
-								    1.f / 24.f +
-								    (solid ? 0.0005f
-							           : 0.f)); // make cursor larger if needed to stop z-fighting
-								renderer->RenderModel(blocks.size() > 1 ? *curLine : *curSingle, param);
+								renderer->AddDebugLine(MakeVector3(x     , y     , z     ), MakeVector3(x     , y     , z + dz), color);	
+								renderer->AddDebugLine(MakeVector3(x     , y + dy, z     ), MakeVector3(x     , y + dy, z + dz), color);
+								renderer->AddDebugLine(MakeVector3(x + dx, y     , z     ), MakeVector3(x + dx, y     , z + dz), color);
+								renderer->AddDebugLine(MakeVector3(x + dx, y + dy, z     ), MakeVector3(x + dx, y + dy, z + dz), color);
+							} break;
+							default: {
+								Handle<IModel> curLine = renderer->RegisterModel("Models/MapObjects/BlockCursorLine.kv6");
+								Handle<IModel> curSingle = renderer->RegisterModel("Models/MapObjects/BlockCursorSingle.kv6");
+								for (size_t i = 0; i < blocks.size(); i++) {
+									IntVector3 &v = blocks[i];
+									bool solid = blocks.size() > 2 && map->IsSolid(v.x, v.y, v.z);
+									ModelRenderParam param;
+									param.ghost = true;
+									param.opacity = active && !solid ? .7f : .3f;
+									param.customColor = color;
+									param.matrix = Matrix4::Translate(MakeVector3(v.x + .5f, v.y + .5f, v.z + .5f));
+									param.matrix = param.matrix * Matrix4::Scale(1.f / 24.f + (solid ? 0.0005f : 0.f)); // make cursor larger if needed to stop z-fighting
+									renderer->RenderModel(blocks.size() > 1 ? *curLine : *curSingle, param);
+								}
 							}
 						}
 					}

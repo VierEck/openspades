@@ -1529,7 +1529,7 @@ namespace spades {
 							cells = GetWorld()->CubeBox(pos1, pos2);
 							break;
 						case Player::ToolBall:
-							//get sphere cells
+							cells = GetWorld()->CubeBall(pos1, pos2);
 							break;
 						case Player::ToolCylinderZ:
 						case Player::ToolCylinderX:

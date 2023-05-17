@@ -702,7 +702,7 @@ namespace spades {
 			layouter.AddControl(_Tr("Preferences", "Equip Single Block"), "cg_keyToolSingleBlock");
 			layouter.AddControl(_Tr("Preferences", "Equip BlockLine"), "cg_keyToolBlockLine");
 			layouter.AddControl(_Tr("Preferences", "Equip Box"), "cg_keyToolBox");
-			//layouter.AddControl(_Tr("Preferences", "Equip Ball"), "cg_keyToolBall");
+			layouter.AddControl(_Tr("Preferences", "Equip Ball"), "cg_keyToolBall");
 			//layouter.AddControl(_Tr("Preferences", "Equip Cylinder"), "cg_keyToolCylinder");
 			
             layouter.AddHeading(_Tr("Preferences", "Weapons/Tools"));

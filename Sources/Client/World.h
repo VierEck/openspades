@@ -117,6 +117,7 @@ namespace spades {
 
 			std::vector<IntVector3> CubeLine(IntVector3 v1, IntVector3 v2, int maxLength);
 			std::vector<IntVector3> CubeBox(IntVector3 v1, IntVector3 v2);
+			std::vector<IntVector3> CubeBall(IntVector3 v1, IntVector3 v2);
 
 			stmp::optional<Player &> GetPlayer(unsigned int i) {
 				SPAssert(i < players.size());

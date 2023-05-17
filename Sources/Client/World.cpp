@@ -428,6 +428,70 @@ namespace spades {
 			return ret;
 		}
 
+		std::vector<IntVector3> World::CubeBall(spades::IntVector3 v1, spades::IntVector3 v2) {
+			SPADES_MARK_FUNCTION_DEBUG();
+			//todo. fix no blocks when ellipsoid is only 1 or 2 thick at 1 or 2 of the axes
+			IntVector3 c = v1;
+			std::vector<IntVector3> ret;
+			if (c == v2) {
+				if (map->IsValidBuildCoord(c))
+					ret.push_back(c);
+				return ret;
+			}
+			IntVector3 d = v2 - v1;
+			long ixi, iyi, izi, cx, cy;
+
+			cx = c.x;
+			cy = c.y;
+
+			if (d.x < 0)
+				ixi = -1;
+			else
+				ixi = 1;
+			if (d.y < 0)
+				iyi = -1;
+			else
+				iyi = 1;
+			if (d.z < 0)
+				izi = -1;
+			else
+				izi = 1;
+
+			float e = d.x * 0.5f;
+			float f = d.y * 0.5f;
+			float g = d.z * 0.5f;
+			Vector3 m = {c.x + e, c.y + f, c.z + g};
+			e *= e;
+			f *= f;
+			g *= g;
+
+			while (1) {
+				float checkEllipsoid =
+					(((float)c.x - m.x) * ((float)c.x - m.x)) / e +
+					(((float)c.y - m.y) * ((float)c.y - m.y)) / f +
+					(((float)c.z - m.z) * ((float)c.z - m.z)) / g;
+
+				if (map->IsValidBuildCoord(c) && checkEllipsoid <= 1.1f)
+					ret.push_back(c);
+
+				if (c == v2)
+					break;
+				
+				if (c.x != v2.x) {
+					c.x += ixi;
+				} else if (c.y != v2.y) {
+					c.x = cx;
+					c.y += iyi;
+				} else if (c.z != v2.z) {
+					c.x = cx;
+					c.y = cy;
+					c.z += izi;
+				}
+			}
+
+			return ret;
+		}
+
 		World::WeaponRayCastResult World::WeaponRayCast(spades::Vector3 startPos,
 		                                                spades::Vector3 dir,
 		                                                stmp::optional<int> excludePlayerId) {
