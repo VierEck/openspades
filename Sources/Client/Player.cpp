@@ -191,7 +191,7 @@ namespace spades {
 					}
 
 					int action = Build;
-					if (newInput.secondary != weapInput.secondary) {
+					if (newInput.secondary != weapInput.secondary || (newInput.secondary && !newInput.primary)) {
 						action = Destroy;
 					} else if (this->Painting) {
 						action = Paint;
@@ -234,10 +234,15 @@ namespace spades {
 							}
 						}
 					} else if ((newInput.primary || newInput.secondary) && world.GetTime() >= nextBlockTime) {
-						if (volumetype == ToolBlockSingle) {
-							listener->LocalPlayerCreatedLineBlock(blockCursor, blockCursor, action);
-
-							nextBlockTime = world.GetTime() + delay;
+						nextBlockTime = world.GetTime() + delay;
+						if (IsBlockCursorActive()) {
+							if (volumetype == ToolBlockSingle) {
+								listener->LocalPlayerCreatedLineBlock(blockCursor, blockCursor, action);
+							}
+						} else {
+							if (listener && this == world.GetLocalPlayer()) {
+								listener->LocalPlayerBuildError(BuildFailureReason::InvalidPosition);
+							}
 						}
 					}
 				} else {
