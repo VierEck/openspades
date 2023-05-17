@@ -641,7 +641,7 @@ namespace spades {
 					    p->IsAlive()) {
 						std::vector<IntVector3> blocks;
 						if (p->IsBlockCursorDragging()) {
-							if (p->GetBuildType() == Player::ToolBlockLine || !p->IsSpectator()) {
+							if (p->GetVolumeType() == Player::ToolBlockLine || !p->IsSpectator()) {
 								blocks = world->CubeLine(p->GetBlockCursorDragPos(), p->GetBlockCursorPos(), 1088);
 							}
 						} else {
@@ -653,12 +653,12 @@ namespace spades {
 						Vector3 color = {1.f, 1.f, 1.f};
 						if (!active)
 							color = MakeVector3(1.f, 1.f, 0.f);
-						if (p->GetBuildType() == Player::ToolBlockSingle) {
+						if (p->GetVolumeType() == Player::ToolBlockSingle) {
 							if ((int)blocks.size() > p->GetNumBlocks() && !p->IsSpectator())
 								color = MakeVector3(1.f, 0.f, 0.f);
 						}
 
-						switch (p->GetBuildType()) {
+						switch (p->GetVolumeType()) {
 							case Player::ToolBall:
 								//todo. draw an actual ellipsoid instead of box
 							case Player::ToolCylinderX:

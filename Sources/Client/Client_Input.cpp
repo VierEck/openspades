@@ -479,7 +479,7 @@ namespace spades {
 							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
 							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
 						} else if (CheckKey(cg_keyToolBrush, name)) {
-							if (p.GetBuildType() > Player::ToolBlockLine && down) {
+							if (p.GetVolumeType() > Player::ToolBlockLine && down) {
 								p.Brushing = !p.Brushing;
 								Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
 								audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());

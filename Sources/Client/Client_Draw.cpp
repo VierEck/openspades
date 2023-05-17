@@ -692,7 +692,7 @@ namespace spades {
 			float iconY = renderer->ScreenHeight() * 0.52f;
 
 			Handle<IImage> imgTool;
-			switch (p.GetBuildType()) {
+			switch (p.GetVolumeType()) {
 				case Player::ToolBlockSingle: {
 					imgTool = renderer->RegisterImage("Gfx/BuildMode/SingleBlock.png");
 				} break;

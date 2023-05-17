@@ -160,7 +160,7 @@ namespace spades {
 			IntVector3 GetBlockColor() { return blockColor; }
 			ToolType GetTool() { return tool; }
 			bool IsLocalPlayer();
-			VolumeType GetBuildType() { return volumetype; }
+			VolumeType GetVolumeType() { return volumetype; }
 
 			bool Painting;
 

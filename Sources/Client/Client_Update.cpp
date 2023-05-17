@@ -520,7 +520,7 @@ namespace spades {
 				if (player.IsBlockCursorActive()) {
 					std::string msg;
 					AlertType type;
-					switch (player.GetBuildType()) {
+					switch (player.GetVolumeType()) {
 						case Player::ToolBlockLine: {
 							IntVector3 diagonal = player.GetBlockCursorDragPos() - player.GetBlockCursorPos();
 							diagonal.x *= 1 - 2 * (diagonal.x < 0);
@@ -1354,7 +1354,7 @@ namespace spades {
 			SPADES_MARK_FUNCTION();
 			stmp::optional<Player &> p = world->GetLocalPlayer();
 			if (world->BuildMode && p->IsSpectator()) {
-				net->SendBlockVolume(v1, v2, p->GetBuildType(), secondaryaction); 
+				net->SendBlockVolume(v1, v2, p->GetVolumeType(), secondaryaction); 
 			} else {
 				net->SendBlockLine(v1, v2);
 			}
