@@ -2037,7 +2037,7 @@ namespace spades {
 			wri.Write((uint16_t)v2.y);
 			wri.Write((uint16_t)v2.z);
 
-			if (secondaryAction == Player::TexturePaint) {
+			if (secondaryAction == Player::TexturePaint || secondaryAction == Player::TextureBuild) {
 				for (auto col : TextureColors) {
 					wri.Write((uint8_t)col.x);
 					wri.Write((uint8_t)col.y);
