@@ -470,9 +470,10 @@ namespace spades {
 							p.SetVolumeType(Player::ToolBall);
 							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
 							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
-						/*} else if (CheckKey(cg_keyToolCylinder, name) && down) {
+						} else if (CheckKey(cg_keyToolCylinder, name) && down) {
+							p.SetVolumeType(Player::ToolCylinderX);
 							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
-							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());*/
+							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
 						} else if (CheckKey(cg_keyToolPaint, name) && down) {
 							p.Painting = !p.Painting;
 							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");

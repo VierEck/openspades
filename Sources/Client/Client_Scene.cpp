@@ -661,6 +661,10 @@ namespace spades {
 						switch (p->GetBuildType()) {
 							case Player::ToolBall:
 								//todo. draw an actual ellipsoid instead of box
+							case Player::ToolCylinderX:
+							case Player::ToolCylinderY:
+							case Player::ToolCylinderZ:
+								//todo. draw actual cylinder instead of box
 							case Player::ToolBox: {
 								int x = p->GetBlockCursorPos().x;
 								int y = p->GetBlockCursorPos().y;

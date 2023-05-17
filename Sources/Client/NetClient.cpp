@@ -1534,7 +1534,7 @@ namespace spades {
 						case Player::ToolCylinderZ:
 						case Player::ToolCylinderX:
 						case Player::ToolCylinderY:
-							//get cylinder cells
+							cells = GetWorld()->CubeCylinder(pos1, pos2, action);
 							break;
 						default: SPRaise("Received invalid block volume action: %d", action);
 					}

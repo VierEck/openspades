@@ -705,6 +705,11 @@ namespace spades {
 				case Player::ToolBall: {
 					imgTool = renderer->RegisterImage("Gfx/BuildMode/Ball.png");
 				} break;
+				case Player::ToolCylinderX:
+				case Player::ToolCylinderY:
+				case Player::ToolCylinderZ:{
+					imgTool = renderer->RegisterImage("Gfx/BuildMode/Cylinder.png");
+				} break;
 				default: return;
 			}
 			renderer->DrawImage(imgTool, MakeVector2(iconX, iconY));

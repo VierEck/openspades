@@ -210,6 +210,19 @@ namespace spades {
 						blockCursor = GetBlockCursorPos();
 					}
 
+					if (volumetype == ToolCylinderX || volumetype == ToolCylinderY || volumetype == ToolCylinderZ) {
+						Vector3 ori = orientation;
+						ori.x *= 1 - 2 * (ori.x < 0);
+						ori.y *= 1 - 2 * (ori.y < 0);
+						ori.z *= 1 - 2 * (ori.z < 0);
+						if (ori.x > ori.z && ori.x > ori.y)
+							volumetype = ToolCylinderX;
+						if (ori.y > ori.x && ori.y > ori.z)
+							volumetype = ToolCylinderY;
+						if (ori.z > ori.y && ori.z > ori.x)
+							volumetype = ToolCylinderZ;
+					}
+
 					float delay = cg_BuildDelayInSec;
 					if (newInput.secondary != weapInput.secondary || newInput.primary != weapInput.primary) {
 						if (IsBlockCursorActive()) {
