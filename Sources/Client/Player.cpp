@@ -217,6 +217,8 @@ namespace spades {
 										int brushHalfSize = this->BrushSize / 2;
 										IntVector3 brushHalfDiagonal = {brushHalfSize, brushHalfSize, brushHalfSize};
 										listener->LocalPlayerCreatedLineBlock(blockCursor + brushHalfDiagonal, blockCursor - brushHalfDiagonal, action);
+
+										nextBlockTime = world.GetTime() + delay;
 									} else {
 										blockCursorDragging = true;
 										blockCursorDragPos = blockCursor;
@@ -236,7 +238,11 @@ namespace spades {
 					} else if ((newInput.primary || newInput.secondary) && world.GetTime() >= nextBlockTime) {
 						nextBlockTime = world.GetTime() + delay;
 						if (IsBlockCursorActive()) {
-							if (volumetype == ToolBlockSingle) {
+							if (this->Brushing) {
+								int brushHalfSize = this->BrushSize / 2;
+								IntVector3 brushHalfDiagonal = {brushHalfSize, brushHalfSize, brushHalfSize};
+								listener->LocalPlayerCreatedLineBlock(blockCursor + brushHalfDiagonal, blockCursor - brushHalfDiagonal, action);
+							} else {
 								listener->LocalPlayerCreatedLineBlock(blockCursor, blockCursor, action);
 							}
 						} else {
