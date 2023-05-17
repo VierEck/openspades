@@ -451,17 +451,17 @@ namespace spades {
 						}
 					} else if (world->BuildMode) {
 						if (CheckKey(cg_keyToolSingleBlock, name) && down) {
-							if (!p.Brushing) {
-								p.SetVolumeType(Player::ToolBlockSingle);
-								Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
-								audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
-							}
+							p.SetVolumeType(Player::ToolBlockSingle);
+							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
+							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+							if (p.Brushing)
+								p.Brushing = false;
 						} else if (CheckKey(cg_keyToolBlockLine, name) && down) {
-							if (!p.Brushing) {
-								p.SetVolumeType(Player::ToolBlockLine);
-								Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
-								audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
-							}
+							p.SetVolumeType(Player::ToolBlockLine);
+							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
+							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+							if (p.Brushing)
+								p.Brushing = false;
 						} else if (CheckKey(cg_keyToolBox, name) && down) {
 							p.SetVolumeType(Player::ToolBox);
 							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
