@@ -1508,13 +1508,13 @@ namespace spades {
 						SPRaise("Received invalid block volume secondary action: %d", actionSecondary);
 
 					IntVector3 pos1, pos2;
-					pos1.x = reader.ReadInt();
-					pos1.y = reader.ReadInt();
-					pos1.z = reader.ReadInt();
+					pos1.x = reader.ReadShort();
+					pos1.y = reader.ReadShort();
+					pos1.z = reader.ReadShort();
 					if (action != Player::ToolBlockSingle) {
-						pos2.x = reader.ReadInt();
-						pos2.y = reader.ReadInt();
-						pos2.z = reader.ReadInt();
+						pos2.x = reader.ReadShort();
+						pos2.y = reader.ReadShort();
+						pos2.z = reader.ReadShort();
 					}
 
 					std::vector<IntVector3> cells;
@@ -2030,12 +2030,12 @@ namespace spades {
 			wri.Write((uint8_t)action);
 			wri.Write((uint8_t)secondaryAction);
 
-			wri.Write((uint32_t)v1.x);
-			wri.Write((uint32_t)v1.y);
-			wri.Write((uint32_t)v1.z);
-			wri.Write((uint32_t)v2.x);
-			wri.Write((uint32_t)v2.y);
-			wri.Write((uint32_t)v2.z);
+			wri.Write((uint16_t)v1.x);
+			wri.Write((uint16_t)v1.y);
+			wri.Write((uint16_t)v1.z);
+			wri.Write((uint16_t)v2.x);
+			wri.Write((uint16_t)v2.y);
+			wri.Write((uint16_t)v2.z);
 
 			if (secondaryAction == Player::TexturePaint) {
 				for (auto col : TextureColors) {
