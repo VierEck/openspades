@@ -1579,7 +1579,35 @@ namespace spades {
 								client->PlayerCreatedBlock(*p);
 							}
 						} break;
-						case Player::Texture: {
+						case Player::TextureBuild: {
+							IntVector3 col;
+							int rgb = 3;
+							for (size_t i = 0; i < cells.size(); i++) {
+								col.x = reader.ReadByte();
+								col.y = reader.ReadByte();
+								col.z = reader.ReadByte();
+								GetWorld()->CreateBlock(cells[i], col);
+							}
+							if (p) {
+								client->PlayerCreatedBlock(*p);
+							}
+						} break;
+						/*case Player::TextureNonSolid: {
+							IntVector3 col;
+							int rgb = 3;
+							for (size_t i = 0; i < cells.size(); i++) {
+								col.x = reader.ReadByte();
+								col.y = reader.ReadByte();
+								col.z = reader.ReadByte();
+								if (!GetWorld()->GetMap()->IsSolid(cells[i].x, cells[i].y, cells[i].z)) {
+									GetWorld()->CreateBlock(cells[i], col);
+								}
+							}
+							if (p) {
+								client->PlayerCreatedBlock(*p);
+							}
+						} break;*/
+						case Player::TexturePaint: {
 							IntVector3 col;
 							int rgb = 3;
 							for (size_t i = 0; i < cells.size(); i++) {
@@ -2009,7 +2037,7 @@ namespace spades {
 			wri.Write((uint32_t)v2.y);
 			wri.Write((uint32_t)v2.z);
 
-			if (secondaryAction == Player::Texture) {
+			if (secondaryAction == Player::TexturePaint) {
 				for (auto col : TextureColors) {
 					wri.Write((uint8_t)col.x);
 					wri.Write((uint8_t)col.y);
