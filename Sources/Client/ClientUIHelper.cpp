@@ -91,6 +91,22 @@ namespace spades {
 			ui->PaletteKeyInput(key);
 		}
 
+		void ClientUIHelper::requestSaveTxt(const std::string &txt) {
+			if (!ui)
+				return;
+			ui->requestSaveTxt(txt);
+		}
+		void ClientUIHelper::requestLoadTxt() {
+			if (!ui)
+				return;
+			ui->requestLoadTxt();
+		}
+		void ClientUIHelper::requestGenTxt() {
+			if (!ui)
+				return;
+			ui->requestGenTxt();
+		}
+
 		void ClientUIHelper::SaveMap() {
 			ui->SaveMap();
 		}

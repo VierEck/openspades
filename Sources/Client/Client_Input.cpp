@@ -58,7 +58,9 @@ DEFINE_SPADES_SETTING(cg_keyReloadWeapon, "r");
 DEFINE_SPADES_SETTING(cg_keyFlashlight, "f");
 DEFINE_SPADES_SETTING(cg_keyLastTool, "");
 
+
 DEFINE_SPADES_SETTING(cg_MapShotBuildMode, "1");
+DEFINE_SPADES_SETTING(cg_keyMapTxt, "o");
 DEFINE_SPADES_SETTING(cg_keyEditColor, "c");
 DEFINE_SPADES_SETTING(cg_keyToolPaint, "f");
 DEFINE_SPADES_SETTING(cg_keyToolBrush, "r");
@@ -478,6 +480,11 @@ namespace spades {
 							p.Painting = !p.Painting;
 							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
 							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+						} else if (CheckKey(cg_keyMapTxt, name) && down) {
+							scriptedUI->EnterMapTxtWindow();
+							scriptedUI->setIgnored(name);
+							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
+							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
 						} else if (CheckKey(cg_keyToolBrush, name)) {
 							if (p.GetVolumeType() > Player::ToolBlockLine && down) {
 								p.Brushing = !p.Brushing;
@@ -614,9 +621,9 @@ namespace spades {
 					} else if (CheckKey(cg_keyCaptureColor, name) && down) {
 						CaptureColor();
 					} else if (CheckKey(cg_keyEditColor, name) && down) {
-							scriptedUI->EnterPaletteWindow();
-							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
-							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+						scriptedUI->EnterPaletteWindow();
+						Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
+						audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
 					} else if (CheckKey(cg_keyChangeMapScale, name) && down) {
 						mapView->SwitchScale();
 						Handle<IAudioChunk> chunk =

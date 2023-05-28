@@ -62,6 +62,50 @@ namespace spades {
 			helper->ClientUIDestroyed();
 		}
 
+		void ClientUI::EnterMapTxtWindow() {
+			SPADES_MARK_FUNCTION();
+			if (!ui) {
+				return;
+			}
+
+			ScopedPrivilegeEscalation privilege;
+			static ScriptFunction func("ClientUI", "void EnterMapTxtWindow()");
+			ScriptContextHandle c = func.Prepare();
+			c->SetObject(&*ui);
+			c.ExecuteChecked();
+		}
+		void ClientUI::LoadMapTxt(const std::string &txt) {
+			SPADES_MARK_FUNCTION();
+			if (!ui) {
+				return;
+			}
+
+			ScopedPrivilegeEscalation privilege;
+			static ScriptFunction func("ClientUI", "void LoadMapTxt(string)");
+			ScriptContextHandle c = func.Prepare();
+			std::string k = txt;
+			c->SetObject(&*ui);
+			c->SetArgObject(0, reinterpret_cast<void *>(&k));
+			c.ExecuteChecked();
+		}
+
+		void ClientUI::requestLoadTxt() {
+			if (client->txt_file != "") {
+				client->LoadMapTxt(client->txt_file);
+			}
+		}
+
+		void ClientUI::requestSaveTxt(const std::string &txt) {
+			client->SaveMapTxt(txt);
+		}
+
+		void ClientUI::requestGenTxt() {
+			client->GenMaptxt();
+			if (client->txt_file != "") {
+				client->LoadMapTxt(client->txt_file);
+			}
+		}
+
 		void ClientUI::EnterPaletteWindow() {
 			SPADES_MARK_FUNCTION();
 			if (!ui) {

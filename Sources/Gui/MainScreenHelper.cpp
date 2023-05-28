@@ -112,8 +112,10 @@ namespace spades {
 
 		name = file_name;
 		ip = "aos://16777343:32887";
-		if (txtExtension)
-			map = ".txt extension file found";
+		if (txtExtension) {
+			map = file_name.substr(0, file_name.size() - 4);
+			map += ".txt";
+		}
 
 		item = new ServerItem(name, ip, map, gameMode, country, version, ping, players, maxPlayers);
 
@@ -161,12 +163,24 @@ namespace spades {
 					FileNames = FileManager::EnumFiles("MapEditor/Maps");
 				}
 
+				std::vector<std::string> txtFiles;
 				std::unique_ptr<MainScreenServerList> resp{new MainScreenServerList()};
-				for (int i = 0; i < (int)FileNames.size(); i++) {
-					if (FileNames[i].substr(FileNames[i].size() - 4, 4) != ".vxl")
+				for (std::string file : FileNames) {
+					if (file.substr(file.size() - 4, 4) == ".txt" && !canvas) {
+						txtFiles.push_back(file);
 						continue;
+					}
+					if (file.substr(file.size() - 4, 4) != ".vxl")
+						continue;
+					
+					bool txtExist = false;
+					for (std::string txt : txtFiles) {
+						if (txt.substr(0, txt.size() - 4) == file.substr(0, file.size() - 4)) {
+							txtExist = true;
+						}
+					}
 
-					std::unique_ptr<ServerItem> srv{ServerItem::MakeMapItem(FileNames[i], false)};
+					std::unique_ptr<ServerItem> srv{ServerItem::MakeMapItem(file, txtExist)};
 
 					if (srv) {
 						resp->list.emplace_back(new MainScreenServerItem(srv.get(), owner->favorites.count(srv->GetAddress()) >= 1),false);

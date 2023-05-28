@@ -109,6 +109,18 @@ namespace spades {
 													  "void PaletteKeyInput(const string& in)",
 													  asMETHOD(ClientUIHelper, PaletteKeyInput),
 													  asCALL_THISCALL);
+						r = eng->RegisterObjectMethod("ClientUIHelper",
+													  "void requestSaveTxt(const string& in)",
+													  asMETHOD(ClientUIHelper, requestSaveTxt),
+													  asCALL_THISCALL);
+						r = eng->RegisterObjectMethod("ClientUIHelper",
+													  "void requestLoadTxt()",
+													  asMETHOD(ClientUIHelper, requestLoadTxt),
+													  asCALL_THISCALL);
+						r = eng->RegisterObjectMethod("ClientUIHelper",
+													  "void requestGenTxt()",
+													  asMETHOD(ClientUIHelper, requestGenTxt),
+													  asCALL_THISCALL);
 						manager->CheckError(r);
 						break;
 					default:

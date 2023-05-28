@@ -690,33 +690,40 @@ namespace spades {
 
 			world->BuildMode = true;
 
-			World::Team &t1 = world->GetTeam(0);
-			World::Team &t2 = world->GetTeam(1);
-			World::Team &spec = world->GetTeam(2);
-			t1.color = {0, 0, 255};
-			t1.color = {0, 255, 0};
-			t1.name = "blue";
-			t2.name = "Green";
-			spec.color = {0, 0, 0};
+			std::string txtFile = map_file.substr(0, map_file.size() - 4);
+			txtFile += ".txt";
+			if (FileManager::FileExists(txtFile.c_str())) {
+				LoadMapTxt(txtFile);
+			}// else
+			{
+				World::Team &t1 = world->GetTeam(0);
+				World::Team &t2 = world->GetTeam(1);
+				World::Team &spec = world->GetTeam(2);
+				t1.color = {0, 0, 255};
+				t1.color = {0, 255, 0};
+				t1.name = "blue";
+				t2.name = "Green";
+				spec.color = {0, 0, 0};
 
-			world->SetFogColor({128, 128, 255});
-			world->SetLocalPlayerIndex(0);
+				world->SetFogColor({128, 128, 255});
 
-			auto mode = stmp::make_unique<CTFGameMode>();
+				auto mode = stmp::make_unique<CTFGameMode>();
+				
+				CTFGameMode::Team &mt1 = mode->GetTeam(0);
+				CTFGameMode::Team &mt2 = mode->GetTeam(1);
 
-			CTFGameMode::Team &mt1 = mode->GetTeam(0);
-			CTFGameMode::Team &mt2 = mode->GetTeam(1);
+				mt1.score = mt2.score = 0;
+				mode->SetCaptureLimit(10);
 
-			mt1.score = mt2.score = 0;
-			mode->SetCaptureLimit(10);
+				mt1.hasIntel = mt2.hasIntel = false;
 
-			mt1.hasIntel = mt2.hasIntel = false;
+				mt1.flagPos = mt2.flagPos = mt1.basePos = mt2.basePos = {0, 0, 0};
 
-			mt1.flagPos = mt2.flagPos = mt1.basePos = mt2.basePos = {0, 0, 0};
-
-			world->SetMode(std::move(mode));
+				world->SetMode(std::move(mode));
+			}
 			JoinedGame();
 
+			world->SetLocalPlayerIndex(0);
 			auto p = stmp::make_unique<Player>(*world, 0, RIFLE_WEAPON, 2,
 			                                   MakeVector3(256, 256, 30),
 			                                   world->GetTeam(2).color);
@@ -727,6 +734,72 @@ namespace spades {
 			pers.name = cg_playerName;
 			pers.kills = 0;
 			SPLog("LocalEditor set");
+		}
+
+		void Client::LoadMapTxt(std::string txtFile) {
+			if (!FileManager::FileExists(txtFile.c_str())) {
+				return;
+			}
+			txt_file = txtFile;
+			std::unique_ptr<IStream> stream = FileManager::OpenForReading(txt_file.c_str());
+			int len = (int)(stream->GetLength() - stream->GetPosition());
+			std::string txt = stream->Read(len);
+
+			scriptedUI->LoadMapTxt(txt);
+
+			/*
+			std::string word;
+			for (char c : txt) {
+				if (!isspace(c)) {
+					word += c;
+					continue;
+				}
+				if (word ==)
+				word.clear();
+			}*/
+			std::string note = "Map.txt loaded: " + txt_file;
+			ShowAlert(note, Client::AlertType::Notice);
+			SPLog("Map.txt loaded: %s", txt_file.c_str());
+		}
+
+		void Client::SaveMapTxt(const std::string &txt) {
+			if (txt_file == "") {
+				txt_file = map_file.substr(0, map_file.length() - 4) + ".txt";
+			}
+			std::unique_ptr<IStream> stream(FileManager::OpenForWriting(txt_file.c_str()));
+
+			stream->Write(txt);
+
+			std::string note = "Map.txt saved: " + txt_file;
+			ShowAlert(note, Client::AlertType::Notice);
+			SPLog("Map.txt saved: %s", txt_file.c_str());
+		}
+
+		void Client::GenMaptxt() {
+			txt_file = map_file.substr(0, map_file.length() - 4) + ".txt";
+			std::unique_ptr<IStream> stream(FileManager::OpenForWriting(txt_file.c_str()));
+			std::string txt = GenMeta();
+
+			char buf[64];
+			IntVector3 fogColor = world->GetFogColor();
+			sprintf(buf, "fog = (%d, %d, %d)\n", fogColor.x, fogColor.y, fogColor.z);
+			txt += buf;
+
+			stream->Write(txt);
+
+			std::string note = "Map.txt created: " + txt_file;
+			ShowAlert(note, Client::AlertType::Notice);
+			SPLog("Map.txt created: %s", txt_file.c_str());
+		}
+
+		std::string Client::GenMeta() {
+			std::string txt = "name = '" + txt_file.substr(15, (int)txt_file.length() - 19) + "'\n";
+			txt += "version = '0'\n";
+			txt += "author = '" + (std::string)cg_playerName + "'\n";
+			txt += "description = ('what is this map about?')\n\n";
+			txt += "extensions = {\n\n}\n\n";
+
+			return txt;
 		}
 
 #pragma mark - Chat Messages

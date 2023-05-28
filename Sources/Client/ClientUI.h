@@ -86,6 +86,12 @@ namespace spades {
 			void EnterCommandWindow();
 			void CloseUI();
 
+			void EnterMapTxtWindow();
+			void LoadMapTxt(const std::string &msg);
+			void requestLoadTxt();
+			void requestSaveTxt(const std::string &txt);
+			void requestGenTxt();
+
 			void EnterPaletteWindow();
 			void EditCurrentColor();
 			void ChangePalettePage(int next);

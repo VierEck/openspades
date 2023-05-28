@@ -512,6 +512,12 @@ namespace spades {
 			bool LocalEditor;
 			std::string map_file;
 			std::string canvas_file;
+
+			void LoadMapTxt(std::string txtFile);
+			void SaveMapTxt(const std::string &txt);
+			void GenMaptxt();
+			std::string GenMeta();
+			std::string txt_file;
 		};
 	} // namespace client
 } // namespace spades
