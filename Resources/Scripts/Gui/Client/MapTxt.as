@@ -1,5 +1,3 @@
-#include "../UIFramework/Field.as"
-#include "../UIFramework/TextViewer.as"
 #include "../UIFramework/Label.as"
 
 namespace spades {
@@ -154,6 +152,12 @@ namespace spades {
 	};
 	
 	namespace ui { 
+	
+		class TxtAction {
+			int start;
+			string oldString;
+			string newString;
+		}
 		
 		class TxtViewerSelectionState {
 			UIElement @FocusElement;
@@ -380,6 +384,9 @@ namespace spades {
 			private TxtViewerSelectionState selection;
 			private bool dragging = false;
 			private string copyText = "";
+			
+			private TxtAction@ [] history;
+			private int historyPos = 0;
 
 			/**
 			 * The maximum number of lines. This affects the behavior of the
@@ -491,13 +498,14 @@ namespace spades {
 			void KeyDown(string key) {
 				KeyAction(key);
 				AdjustHeight();
-				
+				//keydown seems to use qwerty regardless to ur actual keyboard layout. 
+				//u may need to customize the keys to match ur layout or to whatever else to ur own liking. 
 				if (Manager.IsControlPressed or Manager.IsMetaPressed /* for OSX; Cmd + [a-z] */) {
 					if (key == "C" && this.selection.SelectionEnd > this.selection.SelectionStart) {
 						copyText = this.SelectedText;
 						return;
 					} else if (key == "V" and copyText != "") {
-						Insert(copyText);
+						Write(copyText);
 						AdjustHeight();
 						return;
 					} else if (key == "A") {
@@ -510,12 +518,15 @@ namespace spades {
 					} else if (key == "X" and this.selection.MarkPosition != this.selection.CursorPosition) {
 						copyText = this.SelectedText;
 						BackSpace();
+						AdjustHeight();
 						return;
 					} else if (key == "Z") {
-						//todo: undo
+						Undo();
+						AdjustHeight();
 						return;
-					} else if (key == "y") {
-						//todo: redo
+					} else if (key == "Y") {
+						Redo();
+						AdjustHeight();
 						return;
 					}
 				} 
@@ -647,7 +658,7 @@ namespace spades {
 				}
 				
 				if (key == "Enter") {
-					Insert('\n');
+					Write('\n');
 				}
 				if (key == "BackSpace") {
 					BackSpace();
@@ -659,7 +670,7 @@ namespace spades {
 			
 			void KeyPress(string text) {
 				if (!(Manager.IsControlPressed or Manager.IsMetaPressed)) {
-					Insert(text);
+					Write(text);
 					AdjustHeight();
 				}
 			}
@@ -696,7 +707,7 @@ namespace spades {
 				}
 			}
 			
-			void Insert(string text) {
+			void Write(string text) {
 				if (!CheckCharType(text)) {
 					return;
 				}
@@ -704,12 +715,12 @@ namespace spades {
 				int cursor = this.selection.CursorPosition;
 				int mark = this.selection.MarkPosition;
 				if (cursor < mark) {
-					Text = Text.substr(0, cursor) + text + Text.substr(mark, Text.length);
+					Insert(cursor, mark, text);
 				} else if (cursor > mark) {
-					Text = Text.substr(0, mark) + text + Text.substr(cursor, Text.length);
+					Insert(mark, cursor, text);
 					cursor = mark;
 				} else {
-					Text = Text.substr(0, cursor) + text + Text.substr(cursor, Text.length);
+					Insert(cursor, cursor, text);
 				}
 				
 				if (Text.substr(cursor, 1) == '\n') {//prevent overlap with next line
@@ -723,16 +734,16 @@ namespace spades {
 				int mark = this.selection.MarkPosition;
 				int deleteLength;
 				if (cursor < mark) {
-					Text = Text.substr(0, cursor) + Text.substr(mark, Text.length);
+					Insert(cursor, mark, "");
 					deleteLength = 0;
 				} else if (cursor > mark) {
-					Text = Text.substr(0, mark) + Text.substr(cursor, Text.length);
+					Insert(mark, cursor, "");
 					deleteLength = cursor - mark;
 				} else {
 					if (cursor <= 0) {
 						return;
 					}
-					Text = Text.substr(0, cursor - 1) + Text.substr(cursor, Text.length);
+					Insert(cursor - 1, cursor, "");
 					deleteLength = 1;
 				}
 				
@@ -746,7 +757,51 @@ namespace spades {
 					return;
 				}
 				
-				Text = Text.substr(0, cursor) + Text.substr(cursor + 1, Text.length);
+				Insert(cursor, cursor + 1, "");
+				this.selection.CursorPosition = this.selection.MarkPosition = cursor;
+			}
+			
+			void Insert(int start, int end, string text) {
+				addHistory(start, Text.substr(start, end - start), text);
+				Text = Text.substr(0, start) + text + Text.substr(end, -1);
+			}
+			
+			void addHistory(int startAction, string oldS, string newS) {
+				TxtAction act;
+				act.start = startAction;
+				act.oldString = oldS;
+				act.newString = newS;
+				
+				history.length = historyPos;
+				history.insertLast(act);
+				historyPos++;
+			}
+			
+			void Undo() {
+				if (historyPos <= 0) {
+					return;
+				}
+				historyPos--;
+				TxtAction act = history[historyPos];
+				
+				int newlen = int(act.newString.length);
+				Text = Text.substr(0, act.start) + act.oldString + Text.substr(act.start + newlen, -1);
+				
+				int cursor = act.start + int(act.oldString.length);
+				this.selection.CursorPosition = this.selection.MarkPosition = cursor;
+			}
+			
+			void Redo() {
+				if (historyPos >= int(history.length)) {
+					return;
+				}
+				TxtAction act = history[historyPos];
+				historyPos++;
+				
+				int oldLen = int(act.oldString.length);
+				Text = Text.substr(0, act.start) + act.newString + Text.substr(act.start + oldLen, -1);
+				
+				int cursor = act.start + int(act.newString.length);
 				this.selection.CursorPosition = this.selection.MarkPosition = cursor;
 			}
 			
