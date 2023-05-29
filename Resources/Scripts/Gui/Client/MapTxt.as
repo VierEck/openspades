@@ -669,7 +669,7 @@ namespace spades {
 			}
 			
 			void KeyPress(string text) {
-				if (!(Manager.IsControlPressed or Manager.IsMetaPressed)) {
+				if (!(Manager.IsControlPressed or Manager.IsMetaPressed) or Manager.IsAltPressed) {
 					Write(text);
 					AdjustHeight();
 				}
