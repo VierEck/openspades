@@ -108,6 +108,11 @@ namespace spades {
 			} else {
 				UIElement::HotKey(key);
 			}
+			if (int(viewer.Text.length) == 0) {
+				genButton.Enable = true;
+			} else {
+				genButton.Enable = false;
+			}
 		}
 
 		void Load(string text) {
