@@ -700,9 +700,9 @@ namespace spades {
 				World::Team &t2 = world->GetTeam(1);
 				World::Team &spec = world->GetTeam(2);
 				t1.color = {0, 0, 255};
-				t1.color = {0, 255, 0};
-				t1.name = "blue";
-				t2.name = "Green";
+				t2.color = {0, 255, 0};
+				t1.name = "Team1";
+				t2.name = "Team2";
 				spec.color = {0, 0, 0};
 
 				world->SetFogColor({128, 128, 255});
@@ -733,6 +733,9 @@ namespace spades {
 			World::PlayerPersistent &pers = world->GetPlayerPersistent(0);
 			pers.name = cg_playerName;
 			pers.kills = 0;
+
+			net->localRespawnPos = {256, 256, 30};
+			net->switchModeTeam = 0;
 			SPLog("LocalEditor set");
 		}
 

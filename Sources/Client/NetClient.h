@@ -201,6 +201,12 @@ namespace spades {
 			void SendBlockVolume(IntVector3 v1, IntVector3 v2, int action, int secondaryAction);
 			std::vector<IntVector3> TextureColors;
 			void SendSetFlySpeed();
+			Vector3 localRespawnPos;
+			void DoBuildCommands(std::string);
+			void CommandSetRespawn(std::string);
+			void CommandRespawn();
+			void CommandSwitchMode(std::string);
+			int switchModeTeam;
 
 			double GetDownlinkBps() { return bandwidthMonitor->GetDownlinkBps(); }
 			double GetUplinkBps() { return bandwidthMonitor->GetUplinkBps(); }
