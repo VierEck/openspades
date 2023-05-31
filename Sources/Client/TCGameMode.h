@@ -76,6 +76,7 @@ namespace spades {
 			}
 
 			void AddTerritory(const Territory &);
+			void RemoveTerritory(int index);
 		};
 	} // namespace client
 } // namespace spades

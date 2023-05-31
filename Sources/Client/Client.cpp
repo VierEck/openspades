@@ -56,6 +56,7 @@
 #include "NetClient.h"
 
 #include "CTFGameMode.h"
+#include "TCGameMode.h"
 
 DEFINE_SPADES_SETTING(cg_chatBeep, "1");
 DEFINE_SPADES_SETTING(cg_alertSounds, "1");
@@ -707,19 +708,17 @@ namespace spades {
 
 				world->SetFogColor({128, 128, 255});
 
-				auto mode = stmp::make_unique<CTFGameMode>();
-				
-				CTFGameMode::Team &mt1 = mode->GetTeam(0);
-				CTFGameMode::Team &mt2 = mode->GetTeam(1);
+				auto TC = stmp::make_unique<TCGameMode>(*world);
+				world->SetMode(std::move(TC));
 
+				auto CTF = stmp::make_unique<CTFGameMode>();
+				CTFGameMode::Team &mt1 = CTF->GetTeam(0);
+				CTFGameMode::Team &mt2 = CTF->GetTeam(1);
 				mt1.score = mt2.score = 0;
-				mode->SetCaptureLimit(10);
-
+				CTF->SetCaptureLimit(10);
 				mt1.hasIntel = mt2.hasIntel = false;
-
 				mt1.flagPos = mt2.flagPos = mt1.basePos = mt2.basePos = {0, 0, 0};
-
-				world->SetMode(std::move(mode));
+				world->SetMode(std::move(CTF));
 			}
 			JoinedGame();
 

@@ -63,6 +63,7 @@ namespace spades {
 			enum ToolType { ToolSpade = 0, ToolBlock, ToolWeapon, ToolGrenade };
 			enum VolumeType { ToolBlockSingle = 0, ToolBlockLine, ToolBox, ToolBall, ToolCylinderX, ToolCylinderY, ToolCylinderZ, VOLUMETYPEMAX };
 			enum BuildType { Destroy = 0, Build, Paint, TextureBuild, TexturePaint, BUILDTYPEMAX};
+			enum MapObjectId { TentTeam1 = 1, TentTeam2, TentNeutral, IntelTeam1, IntelTeam2, SpawnTeam1, SpawnTeam2, MAPOBJECTIDMAX};
 			struct HitBoxes {
 				OBB3 torso;
 				OBB3 limbs[3];
@@ -170,9 +171,14 @@ namespace spades {
 			float BuildDistance;
 			bool BuildFar;
 
+			bool EditMapObject;
+			int TypeMapObject;
+
 			float walkFlySpeed;
 			float sprintFlySpeed;
 			float sneakFlySpeed;
+
+			void ShootMapObject() { this->FireWeapon(); }
 
 			PlayerInput GetInput() { return input; }
 			WeaponInput GetWeaponInput() { return weapInput; }

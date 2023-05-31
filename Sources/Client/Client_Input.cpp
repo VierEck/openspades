@@ -38,6 +38,7 @@
 #include "World.h"
 
 #include "NetClient.h"
+#include "IGameMode.h"
 
 using namespace std;
 
@@ -61,9 +62,10 @@ DEFINE_SPADES_SETTING(cg_keyLastTool, "");
 
 DEFINE_SPADES_SETTING(cg_MapShotBuildMode, "1");
 DEFINE_SPADES_SETTING(cg_keyMapTxt, "o");
-DEFINE_SPADES_SETTING(cg_keyEditColor, "c");
+DEFINE_SPADES_SETTING(cg_keyEditColor, "g");
 DEFINE_SPADES_SETTING(cg_keyToolPaint, "f");
 DEFINE_SPADES_SETTING(cg_keyToolBrush, "r");
+DEFINE_SPADES_SETTING(cg_keyToolMapObject, "c");
 DEFINE_SPADES_SETTING(cg_keyScaleBuildDistance, "MiddleMouseButton");
 DEFINE_SPADES_SETTING(cg_keyToolSingleBlock, "1");
 DEFINE_SPADES_SETTING(cg_keyToolBlockLine, "2");
@@ -386,7 +388,7 @@ namespace spades {
 				if (world->GetLocalPlayer()) {
 					Player &p = world->GetLocalPlayer().value();
 
-					if (p.IsAlive() && p.GetTool() == Player::ToolBlock && down) {
+					if (p.IsAlive() && p.GetTool() == Player::ToolBlock && down && !p.EditMapObject) {
 						if (paletteView->KeyInput(name)) {
 							return;
 						}
@@ -476,8 +478,46 @@ namespace spades {
 							p.SetVolumeType(Player::ToolCylinderX);
 							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
 							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+						} else if (CheckKey(cg_keyToolMapObject, name) && down) {
+							p.EditMapObject = !p.EditMapObject;
+							if (p.Brushing)
+								p.Brushing = false;
+							if (p.Painting)
+								p.Painting = false;
+							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
+							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+						} else if ((name == "Right") && down && p.EditMapObject) {
+							if (p.TypeMapObject + Player::TentTeam1 >= Player::MAPOBJECTIDMAX) {
+								return;
+							}
+							p.TypeMapObject++;
+							stmp::optional<IGameMode &> mode = GetWorld()->GetMode();
+							if (mode->ModeType() == IGameMode::m_CTF && p.TypeMapObject == Player::TentNeutral) {
+								p.TypeMapObject++;
+							}
+							if (mode->ModeType() == IGameMode::m_TC && p.TypeMapObject == Player::IntelTeam1) {
+								p.TypeMapObject += Player::IntelTeam2 - Player::IntelTeam1 + 1;
+							}
+							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
+							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+						} else if ((name == "Left") && down && p.EditMapObject) {
+							if (p.TypeMapObject - Player::TentTeam1 <= 0) {
+								return;
+							}
+							p.TypeMapObject--;
+							stmp::optional<IGameMode &> mode = GetWorld()->GetMode();
+							if (mode->ModeType() == IGameMode::m_CTF && p.TypeMapObject == Player::TentNeutral) {
+								p.TypeMapObject--;
+							}
+							if (mode->ModeType() == IGameMode::m_TC && p.TypeMapObject == Player::IntelTeam2) {
+								p.TypeMapObject -= Player::IntelTeam2 - Player::IntelTeam1 + 1;
+							}
+							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
+							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
 						} else if (CheckKey(cg_keyToolPaint, name) && down) {
 							p.Painting = !p.Painting;
+							if (p.EditMapObject)
+								p.EditMapObject = false;
 							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
 							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
 						} else if (CheckKey(cg_keyMapTxt, name) && down) {
@@ -488,6 +528,8 @@ namespace spades {
 						} else if (CheckKey(cg_keyToolBrush, name)) {
 							if (p.GetVolumeType() > Player::ToolBlockLine && down) {
 								p.Brushing = !p.Brushing;
+								if (p.EditMapObject)
+									p.EditMapObject = false;
 								Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
 								audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
 							}

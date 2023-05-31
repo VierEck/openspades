@@ -153,6 +153,9 @@ namespace spades {
 			NetClient(Client *);
 			~NetClient();
 
+			enum { BLUE_FLAG = 0, GREEN_FLAG = 1, BLUE_BASE = 2, GREEN_BASE = 3 };
+			enum { DESTROY_SPAWN = 3, SPAWN_TEAM_1 = 4, SPAWN_TEAM_2 = 5};
+
 			NetClientStatus GetStatus() { return status; }
 
 			std::string GetStatusString();
@@ -201,11 +204,13 @@ namespace spades {
 			void SendBlockVolume(IntVector3 v1, IntVector3 v2, int action, int secondaryAction);
 			std::vector<IntVector3> TextureColors;
 			void SendSetFlySpeed();
+			void SendMapObject(int type, int state, Vector3 pos1 = Vector3(0, 0, 0), Vector3 pos2 = Vector3(0, 0, 0));
 			Vector3 localRespawnPos;
 			void DoBuildCommands(std::string);
 			void CommandSetRespawn(std::string);
 			void CommandRespawn();
 			void CommandSwitchMode(std::string);
+			void CommandSetGameMode();
 			int switchModeTeam;
 
 			double GetDownlinkBps() { return bandwidthMonitor->GetDownlinkBps(); }

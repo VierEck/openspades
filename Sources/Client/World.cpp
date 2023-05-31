@@ -131,7 +131,21 @@ namespace spades {
 			}
 		}
 
-		void World::SetMode(std::unique_ptr<IGameMode> m) { mode = std::move(m); }
+		void World::SetMode(std::unique_ptr<IGameMode> m) {
+			if (BuildMode && mode) {
+				if (mode->ModeType() != m->ModeType()) {
+					modeInactive = std::move(mode);
+				}
+			}
+			mode = std::move(m);
+		}
+
+		void World::SwitchMode() {
+			if (!mode || !modeInactive)
+				return;
+
+			std::swap(mode, modeInactive);
+		}
 
 		void World::MarkBlockForRegeneration(const IntVector3 &blockLocation) {
 			UnmarkBlockForRegeneration(blockLocation);

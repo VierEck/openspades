@@ -33,6 +33,9 @@
 #include <Core/Exception.h>
 #include <Core/Settings.h>
 
+#include "IGameMode.h"
+#include "TCGameMode.h"
+
 DEFINE_SPADES_SETTING(cg_BuildDelayInSec, "0.2");
 
 namespace spades {
@@ -98,6 +101,9 @@ namespace spades {
 
 			BuildFar = false;
 			BuildDistance = 3.0f;
+
+			EditMapObject = false;
+			TypeMapObject = Player::TentTeam1;
 
 			volumetype = ToolBlockSingle;
 		}
@@ -826,6 +832,10 @@ namespace spades {
 					// might hit water surface.
 				}
 
+				if (this->IsSpectator() && !hitPlayer) {
+					return;
+				}
+
 				if (mapResult.hit && GetHorizontalLength(mapResult.hitPos - muzzle) < 128.f &&
 				    (!hitPlayer ||
 				     GetHorizontalLength(mapResult.hitPos - muzzle) < hitPlayerDistance)) {
@@ -930,6 +940,10 @@ namespace spades {
 					world.GetListener()->AddBulletTracer(*this, muzzle, finalHitPos);
 
 				// one pellet done
+			}
+
+			if (this->IsSpectator()) {
+				return;
 			}
 
 			// do hit test debugging

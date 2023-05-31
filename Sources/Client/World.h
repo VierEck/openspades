@@ -67,6 +67,7 @@ namespace spades {
 			IWorldListener *listener = nullptr;
 
 			std::unique_ptr<IGameMode> mode;
+			std::unique_ptr<IGameMode> modeInactive;
 
 			Handle<GameMap> map;
 			std::unique_ptr<GameMapWrapper> mapWrapper;
@@ -133,6 +134,7 @@ namespace spades {
 			 */
 			stmp::optional<IGameMode &> GetMode() { return mode.get(); }
 			void SetMode(std::unique_ptr<IGameMode>);
+			void SwitchMode();
 
 			Team &GetTeam(int t) {
 				if (t >= 2 || t < 0) // spectator

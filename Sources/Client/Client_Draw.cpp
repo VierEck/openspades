@@ -59,6 +59,7 @@
 #include "World.h"
 
 #include "NetClient.h"
+#include "TCGameMode.h"
 
 DEFINE_SPADES_SETTING(cg_hitIndicator, "1");
 DEFINE_SPADES_SETTING(cg_debugAim, "0");
@@ -714,8 +715,41 @@ namespace spades {
 			}
 			renderer->DrawImage(imgTool, MakeVector2(iconX, iconY));
 
+			if (p.EditMapObject && !p.Painting && !p.Brushing) {
+				Handle<IImage> imgMapObject;
+				Vector4 col;
+				IntVector3 icol;
+				switch (p.TypeMapObject) {
+					case Player::TentTeam1:
+					case Player::TentTeam2:
+					case Player::TentNeutral:{
+						imgMapObject = renderer->RegisterImage("Gfx/BuildMode/Tent.png");
+						icol = world->GetTeam(p.TypeMapObject - Player::TentTeam1).color;
+					} break;
+					case Player::IntelTeam1:
+					case Player::IntelTeam2: {
+						imgMapObject = renderer->RegisterImage("Gfx/BuildMode/Intel.png");
+						icol = world->GetTeam(p.TypeMapObject - Player::IntelTeam1).color;
+					} break;
+					case Player::SpawnTeam1:
+					case Player::SpawnTeam2:{
+						imgMapObject = renderer->RegisterImage("Gfx/BuildMode/Spawn.png");
+						icol = world->GetTeam(p.TypeMapObject - Player::SpawnTeam1).color;
+					} break;
+					default: return;
+				}
+				col.x = icol.x / 255.f;
+				col.y = icol.y / 255.f;
+				col.z = icol.z / 255.f;
+				col.w = 1.f;
+				renderer->SetColorAlphaPremultiplied(col);
+				float h = imgMapObject->GetHeight();
+				float w = imgMapObject->GetWidth();
+				renderer->DrawImage(imgMapObject, MakeVector2(iconX, iconY + imgTool->GetHeight()), AABB2(0, h, w, h));
+			}
+
 			if (p.Brushing) {
-				Handle<IImage> imgBrush = renderer->RegisterImage("Gfx/BuildMode/Brush.png");;
+				Handle<IImage> imgBrush = renderer->RegisterImage("Gfx/BuildMode/Brush.png");
 				renderer->DrawImage(imgBrush, MakeVector2(iconX, iconY + imgTool->GetHeight()));
 			}
 
@@ -789,6 +823,30 @@ namespace spades {
 			renderer->SetColorAlphaPremultiplied(Vector4(0.f, 0.f, 0.f, 0.5f));
 			renderer->DrawImage(nullptr, AABB2(pos.x, pos.y, size.x, size.y));
 			font.DrawShadow(str, pos + Vector2(margin, margin), 0.8f, Vector4(1.f, 1.f, 1.f, 1.f), Vector4(0.f, 0.f, 0.f, 0.5f));
+		}
+
+		void Client::DrawTerritoryIdx(Vector3 pos3d, int idx) {
+			Player &p = GetWorld()->GetLocalPlayer().value();
+			float dist = (pos3d - p.GetEye()).GetLength();
+			if (dist > 128.f)
+				return;
+
+			Vector3 posxyz = Project(pos3d);
+			Vector2 pos = {posxyz.x, posxyz.y};
+
+			std::string str = std::to_string(idx);
+
+			IFont &font = fontManager->GetGuiFont();
+			float margin = 5.f;
+
+			auto size = font.Measure(str);
+			size += Vector2(margin * 2.f, margin * 2.f);
+			pos.x -= size.x * .5f;
+			pos.y -= size.y * 3;
+
+			renderer->SetColorAlphaPremultiplied(Vector4(0.f, 0.f, 0.f, 0.5f));
+			renderer->DrawImage(nullptr, AABB2(pos.x, pos.y, size.x, size.y));
+			font.DrawShadow(str, pos + Vector2(margin, margin), 1.f, Vector4(1.f, 1.f, 1.f, 1.f), Vector4(0.f, 0.f, 0.f, 0.5f));
 		}
 
 		void Client::DrawAlert() {

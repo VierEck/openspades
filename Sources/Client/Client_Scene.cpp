@@ -593,6 +593,8 @@ namespace spades {
 				param.matrix = Matrix4::Translate(t.pos);
 				param.matrix = param.matrix * Matrix4::Scale(.3f);
 				renderer->RenderModel(*base, param);
+
+				DrawTerritoryIdx(t.pos, tId);
 			}
 		}
 
