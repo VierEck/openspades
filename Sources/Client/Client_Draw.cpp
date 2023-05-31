@@ -825,30 +825,6 @@ namespace spades {
 			font.DrawShadow(str, pos + Vector2(margin, margin), 0.8f, Vector4(1.f, 1.f, 1.f, 1.f), Vector4(0.f, 0.f, 0.f, 0.5f));
 		}
 
-		void Client::DrawTerritoryIdx(Vector3 pos3d, int idx) {
-			Player &p = GetWorld()->GetLocalPlayer().value();
-			float dist = (pos3d - p.GetEye()).GetLength();
-			if (dist > 128.f)
-				return;
-
-			Vector3 posxyz = Project(pos3d);
-			Vector2 pos = {posxyz.x, posxyz.y};
-
-			std::string str = std::to_string(idx);
-
-			IFont &font = fontManager->GetGuiFont();
-			float margin = 5.f;
-
-			auto size = font.Measure(str);
-			size += Vector2(margin * 2.f, margin * 2.f);
-			pos.x -= size.x * .5f;
-			pos.y -= size.y * 3;
-
-			renderer->SetColorAlphaPremultiplied(Vector4(0.f, 0.f, 0.f, 0.5f));
-			renderer->DrawImage(nullptr, AABB2(pos.x, pos.y, size.x, size.y));
-			font.DrawShadow(str, pos + Vector2(margin, margin), 1.f, Vector4(1.f, 1.f, 1.f, 1.f), Vector4(0.f, 0.f, 0.f, 0.5f));
-		}
-
 		void Client::DrawAlert() {
 			SPADES_MARK_FUNCTION();
 
