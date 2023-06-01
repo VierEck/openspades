@@ -715,7 +715,7 @@ namespace spades {
 			}
 			renderer->DrawImage(imgTool, MakeVector2(iconX, iconY));
 
-			if (p.EditMapObject && !p.Painting && !p.Brushing) {
+			if (p.EditMapObject) {
 				Handle<IImage> imgMapObject;
 				Vector4 col;
 				IntVector3 icol;
@@ -746,6 +746,13 @@ namespace spades {
 				float h = imgMapObject->GetHeight();
 				float w = imgMapObject->GetWidth();
 				renderer->DrawImage(imgMapObject, MakeVector2(iconX, iconY + imgTool->GetHeight()), AABB2(0, h, w, h));
+				return;
+			}
+
+			if (p.MoveVolume) {
+				Handle<IImage> imgMove = renderer->RegisterImage("Gfx/BuildMode/Move.png");
+				renderer->DrawImage(imgMove, MakeVector2(iconX, iconY + imgTool->GetHeight()));
+				return;
 			}
 
 			if (p.Brushing) {

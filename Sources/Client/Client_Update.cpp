@@ -1360,9 +1360,7 @@ namespace spades {
 			SPADES_MARK_FUNCTION();
 			stmp::optional<Player &> p = world->GetLocalPlayer();
 			if (world->BuildMode && p->IsSpectator()) {
-				if (!p->EditMapObject) {
-					net->SendBlockVolume(v1, v2, p->GetVolumeType(), secondaryaction); 
-				} else {
+				if (p->EditMapObject) {
 					int type, state;
 					Vector3 pos1, pos2;
 					pos1.x = v1.x;
@@ -1436,6 +1434,17 @@ namespace spades {
 						type = tc.GetNumTerritories();
 					}
 					net->SendMapObject(type, state, pos1, pos2);
+				} else if (secondaryaction == Player::Move) {
+					if (!p->MovePktSaved) {
+						p->MovePkt = std::make_tuple(v1, v2, p->GetVolumeType(), secondaryaction, IntVector3(0, 0, 0));
+						p->MovePktSaved = true;
+					} else {
+						std::get<4>(p->MovePkt) = v1;
+						net->SendBlockVolume(std::get<0>(p->MovePkt), std::get<1>(p->MovePkt), std::get<2>(p->MovePkt), std::get<3>(p->MovePkt));
+						p->MovePktSaved = false;
+					}
+				} else {
+					net->SendBlockVolume(v1, v2, p->GetVolumeType(), secondaryaction); 
 				}
 			} else {
 				net->SendBlockLine(v1, v2);

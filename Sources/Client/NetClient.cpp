@@ -1668,6 +1668,28 @@ namespace spades {
 								client->PlayerCreatedBlock(*p);
 							}
 						} break;
+						case Player::Move: {
+							IntVector3 move;
+							move.x = reader.ReadShort();
+							move.y = reader.ReadShort();
+							move.z = reader.ReadShort();
+							GetWorld()->DestroyBlock(cells);
+							for (size_t i = 0; i < cells.size(); i++) {
+								if (GetWorld()->GetMap()->IsSolid(cells[i].x, cells[i].y, cells[i].z)) {
+									uint32_t col = GetWorld()->GetMap()->GetColorWrapped(cells[i].x, cells[i].y, cells[i].z);
+									IntVector3 colV;
+									colV.x = (uint8_t)(col);
+									colV.y = (uint8_t)(col >> 8);
+									colV.z = (uint8_t)(col >> 16);
+									cells[i] += move - pos1;
+									if (GetWorld()->GetMap()->IsValidBuildCoord(cells[i]))
+										GetWorld()->CreateBlock(cells[i], colV);
+								}
+							}
+							if (p) {
+								client->PlayerCreatedBlock(*p);
+							}
+						} break;
 						default: SPRaise("Received invalid BlockVolume secondaryaction: %d", actionSecondary);
 					}
 				} break;
@@ -2167,6 +2189,13 @@ namespace spades {
 					wri.Write((uint8_t)col.y);
 					wri.Write((uint8_t)col.z);
 				}
+			}
+
+			IntVector3 move = std::get<4>(GetLocalPlayer().MovePkt);
+			if (secondaryAction == Player::Move) {
+				wri.Write((uint16_t)move.x);
+				wri.Write((uint16_t)move.y);
+				wri.Write((uint16_t)move.z);
 			}
 			
 			if (peer) {

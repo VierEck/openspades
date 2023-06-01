@@ -65,7 +65,8 @@ DEFINE_SPADES_SETTING(cg_keyMapTxt, "o");
 DEFINE_SPADES_SETTING(cg_keyEditColor, "g");
 DEFINE_SPADES_SETTING(cg_keyToolPaint, "f");
 DEFINE_SPADES_SETTING(cg_keyToolBrush, "r");
-DEFINE_SPADES_SETTING(cg_keyToolMapObject, "c");
+DEFINE_SPADES_SETTING(cg_keyToolMove, "c");
+DEFINE_SPADES_SETTING(cg_keyToolMapObject, "x");
 DEFINE_SPADES_SETTING(cg_keyScaleBuildDistance, "MiddleMouseButton");
 DEFINE_SPADES_SETTING(cg_keyToolSingleBlock, "1");
 DEFINE_SPADES_SETTING(cg_keyToolBlockLine, "2");
@@ -460,6 +461,8 @@ namespace spades {
 							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
 							if (p.Brushing)
 								p.Brushing = false;
+							if (p.MoveVolume)
+								p.MoveVolume = false;
 						} else if (CheckKey(cg_keyToolBlockLine, name) && down) {
 							p.SetVolumeType(Player::ToolBlockLine);
 							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
@@ -484,6 +487,8 @@ namespace spades {
 								p.Brushing = false;
 							if (p.Painting)
 								p.Painting = false;
+							if (p.MoveVolume)
+								p.MoveVolume = false;
 							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
 							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
 						} else if ((name == "Right") && down && p.EditMapObject) {
@@ -518,6 +523,20 @@ namespace spades {
 							p.Painting = !p.Painting;
 							if (p.EditMapObject)
 								p.EditMapObject = false;
+							if (p.MoveVolume)
+								p.MoveVolume = false;
+							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
+							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+						} else if (CheckKey(cg_keyToolMove, name) && down) {
+							p.MoveVolume = !p.MoveVolume;
+							if (p.EditMapObject)
+								p.EditMapObject = false;
+							if (p.Painting)
+								p.Painting = false;
+							if (p.Brushing)
+								p.Brushing = false;
+							if (p.GetVolumeType() == Player::ToolBlockSingle)
+								p.SetVolumeType(Player::ToolBlockLine);
 							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
 							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
 						} else if (CheckKey(cg_keyMapTxt, name) && down) {
@@ -530,6 +549,8 @@ namespace spades {
 								p.Brushing = !p.Brushing;
 								if (p.EditMapObject)
 									p.EditMapObject = false;
+								if (p.MoveVolume)
+									p.MoveVolume = false;
 								Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
 								audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
 							}
