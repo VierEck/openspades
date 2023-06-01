@@ -196,43 +196,42 @@ namespace spades {
 						weapInput.secondary = false;
 					}
 
-					int action = Build;
-					if (newInput.secondary != weapInput.secondary || (newInput.secondary && !newInput.primary)) {
-						action = Destroy;
-					} else if (this->Painting) {
-						action = Paint;
-					}
-
-					IntVector3 blockCursor;
-					IntVector3 indent = GetBlockCursorIndentPos();
-					Handle<GameMap> map = GetWorld().GetMap();
-					if ((newInput.secondary != weapInput.secondary || this->Painting) && map->IsValidBuildCoord(indent)) {
+					if (IsBlockCursorActive()) {
+						IntVector3 blockCursor;
 						IntVector3 indent = GetBlockCursorIndentPos();
-						if (map->IsSolid(indent.x, indent.y, indent.z)) {
-							blockCursor = indent;
+						Handle<GameMap> map = GetWorld().GetMap();
+						if ((newInput.secondary != weapInput.secondary || this->Painting) && map->IsValidBuildCoord(indent)) {
+							if (map->IsSolidWrapped(indent.x, indent.y, indent.z)) {
+								blockCursor = indent;
+							} else {
+								blockCursor = GetBlockCursorPos();
+							}
 						} else {
 							blockCursor = GetBlockCursorPos();
 						}
-					} else {
-						blockCursor = GetBlockCursorPos();
-					}
 
-					if (volumetype == ToolCylinderX || volumetype == ToolCylinderY || volumetype == ToolCylinderZ) {
-						Vector3 ori = orientation;
-						ori.x *= 1 - 2 * (ori.x < 0);
-						ori.y *= 1 - 2 * (ori.y < 0);
-						ori.z *= 1 - 2 * (ori.z < 0);
-						if (ori.x > ori.z && ori.x > ori.y)
-							volumetype = ToolCylinderX;
-						if (ori.y > ori.x && ori.y > ori.z)
-							volumetype = ToolCylinderY;
-						if (ori.z > ori.y && ori.z > ori.x)
-							volumetype = ToolCylinderZ;
-					}
+						int action = Build;
+						if (newInput.secondary != weapInput.secondary || (newInput.secondary && !newInput.primary)) {
+							action = Destroy;
+						} else if (this->Painting) {
+							action = Paint;
+						}
 
-					float delay = cg_BuildDelayInSec;
-					if (newInput.secondary != weapInput.secondary || newInput.primary != weapInput.primary) {
-						if (IsBlockCursorActive()) {
+						if (volumetype == ToolCylinderX || volumetype == ToolCylinderY || volumetype == ToolCylinderZ) {
+							Vector3 ori = orientation;
+							ori.x *= 1 - 2 * (ori.x < 0);
+							ori.y *= 1 - 2 * (ori.y < 0);
+							ori.z *= 1 - 2 * (ori.z < 0);
+							if (ori.x > ori.z && ori.x > ori.y)
+								volumetype = ToolCylinderX;
+							if (ori.y > ori.x && ori.y > ori.z)
+								volumetype = ToolCylinderY;
+							if (ori.z > ori.y && ori.z > ori.x)
+								volumetype = ToolCylinderZ;
+						}
+
+						float delay = (float)cg_BuildDelayInSec;
+						if (newInput.secondary != weapInput.secondary || newInput.primary != weapInput.primary) {
 							if (newInput.primary || newInput.secondary) {
 								if (volumetype == ToolBlockSingle) {
 									listener->LocalPlayerCreatedLineBlock(blockCursor, blockCursor, action);
@@ -256,13 +255,7 @@ namespace spades {
 								blockCursorDragging = false;
 								blockCursorActive = false;
 							}
-						} else {
-							if (listener && this == world.GetLocalPlayer()) {
-								listener->LocalPlayerBuildError(BuildFailureReason::InvalidPosition);
-							}
-						}
-					} else if ((newInput.primary || newInput.secondary) && world.GetTime() >= nextBlockTime) {
-						if (IsBlockCursorActive()) {
+						} else if ((newInput.primary || newInput.secondary) && world.GetTime() >= nextBlockTime) {
 							if (this->Brushing) {
 								int brushHalfSize = this->BrushSize / 2;
 								IntVector3 brushHalfDiagonal = {brushHalfSize, brushHalfSize, brushHalfSize};
@@ -272,10 +265,10 @@ namespace spades {
 								listener->LocalPlayerCreatedLineBlock(blockCursor, blockCursor, action);
 								nextBlockTime = world.GetTime() + delay;
 							}
-						} else {
-							if (listener && this == world.GetLocalPlayer()) {
-								listener->LocalPlayerBuildError(BuildFailureReason::InvalidPosition);
-							}
+						}
+					} else {
+						if (listener && this == world.GetLocalPlayer()) {
+							listener->LocalPlayerBuildError(BuildFailureReason::InvalidPosition);
 						}
 					}
 				} else {
@@ -596,7 +589,7 @@ namespace spades {
 					IntVector3 blockCursor;
 					if ((weapInput.secondary || this->Painting) && map->IsValidBuildCoord(blockCursorIndentPos)) {
 						blockCursorIndentPos = result.hitBlock;
-						if (map->IsSolid(blockCursorIndentPos.x, blockCursorIndentPos.y, blockCursorIndentPos.z)) {
+						if (map->IsSolidWrapped(blockCursorIndentPos.x, blockCursorIndentPos.y, blockCursorIndentPos.z)) {
 							blockCursor = blockCursorIndentPos;
 						} else {
 							blockCursor = result.hitBlock + result.normal;
