@@ -784,7 +784,7 @@ namespace spades {
 						}
 						if (count == 1) {
 							fogCol.z = std::stoi(numString);
-							world->SetFogColor(fogCol);
+							net->SendFogColor(fogCol);
 							break;
 						}
 					}

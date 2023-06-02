@@ -205,9 +205,11 @@ namespace spades {
 			std::vector<IntVector3> TextureColors;
 			void SendSetFlySpeed();
 			void SendMapObject(int type, int state, Vector3 pos1 = Vector3(0, 0, 0), Vector3 pos2 = Vector3(0, 0, 0));
-			Vector3 localRespawnPos;
+			void SendFogColor(IntVector3);
+
 			void DoBuildCommands(std::string);
 			void CommandSetRespawn(std::string);
+			Vector3 localRespawnPos;
 			void CommandRespawn();
 			void CommandSwitchMode(std::string);
 			void CommandSetGameMode();

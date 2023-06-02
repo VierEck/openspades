@@ -2247,6 +2247,21 @@ namespace spades {
 			}
 		}
 
+		void NetClient::SendFogColor(spades::IntVector3 col) {
+			SPADES_MARK_FUNCTION();
+			NetPacketWriter wri(PacketTypeFogColour);
+			wri.Write((uint8_t)GetLocalPlayer().GetId());
+			wri.Write((uint8_t)col.x);
+			wri.Write((uint8_t)col.y);
+			wri.Write((uint8_t)col.z);
+			if (peer) {
+				enet_peer_send(peer, 0, wri.CreatePacket());
+			} else {
+				NetPacketReader read(wri.CreatePacket());
+				HandleGamePacket(read);
+			}
+		}
+
 		void NetClient::MapLoaded() {
 			SPADES_MARK_FUNCTION();
 
