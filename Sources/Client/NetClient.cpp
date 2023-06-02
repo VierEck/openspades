@@ -997,6 +997,11 @@ namespace spades {
 								if (savedPlayerTeam[type] != state) {
 									savedPlayerTeam[type] = state;
 								}
+
+								World::PlayerPersistent &pers = GetWorld()->GetPlayerPersistent(type);
+								char buf[32];
+								sprintf(buf, "%.02fx %.02fy %.02fz", pos.x, pos.y, pos.z);
+								pers.name = buf;
 								break;
 							}
 						}
