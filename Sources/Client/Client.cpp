@@ -690,12 +690,7 @@ namespace spades {
 			SPLog("World set.");
 
 			world->BuildMode = true;
-
-			std::string txtFile = map_file.substr(0, map_file.size() - 4);
-			txtFile += ".txt";
-			if (FileManager::FileExists(txtFile.c_str())) {
-				LoadMapTxt(txtFile);
-			}// else
+			
 			{
 				World::Team &t1 = world->GetTeam(0);
 				World::Team &t2 = world->GetTeam(1);
@@ -735,6 +730,13 @@ namespace spades {
 
 			net->localRespawnPos = {256, 256, 30};
 			net->switchModeTeam = 0;
+
+			std::string txtFile = map_file.substr(0, map_file.size() - 4);
+			txtFile += ".txt";
+			if (FileManager::FileExists(txtFile.c_str())) {
+				LoadMapTxt(txtFile);
+			}
+
 			SPLog("LocalEditor set");
 		}
 
@@ -749,16 +751,46 @@ namespace spades {
 
 			scriptedUI->LoadMapTxt(txt);
 
-			/*
-			std::string word;
-			for (char c : txt) {
-				if (!isspace(c)) {
-					word += c;
-					continue;
+			int find = txt.rfind("fog =");
+			if (find < 0) {
+				find = txt.rfind("fog=");
+			}
+			if (find >= 0) {
+				int endLine = txt.find('\n', find);
+
+				if (endLine > 0) {
+					std::string numString = "";
+					IntVector3 fogCol;
+					int count = 3;
+					for (char c : txt.substr(find, endLine - find)) {
+						if (isdigit(c)) {
+							numString += c;
+							continue;
+						}
+						if (numString.length() <= 0) {
+							continue;
+						}
+						if (count == 3) {
+							fogCol.x = std::stoi(numString);
+							numString = "";
+							count--;
+							continue;
+						}
+						if (count == 2) {
+							fogCol.y = std::stoi(numString);
+							numString = "";
+							count--;
+							continue;
+						}
+						if (count == 1) {
+							fogCol.z = std::stoi(numString);
+							world->SetFogColor(fogCol);
+							break;
+						}
+					}
 				}
-				if (word ==)
-				word.clear();
-			}*/
+			}
+
 			std::string note = "Map.txt loaded: " + txt_file;
 			ShowAlert(note, Client::AlertType::Notice);
 			SPLog("Map.txt loaded: %s", txt_file.c_str());

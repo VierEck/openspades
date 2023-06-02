@@ -90,7 +90,10 @@ namespace spades {
 
 		private void OnClose(spades::ui::UIElement @sender) { Close(); }
 		
-		private void OnSave(spades::ui::UIElement @sender) { requestSave(); }
+		private void OnSave(spades::ui::UIElement @sender) { 
+			requestSave(); 
+			requestLoad();
+		}
 		
 		private void OnLoad(spades::ui::UIElement @sender) { requestLoad(); }
 		
