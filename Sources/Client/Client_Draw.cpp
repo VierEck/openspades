@@ -684,6 +684,7 @@ namespace spades {
 			DrawBuildIcons();
 			DrawCursorPos();
 			DrawDragCursorPos();
+			DrawMapObjectPosition();
 		}
 
 		void Client::DrawBuildIcons() {
@@ -830,6 +831,74 @@ namespace spades {
 			renderer->SetColorAlphaPremultiplied(Vector4(0.f, 0.f, 0.f, 0.5f));
 			renderer->DrawImage(nullptr, AABB2(pos.x, pos.y, size.x, size.y));
 			font.DrawShadow(str, pos + Vector2(margin, margin), 0.8f, Vector4(1.f, 1.f, 1.f, 1.f), Vector4(0.f, 0.f, 0.f, 0.5f));
+		}
+
+		void Client::DrawMapObjectPosition() {
+			if (IGameMode::m_CTF == world->GetMode()->ModeType()) {
+				CTFGameMode &mode = dynamic_cast<CTFGameMode &>(world->GetMode().value());
+
+				for (int tId = 0; tId < 2; tId++) {
+					//draw base
+					Vector3 pos3d = mode.GetTeam(tId).basePos;
+
+					Vector3 posxyz;
+					if (ProjectAlt(pos3d, posxyz)) {
+						if (posxyz.z <= 0)
+							continue;
+						Vector2 pos = {posxyz.x, posxyz.y};
+						char buf[64];
+						sprintf(buf, "%.02fx %.02fy %.02fz", pos3d.x, pos3d.y, pos3d.z);
+
+						IFont &font = fontManager->GetGuiFont();
+						Vector2 size = font.Measure(buf);
+						pos.x -= size.x * .5f;
+						pos.y -= size.y;
+						font.DrawShadow(buf, pos, 1.f, MakeVector4(1, 1, 1, 1), MakeVector4(0, 0, 0, 0.5));
+					}
+
+					// draw flag
+					if (!mode.GetTeam(1 - tId).hasIntel) {
+						Vector3 pos3d = mode.GetTeam(tId).flagPos;
+
+						Vector3 posxyz;
+						if (ProjectAlt(pos3d, posxyz)) {
+							if (posxyz.z <= 0)
+								continue;
+							Vector2 pos = {posxyz.x, posxyz.y};
+							char buf[64];
+							sprintf(buf, "%.02fx %.02fy %.02fz", pos3d.x, pos3d.y, pos3d.z);
+
+							IFont &font = fontManager->GetGuiFont();
+							Vector2 size = font.Measure(buf);
+							pos.x -= size.x * .5f;
+							pos.y -= size.y;
+							font.DrawShadow(buf, pos, 1.f, MakeVector4(1, 1, 1, 1), MakeVector4(0, 0, 0, 0.5));
+						}
+					}
+				}
+			} else if (IGameMode::m_TC == world->GetMode()->ModeType()) {
+				TCGameMode &mode = dynamic_cast<TCGameMode &>(world->GetMode().value());
+				int cnt = mode.GetNumTerritories();
+
+				for (int tId = 0; tId < cnt; tId++) {
+					Vector3 pos3d = mode.GetTerritory(tId).pos;
+
+					Vector3 posxyz;
+					if (ProjectAlt(pos3d, posxyz)) {
+						if (posxyz.z <= 0)
+							continue;
+						Vector2 pos = {posxyz.x, posxyz.y};
+						char buf[64];
+						sprintf(buf, "%.02fx %.02fy %.02fz", pos3d.x, pos3d.y, pos3d.z);
+
+						IFont &font = fontManager->GetGuiFont();
+						Vector2 size = font.Measure(buf);
+						pos.x -= size.x * .5f;
+						pos.y -= size.y;
+						font.DrawShadow(buf, pos, 1.f, MakeVector4(1, 1, 1, 1), MakeVector4(0, 0, 0, 0.5));
+					}
+				}
+			}
 		}
 
 		void Client::DrawAlert() {

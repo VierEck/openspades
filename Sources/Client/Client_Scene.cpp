@@ -773,5 +773,17 @@ namespace spades {
 			Vector4 screenHomV = lastViewProjectionScreenMatrix * v;
 			return screenHomV.GetXYZ() / screenHomV.w;
 		}
+
+		//zerospades https://github.com/yvt/openspades/commit/63c38e4edf8189e25ed73a61dcffdedcbf9c8372
+		//produces only one projection
+		bool Client::ProjectAlt(const spades::Vector3& v, spades::Vector3& out) {
+			Vector4 screenHomV = lastViewProjectionScreenMatrix * v;
+			if (screenHomV.z <= 0.0F) {
+				screenHomV.w = 0.001F;
+				return false;
+			}
+			out = screenHomV.GetXYZ() / screenHomV.w;
+			return true;
+		}
 	} // namespace client
 } // namespace spades
