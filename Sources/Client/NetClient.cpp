@@ -2084,96 +2084,6 @@ namespace spades {
 			enet_peer_send(peer, 0, wri.CreatePacket());
 		}
 
-		void NetClient::DoBuildCommands(std::string text) {
-			if ((int)text.find("/r", 0) == 0) {
-				CommandSetRespawn(text);
-			}
-
-			if ((int)text.find("/k", 0) == 0) {
-				CommandRespawn();
-			}
-
-			if ((int)text.find("/s", 0) == 0) {
-				CommandSwitchMode(text);
-			}
-
-			if ((int)text.find("/g", 0) == 0) {
-				CommandSetGameMode();
-			}
-		}
-
-		void NetClient::CommandSetRespawn(std::string text) {
-			if (text.length() > 4) {
-				std::string numString;
-				int count = 3;
-				Vector3 pos;
-				for (char c : text) {
-					if (isdigit(c) || c == '.') {
-						numString += c;
-						continue;
-					}
-					if (numString.length() == 0) {
-						continue;
-					}
-					switch (count) {
-						case 3: {
-							pos.x = std::stof(numString);
-							numString.clear();
-							count--;
-						} break;
-						case 2: {
-							pos.y = std::stof(numString);
-							numString.clear();
-							count--;
-						} break;
-						case 1: {
-							pos.z = std::stof(numString);
-							if ((0 <= pos.x <= 511) && (0 <= pos.y <= 511) && (0 <= pos.z <= 63)) {
-								localRespawnPos = pos;
-							}
-						} return;
-					}
-				}
-			} else {
-				localRespawnPos = GetLocalPlayer().GetPosition();
-			}
-		}
-
-		void NetClient::CommandRespawn() {
-			GetLocalPlayer().SetPosition(localRespawnPos);
-		}
-
-		void NetClient::CommandSwitchMode(std::string text) {
-			if (text.length() > 3) {
-				if ((int)text.find("1") >= 0) {
-					switchModeTeam = 0;
-				} else if ((int)text.find("2") >= 0) {
-					switchModeTeam = 1;
-				}
-			} else {
-				if (GetLocalPlayer().GetTeamId() >= 2) {
-					GetLocalPlayer().SetTeam(switchModeTeam);
-				} else {
-					GetLocalPlayer().SetTeam(2);
-				}
-			}
-		}
-
-		void NetClient::CommandSetGameMode() {
-			GetWorld()->SwitchMode();
-			stmp::optional<IGameMode &> mode = GetWorld()->GetMode();
-			if (mode && IGameMode::m_TC == mode->ModeType()) {
-				if (GetLocalPlayer().TypeMapObject == Player::IntelTeam1 || GetLocalPlayer().TypeMapObject == Player::IntelTeam2) {
-					GetLocalPlayer().TypeMapObject = Player::TentTeam1;
-				}
-			}
-			if (mode && IGameMode::m_CTF == mode->ModeType()) {
-				if (GetLocalPlayer().TypeMapObject == Player::TentNeutral) {
-					GetLocalPlayer().TypeMapObject = Player::TentTeam1;
-				}
-			}
-		}
-
 		void NetClient::SendBlockVolume(spades::IntVector3 v1, spades::IntVector3 v2, int action, int secondaryAction) {
 			SPADES_MARK_FUNCTION();
 			NetPacketWriter wri(PacketTypeBlockVolume);
@@ -2264,6 +2174,96 @@ namespace spades {
 			} else {
 				NetPacketReader read(wri.CreatePacket());
 				HandleGamePacket(read);
+			}
+		}
+
+		void NetClient::DoBuildCommands(std::string text) {
+			if ((int)text.find("/r", 0) == 0) {
+				CommandSetRespawn(text);
+			}
+
+			if ((int)text.find("/k", 0) == 0) {
+				CommandRespawn();
+			}
+
+			if ((int)text.find("/s", 0) == 0) {
+				CommandSwitchMode(text);
+			}
+
+			if ((int)text.find("/g", 0) == 0) {
+				CommandSetGameMode();
+			}
+		}
+
+		void NetClient::CommandSetRespawn(std::string text) {
+			if (text.length() > 4) {
+				std::string numString;
+				int count = 3;
+				Vector3 pos;
+				for (char c : text) {
+					if (isdigit(c) || c == '.') {
+						numString += c;
+						continue;
+					}
+					if (numString.length() == 0) {
+						continue;
+					}
+					switch (count) {
+						case 3: {
+							pos.x = std::stof(numString);
+							numString.clear();
+							count--;
+						} break;
+						case 2: {
+							pos.y = std::stof(numString);
+							numString.clear();
+							count--;
+						} break;
+						case 1: {
+							pos.z = std::stof(numString);
+							if ((0 <= pos.x <= 511) && (0 <= pos.y <= 511) && (0 <= pos.z <= 63)) {
+								localRespawnPos = pos;
+							}
+						} return;
+					}
+				}
+			} else {
+				localRespawnPos = GetLocalPlayer().GetPosition();
+			}
+		}
+
+		void NetClient::CommandRespawn() {
+			GetLocalPlayer().SetPosition(localRespawnPos);
+		}
+
+		void NetClient::CommandSwitchMode(std::string text) {
+			if (text.length() > 3) {
+				if ((int)text.find("1") >= 0) {
+					switchModeTeam = 0;
+				} else if ((int)text.find("2") >= 0) {
+					switchModeTeam = 1;
+				}
+			} else {
+				if (GetLocalPlayer().GetTeamId() >= 2) {
+					GetLocalPlayer().SetTeam(switchModeTeam);
+				} else {
+					GetLocalPlayer().SetTeam(2);
+				}
+			}
+		}
+
+		void NetClient::CommandSetGameMode() {
+			GetWorld()->SwitchMode();
+			stmp::optional<IGameMode &> mode = GetWorld()->GetMode();
+			if (mode && IGameMode::m_TC == mode->ModeType()) {
+				if (GetLocalPlayer().TypeMapObject == Player::IntelTeam1 || GetLocalPlayer().TypeMapObject == Player::IntelTeam2) {
+					GetLocalPlayer().TypeMapObject = Player::TentTeam1;
+				}
+			}
+			if (mode && IGameMode::m_CTF == mode->ModeType()) {
+				if (GetLocalPlayer().TypeMapObject == Player::TentNeutral) {
+					GetLocalPlayer().TypeMapObject = Player::TentTeam1;
+				}
 			}
 		}
 
