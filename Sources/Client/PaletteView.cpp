@@ -142,6 +142,7 @@ namespace spades {
 			}
 
 			stream->Write(list);
+			stream->Flush();
 
 			SPLog("Palette List saved.");
 		}
@@ -265,6 +266,7 @@ namespace spades {
 			}
 
 			stream->Write(page);
+			stream->Flush();
 
 			UpdatePaletteWindow();
 

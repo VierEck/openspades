@@ -803,6 +803,7 @@ namespace spades {
 			std::unique_ptr<IStream> stream(FileManager::OpenForWriting(txt_file.c_str()));
 
 			stream->Write(txt);
+			stream->Flush();
 
 			std::string note = "Map.txt saved: " + txt_file;
 			ShowAlert(note, Client::AlertType::Notice);
