@@ -59,7 +59,7 @@ DEFINE_SPADES_SETTING(cg_keyReloadWeapon, "r");
 DEFINE_SPADES_SETTING(cg_keyFlashlight, "f");
 DEFINE_SPADES_SETTING(cg_keyLastTool, "");
 
-
+SPADES_SETTING(cg_MaxBuildDistance);
 DEFINE_SPADES_SETTING(cg_MapShotBuildMode, "1");
 DEFINE_SPADES_SETTING(cg_keyMapTxt, "o");
 DEFINE_SPADES_SETTING(cg_keyEditColor, "g");
@@ -558,7 +558,7 @@ namespace spades {
 								scaleBrush = down;
 							}
 						} else if (CheckKey(cg_keyScaleBuildDistance, name) && down) {
-							p.BuildFar = !p.BuildFar;
+							p.BuildMax = !p.BuildMax;
 						}
 						if (down) {
 							bool rev = (int)cg_switchToolByWheel > 0;
@@ -574,7 +574,7 @@ namespace spades {
 								if (scaleBrush && p.BrushSize < 50000) {
 									p.BrushSize += 1;
 								} else {
-									if (p.BuildDistance < 1088) {
+									if (p.BuildDistance < (float)cg_MaxBuildDistance && p.BuildDistance < 1088) {
 										p.BuildDistance += 1.0f;
 									}
 								}

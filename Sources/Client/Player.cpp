@@ -37,6 +37,7 @@
 #include "TCGameMode.h"
 
 DEFINE_SPADES_SETTING(cg_BuildDelayInSec, "0.2");
+DEFINE_SPADES_SETTING(cg_MaxBuildDistance, "512");
 
 namespace spades {
 	namespace client {
@@ -99,7 +100,7 @@ namespace spades {
 			Brushing = false;
 			BrushSize = 5;
 
-			BuildFar = false;
+			BuildMax = false;
 			BuildDistance = 3.0f;
 
 			EditMapObject = false;
@@ -538,8 +539,8 @@ namespace spades {
 				SPAssert(map);
 
 				float BuildDist = BuildDistance;
-				if (BuildFar) {
-					BuildDist = 1088.0f;
+				if (BuildMax || BuildDist > (float)cg_MaxBuildDistance) {
+					BuildDist = (float)cg_MaxBuildDistance;
 				}
 
 				if (this->GetTeamId() >= 2 && world.BuildMode) {
@@ -594,9 +595,6 @@ namespace spades {
 					}
 				}
 				if (this->GetTeamId() >= 2 && world.BuildMode) {
-					/*if ((weapInput.secondary || this->Painting) && BuildFar) {
-						result.normal = {0,0,0};
-					}*/
 					IntVector3 blockCursor;
 					if ((weapInput.secondary || this->Painting || (!this->MovePktSaved && this->MoveVolume)) && map->IsValidBuildCoord(blockCursorIndentPos)) {
 						blockCursorIndentPos = result.hitBlock;

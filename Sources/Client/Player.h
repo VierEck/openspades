@@ -169,7 +169,7 @@ namespace spades {
 			int BrushSize;
 
 			float BuildDistance;
-			bool BuildFar;
+			bool BuildMax;
 
 			bool EditMapObject;
 			int TypeMapObject;
