@@ -341,7 +341,7 @@ namespace spades {
 
 			/** Project the specified world-space position to a screen space. */
 			Vector3 Project(Vector3);
-			bool Client::ProjectAlt(const Vector3&, Vector3&);
+			bool ProjectAlt(const Vector3&, Vector3&);
 
 			/** Recalculate `lastViewProjectionScreenMatrix` based on the current value of
 			 * `lastSceneDef`. */

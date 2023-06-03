@@ -725,7 +725,7 @@ namespace spades {
 			p->SetTool(Player::ToolBlock);
 			world->SetPlayer(0, std::move(p));
 			World::PlayerPersistent &pers = world->GetPlayerPersistent(0);
-			pers.name = cg_playerName;
+			pers.name = (std::string)cg_playerName;
 			pers.kills = 0;
 
 			net->localRespawnPos = {256, 256, 30};

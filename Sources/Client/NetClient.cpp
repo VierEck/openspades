@@ -49,9 +49,9 @@
 
 DEFINE_SPADES_SETTING(cg_unicode, "1");
 
-SPADES_SETTING(cg_FlySpeedWalk, "2");
-SPADES_SETTING(cg_FlySpeedSprint, "10");
-SPADES_SETTING(cg_FlySpeedSneak, "0.5");
+SPADES_SETTING(cg_FlySpeedWalk);
+SPADES_SETTING(cg_FlySpeedSprint);
+SPADES_SETTING(cg_FlySpeedSneak);
 
 namespace spades {
 	namespace client {
@@ -2126,13 +2126,13 @@ namespace spades {
 			NetPacketWriter wri(PacketTypeSetFlySpeed);
 			wri.Write((uint8_t)GetLocalPlayer().GetId());
 
-			float sendByte = cg_FlySpeedWalk;
+			float sendByte = (float)cg_FlySpeedWalk;
 			wri.Write((uint8_t)(int)(sendByte * 10.f));
 
-			sendByte = cg_FlySpeedSprint;
+			sendByte = (float)cg_FlySpeedSprint;
 			wri.Write((uint8_t)(int)(sendByte * 10.f));
 
-			sendByte = cg_FlySpeedSneak;
+			sendByte = (float)cg_FlySpeedSneak;
 			wri.Write((uint8_t)(int)(sendByte * 10.f));
 
 			if (peer) {
