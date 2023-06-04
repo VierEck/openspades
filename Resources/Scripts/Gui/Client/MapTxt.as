@@ -104,6 +104,7 @@ namespace spades {
 				Close();
 			} else if (key == "S" and (Manager.IsControlPressed or Manager.IsMetaPressed)) {
 				requestSave();
+				requestLoad();
 			} else if (key == "L" and (Manager.IsControlPressed or Manager.IsMetaPressed)) {
 				requestLoad();
 			} else if (key == "G" and (Manager.IsControlPressed or Manager.IsMetaPressed) and genButton.Enable) {
