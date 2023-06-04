@@ -2126,9 +2126,9 @@ namespace spades {
 			SPADES_MARK_FUNCTION();
 			NetPacketWriter wri(PacketTypeFogColour);
 			wri.Write((uint8_t)GetLocalPlayer().GetId());
-			wri.Write((uint8_t)col.x);
-			wri.Write((uint8_t)col.y);
 			wri.Write((uint8_t)col.z);
+			wri.Write((uint8_t)col.y);
+			wri.Write((uint8_t)col.x);
 			if (peer) {
 				enet_peer_send(peer, 0, wri.CreatePacket());
 			} else {
