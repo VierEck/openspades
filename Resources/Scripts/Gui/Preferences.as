@@ -62,6 +62,8 @@ namespace spades {
                    _Tr("Preferences", "Game Options"));
             AddTab(ControlOptionsPanel(Manager, options, fontManager),
                    _Tr("Preferences", "Controls"));
+			AddTab(MapEditorOptionsPanel(Manager, options, fontManager),
+                   _Tr("Preferences", "MapEditor"));
             AddTab(MiscOptionsPanel(Manager, options, fontManager), _Tr("Preferences", "Misc"));
 
             {
@@ -640,17 +642,6 @@ namespace spades {
                 _Tr("Preferences", "Player Name"), "cg_playerName", not options.GameActive);
             nameField.MaxLength = 15;
             nameField.DenyNonAscii = true;
-			
-			layouter.AddHeading(_Tr("Preferences", "BuildMode"));
-			layouter.AddSliderField(_Tr("Preferences", "Flying Speed Walk"),
-                                    "cg_FlySpeedWalk", 0.1, 20.0, 0.1,
-                                    ConfigNumberFormatter(1, "x"));
-			layouter.AddSliderField(_Tr("Preferences", "Flying Speed Sprint"),
-                                    "cg_FlySpeedSprint", 0.1, 20.0, 0.1,
-                                    ConfigNumberFormatter(1, "x"));
-			layouter.AddSliderField(_Tr("Preferences", "Flying Speed Sneak"),
-                                    "cg_FlySpeedSneak", 0.1, 20.0, 0.1,
-                                    ConfigNumberFormatter(1, "x"));
 
             layouter.AddHeading(_Tr("Preferences", "Effects"));
             layouter.AddToggleField(_Tr("Preferences", "Blood"), "cg_blood");
@@ -694,17 +685,6 @@ namespace spades {
             super(manager);
 
             StandardPreferenceLayouter layouter(this, fontManager);
-			layouter.AddHeading(_Tr("Preferences", "BuildMode"));
-			layouter.AddControl(_Tr("Preferences", "Paint"), "cg_keyToolPaint");
-			layouter.AddControl(_Tr("Preferences", "Brush"), "cg_keyToolBrush");
-			layouter.AddControl(_Tr("Preferences", "Color Palette Setting"), "cg_keyEditColor");
-			layouter.AddControl(_Tr("Preferences", "Toggle Build Distance"), "cg_keyScaleBuildDistance");
-			layouter.AddControl(_Tr("Preferences", "Equip Single Block"), "cg_keyToolSingleBlock");
-			layouter.AddControl(_Tr("Preferences", "Equip BlockLine"), "cg_keyToolBlockLine");
-			layouter.AddControl(_Tr("Preferences", "Equip Box"), "cg_keyToolBox");
-			layouter.AddControl(_Tr("Preferences", "Equip Ball"), "cg_keyToolBall");
-			layouter.AddControl(_Tr("Preferences", "Equip Cylinder"), "cg_keyToolCylinder");
-			
             layouter.AddHeading(_Tr("Preferences", "Weapons/Tools"));
             layouter.AddControl(_Tr("Preferences", "Attack"), "cg_keyAttack");
             layouter.AddControl(_Tr("Preferences", "Alt. Attack"), "cg_keyAltAttack");
@@ -750,6 +730,38 @@ namespace spades {
             layouter.AddControl(_Tr("Preferences", "Save Map or Mapshot"), "cg_keySaveMap");
             layouter.AddControl(_Tr("Preferences", "Save Sceneshot"), "cg_keySceneshot");
             layouter.AddControl(_Tr("Preferences", "Save Screenshot"), "cg_keyScreenshot");
+
+            layouter.FinishLayout();
+        }
+    }
+	
+	class MapEditorOptionsPanel : spades::ui::UIElement {
+        MapEditorOptionsPanel(spades::ui::UIManager @manager, PreferenceViewOptions @options,
+                            FontManager @fontManager) {
+            super(manager);
+
+            StandardPreferenceLayouter layouter(this, fontManager);
+			layouter.AddHeading(_Tr("Preferences", "Equip MapEditor Controls"));
+			layouter.AddControl(_Tr("Preferences", "Equip Paint"), "cg_keyToolPaint");
+			layouter.AddControl(_Tr("Preferences", "Equip Brush"), "cg_keyToolBrush");
+			layouter.AddControl(_Tr("Preferences", "Open Color Palette Setting"), "cg_keyEditColor");
+			layouter.AddControl(_Tr("Preferences", "Toggle Build Distance"), "cg_keyScaleBuildDistance");
+			layouter.AddControl(_Tr("Preferences", "Equip Single Block"), "cg_keyToolSingleBlock");
+			layouter.AddControl(_Tr("Preferences", "Equip BlockLine"), "cg_keyToolBlockLine");
+			layouter.AddControl(_Tr("Preferences", "Equip Box"), "cg_keyToolBox");
+			layouter.AddControl(_Tr("Preferences", "Equip Ball"), "cg_keyToolBall");
+			layouter.AddControl(_Tr("Preferences", "Equip Cylinder"), "cg_keyToolCylinder");
+			
+			layouter.AddHeading(_Tr("Preferences", "MapEditor Fly Speed"));
+			layouter.AddSliderField(_Tr("Preferences", "Flying Speed Walk"),
+                                    "cg_FlySpeedWalk", 0.1, 20.0, 0.1,
+                                    ConfigNumberFormatter(1, "x"));
+			layouter.AddSliderField(_Tr("Preferences", "Flying Speed Sprint"),
+                                    "cg_FlySpeedSprint", 0.1, 20.0, 0.1,
+                                    ConfigNumberFormatter(1, "x"));
+			layouter.AddSliderField(_Tr("Preferences", "Flying Speed Sneak"),
+                                    "cg_FlySpeedSneak", 0.1, 20.0, 0.1,
+                                    ConfigNumberFormatter(1, "x"));
 
             layouter.FinishLayout();
         }
