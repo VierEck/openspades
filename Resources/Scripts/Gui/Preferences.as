@@ -744,7 +744,7 @@ namespace spades {
 			layouter.AddHeading(_Tr("Preferences", "Equip MapEditor Controls"));
 			layouter.AddControl(_Tr("Preferences", "Equip Paint"), "cg_keyToolPaint");
 			layouter.AddControl(_Tr("Preferences", "Equip Brush"), "cg_keyToolBrush");
-			layouter.AddControl(_Tr("Preferences", "Equip Move/Duplicate"), "cg_keyToolMove");
+			layouter.AddControl(_Tr("Preferences", "Equip Copy/Move"), "cg_keyToolCopy");
 			layouter.AddControl(_Tr("Preferences", "Equip MapObject"), "cg_keyToolMapObject");
 			layouter.AddControl(_Tr("Preferences", "Open Color Palette Setting"), "cg_keyEditColor");
 			layouter.AddControl(_Tr("Preferences", "Open map.TXT Editor"), "cg_keyMapTxt");
