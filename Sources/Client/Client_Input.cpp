@@ -61,7 +61,7 @@ DEFINE_SPADES_SETTING(cg_keyLastTool, "");
 
 SPADES_SETTING(cg_MaxBuildDistance);
 DEFINE_SPADES_SETTING(cg_MapShotBuildMode, "1");
-DEFINE_SPADES_SETTING(cg_keyMapTxt, "o");
+DEFINE_SPADES_SETTING(cg_keyMapTxt, "j");
 DEFINE_SPADES_SETTING(cg_keyEditColor, "g");
 DEFINE_SPADES_SETTING(cg_keyToolPaint, "f");
 DEFINE_SPADES_SETTING(cg_keyToolBrush, "r");

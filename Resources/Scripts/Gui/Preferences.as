@@ -744,13 +744,24 @@ namespace spades {
 			layouter.AddHeading(_Tr("Preferences", "Equip MapEditor Controls"));
 			layouter.AddControl(_Tr("Preferences", "Equip Paint"), "cg_keyToolPaint");
 			layouter.AddControl(_Tr("Preferences", "Equip Brush"), "cg_keyToolBrush");
+			layouter.AddControl(_Tr("Preferences", "Equip Move/Duplicate"), "cg_keyToolMove");
+			layouter.AddControl(_Tr("Preferences", "Equip MapObject"), "cg_keyToolMapObject");
 			layouter.AddControl(_Tr("Preferences", "Open Color Palette Setting"), "cg_keyEditColor");
+			layouter.AddControl(_Tr("Preferences", "Open map.TXT Editor"), "cg_keyMapTxt");
 			layouter.AddControl(_Tr("Preferences", "Toggle Build Distance"), "cg_keyScaleBuildDistance");
 			layouter.AddControl(_Tr("Preferences", "Equip Single Block"), "cg_keyToolSingleBlock");
 			layouter.AddControl(_Tr("Preferences", "Equip BlockLine"), "cg_keyToolBlockLine");
 			layouter.AddControl(_Tr("Preferences", "Equip Box"), "cg_keyToolBox");
 			layouter.AddControl(_Tr("Preferences", "Equip Ball"), "cg_keyToolBall");
 			layouter.AddControl(_Tr("Preferences", "Equip Cylinder"), "cg_keyToolCylinder");
+			
+			layouter.AddHeading(_Tr("Preferences", "MapEditor Build Options"));
+			layouter.AddSliderField(_Tr("Preferences", "Build Delay"),
+                                    "cg_BuildDelayInSec", 0.1, 1.0, 0.01,
+                                    ConfigNumberFormatter(1, "s"));
+			layouter.AddSliderField(_Tr("Preferences", "Max Build Distance"),
+                                    "cg_MaxBuildDistance", 3, 1088, 1,
+                                    ConfigNumberFormatter(1, "s"));
 			
 			layouter.AddHeading(_Tr("Preferences", "MapEditor Fly Speed"));
 			layouter.AddSliderField(_Tr("Preferences", "Flying Speed Walk"),
