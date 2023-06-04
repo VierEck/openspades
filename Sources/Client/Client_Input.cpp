@@ -65,7 +65,7 @@ DEFINE_SPADES_SETTING(cg_keyMapTxt, "j");
 DEFINE_SPADES_SETTING(cg_keyEditColor, "g");
 DEFINE_SPADES_SETTING(cg_keyToolPaint, "f");
 DEFINE_SPADES_SETTING(cg_keyToolBrush, "r");
-DEFINE_SPADES_SETTING(cg_keyToolMove, "c");
+DEFINE_SPADES_SETTING(cg_keyToolCopy, "c");
 DEFINE_SPADES_SETTING(cg_keyToolMapObject, "x");
 DEFINE_SPADES_SETTING(cg_keyScaleBuildDistance, "MiddleMouseButton");
 DEFINE_SPADES_SETTING(cg_keyToolSingleBlock, "1");
@@ -389,7 +389,7 @@ namespace spades {
 				if (world->GetLocalPlayer()) {
 					Player &p = world->GetLocalPlayer().value();
 
-					if (p.IsAlive() && p.GetTool() == Player::ToolBlock && down && !p.EditMapObject) {
+					if (p.IsAlive() && p.GetTool() == Player::ToolBlock && down && !p.EditMapObject && !p.CopyVolume && !p.MoveVolume) {
 						if (paletteView->KeyInput(name)) {
 							return;
 						}
@@ -461,8 +461,6 @@ namespace spades {
 							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
 							if (p.Brushing)
 								p.Brushing = false;
-							if (p.MoveVolume)
-								p.MoveVolume = false;
 						} else if (CheckKey(cg_keyToolBlockLine, name) && down) {
 							p.SetVolumeType(Player::ToolBlockLine);
 							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
@@ -487,35 +485,65 @@ namespace spades {
 								p.Brushing = false;
 							if (p.Painting)
 								p.Painting = false;
-							if (p.MoveVolume)
+							if (p.CopyVolume) {
+								p.CopyVolume = false;
+								p.TextureColors.clear();
+							}
+							if (p.MoveVolume) {
 								p.MoveVolume = false;
+								p.TextureColors.clear();
+							}
 							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
 							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
-						} else if ((name == "Right") && down && p.EditMapObject) {
-							if (p.TypeMapObject + Player::TentTeam1 >= Player::MAPOBJECTIDMAX) {
-								return;
-							}
-							p.TypeMapObject++;
-							stmp::optional<IGameMode &> mode = GetWorld()->GetMode();
-							if (mode->ModeType() == IGameMode::m_CTF && p.TypeMapObject == Player::TentNeutral) {
+						} else if ((name == "Right") && down) {
+							if (p.EditMapObject) {
+								if (p.TypeMapObject + Player::TentTeam1 >= Player::MAPOBJECTIDMAX) {
+									return;
+								}
 								p.TypeMapObject++;
-							}
-							if (mode->ModeType() == IGameMode::m_TC && p.TypeMapObject == Player::IntelTeam1) {
-								p.TypeMapObject += Player::IntelTeam2 - Player::IntelTeam1 + 1;
+								stmp::optional<IGameMode &> mode = GetWorld()->GetMode();
+								if (mode->ModeType() == IGameMode::m_CTF && p.TypeMapObject == Player::TentNeutral) {
+									p.TypeMapObject++;
+								}
+								if (mode->ModeType() == IGameMode::m_TC && p.TypeMapObject == Player::IntelTeam1) {
+									p.TypeMapObject += Player::IntelTeam2 - Player::IntelTeam1 + 1;
+								}
+							} else if (p.CopyVolume) {
+								p.CopyVolume = false;
+								p.MoveVolume = true;
+								p.TextureColors.clear();
+							} else if (p.MoveVolume) {
+								p.MoveVolume = false;
+								p.CopyVolume = true;
+								p.TextureColors.clear();
+							} else {
+								return;
 							}
 							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
 							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
-						} else if ((name == "Left") && down && p.EditMapObject) {
-							if (p.TypeMapObject - Player::TentTeam1 <= 0) {
-								return;
-							}
-							p.TypeMapObject--;
-							stmp::optional<IGameMode &> mode = GetWorld()->GetMode();
-							if (mode->ModeType() == IGameMode::m_CTF && p.TypeMapObject == Player::TentNeutral) {
+						} else if ((name == "Left") && down) {
+							if (p.EditMapObject) {
+								if (p.TypeMapObject - Player::TentTeam1 <= 0) {
+									return;
+								}	
 								p.TypeMapObject--;
-							}
-							if (mode->ModeType() == IGameMode::m_TC && p.TypeMapObject == Player::IntelTeam2) {
-								p.TypeMapObject -= Player::IntelTeam2 - Player::IntelTeam1 + 1;
+								stmp::optional<IGameMode &> mode = GetWorld()->GetMode();
+								if (mode->ModeType() == IGameMode::m_CTF && p.TypeMapObject == Player::TentNeutral) {
+									p.TypeMapObject--;
+								}
+								if (mode->ModeType() == IGameMode::m_TC && p.TypeMapObject == Player::IntelTeam2) {
+									p.TypeMapObject -= Player::IntelTeam2 - Player::IntelTeam1 + 1;
+								}
+							} else if (p.CopyVolume) {
+								p.CopyVolume = false;
+								p.MoveVolume = true;
+								p.TextureColors.clear();
+							} else if (p.MoveVolume) {
+								p.MoveVolume = false;
+								p.CopyVolume = true;
+								p.TextureColors.clear();
+							} else {
+								return;
 							}
 							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
 							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
@@ -523,12 +551,25 @@ namespace spades {
 							p.Painting = !p.Painting;
 							if (p.EditMapObject)
 								p.EditMapObject = false;
-							if (p.MoveVolume)
+							if (p.CopyVolume) {
+								p.CopyVolume = false;
+								p.TextureColors.clear();
+							}
+							if (p.MoveVolume) {
 								p.MoveVolume = false;
+								p.TextureColors.clear();
+							}
 							Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
 							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
-						} else if (CheckKey(cg_keyToolMove, name) && down) {
-							p.MoveVolume = !p.MoveVolume;
+						} else if (CheckKey(cg_keyToolCopy, name) && down) {
+							if (p.CopyVolume || p.MoveVolume) {
+								if (p.MoveVolume)
+									p.TextureColors.clear();
+								p.CopyVolume = false;
+								p.MoveVolume = false;
+							} else {
+								p.CopyVolume = true;
+							}
 							if (p.EditMapObject)
 								p.EditMapObject = false;
 							if (p.Painting)
@@ -549,8 +590,14 @@ namespace spades {
 								p.Brushing = !p.Brushing;
 								if (p.EditMapObject)
 									p.EditMapObject = false;
-								if (p.MoveVolume)
+								if (p.CopyVolume) {
+									p.CopyVolume = false;
+									p.TextureColors.clear();
+								}
+								if (p.MoveVolume) {
 									p.MoveVolume = false;
+									p.TextureColors.clear();
+								}
 								Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
 								audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
 							}

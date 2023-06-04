@@ -106,8 +106,8 @@ namespace spades {
 			EditMapObject = false;
 			TypeMapObject = Player::TentTeam1;
 
+			CopyVolume = false;
 			MoveVolume = false;
-			MovePktSaved = false;
 
 			volumetype = ToolBlockSingle;
 		}
@@ -203,7 +203,7 @@ namespace spades {
 					IntVector3 blockCursor;
 					IntVector3 indent = GetBlockCursorIndentPos();
 					Handle<GameMap> map = GetWorld().GetMap();
-					if ((newInput.secondary != weapInput.secondary || this->Painting || (!this->MovePktSaved && this->MoveVolume)) && map->IsValidBuildCoord(indent)) {
+					if ((newInput.secondary != weapInput.secondary || this->Painting || ((this->TextureColors.size() == 0) && (this->CopyVolume || this->MoveVolume))) && map->IsValidBuildCoord(indent)) {
 						if (map->IsSolidWrapped(indent.x, indent.y, indent.z)) {
 							blockCursor = indent;
 						} else {
@@ -216,11 +216,11 @@ namespace spades {
 					int action = Build;
 					if (this->Painting) {
 						action = Paint;
-					} else if (this->MoveVolume) {
-						action = Move;
+					} else if (this->CopyVolume || this->MoveVolume) {
+						action = TextureBuild;
 					} else if (newInput.secondary != weapInput.secondary || (newInput.secondary && !newInput.primary)) {
 						action = Destroy;
-					} 
+					}
 
 					if (volumetype == ToolCylinderX || volumetype == ToolCylinderY || volumetype == ToolCylinderZ) {
 						Vector3 ori = orientation;
@@ -456,6 +456,7 @@ namespace spades {
 			blockCursorDragging = false;
 			WeaponInput inp;
 			SetWeaponInput(inp);
+			TextureColors.clear();
 		}
 
 		void Player::SetHeldBlockColor(spades::IntVector3 col) { blockColor = col; }
@@ -596,8 +597,8 @@ namespace spades {
 				}
 				if (this->GetTeamId() >= 2 && world.BuildMode) {
 					IntVector3 blockCursor;
-					if ((weapInput.secondary || this->Painting || (!this->MovePktSaved && this->MoveVolume)) && map->IsValidBuildCoord(blockCursorIndentPos)) {
-						blockCursorIndentPos = result.hitBlock;
+					blockCursorIndentPos = result.hitBlock;
+					if ((weapInput.secondary || this->Painting || ((this->TextureColors.size() == 0) && (this->CopyVolume || this->MoveVolume))) && map->IsValidBuildCoord(blockCursorIndentPos)) {
 						if (map->IsSolidWrapped(blockCursorIndentPos.x, blockCursorIndentPos.y, blockCursorIndentPos.z)) {
 							blockCursor = blockCursorIndentPos;
 						} else {

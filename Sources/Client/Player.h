@@ -62,7 +62,7 @@ namespace spades {
 		public:
 			enum ToolType { ToolSpade = 0, ToolBlock, ToolWeapon, ToolGrenade };
 			enum VolumeType { ToolBlockSingle = 0, ToolBlockLine, ToolBox, ToolBall, ToolCylinderX, ToolCylinderY, ToolCylinderZ, VOLUMETYPEMAX };
-			enum BuildType { Destroy = 0, Build, Paint, TextureBuild, TexturePaint, Move, BUILDTYPEMAX};
+			enum BuildType { Destroy = 0, Build, Paint, TextureBuild, TexturePaint, BUILDTYPEMAX};
 			enum MapObjectId { TentTeam1 = 1, TentTeam2, TentNeutral, IntelTeam1, IntelTeam2, SpawnTeam1, SpawnTeam2, MAPOBJECTIDMAX};
 			struct HitBoxes {
 				OBB3 torso;
@@ -174,9 +174,10 @@ namespace spades {
 			bool EditMapObject;
 			int TypeMapObject;
 
+			bool CopyVolume;
 			bool MoveVolume;
-			bool MovePktSaved;
-			std::tuple<IntVector3, IntVector3, int, int, IntVector3> MovePkt;
+			std::tuple<IntVector3, IntVector3, int, int> CopyVolumePkt;
+			std::vector<int> TextureColors;
 
 			float walkFlySpeed;
 			float sprintFlySpeed;

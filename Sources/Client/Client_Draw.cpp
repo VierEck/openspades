@@ -755,6 +755,11 @@ namespace spades {
 				renderer->DrawImage(imgMove, MakeVector2(iconX, iconY + imgTool->GetHeight()));
 				return;
 			}
+			if (p.CopyVolume) {
+				Handle<IImage> imgMove = renderer->RegisterImage("Gfx/BuildMode/Copy.png");
+				renderer->DrawImage(imgMove, MakeVector2(iconX, iconY + imgTool->GetHeight()));
+				return;
+			}
 
 			if (p.Brushing) {
 				Handle<IImage> imgBrush = renderer->RegisterImage("Gfx/BuildMode/Brush.png");

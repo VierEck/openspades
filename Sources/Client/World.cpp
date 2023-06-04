@@ -612,6 +612,50 @@ namespace spades {
 			return ret;
 		}
 
+		std::vector<int> World::ColorVolume(spades::IntVector3 v1, spades::IntVector3 v2, int volume) {
+			SPADES_MARK_FUNCTION_DEBUG();
+			std::vector<int> ret;
+
+			std::vector<IntVector3> cells;
+			switch (volume) {
+				case Player::ToolBlockSingle:
+					cells.push_back(v1);
+					break;
+				case Player::ToolBlockLine:
+					cells = CubeLine(v1, v2, 1088);
+					break;
+				case Player::ToolBox:
+					cells = CubeBox(v1, v2);
+					break;
+				case Player::ToolBall:
+					cells = CubeBall(v1, v2);
+					break;
+				case Player::ToolCylinderX:
+				case Player::ToolCylinderY:
+				case Player::ToolCylinderZ:
+					cells = CubeCylinder(v1, v2, volume);
+					break;
+				default:
+					return ret;
+			}
+
+			for (auto c : cells) {
+				if (!map->IsValidBuildCoord(c))
+					continue;
+				if (map->IsSolid(c.x, c.y, c.z)) {
+					uint32_t col = map->GetColor(c.x, c.y, c.z);
+					IntVector3 colV = {(uint8_t)col, (uint8_t)(col >> 8), (uint8_t)(col >> 16)};
+					ret.push_back(1);
+					ret.push_back(colV.x);
+					ret.push_back(colV.y);
+					ret.push_back(colV.z);
+				} else {
+					ret.push_back(0);
+				}
+			}
+			return ret;
+		}
+
 		World::WeaponRayCastResult World::WeaponRayCast(spades::Vector3 startPos,
 		                                                spades::Vector3 dir,
 		                                                stmp::optional<int> excludePlayerId) {

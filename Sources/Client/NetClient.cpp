@@ -1631,12 +1631,13 @@ namespace spades {
 						} break;
 						case Player::TextureBuild: {
 							IntVector3 col;
-							int rgb = 3;
 							for (size_t i = 0; i < cells.size(); i++) {
-								col.x = reader.ReadByte();
-								col.y = reader.ReadByte();
-								col.z = reader.ReadByte();
-								GetWorld()->CreateBlock(cells[i], col);
+								if (reader.ReadByte()) {
+									col.x = reader.ReadByte();
+									col.y = reader.ReadByte();
+									col.z = reader.ReadByte();
+									GetWorld()->CreateBlock(cells[i], col);
+								}
 							}
 							if (p) {
 								client->PlayerCreatedBlock(*p);
@@ -1659,35 +1660,16 @@ namespace spades {
 						} break;*/
 						case Player::TexturePaint: {
 							IntVector3 col;
-							int rgb = 3;
 							for (size_t i = 0; i < cells.size(); i++) {
-								col.x = reader.ReadByte();
-								col.y = reader.ReadByte();
-								col.z = reader.ReadByte();
-								if (GetWorld()->GetMap()->IsSolid(cells[i].x, cells[i].y, cells[i].z)) {
-									GetWorld()->CreateBlock(cells[i], col);
-								}
-							}
-							if (p) {
-								client->PlayerCreatedBlock(*p);
-							}
-						} break;
-						case Player::Move: {
-							IntVector3 move;
-							move.x = reader.ReadShort();
-							move.y = reader.ReadShort();
-							move.z = reader.ReadShort();
-							GetWorld()->DestroyBlock(cells);
-							for (size_t i = 0; i < cells.size(); i++) {
-								if (GetWorld()->GetMap()->IsSolid(cells[i].x, cells[i].y, cells[i].z)) {
-									uint32_t col = GetWorld()->GetMap()->GetColorWrapped(cells[i].x, cells[i].y, cells[i].z);
-									IntVector3 colV;
-									colV.x = (uint8_t)(col);
-									colV.y = (uint8_t)(col >> 8);
-									colV.z = (uint8_t)(col >> 16);
-									cells[i] += move - pos1;
-									if (GetWorld()->GetMap()->IsValidBuildCoord(cells[i]))
-										GetWorld()->CreateBlock(cells[i], colV);
+								if (!GetWorld()->GetMap()->IsValidBuildCoord(cells[i]))
+									continue;
+								if (reader.ReadByte()) {
+									col.x = reader.ReadByte();
+									col.y = reader.ReadByte();
+									col.z = reader.ReadByte();
+									if (GetWorld()->GetMap()->IsSolid(cells[i].x, cells[i].y, cells[i].z)) {
+										GetWorld()->CreateBlock(cells[i], col);
+									}
 								}
 							}
 							if (p) {
@@ -2081,18 +2063,12 @@ namespace spades {
 			wri.Write((uint16_t)v2.z);
 
 			if (secondaryAction == Player::TexturePaint || secondaryAction == Player::TextureBuild) {
-				for (auto col : TextureColors) {
-					wri.Write((uint8_t)col.x);
-					wri.Write((uint8_t)col.y);
-					wri.Write((uint8_t)col.z);
+				for (int i : GetLocalPlayer().TextureColors) {
+					wri.Write((uint8_t)i);
 				}
-			}
-
-			IntVector3 move = std::get<4>(GetLocalPlayer().MovePkt);
-			if (secondaryAction == Player::Move) {
-				wri.Write((uint16_t)move.x);
-				wri.Write((uint16_t)move.y);
-				wri.Write((uint16_t)move.z);
+				if (GetLocalPlayer().MoveVolume && secondaryAction == Player::TextureBuild) {
+					GetLocalPlayer().TextureColors.clear();
+				}
 			}
 			
 			if (peer) {

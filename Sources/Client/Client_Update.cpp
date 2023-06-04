@@ -1433,15 +1433,17 @@ namespace spades {
 						type = tc.GetNumTerritories();
 					}
 					net->SendMapObject(type, state, pos1, pos2);
-				} else if (secondaryaction == Player::Move) {
-					if (!p->MovePktSaved) {
-						p->MovePkt = std::make_tuple(v1, v2, p->GetVolumeType(), secondaryaction, IntVector3(0, 0, 0));
-						p->MovePktSaved = true;
-					} else {
-						std::get<4>(p->MovePkt) = v1;
-						net->SendBlockVolume(std::get<0>(p->MovePkt), std::get<1>(p->MovePkt), std::get<2>(p->MovePkt), std::get<3>(p->MovePkt));
-						p->MovePktSaved = false;
+				} else if (p->CopyVolume || p->MoveVolume) {
+					if (p->TextureColors.size() == 0) {
+						p->CopyVolumePkt = std::make_tuple(v1, v2, p->GetVolumeType(), Player::TextureBuild);
+						p->TextureColors = world->ColorVolume(v1, v2, p->GetVolumeType());
+						return;
 					}
+					if (p->MoveVolume) {
+						net->SendBlockVolume(std::get<0>(p->CopyVolumePkt), std::get<1>(p->CopyVolumePkt), std::get<2>(p->CopyVolumePkt), Player::Destroy);
+					}
+					IntVector3 move = v1 - std::get<0>(p->CopyVolumePkt);
+					net->SendBlockVolume(std::get<0>(p->CopyVolumePkt) + move, std::get<1>(p->CopyVolumePkt) + move, std::get<2>(p->CopyVolumePkt), std::get<3>(p->CopyVolumePkt));
 				} else {
 					net->SendBlockVolume(v1, v2, p->GetVolumeType(), secondaryaction); 
 				}
