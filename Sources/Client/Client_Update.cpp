@@ -279,9 +279,18 @@ namespace spades {
 					hitFeedbackIconState = 0.f;
 			}
 
-			if (time > lastPosSentTime + 1.f && world->GetLocalPlayer()) {
-				stmp::optional<Player &> p = world->GetLocalPlayer();
-				if ((p->IsAlive() && (p->GetTeamId() < 2 || world->BuildMode) && !LocalEditor)) {
+			stmp::optional<Player &> p = world->GetLocalPlayer();
+			if (!p)
+				return;
+			if (p->GetTeamId() < 2) {
+				if (time > lastPosSentTime + 1.f && world->GetLocalPlayer()) {
+					if (p->IsAlive()) {
+						net->SendPosition();
+						lastPosSentTime = time;
+					}
+				}
+			} else if (world->BuildMode && !LocalEditor) {
+				if (time > lastPosSentTime + 0.2f && world->GetLocalPlayer()) {
 					net->SendPosition();
 					lastPosSentTime = time;
 				}
