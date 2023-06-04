@@ -1995,6 +1995,7 @@ namespace spades {
 			wri.Write((uint8_t)(global ? 0 : 1));
 			wri.Write(text);
 			wri.Write((uint8_t)0);
+			enet_peer_send(peer, 0, wri.CreatePacket());
 		}
 
 		void NetClient::SendWeaponChange(WeaponType wt) {
