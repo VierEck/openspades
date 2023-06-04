@@ -182,24 +182,17 @@ namespace spades {
 					}
 					playerInput = PlayerInput();
 
-					if (world->BuildMode && paletteView->currentPalettePage >= 0) {
-						paletteView->CompareCurrentColor();
-					}
-				} else {
 					if (world->BuildMode) {
-						float compare = (float)cg_FlySpeedWalk;
-						if (compare != player->walkFlySpeed) {
-							net->SendSetFlySpeed();
-						} else {
-							compare = (float)cg_FlySpeedSprint;
-							if (compare != player->sprintFlySpeed) {
-								net->SendSetFlySpeed();
-							} else {
-								compare = (float)cg_FlySpeedSneak;
-								if (compare != player->sneakFlySpeed) {
-									net->SendSetFlySpeed();
-								}
-							}
+						if (paletteView->currentPalettePage >= 0) {
+							paletteView->CompareCurrentColor();
+						}
+						if (player->walkFlySpeed != (float)cg_FlySpeedWalk ||
+							player->sprintFlySpeed != (float)cg_FlySpeedSprint ||
+							player->sneakFlySpeed != (float)cg_FlySpeedSneak) {
+
+							player->walkFlySpeed = (float)cg_FlySpeedWalk;
+							player->sprintFlySpeed = (float)cg_FlySpeedSprint;
+							player->sneakFlySpeed = (float)cg_FlySpeedSneak;
 						}
 					}
 				}

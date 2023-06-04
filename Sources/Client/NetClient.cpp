@@ -101,7 +101,6 @@ namespace spades {
 
 				PacketTypeBuildMode = 100,
 				PacketTypeBlockVolume = 101,
-				PacketTypeSetFlySpeed = 102,
 			};
 
 			enum class VersionInfoPropertyId : std::uint8_t {
@@ -1698,24 +1697,6 @@ namespace spades {
 						default: SPRaise("Received invalid BlockVolume secondaryaction: %d", actionSecondary);
 					}
 				} break;
-				case PacketTypeSetFlySpeed: {
-					if (!GetWorld()->BuildMode)
-						break;
-					stmp::optional<Player &> p = GetPlayerOrNull(reader.ReadByte());
-					if (!p)
-						break;
-					//we dont need speed higher than 25.5 anyway
-					float walk = reader.ReadByte() * 0.1f;
-					float sprint = reader.ReadByte() * 0.1f;
-					float sneak = reader.ReadByte() * 0.1f;
-
-					if (walk == 0.0f || sprint == 0.0f || sneak == 0.0f)
-						SPRaise("Received invalid FlySpeed value of 0");
-
-					p->walkFlySpeed = walk;
-					p->sprintFlySpeed = sprint;
-					p->sneakFlySpeed = sneak;
-				} break;
 				default:
 					printf("WARNING: dropped packet %d\n", (int)reader.GetType());
 					reader.DumpDebug();
@@ -2113,28 +2094,6 @@ namespace spades {
 				wri.Write((uint16_t)move.z);
 			}
 			
-			if (peer) {
-				enet_peer_send(peer, 0, wri.CreatePacket());
-			} else {
-				NetPacketReader read(wri.CreatePacket());
-				HandleGamePacket(read);
-			}
-		}
-
-		void NetClient::SendSetFlySpeed() {
-			SPADES_MARK_FUNCTION();
-			NetPacketWriter wri(PacketTypeSetFlySpeed);
-			wri.Write((uint8_t)GetLocalPlayer().GetId());
-
-			float sendByte = (float)cg_FlySpeedWalk;
-			wri.Write((uint8_t)(int)(sendByte * 10.f));
-
-			sendByte = (float)cg_FlySpeedSprint;
-			wri.Write((uint8_t)(int)(sendByte * 10.f));
-
-			sendByte = (float)cg_FlySpeedSneak;
-			wri.Write((uint8_t)(int)(sendByte * 10.f));
-
 			if (peer) {
 				enet_peer_send(peer, 0, wri.CreatePacket());
 			} else {

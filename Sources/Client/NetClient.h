@@ -203,7 +203,6 @@ namespace spades {
 
 			void SendBlockVolume(IntVector3 v1, IntVector3 v2, int action, int secondaryAction);
 			std::vector<IntVector3> TextureColors;
-			void SendSetFlySpeed();
 			void SendMapObject(int type, int state, Vector3 pos1 = Vector3(0, 0, 0), Vector3 pos2 = Vector3(0, 0, 0));
 			void SendFogColor(IntVector3);
 
