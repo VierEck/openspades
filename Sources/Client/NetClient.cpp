@@ -176,7 +176,7 @@ namespace spades {
 				return value;
 			}
 
-			uint16_t ReadShort() {
+			uint16_t ReadUShort() {
 				SPADES_MARK_FUNCTION();
 
 				uint32_t value = 0;
@@ -186,6 +186,18 @@ namespace spades {
 				value |= ((uint32_t)(uint8_t)data[pos++]);
 				value |= ((uint32_t)(uint8_t)data[pos++]) << 8;
 				return (uint16_t)value;
+			}
+
+			int16_t ReadShort() {
+				SPADES_MARK_FUNCTION();
+
+				uint32_t value = 0;
+				if (pos + 2 > data.size()) {
+					SPRaise("Received packet truncated");
+				}
+				value |= ((uint32_t)(uint8_t)data[pos++]);
+				value |= ((uint32_t)(uint8_t)data[pos++]) << 8;
+				return (int16_t)value;
 			}
 
 			uint8_t ReadByte() {
@@ -287,6 +299,11 @@ namespace spades {
 				data.push_back(v);
 			}
 			void Write(uint16_t v) {
+				SPADES_MARK_FUNCTION_DEBUG();
+				data.push_back((char)(v));
+				data.push_back((char)(v >> 8));
+			}
+			void Write(int16_t v) {
 				SPADES_MARK_FUNCTION_DEBUG();
 				data.push_back((char)(v));
 				data.push_back((char)(v >> 8));
@@ -2055,12 +2072,12 @@ namespace spades {
 			wri.Write((uint8_t)action);
 			wri.Write((uint8_t)secondaryAction);
 
-			wri.Write((uint16_t)v1.x);
-			wri.Write((uint16_t)v1.y);
-			wri.Write((uint16_t)v1.z);
-			wri.Write((uint16_t)v2.x);
-			wri.Write((uint16_t)v2.y);
-			wri.Write((uint16_t)v2.z);
+			wri.Write((int16_t)v1.x);
+			wri.Write((int16_t)v1.y);
+			wri.Write((int16_t)v1.z);
+			wri.Write((int16_t)v2.x);
+			wri.Write((int16_t)v2.y);
+			wri.Write((int16_t)v2.z);
 
 			if (secondaryAction == Player::TexturePaint || secondaryAction == Player::TextureBuild) {
 				for (int i : GetLocalPlayer().TextureColors) {
