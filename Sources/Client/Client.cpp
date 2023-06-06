@@ -907,6 +907,10 @@ namespace spades {
 					return;
 				}
 			}
+			
+			if (msg == " /g switching gamemode" && world->BuildMode) {
+				net->CommandSetGameMode();
+			}
 
 			chatWindow->AddMessage(msg);
 
