@@ -65,6 +65,7 @@ DEFINE_SPADES_SETTING(cg_skipDeadPlayersWhenDead, "1");
 SPADES_SETTING(cg_playerName);
 
 DEFINE_SPADES_SETTING(cg_demoFileNameFormat, "dmy");
+DEFINE_SPADES_SETTING(cg_demoRecord, "1");
 
 namespace spades {
 	namespace client {
@@ -355,46 +356,53 @@ namespace spades {
 				        tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
 				fn2 = buf;
 
-				int countChars = 0;
-				for (char c : demoNameFormat) {
-					if (countChars == 3)
-						break;
+				if ((bool)cg_demoRecord) {
+					int countChars = 0;
+					for (char c : demoNameFormat) {
+						if (countChars == 3)
+							break;
 
-					int dateNum;
-					if (c == 'd')
-						dateNum = tm.tm_mday;
-					else if (c == 'm')
-						dateNum = tm.tm_mon;
-					else if (c == 'y')
-						dateNum = tm.tm_year + 1900;
-					else
-						continue;
+						int dateNum;
+						if (c == 'd')
+							dateNum = tm.tm_mday;
+						else if (c == 'm')
+							dateNum = tm.tm_mon;
+						else if (c == 'y')
+							dateNum = tm.tm_year + 1900;
+						else
+							continue;
 
-					demoName += std::to_string(dateNum) + "_";
-					countChars++;
+						demoName += std::to_string(dateNum) + "_";
+						countChars++;
+					}
 				}
 			}
+
+			std::string hostName;
 			for (size_t i = 0; i < fn.size(); i++) {
 				char c = fn[i];
 				if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')) {
-					fn2 += c;
-					demoName += c;
+					hostName += c;
 				} else {
-					fn2 += '_';
-					demoName += '_';
+					hostName += '_';
 				}
 			}
+			fn2 += hostName;
 
-			if (demoNameFormat == "log") {
-				demoName = "Demos/" + fn2;
-			}
-			demoName += ".demo";
+			if ((bool)cg_demoRecord) {
+				if (demoNameFormat == "log") {
+					demoName = "Demos/" + fn2;
+				} else {
+					demoName += hostName;
+				}
 
-			try {
-				net->StartDemo(demoName);
-				SPLog("Demo Recording Started at '%s'", demoName.c_str());
-			} catch (const std::exception &ex) {
-				SPLog("Failed to open new demo file '%s' (%s)", demoName.c_str(), ex.what());
+				demoName += ".demo";
+				try {
+					net->StartDemo(demoName);
+					SPLog("Demo Recording Started at '%s'", demoName.c_str());
+				} catch (const std::exception &ex) {
+					SPLog("Failed to open new demo file '%s' (%s)", demoName.c_str(), ex.what());
+				}
 			}
 
 			fn2 = "NetLogs/" + fn2 + ".log";
