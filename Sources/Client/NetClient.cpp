@@ -97,6 +97,30 @@ namespace spades {
 
 			};
 
+			struct {
+				std::array<int, 9> pktTypes {
+					PacketTypePositionData,
+					PacketTypeOrientationData,
+
+					PacketTypeSetHP,
+					PacketTypeProgressBar,
+					PacketTypeRestock,
+
+					PacketTypeHandShakeInit,
+					PacketTypeHandShakeReturn,
+					PacketTypeVersionGet,
+					PacketTypeVersionSend,
+				};
+				bool IsInPktTypes(int type) {
+					auto end = std::end(pktTypes);
+					auto find = std::find(std::begin(pktTypes), end, type);
+					if (find != end) {
+						return true;
+					}
+					return false;
+				}
+			} ignore;
+
 			enum class VersionInfoPropertyId : std::uint8_t {
 				ApplicationNameAndVersion = 0,
 				UserLocale = 1,
@@ -1945,8 +1969,13 @@ namespace spades {
 		}
 
 		void NetClient::DemoRegisterPacket(ENetPacket * pkt) {
-			if (!demo.stream || !demo.recording)
+			if (!demo.stream)
 				return;
+
+			auto data = pkt->data;
+			if (ignore.IsInPktTypes(data[0])) {
+				return;
+			}
 
 			float recDeltaTime = client->GetClientTime() - demo.startTime;
 			demo.stream->Write(&recDeltaTime, sizeof(recDeltaTime));
@@ -1956,7 +1985,7 @@ namespace spades {
 			demo.stream->Write(&len, sizeof(len));
 			demo.stream->Flush();
 
-			demo.stream->Write(pkt->data, len);
+			demo.stream->Write(data, len);
 			demo.stream->Flush();
 		}
 	} // namespace client
