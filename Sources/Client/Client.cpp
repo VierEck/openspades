@@ -64,6 +64,8 @@ DEFINE_SPADES_SETTING(cg_skipDeadPlayersWhenDead, "1");
 
 SPADES_SETTING(cg_playerName);
 
+DEFINE_SPADES_SETTING(cg_demoFileNameFormat, "dmy");
+
 namespace spades {
 	namespace client {
 
@@ -341,6 +343,8 @@ namespace spades {
 			// decide log file name
 			std::string fn = hostname.ToString(false);
 			std::string fn2;
+			std::string demoName = "Demos/";
+			std::string demoNameFormat = (std::string)cg_demoFileNameFormat;
 			{
 				time_t t;
 				struct tm tm;
@@ -350,17 +354,42 @@ namespace spades {
 				sprintf(buf, "%04d%02d%02d%02d%02d%02d_", tm.tm_year + 1900, tm.tm_mon + 1,
 				        tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
 				fn2 = buf;
+
+				int countChars = 0;
+				for (char c : demoNameFormat) {
+					if (countChars == 3)
+						break;
+
+					int dateNum;
+					if (c == 'd')
+						dateNum = tm.tm_mday;
+					else if (c == 'm')
+						dateNum = tm.tm_mon;
+					else if (c == 'y')
+						dateNum = tm.tm_year + 1900;
+					else
+						continue;
+
+					demoName += std::to_string(dateNum) + "_";
+					countChars++;
+				}
 			}
 			for (size_t i = 0; i < fn.size(); i++) {
 				char c = fn[i];
 				if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')) {
 					fn2 += c;
+					demoName += c;
 				} else {
 					fn2 += '_';
+					demoName += '_';
 				}
 			}
 
-			std::string demoName = "Demos/" + fn2 + ".demo";
+			if (demoNameFormat == "log") {
+				demoName = "Demos/" + fn2;
+			}
+			demoName += ".demo";
+
 			try {
 				net->StartDemo(demoName);
 				SPLog("Demo Recording Started at '%s'", demoName.c_str());
