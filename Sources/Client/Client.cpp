@@ -112,6 +112,10 @@ namespace spades {
 			SPADES_MARK_FUNCTION();
 			SPLog("Initializing...");
 
+			demo.replaying = replay;
+			if (demo.replaying) 
+				demo.fileName = demoName;
+
 			renderer->SetFogDistance(128.f);
 			renderer->SetFogColor(MakeVector3(.8f, 1.f, 1.f));
 
@@ -337,8 +341,19 @@ namespace spades {
 			mumbleLink.setContext(hostname.ToString(false));
 			mumbleLink.setIdentity(playerName);
 
+			net = stmp::make_unique<NetClient>(this, demo.replaying);
+
+			if (demo.replaying) {
+				try {
+					net->StartDemo(demo.fileName, hostname, demo.replaying);
+					SPLog("Demo Replay started: %s", demo.fileName.c_str());
+				} catch (...) {
+					SPRaise("Demo Replay Error: couldnt start Demo Replay");
+				}
+				return;
+			}
+
 			SPLog("Started connecting to '%s'", hostname.ToString(true).c_str());
-			net = stmp::make_unique<NetClient>(this);
 			net->Connect(hostname);
 
 			// decide log file name
@@ -398,7 +413,7 @@ namespace spades {
 
 				demoName += ".demo";
 				try {
-					net->StartDemo(demoName);
+					net->StartDemo(demoName, hostname);
 					SPLog("Demo Recording Started at '%s'", demoName.c_str());
 				} catch (const std::exception &ex) {
 					SPLog("Failed to open new demo file '%s' (%s)", demoName.c_str(), ex.what());
@@ -524,6 +539,9 @@ namespace spades {
 		}
 
 		bool Client::IsLimboViewActive() {
+			if (demo.replaying)
+				return false;
+
 			if (world) {
 				if (!world->GetLocalPlayer()) {
 					return true;
@@ -591,6 +609,9 @@ namespace spades {
 
 		/** Records chat message/game events to the log file. */
 		void Client::NetLog(const char *format, ...) {
+			if (demo.replaying)
+				return;
+
 			char buf[4096];
 			va_list va;
 			va_start(va, format);

@@ -401,6 +401,11 @@ namespace spades {
 
 			void NetLog(const char *format, ...);
 
+			struct {
+				bool replaying;
+				std::string fileName;
+			} demo;
+
 		protected:
 			~Client();
 

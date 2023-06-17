@@ -377,22 +377,24 @@ namespace spades {
 			}
 		};
 
-		NetClient::NetClient(Client *c) : client(c), host(nullptr), peer(nullptr) {
+		NetClient::NetClient(Client *c, bool replay) : client(c), host(nullptr), peer(nullptr) {
 			SPADES_MARK_FUNCTION();
 
-			enet_initialize();
-			SPLog("ENet initialized");
+			if (!replay) {
+				enet_initialize();
+				SPLog("ENet initialized");
 
-			host = enet_host_create(NULL, 1, 1, 100000, 100000);
-			SPLog("ENet host created");
-			if (!host) {
-				SPRaise("Failed to create ENet host");
+				host = enet_host_create(NULL, 1, 1, 100000, 100000);
+				SPLog("ENet host created");
+				if (!host) {
+					SPRaise("Failed to create ENet host");
+				}
+
+				if (enet_host_compress_with_range_coder(host) < 0)
+					SPRaise("Failed to enable ENet Range coder.");
+
+				SPLog("ENet Range Coder Enabled");
 			}
-
-			if (enet_host_compress_with_range_coder(host) < 0)
-				SPRaise("Failed to enable ENet Range coder.");
-
-			SPLog("ENet Range Coder Enabled");
 
 			peer = NULL;
 			status = NetClientStatusNotConnected;
@@ -406,9 +408,12 @@ namespace spades {
 
 			std::fill(savedPlayerTeam.begin(), savedPlayerTeam.end(), -1);
 
-			bandwidthMonitor.reset(new BandwidthMonitor(host));
+			if (!replay) {
+				bandwidthMonitor.reset(new BandwidthMonitor(host));
+			}
 
 			demo.recording = false;
+			demo.replaying = replay;
 		}
 		NetClient::~NetClient() {
 			SPADES_MARK_FUNCTION();
@@ -503,6 +508,15 @@ namespace spades {
 		void NetClient::DoEvents(int timeout) {
 			SPADES_MARK_FUNCTION();
 
+			if (demo.replaying) {
+				try {
+					DoDemo();
+				} catch (...) {
+					throw;
+				}
+				return;
+			}
+
 			if (status == NetClientStatusNotConnected)
 				return;
 
@@ -545,113 +559,137 @@ namespace spades {
 						SPRaise("Exception while handling packet type 0x%08x:\n%s", type,
 						        ex.what());
 					}
+
+					try {
+						DoPackets(reader);
+					} catch (...) {
+						throw;
+					}
+				} else {
+					if (status == NetClientStatusConnecting) {
+						if (event.type == ENET_EVENT_TYPE_CONNECT) {
+							statusString = _Tr("NetClient", "Awaiting for state");
+						}
+					} else if (status == NetClientStatusReceivingMap) {
+						SPAssert(mapLoader);
+					}
+				}
+			}
+		}
+
+		void NetClient::DoDemo() {
+			SPADES_MARK_FUNCTION();
+
+			while (demo.startTime + demo.deltaTime < client->GetClientTime()) {
+				try {
+					DemoReadNextPacket();
+				} catch (...) {
+					throw;
 				}
 
-				if (status == NetClientStatusConnecting) {
-					if (event.type == ENET_EVENT_TYPE_CONNECT) {
-						statusString = _Tr("NetClient", "Awaiting for state");
-					} else if (event.type == ENET_EVENT_TYPE_RECEIVE) {
-						auto &reader = readerOrNone.value();
-						reader.DumpDebug();
-						if (reader.GetType() != PacketTypeMapStart) {
-							SPRaise("Unexpected packet: %d", (int)reader.GetType());
-						}
+				if (ignore.IsInPktTypes(demo.data[0])) {
+					continue;
+				}
 
-						auto mapSize = reader.ReadInt();
-						SPLog("Map size advertised by the server: %lu", (unsigned long)mapSize);
+				try {
+					DemoHandleCurrentData();
+				} catch (...) {
+					throw;
+				}
+			}
+		}
 
-						mapLoader.reset(new GameMapLoader());
-						mapLoadMonitor.reset(new MapDownloadMonitor(*mapLoader));
+		void NetClient::DoPackets(NetPacketReader &reader) {
+			if (status == NetClientStatusConnecting) {
+				reader.DumpDebug();
+				if (reader.GetType() != PacketTypeMapStart) {
+					SPRaise("Unexpected packet: %d", (int)reader.GetType());
+				}
 
-						status = NetClientStatusReceivingMap;
-						statusString = _Tr("NetClient", "Loading snapshot");
-					}
-				} else if (status == NetClientStatusReceivingMap) {
-					SPAssert(mapLoader);
+				auto mapSize = reader.ReadInt();
+				SPLog("Map size advertised by the server: %lu", (unsigned long)mapSize);
 
-					if (event.type == ENET_EVENT_TYPE_RECEIVE) {
-						auto &reader = readerOrNone.value();
+				mapLoader.reset(new GameMapLoader());
+				mapLoadMonitor.reset(new MapDownloadMonitor(*mapLoader));
 
-						if (reader.GetType() == PacketTypeMapChunk) {
-							std::vector<char> dt = reader.GetData();
+				status = NetClientStatusReceivingMap;
+				statusString = _Tr("NetClient", "Loading snapshot");
+			} else if (status == NetClientStatusReceivingMap) {
+				if (reader.GetType() == PacketTypeMapChunk) {
+					std::vector<char> dt = reader.GetData();
 
-							mapLoader->AddRawChunk(dt.data() + 1, dt.size() - 1);
-							mapLoadMonitor->AccumulateBytes(
-							  static_cast<unsigned int>(dt.size() - 1));
-						} else {
-							reader.DumpDebug();
+					mapLoader->AddRawChunk(dt.data() + 1, dt.size() - 1);
+					mapLoadMonitor->AccumulateBytes(
+						static_cast<unsigned int>(dt.size() - 1));
+				} else {
+					reader.DumpDebug();
 
-							// The actual size of the map data cannot be known beforehand because
-							// of compression. This means we must detect the end of the map
-							// transfer in another way.
-							//
-							// We do this by checking for a StateData packet, which is sent
-							// directly after the map transfer completes.
-							//
-							// A number of other packets can also be received while loading the map:
-							//
-							//  - World update packets (WorldUpdate, ExistingPlayer, and
-							//    CreatePlayer) for the current round. We must store such packets
-							//    temporarily and process them later when a `World` is created.
-							//
-							//  - Leftover reload packet from the previous round. This happens when
-							//    you initiate the reload action and a map change occurs before it
-							//    is completed. In pyspades, sending a reload packet is implemented
-							//    by registering a callback function to the Twisted reactor. This
-							//    callback function sends a reload packet, but it does not check if
-							//    the current game round is finished, nor is it unregistered on a
-							//    map change.
-							//
-							//    Such a reload packet would not (and should not) have any effect on
-							//    the current round. Also, an attempt to process it would result in
-							//    an "invalid player ID" exception, so we simply drop it during
-							//    map load sequence.
-							//
+					// The actual size of the map data cannot be known beforehand because
+					// of compression. This means we must detect the end of the map
+					// transfer in another way.
+					//
+					// We do this by checking for a StateData packet, which is sent
+					// directly after the map transfer completes.
+					//
+					// A number of other packets can also be received while loading the map:
+					//
+					//  - World update packets (WorldUpdate, ExistingPlayer, and
+					//    CreatePlayer) for the current round. We must store such packets
+					//    temporarily and process them later when a `World` is created.
+					//
+					//  - Leftover reload packet from the previous round. This happens when
+					//    you initiate the reload action and a map change occurs before it
+					//    is completed. In pyspades, sending a reload packet is implemented
+					//    by registering a callback function to the Twisted reactor. This
+					//    callback function sends a reload packet, but it does not check if
+					//    the current game round is finished, nor is it unregistered on a
+					//    map change.
+					//
+					//    Such a reload packet would not (and should not) have any effect on
+					//    the current round. Also, an attempt to process it would result in
+					//    an "invalid player ID" exception, so we simply drop it during
+					//    map load sequence.
+					//
 
-							if (reader.GetType() == PacketTypeStateData) {
-								status = NetClientStatusConnected;
-								statusString = _Tr("NetClient", "Connected");
+					if (reader.GetType() == PacketTypeStateData) {
+						status = NetClientStatusConnected;
+						statusString = _Tr("NetClient", "Connected");
 
-								try {
-									MapLoaded();
-								} catch (const std::exception &ex) {
-									if (strstr(ex.what(), "File truncated") ||
-									    strstr(ex.what(), "EOF reached")) {
-										SPLog("Map decoder returned error:\n%s", ex.what());
-										Disconnect();
-										statusString = _Tr("NetClient", "Error");
-										throw;
-									}
-								} catch (...) {
-									Disconnect();
-									statusString = _Tr("NetClient", "Error");
-									throw;
-								}
-								HandleGamePacket(reader);
-							} else if (reader.GetType() == PacketTypeWeaponReload) {
-								// Drop the reload packet. Pyspades does not
-								// cancel the reload packets on map change and
-								// they would cause an error if we would
-								// process them
-							} else {
-								// Save the packet for later
-								savedPackets.push_back(reader.GetData());
-							}
-						}
-					}
-				} else if (status == NetClientStatusConnected) {
-					if (event.type == ENET_EVENT_TYPE_RECEIVE) {
-						auto &reader = readerOrNone.value();
-						// reader.DumpDebug();
 						try {
-							HandleGamePacket(reader);
+							MapLoaded();
 						} catch (const std::exception &ex) {
-							int type = reader.GetType();
-							reader.DumpDebug();
-							SPRaise("Exception while handling packet type 0x%08x:\n%s", type,
-							        ex.what());
+							if (strstr(ex.what(), "File truncated") ||
+								strstr(ex.what(), "EOF reached")) {
+								SPLog("Map decoder returned error:\n%s", ex.what());
+								Disconnect();
+								statusString = _Tr("NetClient", "Error");
+								throw;
+							}
+						} catch (...) {
+							Disconnect();
+							statusString = _Tr("NetClient", "Error");
+							throw;
 						}
+						HandleGamePacket(reader);
+					} else if (reader.GetType() == PacketTypeWeaponReload) {
+						// Drop the reload packet. Pyspades does not
+						// cancel the reload packets on map change and
+						// they would cause an error if we would
+						// process them
+					} else {
+						// Save the packet for later
+						savedPackets.push_back(reader.GetData());
 					}
+				}
+			} else if (status == NetClientStatusConnected) {
+				// reader.DumpDebug();
+				try {
+					HandleGamePacket(reader);
+				} catch (const std::exception &ex) {
+					int type = reader.GetType();
+					reader.DumpDebug();
+					SPRaise("Exception while handling packet type 0x%08x:\n%s", type,
+							ex.what());
 				}
 			}
 		}
@@ -1511,6 +1549,9 @@ namespace spades {
 		}
 
 		void NetClient::SendVersionEnhanced(const std::set<std::uint8_t> &propertyIds) {
+			if (demo.replaying)
+				return;
+
 			NetPacketWriter wri(PacketTypeExistingPlayer);
 			wri.Write((uint8_t)'x');
 
@@ -1770,6 +1811,9 @@ namespace spades {
 
 		void NetClient::SendChat(std::string text, bool global) {
 			SPADES_MARK_FUNCTION();
+			if (demo.replaying)
+				return;
+
 			NetPacketWriter wri(PacketTypeChatMessage);
 			wri.Write((uint8_t)GetLocalPlayer().GetId());
 			wri.Write((uint8_t)(global ? 0 : 1));
@@ -1800,6 +1844,9 @@ namespace spades {
 
 		void NetClient::SendHandShakeValid(int challenge) {
 			SPADES_MARK_FUNCTION();
+			if (demo.replaying)
+				return;
+
 			NetPacketWriter wri(PacketTypeHandShakeReturn);
 			wri.Write((uint32_t)challenge);
 			SPLog("Sending hand shake back.");
@@ -1808,6 +1855,9 @@ namespace spades {
 
 		void NetClient::SendVersion() {
 			SPADES_MARK_FUNCTION();
+			if (demo.replaying)
+				return;
+
 			NetPacketWriter wri(PacketTypeVersionSend);
 			wri.Write((uint8_t)'o');
 			wri.Write((uint8_t)OpenSpades_VERSION_MAJOR);
@@ -1820,6 +1870,9 @@ namespace spades {
 
 		void NetClient::SendSupportedExtensions() {
 			SPADES_MARK_FUNCTION();
+			if (demo.replaying)
+				return;
+
 			NetPacketWriter wri(PacketTypeExtensionInfo);
 			wri.Write(static_cast<uint8_t>(extensions.size()));
 			for (auto &i : extensions) {
@@ -1958,14 +2011,41 @@ namespace spades {
 			return text;
 		}
 
-		void NetClient::StartDemo(std::string fileName) {
-			demo.stream = FileManager::OpenForWriting(fileName.c_str());
-			demo.startTime = client->GetClientTime();
-			demo.recording = true;
+		void NetClient::StartDemo(std::string fileName, const ServerAddress &hostname, bool replay) {
+			if (replay) {
+				demo.stream = FileManager::OpenForReading(fileName.c_str());
+				demo.stream->SetPosition(2); //version check should happen at mainmenu demolist
 
-			std::vector<unsigned char> buf = { demo.aos_replayVersion, (unsigned char)protocolVersion};
-			demo.stream->Write(buf.data(), buf.size());
-			demo.stream->Flush();
+				ProtocolVersion version;
+				switch (hostname.GetProtocolVersion()) {
+					case ProtocolVersion::v075:
+						SPLog("Using Ace of Spades 0.75 protocol");
+						protocolVersion = 3;
+						version = ProtocolVersion::v075;
+						break;
+					case ProtocolVersion::v076:
+						SPLog("Using Ace of Spades 0.76 protocol");
+						protocolVersion = 4;
+						version = ProtocolVersion::v076;
+						break;
+					default: SPRaise("Invalid ProtocolVersion"); break;
+				}
+				properties.reset(new GameProperties(version));
+
+				status = NetClientStatusConnecting;
+				statusString = _Tr("Demo Replay", "Reading demo file");
+				timeToTryMapLoad = 0;
+
+				savedPackets.clear();
+			} else {
+				demo.stream = FileManager::OpenForWriting(fileName.c_str());
+
+				std::vector<unsigned char> buf = { (unsigned char)aos_replayVersion::v1, (unsigned char)protocolVersion };
+				demo.stream->Write(buf.data(), buf.size());
+				demo.stream->Flush();
+			}
+			demo.startTime = client->GetClientTime();
+			demo.recording = !replay;
 		}
 
 		void NetClient::DemoRegisterPacket(ENetPacket * pkt) {
@@ -1987,6 +2067,56 @@ namespace spades {
 
 			demo.stream->Write(data, len);
 			demo.stream->Flush();
+		}
+
+		void NetClient::DemoReadNextPacket() {
+			if (!demo.stream)
+				SPRaise("Demo tried reading null stream");
+
+			if (demo.stream->Read(&demo.deltaTime, sizeof(demo.deltaTime)) == sizeof(demo.deltaTime)) {
+				unsigned short len;
+				demo.stream->Read(&len, sizeof(len));
+				demo.data.resize(len);
+
+				demo.stream->Read(demo.data.data(), len);
+			} else {
+				if (GetWorld()) {
+					client->SetWorld(NULL);
+				}
+
+				status = NetClientStatusNotConnected;
+				statusString = "Demo Replay Ended: end of recording reached";
+				SPRaise("Demo Replay Ended: end of recording reached");
+			}
+		}
+
+		void NetClient::DemoHandleCurrentData() {
+			stmp::optional<NetPacketReader> readerOrNone;
+			readerOrNone.reset(demo.data);
+			NetPacketReader &reader = readerOrNone.value();
+
+			try {
+				DoPackets(reader);
+			} catch (...) {
+				throw;
+			}
+
+			if (reader.GetType() == PacketTypeStateData) {
+				DemoJoinGame();
+			}
+		}
+
+		void NetClient::DemoJoinGame() {
+			if (!GetLocalPlayerOrNull()) {
+				GetWorld()->SetLocalPlayerIndex(33);
+				auto p = stmp::make_unique<Player>(*GetWorld(), 33, RIFLE_WEAPON, 2, MakeVector3(255, 255, 255),GetWorld()->GetTeam(2).color);
+				GetWorld()->SetPlayer(33, std::move(p));
+				savedPlayerTeam[33] = 2;
+
+				SPADES_SETTING(cg_playerName);
+				World::PlayerPersistent &pers = GetWorld()->GetPlayerPersistent(33);
+				pers.name = (std::string)cg_playerName;
+			}
 		}
 	} // namespace client
 } // namespace spades

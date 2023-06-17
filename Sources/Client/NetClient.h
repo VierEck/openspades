@@ -151,17 +151,22 @@ namespace spades {
 			void SendSupportedExtensions();
 
 			struct {
-				unsigned char aos_replayVersion = 1;
-
 				std::unique_ptr<IStream> stream;
+				std::vector<char> data;
 				float startTime;
+				float deltaTime;
+
 				bool recording;
+				bool replaying;
 			} demo;
 
 			void DemoRegisterPacket(ENetPacket *);
+			void DemoReadNextPacket();
+			void DemoHandleCurrentData();
+			void DemoJoinGame();
 
 		public:
-			NetClient(Client *);
+			NetClient(Client *, bool replay);
 			~NetClient();
 
 			NetClientStatus GetStatus() { return status; }
@@ -191,6 +196,8 @@ namespace spades {
 			int GetPing();
 
 			void DoEvents(int timeout = 0);
+			void DoDemo();
+			void DoPackets(NetPacketReader &);
 
 			void SendJoin(int team, WeaponType, std::string name, int kills);
 			void SendPosition();
@@ -212,7 +219,7 @@ namespace spades {
 			double GetDownlinkBps() { return bandwidthMonitor->GetDownlinkBps(); }
 			double GetUplinkBps() { return bandwidthMonitor->GetUplinkBps(); }
 
-			void StartDemo(std::string);
+			void StartDemo(std::string fileName, const ServerAddress &hostname, bool replay = false);
 		};
 	} // namespace client
 } // namespace spades

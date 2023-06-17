@@ -28,6 +28,7 @@ typedef _ENetAddress ENetAddress;
 
 namespace spades {
 	enum class ProtocolVersion { Unknown = 0, v075 = 3, v076 = 4 };
+	enum class aos_replayVersion { v1 = 1, };
 	class ServerAddress {
 		std::string mAddress;
 		ProtocolVersion mVersion;

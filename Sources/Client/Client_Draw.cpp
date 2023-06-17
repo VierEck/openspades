@@ -928,7 +928,7 @@ namespace spades {
 				}
 			}
 
-			if (net) {
+			if (net && !demo.replaying) {
 				auto ping = net->GetPing();
 				auto upbps = net->GetUplinkBps();
 				auto downbps = net->GetDownlinkBps();
