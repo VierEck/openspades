@@ -384,6 +384,7 @@ namespace spades {
 			void DrawAlert();
 			void DrawDebugAim();
 			void DrawStats();
+			void DrawDemoProgress();
 
 			void DrawScene();
 			void AddGrenadeToScene(Grenade &);

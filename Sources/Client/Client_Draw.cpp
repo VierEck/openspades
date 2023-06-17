@@ -825,6 +825,9 @@ namespace spades {
 
 					chatWindow->Draw();
 					killfeedWindow->Draw();
+
+					if (demo.replaying)
+						DrawDemoProgress();
 				}
 
 				// large map view should come in front
@@ -951,6 +954,35 @@ namespace spades {
 			renderer->DrawImage(nullptr, AABB2(pos.x, pos.y, size.x, size.y));
 			font.DrawShadow(str, pos + Vector2(margin, margin), 1.f, Vector4(1.f, 1.f, 1.f, 1.f),
 			                Vector4(0.f, 0.f, 0.f, 0.5f));
+		}
+
+		void Client::DrawDemoProgress() {
+			SPADES_MARK_FUNCTION();
+
+			float scrWidth = renderer->ScreenWidth();
+			float scrHeight = renderer->ScreenHeight();
+			IFont &font = fontManager->GetGuiFont();
+			float margin = 5.f;
+
+			int deltaTime = (int)net->GetDemoDeltaTime();
+			int hour = deltaTime / 3600;
+			int min  = (deltaTime % 3600) / 60;
+			int sec  = deltaTime % 60;
+			char buf[64];
+			sprintf(buf, "%02d:%02d:%02d / ", hour, min, sec);
+
+			std::string str = "Demo: ";
+			str += buf;
+			str += net->GetDemoEndTimeStr();
+
+			auto size = font.Measure(str);
+			size += Vector2(margin * 2.f, margin * 2.f);
+
+			auto pos = (Vector2(scrWidth, scrHeight - size.y - 4) - size) * Vector2(0.5f, 1.f);
+
+			renderer->SetColorAlphaPremultiplied(Vector4(0.f, 0.f, 0.f, 0.5f));
+			renderer->DrawImage(nullptr, AABB2(pos.x, pos.y, size.x, size.y));
+			font.DrawShadow(str, pos + Vector2(margin, margin), 1.f, Vector4(1.f, 1.f, 1.f, 1.f), Vector4(0.f, 0.f, 0.f, 0.5f));
 		}
 
 		void Client::Draw2D() {

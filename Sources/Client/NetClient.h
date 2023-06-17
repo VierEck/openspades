@@ -153,14 +153,20 @@ namespace spades {
 			struct {
 				std::unique_ptr<IStream> stream;
 				std::vector<char> data;
+
 				float startTime;
+				float endTime;
 				float deltaTime;
+
+				std::string endTimeStr;
 
 				bool recording;
 				bool replaying;
 
 				bool paused;
 			} demo;
+
+			void ScanDemo();
 
 			void DemoRegisterPacket(ENetPacket *);
 			void DemoReadNextPacket();
@@ -228,6 +234,9 @@ namespace spades {
 			void DemoPause(bool unpause = false);
 
 			bool IsDemoPaused() { return demo.paused; }
+
+			float GetDemoDeltaTime() { return demo.deltaTime; }
+			std::string GetDemoEndTimeStr() { return demo.endTimeStr; }
 		};
 	} // namespace client
 } // namespace spades

@@ -2047,6 +2047,8 @@ namespace spades {
 				timeToTryMapLoad = 0;
 
 				savedPackets.clear();
+
+				ScanDemo();
 			} else {
 				demo.stream = FileManager::OpenForWriting(fileName.c_str());
 
@@ -2057,6 +2059,22 @@ namespace spades {
 			demo.startTime = client->GetClientTime();
 			demo.recording = !replay;
 			demo.paused = false;
+		}
+
+		void NetClient::ScanDemo() {
+			unsigned short len;
+			while (demo.stream->Read(&demo.endTime, sizeof(demo.endTime)) == sizeof(demo.endTime)) {
+				demo.stream->Read(&len, sizeof(len));
+				demo.stream->SetPosition(demo.stream->GetPosition() + len);
+			}
+			demo.stream->SetPosition(2);
+
+			int hour = (int)demo.endTime / 3600;
+			int min  = ((int)demo.endTime % 3600) / 60;
+			int sec  = (int)demo.endTime % 60;
+			char buf[64];
+			sprintf(buf, "%02d:%02d:%02d", hour, min, sec);
+			demo.endTimeStr = buf;
 		}
 
 		void NetClient::DemoRegisterPacket(ENetPacket * pkt) {
