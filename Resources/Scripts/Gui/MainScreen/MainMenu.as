@@ -81,6 +81,7 @@ namespace spades {
         private ConfigItem cg_protocolVersion("cg_protocolVersion", "3");
         private ConfigItem cg_lastQuickConnectHost("cg_lastQuickConnectHost", "127.0.0.1");
         private ConfigItem cg_serverlistSort("cg_serverlistSort", "16385");
+		MainScreenServerItem@[]@ savedlist = array<spades::MainScreenServerItem@>();
 
         MainScreenMainMenu(MainScreenUI @ui) {
             super(ui.manager);
@@ -282,8 +283,12 @@ namespace spades {
         }
 
         void ServerListItemActivated(ServerListModel @sender, MainScreenServerItem @item) {
-            addressField.Text = item.Address;
-            cg_lastQuickConnectHost = addressField.Text;
+            if (!demoList) {
+				addressField.Text = item.Address;
+				cg_lastQuickConnectHost = addressField.Text;
+			} else {
+				addressField.Text = item.Name;
+			}
             if (item.Protocol == "0.75") {
                 SetProtocolVersion(3);
             } else if (item.Protocol == "0.76") {
@@ -315,6 +320,9 @@ namespace spades {
         private void SortServerListByCountry(spades::ui::UIElement @sender) { SortServerList(6); }
 
         private void SortServerList(int keyId) {
+			if (demoList) {
+				return;
+			}
             int sort = cg_serverlistSort.IntValue;
             if (int(sort & 0xfff) == keyId) {
                 sort ^= int(0x4000);
@@ -336,6 +344,9 @@ namespace spades {
                 case 5: key = "Protocol"; break;
                 case 6: key = "Country"; break;
             }
+			if (demoList) {
+				key == "Name";
+			}
             MainScreenServerItem @[] @list =
                 helper.GetServerList(key, (cg_serverlistSort.IntValue & 0x4000) != 0);
             if ((list is null)or(loading)) {
@@ -349,32 +360,34 @@ namespace spades {
             bool filterEmpty = filterEmptyButton.Toggled;
             bool filterFull = filterFullButton.Toggled;
             string filterText = filterField.Text;
-            MainScreenServerItem @[] @list2 = array<spades::MainScreenServerItem @>();
+            savedlist.resize(0);
             for (int i = 0, count = list.length; i < count; i++) {
                 MainScreenServerItem @item = list[i];
-                if (filterProtocol3 and(item.Protocol != "0.75")) {
-                    continue;
-                }
-                if (filterProtocol4 and(item.Protocol != "0.76")) {
-                    continue;
-                }
-                if (filterEmpty and(item.NumPlayers > 0)) {
-                    continue;
-                }
-                if (filterFull and(item.NumPlayers >= item.MaxPlayers)) {
-                    continue;
-                }
-                if (filterText.length > 0) {
-                    if (not(StringContainsCaseInsensitive(item.Name, filterText)
-                                or StringContainsCaseInsensitive(item.MapName, filterText)
-                                    or StringContainsCaseInsensitive(item.GameMode, filterText))) {
-                        continue;
-                    }
-                }
-                list2.insertLast(item);
+                if(filterProtocol3 and (item.Protocol != "0.75")) {
+					continue;
+				}
+				if(filterProtocol4 and (item.Protocol != "0.76")) {
+					continue;
+				}
+				if (!demoList) {
+					if(filterEmpty and (item.NumPlayers > 0)) {
+						continue;
+					}
+					if(filterFull and (item.NumPlayers >= item.MaxPlayers)) {
+						continue;
+					}
+				}
+				if(filterText.length > 0) {
+					if(not (StringContainsCaseInsensitive(item.Name, filterText) or
+						StringContainsCaseInsensitive(item.MapName, filterText) or
+						StringContainsCaseInsensitive(item.GameMode, filterText))) {
+						continue;
+					}
+				}
+				savedlist.insertLast(item);
             }
 
-            ServerListModel model(Manager, list2);
+            ServerListModel model(Manager, savedlist);
             @serverList.Model = model;
             @model.ItemActivated = ServerListItemEventHandler(this.ServerListItemActivated);
             @model.ItemDoubleClicked = ServerListItemEventHandler(this.ServerListItemDoubleClicked);
@@ -404,6 +417,9 @@ namespace spades {
         }
 
         private void OnAddressChanged(spades::ui::UIElement @sender) {
+			if (demoList) {
+				return;
+			}
             cg_lastQuickConnectHost = addressField.Text;
         }
 
@@ -426,10 +442,16 @@ namespace spades {
             UpdateServerList();
         }
         private void OnFilterFullPressed(spades::ui::UIElement @sender) {
+			if (demoList) {
+				return;
+			}
             filterEmptyButton.Toggled = false;
             UpdateServerList();
         }
         private void OnFilterEmptyPressed(spades::ui::UIElement @sender) {
+			if (demoList) {
+				return;
+			}
             filterFullButton.Toggled = false;
             UpdateServerList();
         }
@@ -451,7 +473,27 @@ namespace spades {
         }
 
         private void Connect() {
-            string msg = helper.ConnectServer(addressField.Text, cg_protocolVersion.IntValue);
+            if (addressField.Text == "") {
+				return;
+			}
+			string DemoFile = ""; 
+			string FieldText = addressField.Text;
+			if (demoList) {
+				bool Found = false; 
+				for(int i = 0, count = savedlist.length; i < count; i++) {
+					MainScreenServerItem@ item = savedlist[i];
+					if (item.Name == addressField.Text) {
+						Found = true;
+						break;
+					}
+				}
+				if (!Found) {
+					return;
+				}
+				DemoFile = "Demos/" + addressField.Text;
+				FieldText = "aos://16777343:32887";
+			}
+			string msg = helper.ConnectServer(FieldText, cg_protocolVersion.IntValue, demoList, DemoFile);
             if (msg.length > 0) {
                 // failde to initialize client.
                 AlertScreen al(this, msg);
@@ -463,6 +505,11 @@ namespace spades {
 		
 		private void OnChangeListPressed(spades::ui::UIElement @sender) {
 			demoList = !demoList;
+			if (demoList) {
+				addressField.Text = "";
+			} else {
+				addressField.Text = cg_lastQuickConnectHost.StringValue;
+			}
 			LoadServerList();
 		}
 

@@ -406,7 +406,7 @@ namespace spades {
 
 		public:
 			Client(Handle<IRenderer>, Handle<IAudioDevice>, const ServerAddress &host,
-			       Handle<FontManager>);
+			       Handle<FontManager>, bool replay, std::string demoName);
 
 			void RunFrame(float dt) override;
 			void RunFrameLate(float dt) override;

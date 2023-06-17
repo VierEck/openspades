@@ -415,12 +415,11 @@ namespace spades {
 			return arr;
 		}
 
-		std::string MainScreenHelper::ConnectServer(std::string hostname, int protocolVersion) {
+		std::string MainScreenHelper::ConnectServer(std::string hostname, int protocolVersion, bool replay, std::string demoName) {
 			if (mainScreen == NULL) {
 				return "mainScreen == NULL";
 			}
-			return mainScreen->Connect(ServerAddress(
-			  hostname, protocolVersion == 3 ? ProtocolVersion::v075 : ProtocolVersion::v076));
+			return mainScreen->Connect(ServerAddress(hostname, protocolVersion == 3 ? ProtocolVersion::v075 : ProtocolVersion::v076), replay, demoName);
 		}
 
 		std::string MainScreenHelper::GetServerListQueryMessage() {

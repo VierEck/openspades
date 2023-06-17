@@ -71,7 +71,7 @@ namespace spades {
 	namespace client {
 
 		Client::Client(Handle<IRenderer> r, Handle<IAudioDevice> audioDev,
-		               const ServerAddress &host, Handle<FontManager> fontManager)
+		               const ServerAddress &host, Handle<FontManager> fontManager, bool replay, std::string demoName)
 		    : playerName(cg_playerName.operator std::string().substr(0, 15)),
 		      logStream(nullptr),
 		      hostname(host),
