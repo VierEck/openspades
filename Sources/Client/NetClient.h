@@ -163,6 +163,8 @@ namespace spades {
 			void DemoRegisterPacket(ENetPacket *);
 			void DemoReadNextPacket();
 			void DemoHandleCurrentData();
+
+			void DemoSkipMap();
 			void DemoJoinGame();
 
 		public:

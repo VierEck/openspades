@@ -597,6 +597,13 @@ namespace spades {
 					throw;
 				}
 			}
+			if (status == NetClientStatusReceivingMap) {
+				try {
+					DemoSkipMap();
+				} catch (...) {
+					throw;
+				}
+			}
 		}
 
 		void NetClient::DoPackets(NetPacketReader &reader) {
@@ -2100,10 +2107,31 @@ namespace spades {
 			} catch (...) {
 				throw;
 			}
+		}
 
-			if (reader.GetType() == PacketTypeStateData) {
-				DemoJoinGame();
+		void NetClient::DemoSkipMap() {
+			SPADES_MARK_FUNCTION();
+
+			while (demo.data[0] != PacketTypeStateData) {
+				try {
+					DemoReadNextPacket();
+				} catch (...) {
+					throw;
+				}
+
+				if (ignore.IsInPktTypes(demo.data[0])) {
+					continue;
+				}
+
+				try {
+					DemoHandleCurrentData();
+				} catch (...) {
+					throw;
+				}
 			}
+			DemoJoinGame();
+
+			demo.startTime = client->GetClientTime() - demo.deltaTime;
 		}
 
 		void NetClient::DemoJoinGame() {
