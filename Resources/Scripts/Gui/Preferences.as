@@ -668,6 +668,7 @@ namespace spades {
             layouter.AddToggleField(_Tr("Preferences", "Server Alert"), "cg_serverAlert");
 
             layouter.AddHeading(_Tr("Preferences", "Misc"));
+			layouter.AddToggleField(_Tr("Preferences", "Demo Recording"), "cg_demoRecord");
             layouter.AddSliderField(_Tr("Preferences", "Field of View"), "cg_fov", 45, 90, 1,
                                     ConfigNumberFormatter(0, " deg"));
             layouter.AddSliderField(_Tr("Preferences", "Minimap size"), "cg_minimapSize", 128, 256,
