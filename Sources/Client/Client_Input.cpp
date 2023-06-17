@@ -89,6 +89,9 @@ DEFINE_SPADES_SETTING(cg_keyAutoFocus, "MiddleMouseButton");
 
 SPADES_SETTING(cg_DemoRecord);
 DEFINE_SPADES_SETTING(cg_keyPause, "Keypad 5");
+DEFINE_SPADES_SETTING(cg_keySkipForward, "Keypad 6");
+DEFINE_SPADES_SETTING(cg_keySkipRewind, "Keypad 4");
+DEFINE_SPADES_SETTING(cg_SkipValue, "15");
 
 namespace spades {
 	namespace client {
@@ -317,6 +320,14 @@ namespace spades {
 				if (demo.replaying) {
 					if (CheckKey(cg_keyPause, name) && down) {
 						net->DemoPause(net->IsDemoPaused());
+						return;
+					}
+					if (CheckKey(cg_keySkipForward, name) && down) {
+						net->DemoSkip((float)cg_SkipValue);
+						return;
+					}
+					if (CheckKey(cg_keySkipRewind, name) && down) {
+						net->DemoSkip((float)cg_SkipValue * (-1.f));
 						return;
 					}
 				}

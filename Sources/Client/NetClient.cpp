@@ -121,6 +121,8 @@ namespace spades {
 				}
 			} ignore;
 
+			std::vector<std::pair<float, uint64_t>> mapStartPositions;
+
 			enum class VersionInfoPropertyId : std::uint8_t {
 				ApplicationNameAndVersion = 0,
 				UserLocale = 1,
@@ -2062,10 +2064,19 @@ namespace spades {
 		}
 
 		void NetClient::ScanDemo() {
+			uint64_t pos = demo.stream->GetPosition();
+			unsigned char type;
 			unsigned short len;
 			while (demo.stream->Read(&demo.endTime, sizeof(demo.endTime)) == sizeof(demo.endTime)) {
 				demo.stream->Read(&len, sizeof(len));
-				demo.stream->SetPosition(demo.stream->GetPosition() + len);
+				demo.stream->Read(&type, sizeof(type));
+				demo.stream->SetPosition(demo.stream->GetPosition() + len - sizeof(type));
+
+				if (type == PacketTypeMapStart) {
+					mapStartPositions.push_back(std::make_pair(demo.endTime, pos));
+				}
+
+				pos = demo.stream->GetPosition();
 			}
 			demo.stream->SetPosition(2);
 
@@ -2151,9 +2162,7 @@ namespace spades {
 					throw;
 				}
 			}
-			DemoJoinGame();
-
-			demo.startTime = client->GetClientTime() - demo.deltaTime;
+			DemoSkimEnd();
 		}
 
 		void NetClient::DemoJoinGame() {
@@ -2169,10 +2178,128 @@ namespace spades {
 			}
 		}
 
+		void NetClient::DemoSetSkimOfs(float sec, float skipToTime) {
+			if (sec < 0) {
+				demo.deltaTime = 0;
+			}
+
+			//first=time, second=offset
+			int64_t pos = demo.stream->GetPosition();
+			for (auto &mapStart : mapStartPositions) {
+				if (mapStart.first < demo.deltaTime)
+					continue;
+				if (mapStart.first > skipToTime)
+					continue;
+
+				pos = mapStart.second;
+			}
+			demo.stream->SetPosition(pos);
+		}
+
+		void NetClient::DemoSkimEnd() {
+			if (status == NetClientStatusReceivingMap) {
+				DemoSkipMap();
+				return;
+			}
+			demo.startTime = client->GetClientTime() - demo.deltaTime;
+			DemoJoinGame();
+			if (demo.paused) {
+				GetWorld()->Advance(0);
+			}
+			DemoSkimReadLastFogWorld();
+		}
+
+		void NetClient::DemoSkimReadLastFogWorld() {
+			if (demo.lastWorldUpdate.size() > 0) {
+				demo.data = demo.lastWorldUpdate;
+				DemoHandleCurrentData();
+			}
+			if (demo.lastFogColour.size() > 0) {
+				demo.data = demo.lastFogColour;
+				DemoHandleCurrentData();
+			}
+
+			demo.lastWorldUpdate.clear();
+			demo.lastFogColour.clear();
+		}
+
+		bool NetClient::DemoSkimIgnoreType(int type, float skipToTime) {
+			if (ignore.IsInPktTypes(type)) {
+				return true;
+			}
+
+			if (type == PacketTypeWorldUpdate) {
+				demo.lastWorldUpdate = demo.data;
+				return true;
+			}
+			if (type == PacketTypeGrenadePacket) {
+				float fuse = demo.data[2];
+				float fuseEnd = demo.deltaTime + fuse;
+				if (skipToTime <= fuseEnd) {
+					return false;
+				}
+				return true;
+			}
+			if (type == PacketTypeFogColour) {
+				demo.lastFogColour = demo.data;
+				return true;
+			}
+			if (type == PacketTypeStateData) {
+				demo.lastFogColour.clear();
+				return false;
+			}
+
+			return false;
+		}
+
 		void NetClient::DemoPause(bool unpause) {
 			demo.paused = !unpause;
 			if (unpause)
 				demo.startTime = client->GetClientTime() - demo.deltaTime;
+		}
+
+		void NetClient::DemoSkip(float sec) {
+			if (sec == 0)
+				return;
+
+			float skipToTime = demo.deltaTime + sec;
+			if (skipToTime > demo.endTime) {
+				skipToTime = demo.endTime;
+			} else if (skipToTime < 0) {
+				skipToTime = 0;
+			}
+			if (demo.deltaTime == skipToTime) {
+				return;
+			}
+			DemoSetSkimOfs(sec, skipToTime);
+
+			if (sec > 3.0f) //update nades stuck in pause.
+				GetWorld()->Advance(skipToTime - demo.deltaTime);
+
+			float beforeTime = demo.deltaTime;
+			while (demo.deltaTime < skipToTime) {
+				try {
+					DemoReadNextPacket();
+				} catch (...) {
+					SPRaise("Error reading demo file");
+				}
+
+				if (GetWorld() && (skipToTime - demo.deltaTime) <= 3.0f) {
+					GetWorld()->Advance(demo.deltaTime - beforeTime);
+				}
+				beforeTime = demo.deltaTime;
+
+				if (DemoSkimIgnoreType(demo.data[0], skipToTime)) {
+					continue;
+				}
+
+				try {
+					DemoHandleCurrentData();
+				} catch (...) {
+					SPRaise("Error handling demo packet"); 
+				}
+			}
+			DemoSkimEnd();
 		}
 	} // namespace client
 } // namespace spades

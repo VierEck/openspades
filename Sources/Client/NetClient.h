@@ -164,6 +164,9 @@ namespace spades {
 				bool replaying;
 
 				bool paused;
+
+				std::vector<char> lastWorldUpdate;
+				std::vector<char> lastFogColour;
 			} demo;
 
 			void ScanDemo();
@@ -174,6 +177,10 @@ namespace spades {
 
 			void DemoSkipMap();
 			void DemoJoinGame();
+			void DemoSetSkimOfs(float sec_ups, float skipToTime);
+			void DemoSkimEnd();
+			void DemoSkimReadLastFogWorld();
+			bool DemoSkimIgnoreType(int type, float skipToTime);
 
 		public:
 			NetClient(Client *, bool replay);
@@ -232,6 +239,7 @@ namespace spades {
 			void StartDemo(std::string fileName, const ServerAddress &hostname, bool replay = false);
 
 			void DemoPause(bool unpause = false);
+			void DemoSkip(float sec);
 
 			bool IsDemoPaused() { return demo.paused; }
 
