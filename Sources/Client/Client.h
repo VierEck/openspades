@@ -492,6 +492,8 @@ namespace spades {
 			void LocalPlayerHurt(HurtType type, bool sourceGiven, Vector3 source) override;
 			void LocalPlayerBuildError(BuildFailureReason reason) override;
 			// IWorldListener end
+
+			float GetClientTime() { return time; }
 		};
 	} // namespace client
 } // namespace spades

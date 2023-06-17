@@ -27,6 +27,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <enet/enet.h>
 
 #include "PhysicsConstants.h"
 #include "Player.h"
@@ -149,6 +150,16 @@ namespace spades {
 			void SendVersionEnhanced(const std::set<std::uint8_t> &propertyIds);
 			void SendSupportedExtensions();
 
+			struct {
+				unsigned char aos_replayVersion = 1;
+
+				std::unique_ptr<IStream> stream;
+				float startTime;
+				bool recording;
+			} demo;
+
+			void DemoRegisterPacket(ENetPacket *);
+
 		public:
 			NetClient(Client *);
 			~NetClient();
@@ -200,6 +211,8 @@ namespace spades {
 
 			double GetDownlinkBps() { return bandwidthMonitor->GetDownlinkBps(); }
 			double GetUplinkBps() { return bandwidthMonitor->GetUplinkBps(); }
+
+			void StartDemo(std::string);
 		};
 	} // namespace client
 } // namespace spades

@@ -44,6 +44,7 @@
 #include <Core/Settings.h>
 #include <Core/Strings.h>
 #include <Core/TMPUtils.h>
+#include <Core/FileManager.h>
 
 DEFINE_SPADES_SETTING(cg_unicode, "1");
 
@@ -382,6 +383,8 @@ namespace spades {
 			std::fill(savedPlayerTeam.begin(), savedPlayerTeam.end(), -1);
 
 			bandwidthMonitor.reset(new BandwidthMonitor(host));
+
+			demo.recording = false;
 		}
 		NetClient::~NetClient() {
 			SPADES_MARK_FUNCTION();
@@ -501,6 +504,10 @@ namespace spades {
 				stmp::optional<NetPacketReader> readerOrNone;
 
 				if (event.type == ENET_EVENT_TYPE_RECEIVE) {
+					if (demo.recording) {
+						DemoRegisterPacket(event.packet);
+					}
+
 					readerOrNone.reset(event.packet);
 					auto &reader = readerOrNone.value();
 
@@ -1593,7 +1600,9 @@ namespace spades {
 			wri.Write((uint8_t)GetLocalPlayer().GetId());
 			wri.Write(bits);
 
-			enet_peer_send(peer, 0, wri.CreatePacket());
+			ENetPacket *pkt = wri.CreatePacket();
+			enet_peer_send(peer, 0, pkt);
+			DemoRegisterPacket(pkt);
 		}
 
 		void NetClient::SendWeaponInput(WeaponInput inp) {
@@ -1612,7 +1621,9 @@ namespace spades {
 			wri.Write((uint8_t)GetLocalPlayer().GetId());
 			wri.Write(bits);
 
-			enet_peer_send(peer, 0, wri.CreatePacket());
+			ENetPacket *pkt = wri.CreatePacket();
+			enet_peer_send(peer, 0, pkt);
+			DemoRegisterPacket(pkt);
 		}
 
 		void NetClient::SendBlockAction(spades::IntVector3 v, BlockActionType type) {
@@ -1661,7 +1672,9 @@ namespace spades {
 			wri.Write((uint8_t)255); // clip_ammo; not used?
 			wri.Write((uint8_t)255); // reserve_ammo; not used?
 
-			enet_peer_send(peer, 0, wri.CreatePacket());
+			ENetPacket *pkt = wri.CreatePacket();
+			enet_peer_send(peer, 0, pkt);
+			DemoRegisterPacket(pkt);
 		}
 
 		void NetClient::SendHeldBlockColor() {
@@ -1670,7 +1683,10 @@ namespace spades {
 			wri.Write((uint8_t)GetLocalPlayer().GetId());
 			IntVector3 v = GetLocalPlayer().GetBlockColor();
 			wri.WriteColor(v);
-			enet_peer_send(peer, 0, wri.CreatePacket());
+
+			ENetPacket *pkt = wri.CreatePacket();
+			enet_peer_send(peer, 0, pkt);
+			DemoRegisterPacket(pkt);
 		}
 
 		void NetClient::SendTool() {
@@ -1685,7 +1701,9 @@ namespace spades {
 				default: SPInvalidEnum("tool", GetLocalPlayer().GetTool());
 			}
 
-			enet_peer_send(peer, 0, wri.CreatePacket());
+			ENetPacket *pkt = wri.CreatePacket();
+			enet_peer_send(peer, 0, pkt);
+			DemoRegisterPacket(pkt);
 		}
 
 		void NetClient::SendGrenade(const Grenade &g) {
@@ -1704,7 +1722,10 @@ namespace spades {
 			wri.Write(v.x);
 			wri.Write(v.y);
 			wri.Write(v.z);
-			enet_peer_send(peer, 0, wri.CreatePacket());
+
+			ENetPacket *pkt = wri.CreatePacket();
+			enet_peer_send(peer, 0, pkt);
+			DemoRegisterPacket(pkt);
 		}
 
 		void NetClient::SendHit(int targetPlayerId, HitType type) {
@@ -1911,6 +1932,32 @@ namespace spades {
 			}
 
 			return text;
+		}
+
+		void NetClient::StartDemo(std::string fileName) {
+			demo.stream = FileManager::OpenForWriting(fileName.c_str());
+			demo.startTime = client->GetClientTime();
+			demo.recording = true;
+
+			std::vector<unsigned char> buf = { demo.aos_replayVersion, (unsigned char)protocolVersion};
+			demo.stream->Write(buf.data(), buf.size());
+			demo.stream->Flush();
+		}
+
+		void NetClient::DemoRegisterPacket(ENetPacket * pkt) {
+			if (!demo.stream || !demo.recording)
+				return;
+
+			float recDeltaTime = client->GetClientTime() - demo.startTime;
+			demo.stream->Write(&recDeltaTime, sizeof(recDeltaTime));
+			demo.stream->Flush();
+
+			unsigned short len = pkt->dataLength;
+			demo.stream->Write(&len, sizeof(len));
+			demo.stream->Flush();
+
+			demo.stream->Write(pkt->data, len);
+			demo.stream->Flush();
 		}
 	} // namespace client
 } // namespace spades

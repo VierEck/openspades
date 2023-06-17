@@ -359,6 +359,15 @@ namespace spades {
 					fn2 += '_';
 				}
 			}
+
+			std::string demoName = "Demos/" + fn2 + ".demo";
+			try {
+				net->StartDemo(demoName);
+				SPLog("Demo Recording Started at '%s'", demoName.c_str());
+			} catch (const std::exception &ex) {
+				SPLog("Failed to open new demo file '%s' (%s)", demoName.c_str(), ex.what());
+			}
+
 			fn2 = "NetLogs/" + fn2 + ".log";
 
 			try {
