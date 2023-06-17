@@ -158,6 +158,8 @@ namespace spades {
 
 				bool recording;
 				bool replaying;
+
+				bool paused;
 			} demo;
 
 			void DemoRegisterPacket(ENetPacket *);
@@ -222,6 +224,10 @@ namespace spades {
 			double GetUplinkBps() { return bandwidthMonitor->GetUplinkBps(); }
 
 			void StartDemo(std::string fileName, const ServerAddress &hostname, bool replay = false);
+
+			void DemoPause(bool unpause = false);
+
+			bool IsDemoPaused() { return demo.paused; }
 		};
 	} // namespace client
 } // namespace spades

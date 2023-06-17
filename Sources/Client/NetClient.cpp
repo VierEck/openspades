@@ -580,6 +580,9 @@ namespace spades {
 		void NetClient::DoDemo() {
 			SPADES_MARK_FUNCTION();
 
+			if (demo.paused)
+				return;
+
 			while (demo.startTime + demo.deltaTime < client->GetClientTime()) {
 				try {
 					DemoReadNextPacket();
@@ -2053,6 +2056,7 @@ namespace spades {
 			}
 			demo.startTime = client->GetClientTime();
 			demo.recording = !replay;
+			demo.paused = false;
 		}
 
 		void NetClient::DemoRegisterPacket(ENetPacket * pkt) {
@@ -2145,6 +2149,12 @@ namespace spades {
 				World::PlayerPersistent &pers = GetWorld()->GetPlayerPersistent(33);
 				pers.name = (std::string)cg_playerName;
 			}
+		}
+
+		void NetClient::DemoPause(bool unpause) {
+			demo.paused = !unpause;
+			if (unpause)
+				demo.startTime = client->GetClientTime() - demo.deltaTime;
 		}
 	} // namespace client
 } // namespace spades
