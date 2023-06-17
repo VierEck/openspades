@@ -76,7 +76,7 @@ namespace spades {
         spades::ui::ListView @serverList;
         MainScreenServerListLoadingView @loadingView;
         MainScreenServerListErrorView @errorView;
-        bool loading = false, loaded = false;
+        bool loading = false, loaded = false, demoList = false;
 
         private ConfigItem cg_protocolVersion("cg_protocolVersion", "3");
         private ConfigItem cg_lastQuickConnectHost("cg_lastQuickConnectHost", "127.0.0.1");
@@ -90,6 +90,13 @@ namespace spades {
             float contentsWidth = 750.f;
             float contentsLeft = (Manager.Renderer.ScreenWidth - contentsWidth) * 0.5f;
             float footerPos = Manager.Renderer.ScreenHeight - 50.f;
+			{
+				spades::ui::Button button(Manager);
+                button.Caption = _Tr("MainScreen", "Server List / Demo List");
+                button.Bounds = AABB2(contentsLeft, 165, 180.f, 30.f);
+                @button.Activated = spades::ui::EventHandler(this.OnChangeListPressed);
+                AddChild(button);
+			}
             {
                 spades::ui::Button button(Manager);
                 button.Caption = _Tr("MainScreen", "Connect");
@@ -271,7 +278,7 @@ namespace spades {
             @serverList.Model = spades::ui::ListViewModel(); // empty
             errorView.Visible = false;
             loadingView.Visible = true;
-            helper.StartQuery();
+            helper.StartQuery(demoList);
         }
 
         void ServerListItemActivated(ServerListModel @sender, MainScreenServerItem @item) {
@@ -453,6 +460,11 @@ namespace spades {
         }
 
         private void OnConnectPressed(spades::ui::UIElement @sender) { Connect(); }
+		
+		private void OnChangeListPressed(spades::ui::UIElement @sender) {
+			demoList = !demoList;
+			LoadServerList();
+		}
 
         void HotKey(string key) {
             if (IsEnabled and key == "Enter") {

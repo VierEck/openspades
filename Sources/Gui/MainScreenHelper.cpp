@@ -57,6 +57,7 @@ namespace spades {
 
 	public:
 		static ServerItem *Create(Json::Value &val);
+		static ServerItem *CreateDemoItem(std::string fileName);
 
 		inline const std::string &GetName() const { return mName; }
 		inline const std::string &GetAddress() const { return mIp; }
@@ -104,6 +105,24 @@ namespace spades {
 		return item;
 	}
 
+	ServerItem *ServerItem::CreateDemoItem(std::string fileName) {
+		ServerItem *item = NULL;
+		std::string name, ip, map, gameMode, country, version;
+		int ping = 0, players = 0, maxPlayers = 1;
+
+		name = fileName;
+		ip = "aos://16777343:32887";
+		gameMode = "";
+		country = "";
+		map = "";
+		version = "0.75"; //FIX ME. display correct version
+
+		item = new ServerItem(name, ip, map, gameMode, country, version, ping, players, maxPlayers);
+		
+		return item;
+	}
+
+
 	namespace gui {
 		constexpr auto FAVORITE_PATH = "/favorite_servers.json";
 
@@ -137,11 +156,33 @@ namespace spades {
 				ReturnResult(std::move(resp));
 			}
 
+			void GetDemoList() {
+				std::unique_ptr<MainScreenServerList> resp{new MainScreenServerList()};
+
+				std::vector<std::string> FileNames = FileManager::EnumFiles("Demos/");
+				for (auto file : FileNames) {
+					if (file.substr(file.size() - 5, 5) != ".demo")
+						continue;
+
+					std::unique_ptr<ServerItem> srv{ServerItem::CreateDemoItem(file)};
+
+					if (srv) {
+						resp->list.emplace_back(new MainScreenServerItem(srv.get(), owner->favorites.count(srv->GetAddress()) >= 1),false);
+					}
+				}
+				ReturnResult(std::move(resp));
+			}
+
 		public:
-			ServerListQuery(MainScreenHelper *owner) : owner{owner} {}
+			ServerListQuery(MainScreenHelper *owner, bool dL) : owner{owner} { demoList = dL; }
+			bool demoList;
 
 			void Run() override {
 				try {
+					if (demoList) {
+						GetDemoList();
+						return;
+					}
 					std::unique_ptr<CURL, CURLEasyDeleter> cHandle{curl_easy_init()};
 					if (cHandle) {
 						size_t (*curlWriteCallback)(void *, size_t, size_t, ServerListQuery *) =
@@ -260,13 +301,13 @@ namespace spades {
 			return false;
 		}
 
-		void MainScreenHelper::StartQuery() {
+		void MainScreenHelper::StartQuery(bool dL) {
 			if (query) {
 				// There already is an ongoing query
 				return;
 			}
 
-			query = new ServerListQuery(this);
+			query = new ServerListQuery(this, dL);
 			query->Start();
 		}
 
