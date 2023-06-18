@@ -26,6 +26,7 @@
 
 #include "IAudioChunk.h"
 #include "IAudioDevice.h"
+#include "Fonts.h"
 
 #include "ChatWindow.h"
 #include "ClientUI.h"
@@ -98,6 +99,7 @@ DEFINE_SPADES_SETTING(cg_keySpeedUp, "Keypad 8");
 DEFINE_SPADES_SETTING(cg_keySpeedDown, "Keypad 2");
 DEFINE_SPADES_SETTING(cg_keySpeedNormalize, "Keypad 1");
 DEFINE_SPADES_SETTING(cg_SpeedChangeValue, "0.2");
+DEFINE_SPADES_SETTING(cg_KeyProgressUi, "MiddleMouseButton");
 
 namespace spades {
 	namespace client {
@@ -118,6 +120,9 @@ namespace spades {
 			if (IsLimboViewActive()) {
 				return true;
 			}
+			if (demo.replaying && demo.uiActive) {
+				return true;
+			}
 			return false;
 		}
 
@@ -131,6 +136,11 @@ namespace spades {
 
 			if (IsLimboViewActive()) {
 				limbo->MouseEvent(x, y);
+				return;
+			}
+
+			if (demo.replaying && demo.uiActive) {
+				DemoUiMouseInput(x, y);
 				return;
 			}
 
@@ -213,6 +223,77 @@ namespace spades {
 			}
 		}
 
+		bool DemoProgressBarHitBox(float x, float y, float w, float h, float sY) {
+			if (x >= (w * 0.25f) &&
+				x <= (w * 0.75f) &&
+				y >= (h - sY * 3.f - 10.f) &&
+				y <= (h - sY * 3.f + 28.f)
+				)
+				return true;
+			return false;
+		}
+		bool DemoProgressMiddleHitBox(float x, float y, float w, float h, float sY) {
+			if (x >= (w * 0.25f) &&
+				x <= (w * 0.75f) &&
+				y <= (h - sY * 3.f)
+				)
+				return true;
+			return false;
+		}
+		bool DemoProgressForwardHitBox(float x, float y, float w, float h, float sY) {
+			if (x > (w * 0.75f) &&
+				y <= (h - sY * 3.f)
+				)
+				return true;
+			return false;
+		}
+		bool DemoProgressBackwardHitBox(float x, float y, float w, float h, float sY) {
+			if (x < (w * 0.25f) &&
+				y <= (h - sY * 3.f)
+				)
+				return true;
+			return false;
+		}
+
+		void Client::DemoUiMouseInput(float x, float y) {
+			demo.cursor.x = x;
+			demo.cursor.y = y;
+
+			float w = renderer->ScreenWidth();
+			float h = renderer->ScreenHeight();
+			IFont &font = fontManager->GetGuiFont();
+			auto size = font.Measure("A");
+			size.y += 10.f;
+
+			demo.cursor.x = std::max(demo.cursor.x, 0.f);
+			demo.cursor.y = std::max(demo.cursor.y, 0.f);
+			demo.cursor.x = std::min(demo.cursor.x, w);
+			demo.cursor.y = std::min(demo.cursor.y, h);
+			float startBar = w * 0.25f;
+			float halfBar = w * 0.5f;
+
+			demo.skipTo = -1.f;
+			if (DemoProgressMiddleHitBox(x, y, w, h, size.y)) {
+				demo.skipTo = -2.f;
+				return;
+			}
+			if (DemoProgressBarHitBox(x, y, w, h, size.y)) {
+
+				float multiplier = net->GetDemoEndTime() / halfBar;
+				float skipTo = (x - startBar) * multiplier;
+
+				demo.skipTo = skipTo;
+				return;
+			}
+			if (DemoProgressForwardHitBox(x, y, w, h, size.y)) {
+				demo.skipTo = -3.f;
+				return;
+			}
+			if (DemoProgressBackwardHitBox(x, y, w, h, size.y)) {
+				demo.skipTo = -4.f;
+			}
+		}
+
 		void Client::WheelEvent(float x, float y) {
 			SPADES_MARK_FUNCTION();
 
@@ -290,6 +371,16 @@ namespace spades {
 		void Client::KeyEvent(const std::string &name, bool down) {
 			SPADES_MARK_FUNCTION();
 
+			if (demo.replaying && CheckKey(cg_KeyProgressUi, name) && down) {
+				if (scriptedUI->NeedsInput()) {
+					scriptedUI->CloseUI();
+					demo.uiActive = true;
+					return;
+				}
+				demo.uiActive = !demo.uiActive;
+				return;
+			}
+
 			if (scriptedUI->NeedsInput()) {
 				if (!scriptedUI->isIgnored(name)) {
 					scriptedUI->KeyEvent(name, down);
@@ -317,6 +408,8 @@ namespace spades {
 							scriptedUI->EnterClientMenu();
 						}
 					}
+					if (demo.replaying)
+						demo.uiActive = false;
 				}
 			} else if (world) {
 				if (IsLimboViewActive()) {
@@ -361,6 +454,37 @@ namespace spades {
 						demo.SetSpeed(1);
 						net->DemoNormalizeTime();
 						return;
+					}
+					if (demo.uiActive && down) {
+						if (name == "LeftMouseButton") {
+							if (demo.skipTo >= 0.f) 
+								net->DemoSkip(demo.skipTo - net->GetDemoDeltaTime());
+							if (demo.skipTo == -2.f)
+								net->DemoPause(net->IsDemoPaused());
+							if (demo.skipTo == -3.f)
+								net->DemoSkip((float)cg_SkipValue);
+							if (demo.skipTo == -4.f)
+								net->DemoSkip((float)cg_SkipValue * (-1.f));
+							return;
+						} else if (name == "RightMouseButton") {
+							if (demo.skipTo == -3.f)
+								net->DemoUps(1);
+							if (demo.skipTo == -4.f)
+								net->DemoUps(-1);
+							if (demo.skipTo == -2.f) {
+								demo.SetSpeed(1);
+								net->DemoNormalizeTime();
+							}
+							return;
+						} else if (name == "WheelUp") {
+							demo.SetSpeed(demo.speed + (float)cg_SpeedChangeValue);
+							net->DemoNormalizeTime();
+							return;
+						} else if (name == "WheelDown") {
+							demo.SetSpeed(demo.speed - (float)cg_SpeedChangeValue);
+							net->DemoNormalizeTime();
+							return;
+						}
 					}
 				}
 

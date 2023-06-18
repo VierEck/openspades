@@ -248,6 +248,7 @@ namespace spades {
 			void DemoUps(int ups);
 			void DemoPause(bool unpause = false);
 
+			bool IsDemoRecording() { return demo.recording; }
 			bool IsDemoPaused() { return demo.paused; }
 			bool IsDemoSkimming() { return demo.skimming; }
 
@@ -258,8 +259,8 @@ namespace spades {
 				return b;
 			}
 			float GetDemoDeltaTime() { return demo.deltaTime; }
+			float GetDemoEndTime() { return demo.endTime; }
 			std::string GetDemoEndTimeStr() { return demo.endTimeStr; }
-			bool IsDemoRecording() { return demo.recording; }
 		};
 	} // namespace client
 } // namespace spades

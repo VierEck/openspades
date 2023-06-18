@@ -114,8 +114,10 @@ namespace spades {
 
 			demo.speed = 1;
 			demo.replaying = replay;
-			if (demo.replaying)
+			if (demo.replaying) {
 				demo.fileName = demoName;
+				demo.Initiate();
+			}
 
 			renderer->SetFogDistance(128.f);
 			renderer->SetFogColor(MakeVector3(.8f, 1.f, 1.f));

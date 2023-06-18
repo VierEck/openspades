@@ -411,7 +411,18 @@ namespace spades {
 						return;
 					speed = sp;
 				}
+
+				bool uiActive;
+				float skipTo;
+				Vector2 cursor;
+
+				void Initiate() {
+					cursor = MakeVector2(0.f,0.f);
+					skipTo = -1.f;
+					uiActive = false; 
+				}
 			} demo;
+			void DemoUiMouseInput(float x, float y);
 
 		protected:
 			~Client();
