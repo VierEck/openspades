@@ -635,6 +635,9 @@ namespace spades {
 		void Client::PlayerFiredWeapon(spades::client::Player &p) {
 			SPADES_MARK_FUNCTION();
 
+			if (IsMuted())
+				return;
+
 			if (&p == world->GetLocalPlayer()) {
 				localFireVibrationTime = time;
 			}

@@ -166,6 +166,7 @@ namespace spades {
 				bool replaying;
 
 				bool paused;
+				bool skimming;
 
 				std::vector<char> lastWorldUpdate;
 				std::vector<char> lastFogColour;
@@ -245,6 +246,7 @@ namespace spades {
 			void DemoPause(bool unpause = false);
 
 			bool IsDemoPaused() { return demo.paused; }
+			bool IsDemoSkimming() { return demo.skimming; }
 
 			void DemoNormalizeTime();
 			float GetDemoDeltaTime() { return demo.deltaTime; }

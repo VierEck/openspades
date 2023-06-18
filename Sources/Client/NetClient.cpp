@@ -2191,10 +2191,10 @@ namespace spades {
 			}
 			DemoNormalizeTime();
 			DemoJoinGame();
-			if (demo.paused) {
-				GetWorld()->Advance(0);
-			}
 			DemoSkimReadLastFogWorld();
+			if (demo.paused)
+				GetWorld()->Advance(0);
+			demo.skimming = false;
 		}
 
 		void NetClient::DemoSkimReadLastFogWorld() {
@@ -2246,6 +2246,7 @@ namespace spades {
 		void NetClient::DemoSkipMap() {
 			SPADES_MARK_FUNCTION();
 
+			demo.skimming = true;
 			while (demo.data[0] != PacketTypeStateData) {
 				try {
 					DemoReadNextPacket();
@@ -2284,6 +2285,7 @@ namespace spades {
 			if (sec > 3.0f) //update nades stuck in pause.
 				GetWorld()->Advance(skipToTime - demo.deltaTime);
 
+			demo.skimming = true;
 			float beforeTime = demo.deltaTime;
 			while (demo.deltaTime < skipToTime) {
 				try {
@@ -2328,6 +2330,7 @@ namespace spades {
 			if (ups > 180) //update nades stuck in pause. not accurate though
 				GetWorld()->Advance(ups / 60.f);
 
+			demo.skimming = true;
 			float beforeTime = demo.deltaTime;
 			while (demo.countUps < skipToUps) {
 				try {
