@@ -592,8 +592,12 @@ namespace spades {
 					throw;
 				}
 
-				if (ignore.IsInPktTypes(demo.data[0])) {
+				int type = demo.data[0];
+				if (ignore.IsInPktTypes(type)) {
 					continue;
+				}
+				if (type == PacketTypeWorldUpdate) {
+					demo.countUps++;
 				}
 
 				try {
@@ -2064,6 +2068,7 @@ namespace spades {
 		}
 
 		void NetClient::ScanDemo() {
+			demo.endUps = demo.countUps = 0;
 			uint64_t pos = demo.stream->GetPosition();
 			unsigned char type;
 			unsigned short len;
@@ -2074,6 +2079,10 @@ namespace spades {
 
 				if (type == PacketTypeMapStart) {
 					mapStartPositions.push_back(std::make_pair(demo.endTime, pos));
+				}
+
+				if (type == PacketTypeWorldUpdate) {
+					demo.endUps++;
 				}
 
 				pos = demo.stream->GetPosition();
@@ -2140,6 +2149,9 @@ namespace spades {
 			} catch (...) {
 				throw;
 			}
+
+			if (reader.GetType() == PacketTypeStateData)
+				GetWorld()->SetLocalPlayerIndex(33);
 		}
 
 		void NetClient::DemoSkipMap() {
@@ -2152,7 +2164,7 @@ namespace spades {
 					throw;
 				}
 
-				if (ignore.IsInPktTypes(demo.data[0])) {
+				if (DemoSkimIgnoreType(demo.data[0], demo.deltaTime)) {
 					continue;
 				}
 
@@ -2178,10 +2190,9 @@ namespace spades {
 			}
 		}
 
-		void NetClient::DemoSetSkimOfs(float sec, float skipToTime) {
-			if (sec < 0) {
-				demo.deltaTime = 0;
-			}
+		void NetClient::DemoSetSkimOfs(float sec_ups, float skipToTime) {
+			if (sec_ups < 0)
+				demo.deltaTime = demo.countUps = 0;
 
 			//first=time, second=offset
 			int64_t pos = demo.stream->GetPosition();
@@ -2230,6 +2241,7 @@ namespace spades {
 
 			if (type == PacketTypeWorldUpdate) {
 				demo.lastWorldUpdate = demo.data;
+				demo.countUps++;
 				return true;
 			}
 			if (type == PacketTypeGrenadePacket) {
@@ -2290,6 +2302,50 @@ namespace spades {
 				beforeTime = demo.deltaTime;
 
 				if (DemoSkimIgnoreType(demo.data[0], skipToTime)) {
+					continue;
+				}
+
+				try {
+					DemoHandleCurrentData();
+				} catch (...) {
+					SPRaise("Error handling demo packet"); 
+				}
+			}
+			DemoSkimEnd();
+		}
+
+		void NetClient::DemoUps(int ups) {
+			if (ups == 0 || !demo.paused)
+				return;
+
+			int skipToUps = demo.countUps + ups;
+			if (skipToUps > demo.endUps) {
+				skipToUps = demo.endUps;
+			} else if (skipToUps < 0) {
+				skipToUps = 0;
+			}
+			if (skipToUps == demo.countUps) {
+				return;
+			}
+			DemoSetSkimOfs(ups, demo.deltaTime);
+
+			if (ups > 180) //update nades stuck in pause. not accurate though
+				GetWorld()->Advance(ups / 60.f);
+
+			float beforeTime = demo.deltaTime;
+			while (demo.countUps < skipToUps) {
+				try {
+					DemoReadNextPacket();
+				} catch (...) {
+					SPRaise("Error reading demo file");
+				}
+
+				if (GetWorld() && (ups * (1 - 2 * (ups < 0)) < 180)) {
+					GetWorld()->Advance(demo.deltaTime - beforeTime);
+				}
+				beforeTime = demo.deltaTime;
+
+				if (DemoSkimIgnoreType(demo.data[0], demo.deltaTime)) {
 					continue;
 				}
 

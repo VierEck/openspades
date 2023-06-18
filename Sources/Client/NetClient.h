@@ -155,8 +155,10 @@ namespace spades {
 				std::vector<char> data;
 
 				float startTime;
-				float endTime;
 				float deltaTime;
+				float endTime;
+				int countUps;
+				int endUps;
 
 				std::string endTimeStr;
 
@@ -240,6 +242,7 @@ namespace spades {
 
 			void DemoPause(bool unpause = false);
 			void DemoSkip(float sec);
+			void DemoUps(int ups);
 
 			bool IsDemoPaused() { return demo.paused; }
 

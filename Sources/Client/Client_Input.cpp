@@ -92,6 +92,8 @@ DEFINE_SPADES_SETTING(cg_keyPause, "Keypad 5");
 DEFINE_SPADES_SETTING(cg_keySkipForward, "Keypad 6");
 DEFINE_SPADES_SETTING(cg_keySkipRewind, "Keypad 4");
 DEFINE_SPADES_SETTING(cg_SkipValue, "15");
+DEFINE_SPADES_SETTING(cg_keyNextUps, "Keypad 9");
+DEFINE_SPADES_SETTING(cg_keyPrevUps, "Keypad 7");
 
 namespace spades {
 	namespace client {
@@ -328,6 +330,14 @@ namespace spades {
 					}
 					if (CheckKey(cg_keySkipRewind, name) && down) {
 						net->DemoSkip((float)cg_SkipValue * (-1.f));
+						return;
+					}
+					if (CheckKey(cg_keyNextUps, name) && down) {
+						net->DemoUps(1);
+						return;
+					}
+					if (CheckKey(cg_keyPrevUps, name) && down) {
+						net->DemoUps(-1);
 						return;
 					}
 				}
