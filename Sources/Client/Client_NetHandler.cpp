@@ -61,6 +61,9 @@ namespace spades {
 		void Client::JoinedGame() {
 			// Note: A local player doesn't exist yet
 
+			if (demo.replaying && !net->IsDemoFirstJoin())
+				return;
+
 			// Prepare the spectate mode
 			followCameraState.enabled = false;
 			freeCameraState.position = MakeVector3(256, 256, 30);

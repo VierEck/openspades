@@ -170,6 +170,8 @@ namespace spades {
 
 				std::vector<char> lastWorldUpdate;
 				std::vector<char> lastFogColour;
+
+				bool isFirstJoin;
 			} demo;
 
 			void ScanDemo();
@@ -249,6 +251,11 @@ namespace spades {
 			bool IsDemoSkimming() { return demo.skimming; }
 
 			void DemoNormalizeTime();
+			bool IsDemoFirstJoin() { 
+				bool b = demo.isFirstJoin;
+				demo.isFirstJoin = false;
+				return b;
+			}
 			float GetDemoDeltaTime() { return demo.deltaTime; }
 			std::string GetDemoEndTimeStr() { return demo.endTimeStr; }
 		};

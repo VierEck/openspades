@@ -2058,6 +2058,7 @@ namespace spades {
 				savedPackets.clear();
 
 				ScanDemo();
+				demo.isFirstJoin = true;
 			} else {
 				demo.stream = FileManager::OpenForWriting(fileName.c_str());
 
