@@ -98,7 +98,7 @@ namespace spades {
 			};
 
 			struct {
-				std::array<int, 9> pktTypes {
+				std::array<int, 5> pktTypes {
 					PacketTypePositionData,
 					PacketTypeOrientationData,
 
