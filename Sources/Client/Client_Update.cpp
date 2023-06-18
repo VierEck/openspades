@@ -197,7 +197,7 @@ namespace spades {
 
 				float frameStep = 1.f / 60.f;
 				while (worldSubFrame >= frameStep) {
-					world->Advance(frameStep);
+					world->Advance(frameStep * demo.speed);
 					worldSubFrame -= frameStep;
 				}
 			}

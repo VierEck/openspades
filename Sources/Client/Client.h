@@ -405,6 +405,12 @@ namespace spades {
 			struct {
 				bool replaying;
 				std::string fileName;
+				float speed;
+				void SetSpeed(float sp) {
+					if (sp < 0.1f || sp > 10)
+						return;
+					speed = sp;
+				}
 			} demo;
 
 		protected:
@@ -500,6 +506,7 @@ namespace spades {
 			// IWorldListener end
 
 			float GetClientTime() { return time; }
+			float GetClientTimeMultiplied() { return time * demo.speed; }
 		};
 	} // namespace client
 } // namespace spades

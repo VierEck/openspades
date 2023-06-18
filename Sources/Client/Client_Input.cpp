@@ -94,6 +94,10 @@ DEFINE_SPADES_SETTING(cg_keySkipRewind, "Keypad 4");
 DEFINE_SPADES_SETTING(cg_SkipValue, "15");
 DEFINE_SPADES_SETTING(cg_keyNextUps, "Keypad 9");
 DEFINE_SPADES_SETTING(cg_keyPrevUps, "Keypad 7");
+DEFINE_SPADES_SETTING(cg_keySpeedUp, "Keypad 8");
+DEFINE_SPADES_SETTING(cg_keySpeedDown, "Keypad 2");
+DEFINE_SPADES_SETTING(cg_keySpeedNormalize, "Keypad 1");
+DEFINE_SPADES_SETTING(cg_SpeedChangeValue, "0.2");
 
 namespace spades {
 	namespace client {
@@ -338,6 +342,21 @@ namespace spades {
 					}
 					if (CheckKey(cg_keyPrevUps, name) && down) {
 						net->DemoUps(-1);
+						return;
+					}
+					if (CheckKey(cg_keySpeedUp, name) && down) {
+						demo.SetSpeed(demo.speed + (float)cg_SpeedChangeValue);
+						net->DemoNormalizeTime();
+						return;
+					}
+					if (CheckKey(cg_keySpeedDown, name) && down) {
+						demo.SetSpeed(demo.speed - (float)cg_SpeedChangeValue);
+						net->DemoNormalizeTime();
+						return;
+					}
+					if (CheckKey(cg_keySpeedNormalize, name) && down) {
+						demo.SetSpeed(1);
+						net->DemoNormalizeTime();
 						return;
 					}
 				}

@@ -112,8 +112,9 @@ namespace spades {
 			SPADES_MARK_FUNCTION();
 			SPLog("Initializing...");
 
+			demo.speed = 1;
 			demo.replaying = replay;
-			if (demo.replaying) 
+			if (demo.replaying)
 				demo.fileName = demoName;
 
 			renderer->SetFogDistance(128.f);

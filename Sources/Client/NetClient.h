@@ -240,12 +240,13 @@ namespace spades {
 
 			void StartDemo(std::string fileName, const ServerAddress &hostname, bool replay = false);
 
-			void DemoPause(bool unpause = false);
 			void DemoSkip(float sec);
 			void DemoUps(int ups);
+			void DemoPause(bool unpause = false);
 
 			bool IsDemoPaused() { return demo.paused; }
 
+			void DemoNormalizeTime();
 			float GetDemoDeltaTime() { return demo.deltaTime; }
 			std::string GetDemoEndTimeStr() { return demo.endTimeStr; }
 		};

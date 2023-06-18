@@ -585,7 +585,7 @@ namespace spades {
 			if (demo.paused)
 				return;
 
-			while (demo.startTime + demo.deltaTime < client->GetClientTime()) {
+			while (demo.startTime + demo.deltaTime < client->GetClientTimeMultiplied()) {
 				try {
 					DemoReadNextPacket();
 				} catch (...) {
@@ -2154,29 +2154,6 @@ namespace spades {
 				GetWorld()->SetLocalPlayerIndex(33);
 		}
 
-		void NetClient::DemoSkipMap() {
-			SPADES_MARK_FUNCTION();
-
-			while (demo.data[0] != PacketTypeStateData) {
-				try {
-					DemoReadNextPacket();
-				} catch (...) {
-					throw;
-				}
-
-				if (DemoSkimIgnoreType(demo.data[0], demo.deltaTime)) {
-					continue;
-				}
-
-				try {
-					DemoHandleCurrentData();
-				} catch (...) {
-					throw;
-				}
-			}
-			DemoSkimEnd();
-		}
-
 		void NetClient::DemoJoinGame() {
 			if (!GetLocalPlayerOrNull()) {
 				GetWorld()->SetLocalPlayerIndex(33);
@@ -2212,7 +2189,7 @@ namespace spades {
 				DemoSkipMap();
 				return;
 			}
-			demo.startTime = client->GetClientTime() - demo.deltaTime;
+			DemoNormalizeTime();
 			DemoJoinGame();
 			if (demo.paused) {
 				GetWorld()->Advance(0);
@@ -2264,10 +2241,29 @@ namespace spades {
 			return false;
 		}
 
-		void NetClient::DemoPause(bool unpause) {
-			demo.paused = !unpause;
-			if (unpause)
-				demo.startTime = client->GetClientTime() - demo.deltaTime;
+		void NetClient::DemoNormalizeTime() { demo.startTime = client->GetClientTimeMultiplied() - demo.deltaTime; }
+
+		void NetClient::DemoSkipMap() {
+			SPADES_MARK_FUNCTION();
+
+			while (demo.data[0] != PacketTypeStateData) {
+				try {
+					DemoReadNextPacket();
+				} catch (...) {
+					throw;
+				}
+
+				if (DemoSkimIgnoreType(demo.data[0], demo.deltaTime)) {
+					continue;
+				}
+
+				try {
+					DemoHandleCurrentData();
+				} catch (...) {
+					throw;
+				}
+			}
+			DemoSkimEnd();
 		}
 
 		void NetClient::DemoSkip(float sec) {
@@ -2356,6 +2352,12 @@ namespace spades {
 				}
 			}
 			DemoSkimEnd();
+		}
+
+		void NetClient::DemoPause(bool unpause) {
+			demo.paused = !unpause;
+			if (unpause)
+				DemoNormalizeTime();
 		}
 	} // namespace client
 } // namespace spades
