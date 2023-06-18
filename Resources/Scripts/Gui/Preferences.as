@@ -689,7 +689,11 @@ namespace spades {
             layouter.AddToggleField(_Tr("Preferences", "Enable Demo Recording"), "cg_DemoRecord");
             ConfigField @nameField = layouter.AddInputField(_Tr("Preferences", "Demo Filename Date Format"), "cg_demoFileNameFormat");
 
-            layouter.AddHeading(_Tr("Preferences", "Replay Key Shortcuts"));
+            layouter.AddHeading(_Tr("Preferences", "Demo Replaying"));
+            layouter.AddToggleField(_Tr("Preferences", "Show Progressbar only in UI"), "cg_DemoProgressBarOnlyInUi");
+
+            layouter.AddHeading(_Tr("Preferences", "Replay Keys"));
+            layouter.AddControl(_Tr("Preferences", "Toggle UI"), "cg_KeyProgressUi");
             layouter.AddControl(_Tr("Preferences", "Pause"), "cg_keyPause");
 
             layouter.AddControl(_Tr("Preferences", "FastForward"), "cg_keySkipForward");
