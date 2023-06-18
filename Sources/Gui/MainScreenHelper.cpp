@@ -161,7 +161,7 @@ namespace spades {
 
 				std::vector<std::string> FileNames = FileManager::EnumFiles("Demos/");
 				for (auto file : FileNames) {
-					if (file.substr(file.size() - 5, 5) != ".demo")
+					if (file.size() > 5 && file.substr(file.size() - 5, 5) != ".demo")
 						continue;
 
 					std::unique_ptr<ServerItem> srv{ServerItem::CreateDemoItem(file)};
