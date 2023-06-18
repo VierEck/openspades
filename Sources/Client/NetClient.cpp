@@ -2071,6 +2071,11 @@ namespace spades {
 			demo.paused = false;
 		}
 
+		void NetClient::StopDemo() {
+			demo.recording = false;
+			demo.stream.reset();
+		}
+
 		void NetClient::ScanDemo() {
 			demo.endUps = demo.countUps = 0;
 			uint64_t pos = demo.stream->GetPosition();

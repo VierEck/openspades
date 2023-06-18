@@ -298,6 +298,9 @@ namespace spades {
 						scriptedUI->setIgnored("");
 					}
 				}
+				if (!(bool)cg_DemoRecord && net->IsDemoRecording()) {
+					net->StopDemo();
+				}
 				return;
 			}
 

@@ -242,6 +242,7 @@ namespace spades {
 			double GetUplinkBps() { return bandwidthMonitor->GetUplinkBps(); }
 
 			void StartDemo(std::string fileName, const ServerAddress &hostname, bool replay = false);
+			void StopDemo();
 
 			void DemoSkip(float sec);
 			void DemoUps(int ups);
@@ -258,6 +259,7 @@ namespace spades {
 			}
 			float GetDemoDeltaTime() { return demo.deltaTime; }
 			std::string GetDemoEndTimeStr() { return demo.endTimeStr; }
+			bool IsDemoRecording() { return demo.recording; }
 		};
 	} // namespace client
 } // namespace spades
