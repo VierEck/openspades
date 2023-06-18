@@ -105,11 +105,6 @@ namespace spades {
 					PacketTypeSetHP,
 					PacketTypeProgressBar,
 					PacketTypeRestock,
-
-					PacketTypeHandShakeInit,
-					PacketTypeHandShakeReturn,
-					PacketTypeVersionGet,
-					PacketTypeVersionSend,
 				};
 				bool IsInPktTypes(int type) {
 					auto end = std::end(pktTypes);
