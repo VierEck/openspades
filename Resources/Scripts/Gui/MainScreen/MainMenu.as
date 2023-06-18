@@ -482,6 +482,9 @@ namespace spades {
                 bool Found = false; 
                 for(int i = 0, count = savedlist.length; i < count; i++) {
                     MainScreenServerItem@ item = savedlist[i];
+                    if (item.Protocol != "0.75" and item.Protocol != "0.76" or item.MapName == "invalid aos_replay") {
+                        continue;
+                    }
                     if (item.Name == addressField.Text) {
                         Found = true;
                         break;

@@ -33,6 +33,7 @@
 #include <Core/IStream.h>
 #include <Core/Settings.h>
 #include <Core/Thread.h>
+#include <Core/ServerAddress.h>
 #include <Gui/PackageUpdateManager.h>
 #include <OpenSpades.h>
 
@@ -112,10 +113,32 @@ namespace spades {
 
 		name = fileName;
 		ip = "aos://16777343:32887";
-		gameMode = "";
-		country = "";
-		map = "";
-		version = "0.75"; //FIX ME. display correct version
+		gameMode = country = map = "";
+
+		auto stream = FileManager::OpenForReading(("Demos/" + fileName).c_str());
+		unsigned char ver;
+
+		if (stream->Read(&ver, sizeof(ver)) == sizeof(ver)) {
+			if (ver != (unsigned char)aos_replayVersion::v1) {
+				map = "invalid aos_replay";
+			}
+
+			if (stream->Read(&ver, sizeof(ver)) == sizeof(ver)) {
+				switch (ver) {
+					case (unsigned char)ProtocolVersion::v075:
+						version = "0.75";
+						break;
+					case (unsigned char)ProtocolVersion::v076:
+						version = "0.76";
+						break;
+					default: version = "invalid";
+				}
+			} else {
+				version = "invalid";
+			}
+		} else {
+			map = "invalid aos_replay";
+		}
 
 		item = new ServerItem(name, ip, map, gameMode, country, version, ping, players, maxPlayers);
 		
