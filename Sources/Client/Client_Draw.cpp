@@ -73,6 +73,7 @@ DEFINE_SPADES_SETTING(cg_hideHud, "0");
 DEFINE_SPADES_SETTING(cg_playerNames, "2");
 DEFINE_SPADES_SETTING(cg_playerNameX, "0");
 DEFINE_SPADES_SETTING(cg_playerNameY, "0");
+DEFINE_SPADES_SETTING(cg_specNames, "1");
 
 namespace spades {
 	namespace client {
@@ -642,8 +643,8 @@ namespace spades {
 			};
 
 			if (HasTargetPlayer(GetCameraMode())) {
-				addLine(_Tr("Client", "Following {0}",
-				            world->GetPlayerPersistent(GetCameraTargetPlayerId()).name));
+				addLine(_Tr("Client", "Following {0} (#{1})",
+				            world->GetPlayerPersistent(GetCameraTargetPlayerId()).name, GetCameraTargetPlayerId()));
 			}
 
 			textY += 10.0f;
@@ -670,6 +671,51 @@ namespace spades {
 			}
 
 			mapView->Draw();
+
+			if (cg_specNames)
+				DrawAllPlayerNames();
+		}
+
+		void Client::DrawAllPlayerNames() {
+			for (int i = 0; i < world->GetNumPlayerSlots(); ++i) {
+				stmp::optional<Player &> p = world->GetPlayer(i);
+
+				if (!p)
+					continue;
+				if (p->GetTeamId() >= 2)
+					continue;
+
+				Vector3 posxyz = Project(p->GetEye());
+				if (posxyz.z <= 0 || posxyz.z > 1.0004f)
+					continue;
+
+				Vector2 pos = {posxyz.x, posxyz.y};
+
+				Vector3 pToLocalDiff;
+				if (FollowsNonLocalPlayer(GetCameraMode())) {
+					pToLocalDiff = p->GetEye() - GetCameraTargetPlayer().GetEye();
+				} else {
+					pToLocalDiff = p->GetEye() - freeCameraState.position;
+				}
+
+				Vector4 color;
+				if (p->IsAlive()) {
+					float dist2d = sqrt(pToLocalDiff.x * pToLocalDiff.x + pToLocalDiff.y * pToLocalDiff.y);
+					if (dist2d <= 128.f) {
+						color = MakeVector4(1, 1, 1, 1);
+					} else {
+						color = MakeVector4(1, 1, 0, 1);
+					}
+				} else {
+					color = MakeVector4(1, 0, 0, 1);
+				}
+
+				IFont &font = fontManager->GetGuiFont();
+				Vector2 size = font.Measure(p->GetName());
+				pos.x -= size.x * .5f;
+				pos.y -= size.y;
+				font.DrawShadow(p->GetName(), pos, 0.85, color, MakeVector4(0, 0, 0, 0.5));
+			}
 		}
 
 		void Client::DrawAlert() {
