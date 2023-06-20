@@ -691,15 +691,9 @@ namespace spades {
 
 				Vector2 pos = {posxyz.x, posxyz.y};
 
-				Vector3 pToLocalDiff;
-				if (FollowsNonLocalPlayer(GetCameraMode())) {
-					pToLocalDiff = p->GetEye() - GetCameraTargetPlayer().GetEye();
-				} else {
-					pToLocalDiff = p->GetEye() - freeCameraState.position;
-				}
-
 				Vector4 color;
 				if (p->IsAlive()) {
+					Vector3 pToLocalDiff = p->GetEye() - lastSceneDef.viewOrigin;
 					float dist2d = sqrt(pToLocalDiff.x * pToLocalDiff.x + pToLocalDiff.y * pToLocalDiff.y);
 					if (dist2d <= 128.f) {
 						color = MakeVector4(1, 1, 1, 1);
