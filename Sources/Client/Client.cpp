@@ -64,7 +64,7 @@ DEFINE_SPADES_SETTING(cg_skipDeadPlayersWhenDead, "1");
 
 SPADES_SETTING(cg_playerName);
 
-DEFINE_SPADES_SETTING(cg_demoFileNameFormat, "dmy");
+DEFINE_SPADES_SETTING(cg_demoFileNameFormat, "year month day time");
 DEFINE_SPADES_SETTING(cg_demoRecord, "1");
 
 namespace spades {
@@ -375,23 +375,36 @@ namespace spades {
 				fn2 = buf;
 
 				if ((bool)cg_demoRecord) {
-					int countChars = 0;
-					for (char c : demoNameFormat) {
-						if (countChars == 3)
-							break;
+					int yearIdx = demoNameFormat.find("year");
+					int monthIdx = demoNameFormat.find("month");
+					int dayIdx = demoNameFormat.find("day");
+					int timeIdx = demoNameFormat.find("time");
 
-						int dateNum;
-						if (c == 'd')
-							dateNum = tm.tm_mday;
-						else if (c == 'm')
-							dateNum = tm.tm_mon;
-						else if (c == 'y')
-							dateNum = tm.tm_year + 1900;
-						else
-							continue;
-
-						demoName += std::to_string(dateNum) + "_";
-						countChars++;
+					int count = 0;
+					for (int i = 0; i < demoNameFormat.size(); i++) {
+						if (i == timeIdx) {
+							sprintf(buf, "%02d_%02d_%02d_", tm.tm_hour, tm.tm_min, tm.tm_sec);
+							demoName += buf;
+							count++;
+						}
+						if (i == dayIdx) {
+							sprintf(buf, "%02d_", tm.tm_mday);
+							demoName += buf;
+							count++;
+						}
+						if (i == monthIdx) {
+							sprintf(buf, "%02d_", tm.tm_mon + 1);
+							demoName += buf;
+							count++;
+						}
+						if (i == yearIdx) {
+							sprintf(buf, "%04d_", tm.tm_year + 1900);
+							demoName += buf;
+							count++;
+						}
+					}
+					if (count != 4) {
+						demoNameFormat = "log";
 					}
 				}
 			}
