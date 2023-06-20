@@ -686,7 +686,7 @@ namespace spades {
 
             StandardPreferenceLayouter layouter(this, fontManager);
             layouter.AddHeading(_Tr("Preferences", "Demo Recording"));
-            layouter.AddToggleField(_Tr("Preferences", "Enable Demo Recording"), "cg_DemoRecord");
+            layouter.AddToggleField(_Tr("Preferences", "Enable Demo Recording"), "cg_demoRecord");
             ConfigField @nameField = layouter.AddInputField(_Tr("Preferences", "Demo Filename Date Format"), "cg_demoFileNameFormat");
 
             layouter.AddHeading(_Tr("Preferences", "Demo Replaying"));

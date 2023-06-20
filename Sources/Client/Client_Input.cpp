@@ -88,7 +88,7 @@ DEFINE_SPADES_SETTING(cg_alerts, "1");
 SPADES_SETTING(cg_manualFocus);
 DEFINE_SPADES_SETTING(cg_keyAutoFocus, "MiddleMouseButton");
 
-SPADES_SETTING(cg_DemoRecord);
+SPADES_SETTING(cg_demoRecord);
 DEFINE_SPADES_SETTING(cg_keyPause, "Keypad 5");
 DEFINE_SPADES_SETTING(cg_keySkipForward, "Keypad 6");
 DEFINE_SPADES_SETTING(cg_keySkipRewind, "Keypad 4");
@@ -389,7 +389,7 @@ namespace spades {
 						scriptedUI->setIgnored("");
 					}
 				}
-				if (!(bool)cg_DemoRecord && net->IsDemoRecording()) {
+				if (!(bool)cg_demoRecord && net->IsDemoRecording()) {
 					net->StopDemo();
 				}
 				return;
