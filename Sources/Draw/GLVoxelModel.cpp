@@ -707,10 +707,6 @@ namespace spades {
 					continue;
 				}
 
-				static GLProgramUniform customColor("customColor");
-				customColor(program);
-				customColor.SetValue(param.customColor.x, param.customColor.y, param.customColor.z);
-
 				Matrix4 modelMatrix = param.matrix;
 				static GLProgramUniform projectionViewModelMatrix("projectionViewModelMatrix");
 				projectionViewModelMatrix(VoxelModelOccludedProgram);
