@@ -28,11 +28,24 @@ namespace spades {
 	namespace draw {
 		GLModelRenderer::GLModelRenderer(GLRenderer &r) : renderer(r), device(r.GetGLDevice()) {
 			SPADES_MARK_FUNCTION();
+
+			for (int i = 0; i < 32; ++i) {
+				playerVisibilityQueries[i] = device.GenQuery();
+				device.BeginQuery(IGLDevice::SamplesPassed, playerVisibilityQueries[i]);
+				device.EndQuery(IGLDevice::SamplesPassed);
+			}
+			device.Flush();
+
 			modelCount = 0;
 		}
 
 		GLModelRenderer::~GLModelRenderer() {
 			SPADES_MARK_FUNCTION();
+
+			for (int i = 0; i < 32; ++i) {
+				device.DeleteQuery(playerVisibilityQueries[i]);
+			}
+
 			Clear();
 		}
 
@@ -116,6 +129,110 @@ namespace spades {
 
 					model->RenderDynamicLightPass(m.params, lights);
 				}
+			}
+		}
+
+		void GLModelRenderer::DetermineVisiblePlayers(bool visiblePlayers[]) {
+			SPADES_MARK_FUNCTION();
+			// determine player visbility via the last frame
+			for (int i = 0; i < 32; ++i) {
+				int iSamplesPassed = device.GetQueryObjectUInteger(playerVisibilityQueries[i],
+				                                                    IGLDevice::QueryResult);
+				visiblePlayers[i] = (iSamplesPassed > 0);
+			}
+			// set up the occlusion query
+			device.ColorMask(false, false, false, false);
+			device.DepthMask(false);
+			// iterate every player and get the new occlusion query going
+			for (int i = 0; i < 32; ++i) {
+				device.BeginQuery(IGLDevice::SamplesPassed, playerVisibilityQueries[i]);
+				for (RenderModel &m : models) {
+					std::vector<client::ModelRenderParam> playerParams;
+					for (client::ModelRenderParam p : m.params) {
+						if (p.playerID == i) {
+							playerParams.push_back(p);
+						}
+					}
+					m.model->RenderOcclusionTestPass(playerParams);
+				}
+				device.EndQuery(IGLDevice::SamplesPassed);
+			}
+			// end with query stuff
+			device.ColorMask(true, true, true, true);
+			device.DepthMask(true);
+		}
+
+		void GLModelRenderer::RenderOccludedPlayers(bool visiblePlayers[]) {
+			SPADES_MARK_FUNCTION();
+
+			GLProfiler::Context profiler(renderer.GetGLProfiler(),
+			                             "Model [%d model(s), %d unique model type(s)]", modelCount,
+			                             (int)models.size());
+
+			for (RenderModel &m : models) {
+				std::vector<client::ModelRenderParam> params;
+				for (client::ModelRenderParam p : m.params) {
+					if (p.playerID != -1 && !visiblePlayers[p.playerID] || p.occludedByFog) {
+						params.push_back(p);
+					}
+				}
+				m.model->RenderOccludedPass(params);
+			}
+		}
+
+		void GLModelRenderer::RenderNonOccludedPlayers(bool visiblePlayers[], std::vector<GLDynamicLight> lights) {
+			SPADES_MARK_FUNCTION();
+
+			GLProfiler::Context profiler(renderer.GetGLProfiler(),
+			                             "Model [%d model(s), %d unique model type(s)]", modelCount,
+			                             (int)models.size());
+
+			device.Enable(IGLDevice::DepthTest, true);
+			device.DepthFunc(IGLDevice::Less);
+			device.Enable(IGLDevice::Texture2D, true);
+			device.Enable(IGLDevice::Blend, false);
+
+			for (RenderModel &m : models) {
+				std::vector<client::ModelRenderParam> params;
+				for (client::ModelRenderParam p : m.params) {
+					if (p.playerID != -1 && visiblePlayers[p.playerID] && !p.occludedByFog) {
+						params.push_back(p);
+					}
+				}
+				m.model->RenderSunlightPass(params, true);
+			}
+
+			device.Enable(IGLDevice::Blend, true);
+			device.Enable(IGLDevice::DepthTest, true);
+			device.DepthFunc(IGLDevice::Equal);
+			device.BlendFunc(IGLDevice::SrcAlpha, IGLDevice::One);
+
+			for (RenderModel &m : models) {
+				std::vector<client::ModelRenderParam> params;
+				for (client::ModelRenderParam p : m.params) {
+					if (p.playerID != -1 && visiblePlayers[p.playerID] || p.occludedByFog) {
+						params.push_back(p);
+					}
+				}
+				m.model->RenderDynamicLightPass(params, lights);
+			}
+		}
+
+		void GLModelRenderer::RenderOutlinesPlayers(bool visiblePlayers[]) {
+			SPADES_MARK_FUNCTION();
+
+			GLProfiler::Context profiler(renderer.GetGLProfiler(),
+			                             "Model [%d model(s), %d unique model type(s)]", modelCount,
+			                             (int)models.size());
+
+			for (RenderModel &m : models) {
+				std::vector<client::ModelRenderParam> params;
+				for (client::ModelRenderParam p : m.params) {
+					if (p.playerID != -1 && !visiblePlayers[p.playerID] || p.occludedByFog) {
+						params.push_back(p);
+					}
+				}
+				m.model->RenderOutlinesPass(params);
 			}
 		}
 

@@ -45,6 +45,7 @@ DEFINE_SPADES_SETTING(cg_thirdperson, "0");
 DEFINE_SPADES_SETTING(cg_manualFocus, "0");
 DEFINE_SPADES_SETTING(cg_depthOfFieldAmount, "1");
 DEFINE_SPADES_SETTING(cg_shake, "1");
+DEFINE_SPADES_SETTING(cg_specEsp, "1");
 
 namespace spades {
 	namespace client {
@@ -165,6 +166,10 @@ namespace spades {
 				float scale = 1.f;
 				float vibPitch = 0.f;
 				float vibYaw = 0.f;
+
+				if (cg_specEsp && world->GetLocalPlayer()) {
+					def.allowEsp = world->GetLocalPlayer()->IsSpectator();
+				}
 
 				switch (GetCameraMode()) {
 					case ClientCameraMode::None: SPUnreachable();

@@ -886,6 +886,14 @@ namespace spades {
 			IntVector3 col = p.GetColor();
 			param.customColor = MakeVector3(col.x / 255.f, col.y / 255.f, col.z / 255.f);
 
+			if (client.GetLastSceneDef().allowEsp) {
+				param.playerID = GetPlayer().GetId();
+				Vector3 diff = origin - client.GetLastSceneDef().viewOrigin;
+				if (sqrtf(diff.x * diff.x + diff.y * diff.y) > 128.0f) {
+					param.occludedByFog = true;
+				}
+			}
+
 			float yaw = atan2(front.y, front.x) + M_PI * .5f;
 			float pitch = -atan2(front.z, sqrt(front.x * front.x + front.y * front.y));
 

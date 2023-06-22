@@ -32,6 +32,8 @@ namespace spades {
 			float zNear, zFar;
 			bool skipWorld;
 
+			bool allowEsp = false;
+
 			float depthOfFieldFocalLength;
 			float depthOfFieldNearBlurStrength;
 			float depthOfFieldFarBlurStrength;

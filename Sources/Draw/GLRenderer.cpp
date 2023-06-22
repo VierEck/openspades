@@ -70,6 +70,8 @@
 #include <Core/Settings.h>
 #include <Core/Stopwatch.h>
 
+#include "../Imports/OpenGL.h"
+
 namespace spades {
 	namespace draw {
 		// TODO: raise error for any calls after Shutdown().
@@ -868,9 +870,101 @@ namespace spades {
 
 			device->FrontFace(IGLDevice::CW);
 
-			{
+			bool visiblePlayers[32];
+
+			if (!sceneDef.allowEsp) {
 				GLProfiler::Context p(*profiler, "Non-mirrored Objects");
 				RenderObjects();
+			} else {
+				device->Enable(IGLDevice::DepthTest, true);
+				device->Enable(IGLDevice::Texture2D, true);
+				device->Enable(IGLDevice::Blend, false);
+
+				bool needsDepthPrepass = settings.r_depthPrepass || settings.r_ssao;
+				bool needsFullDepthPrepass = settings.r_ssao;
+
+				GLFramebufferManager::BufferHandle ssaoBuffer;
+
+				if (needsDepthPrepass) {
+					{
+						GLProfiler::Context p(*profiler, "Depth-only Prepass");
+						device->DepthFunc(IGLDevice::Less);
+						if (!sceneDef.skipWorld && mapRenderer) {
+							mapRenderer->Prerender();
+						}
+						if (needsFullDepthPrepass) {
+							modelRenderer->Prerender(false);
+						}
+					}
+
+					if (settings.r_ssao) {
+						{
+							GLProfiler::Context p(*profiler, "Screen Space Ambient Occlusion");
+							device->DepthMask(false);
+							device->Enable(IGLDevice::DepthTest, false);
+							device->Enable(IGLDevice::CullFace, false);
+
+							ssaoBuffer = GLSSAOFilter(*this).Filter();
+							ssaoBufferTexture = ssaoBuffer.GetTexture();
+
+							device->BindTexture(IGLDevice::Texture2D, ssaoBufferTexture);
+							device->TexParamater(IGLDevice::Texture2D, IGLDevice::TextureMagFilter,
+							                     IGLDevice::Nearest);
+							device->TexParamater(IGLDevice::Texture2D, IGLDevice::TextureMinFilter,
+							                     IGLDevice::Nearest);
+
+							device->Enable(IGLDevice::CullFace, true);
+						}
+						GetFramebufferManager()->PrepareSceneRendering();
+					}
+				}
+				{
+					GLProfiler::Context p(*profiler, "Sunlight Pass");
+
+					device->DepthFunc(IGLDevice::LessOrEqual);
+					if (!sceneDef.skipWorld && mapRenderer) {
+						mapRenderer->RenderSunlightPass();
+					}
+					modelRenderer->RenderSunlightPass(false);
+				}
+				if (settings.r_ssao) {
+					device->BindTexture(IGLDevice::Texture2D, ssaoBufferTexture);
+					device->TexParamater(IGLDevice::Texture2D, IGLDevice::TextureMagFilter,
+					                     IGLDevice::Linear);
+					device->TexParamater(IGLDevice::Texture2D, IGLDevice::TextureMinFilter,
+					                     IGLDevice::Linear);
+					ssaoBuffer.Release();
+				}
+
+				// render the map (sunlight pass) first
+				device->DepthFunc(IGLDevice::LessOrEqual);
+				device->Enable(IGLDevice::DepthTest, true);
+				device->Enable(IGLDevice::Texture2D, true);
+				device->Enable(IGLDevice::Blend, false);
+
+				if (!sceneDef.skipWorld && mapRenderer) {
+					mapRenderer->Prerender();
+					mapRenderer->RenderSunlightPass();
+				}
+
+				// determine the visible players (via their ID's)
+				modelRenderer->Prerender(false);
+				modelRenderer->DetermineVisiblePlayers(visiblePlayers);
+
+				device->Enable(IGLDevice::Blend, true);
+				device->Enable(IGLDevice::DepthTest, true);
+				device->DepthFunc(IGLDevice::Equal);
+				device->BlendFunc(IGLDevice::SrcAlpha, IGLDevice::One);
+
+				if (!sceneDef.skipWorld && mapRenderer) {
+					mapRenderer->RenderDynamicLightPass(lights);
+				}
+
+				GLProfiler::Context p(*profiler, "Debug Line");
+				device->Enable(IGLDevice::Blend, false);
+				device->Enable(IGLDevice::DepthTest, true);
+				device->DepthFunc(IGLDevice::Less);
+				RenderDebugLines();
 			}
 
 			device->Enable(IGLDevice::CullFace, false);
@@ -900,6 +994,48 @@ namespace spades {
 				device->BlendFunc(IGLDevice::One, IGLDevice::OneMinusSrcAlpha, IGLDevice::Zero,
 				                  IGLDevice::One);
 				longSpriteRenderer->Render();
+			}
+
+			if (sceneDef.allowEsp) {
+				device->DepthMask(true);
+				device->Clear(IGLDevice::DepthBufferBit);
+				device->Enable(IGLDevice::CullFace, true);
+
+				modelRenderer->RenderNonOccludedPlayers(visiblePlayers, lights);
+
+				device->Enable(IGLDevice::DepthTest, true);
+				device->DepthFunc(IGLDevice::Less);
+				device->Enable(IGLDevice::Texture2D, true);
+				device->Enable(IGLDevice::Blend, false);
+				modelRenderer->RenderOccludedPlayers(visiblePlayers);
+
+				{
+					GLProfiler::Context p(*profiler, "Outlines Pass");
+
+					device->Enable(IGLDevice::Blend, false);
+					device->Enable(IGLDevice::DepthTest, true);
+					device->Enable(IGLDevice::CullFace, true);
+					device->DepthFunc(IGLDevice::LessOrEqual);
+
+					glCullFace(GL_FRONT);
+					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+					glEnable(GL_POLYGON_OFFSET_LINE);
+					glPolygonOffset(1, 1);
+					glLineWidth(2);
+
+					modelRenderer->RenderOutlinesPlayers(visiblePlayers);
+
+					glLineWidth(1);
+					glCullFace(GL_BACK);
+					glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+					glPolygonOffset(0, 0);
+					glDisable(GL_POLYGON_OFFSET_LINE);
+				}
+
+				device->ColorMask(true, true, true, true);
+				device->Enable(IGLDevice::Blend, true);
+				device->DepthMask(false);
+				device->Enable(IGLDevice::CullFace, false);
 			}
 
 			device->Enable(IGLDevice::DepthTest, false);

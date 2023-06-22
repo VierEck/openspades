@@ -54,6 +54,10 @@ namespace spades {
 			GLProgram *shadowMapProgram;
 			Handle<GLImage> aoImage;
 
+			GLProgram *VoxelModelOutlinesProgram;
+			GLProgram *VoxelModelOccludedProgram;
+			GLProgram *VoxelModelOcclusionTestProgram;
+
 			IGLDevice::UInteger buffer;
 			IGLDevice::UInteger idxBuffer;
 			std::vector<Vertex> vertices;
@@ -90,6 +94,10 @@ namespace spades {
 			                            std::vector<GLDynamicLight> lights) override;
 
 			AABB3 GetBoundingBox() override { return boundingBox; }
+
+			virtual void RenderOutlinesPass(std::vector<client::ModelRenderParam> params);
+			virtual void RenderOccludedPass(std::vector<client::ModelRenderParam> params);
+			virtual void RenderOcclusionTestPass(std::vector<client::ModelRenderParam> params);
 		};
 	} // namespace draw
 } // namespace spades

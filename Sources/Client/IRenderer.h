@@ -60,6 +60,9 @@ namespace spades {
 			bool ghost = false;
 			/** Specifies the opacity of the model. Ignored if `ghost` is `false`. */
 			float opacity = 1.0;
+
+			int playerID = -1;
+			bool occludedByFog = false;
 		};
 
 		enum DynamicLightType {

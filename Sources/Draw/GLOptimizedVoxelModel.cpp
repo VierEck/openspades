@@ -58,6 +58,10 @@ namespace spades {
 			  renderer.RegisterProgram("Shaders/OptimizedVoxelModelShadowMap.program");
 			aoImage = renderer.RegisterImage("Gfx/AmbientOcclusion.png").Cast<GLImage>();
 
+			VoxelModelOutlinesProgram = renderer.RegisterProgram("Shaders/VoxelModelOutlines.program");
+			VoxelModelOccludedProgram = renderer.RegisterProgram("Shaders/VoxelModelOccluded.program");
+			VoxelModelOcclusionTestProgram = renderer.RegisterProgram("Shaders/VoxelModelOcclusionTest.program");
+
 			buffer = device.GenBuffer();
 			device.BindBuffer(IGLDevice::ArrayBuffer, buffer);
 			device.BufferData(IGLDevice::ArrayBuffer,
@@ -904,6 +908,248 @@ namespace spades {
 			device.EnableVertexAttribArray(normalAttribute(), false);
 
 			device.ActiveTexture(0);
+		}
+
+		void GLOptimizedVoxelModel::RenderOutlinesPass(std::vector<client::ModelRenderParam> params) {
+			SPADES_MARK_FUNCTION();
+
+			bool mirror = renderer.IsRenderingMirror();
+
+			device.ActiveTexture(0);
+			aoImage->Bind(IGLDevice::Texture2D);
+			device.TexParamater(IGLDevice::Texture2D, IGLDevice::TextureMinFilter,
+			                     IGLDevice::Linear);
+
+			device.ActiveTexture(1);
+			image->Bind(IGLDevice::Texture2D);
+			device.TexParamater(IGLDevice::Texture2D, IGLDevice::TextureMinFilter,
+			                     IGLDevice::Nearest);
+			device.TexParamater(IGLDevice::Texture2D, IGLDevice::TextureMagFilter,
+			                     IGLDevice::Nearest);
+
+			device.Enable(IGLDevice::CullFace, true);
+			device.Enable(IGLDevice::DepthTest, true);
+
+			VoxelModelOutlinesProgram->Use();
+
+			static GLProgramUniform modelOrigin("modelOrigin");
+			modelOrigin(VoxelModelOutlinesProgram);
+			modelOrigin.SetValue(origin.x, origin.y, origin.z);
+
+			static GLProgramAttribute positionAttribute("positionAttribute");
+			positionAttribute(VoxelModelOutlinesProgram);
+
+			static GLProgramUniform viewOriginVector("viewOriginVector");
+			viewOriginVector(VoxelModelOutlinesProgram);
+			const auto &viewOrigin = renderer.GetSceneDef().viewOrigin;
+			viewOriginVector.SetValue(viewOrigin.x, viewOrigin.y, viewOrigin.z);
+
+			device.BindBuffer(IGLDevice::ArrayBuffer, buffer);
+			device.VertexAttribPointer(positionAttribute(), 4, IGLDevice::UnsignedByte, false,
+			                            sizeof(Vertex), (void *)0);
+
+			device.BindBuffer(IGLDevice::ArrayBuffer, 0);
+			device.EnableVertexAttribArray(positionAttribute(), true);
+			device.BindBuffer(IGLDevice::ElementArrayBuffer, idxBuffer);
+
+			for (size_t i = 0; i < params.size(); i++) {
+				const client::ModelRenderParam &param = params[i];
+
+				if (mirror && param.depthHack)
+					continue;
+
+				Matrix4 modelMatrix = param.matrix;
+
+				static GLProgramUniform customColor("customColor");
+				customColor(VoxelModelOutlinesProgram);
+				customColor.SetValue(param.customColor.x, param.customColor.y, param.customColor.z);
+
+				static GLProgramUniform modelMatrixU("modelMatrix");
+				modelMatrixU(VoxelModelOutlinesProgram);
+				modelMatrixU.SetValue(modelMatrix);
+
+				static GLProgramUniform projectionViewModelMatrix("projectionViewModelMatrix");
+				projectionViewModelMatrix(VoxelModelOutlinesProgram);
+				const Matrix4 &pvMat = (renderer.GetProjectionViewMatrix());
+				projectionViewModelMatrix.SetValue(pvMat * modelMatrix);
+
+				static GLProgramUniform viewModelMatrix("viewModelMatrix");
+				viewModelMatrix(VoxelModelOutlinesProgram);
+				viewModelMatrix.SetValue(renderer.GetViewMatrix() * modelMatrix);
+
+				if (param.depthHack) {
+					device.DepthRange(0.f, 0.1f);
+				}
+
+				device.DrawElements(IGLDevice::Triangles, numIndices, IGLDevice::UnsignedInt, (void *)0);
+
+				if (param.depthHack) {
+					device.DepthRange(0.f, 1.f);
+				}
+			}
+
+			device.BindBuffer(IGLDevice::ElementArrayBuffer, 0);
+			device.EnableVertexAttribArray(positionAttribute(), false);
+		}
+
+		void GLOptimizedVoxelModel::RenderOccludedPass(std::vector<client::ModelRenderParam> params) {
+			SPADES_MARK_FUNCTION();
+
+			bool mirror = renderer.IsRenderingMirror();
+
+			device.ActiveTexture(0);
+			aoImage->Bind(IGLDevice::Texture2D);
+			device.TexParamater(IGLDevice::Texture2D, IGLDevice::TextureMinFilter,
+			                     IGLDevice::Linear);
+
+			device.ActiveTexture(1);
+			image->Bind(IGLDevice::Texture2D);
+			device.TexParamater(IGLDevice::Texture2D, IGLDevice::TextureMinFilter,
+			                     IGLDevice::Nearest);
+			device.TexParamater(IGLDevice::Texture2D, IGLDevice::TextureMagFilter,
+			                     IGLDevice::Nearest);
+
+			device.Enable(IGLDevice::CullFace, true);
+			device.Enable(IGLDevice::DepthTest, true);
+
+			device.Enable(IGLDevice::CullFace, true);
+			device.Enable(IGLDevice::DepthTest, true);
+
+			VoxelModelOccludedProgram->Use();
+
+			static GLProgramUniform modelOrigin("modelOrigin");
+			modelOrigin(VoxelModelOccludedProgram);
+			modelOrigin.SetValue(origin.x, origin.y, origin.z);
+
+			// setup attributes
+			static GLProgramAttribute positionAttribute("positionAttribute");
+			positionAttribute(VoxelModelOccludedProgram);
+
+			device.BindBuffer(IGLDevice::ArrayBuffer, buffer);
+			device.VertexAttribPointer(positionAttribute(), 4, IGLDevice::UnsignedByte, false,
+			                            sizeof(Vertex), (void *)0);
+
+			device.BindBuffer(IGLDevice::ArrayBuffer, 0);
+			device.EnableVertexAttribArray(positionAttribute(), true);
+			device.BindBuffer(IGLDevice::ElementArrayBuffer, idxBuffer);
+
+			for (size_t i = 0; i < params.size(); i++) {
+				const client::ModelRenderParam &param = params[i];
+
+				if (mirror && param.depthHack)
+					continue;
+
+				// frustrum cull
+				float rad = radius;
+				rad *= param.matrix.GetAxis(0).GetLength();
+				if (!renderer.SphereFrustrumCull(param.matrix.GetOrigin(), rad)) {
+					continue;
+				}
+
+				Matrix4 modelMatrix = param.matrix;
+				static GLProgramUniform projectionViewModelMatrix("projectionViewModelMatrix");
+				projectionViewModelMatrix(VoxelModelOccludedProgram);
+				const Matrix4 &pvMat = (renderer.GetProjectionViewMatrix());
+				projectionViewModelMatrix.SetValue(pvMat * modelMatrix);
+
+				if (param.depthHack) {
+					device.DepthRange(0.f, 0.1f);
+				}
+
+				device.DrawElements(IGLDevice::Triangles, numIndices, IGLDevice::UnsignedInt,
+				                     (void *)0);
+				if (param.depthHack) {
+					device.DepthRange(0.f, 1.f);
+				}
+			}
+
+			device.BindBuffer(IGLDevice::ElementArrayBuffer, 0);
+			device.EnableVertexAttribArray(positionAttribute(), false);
+		}
+
+		void GLOptimizedVoxelModel::RenderOcclusionTestPass(std::vector<client::ModelRenderParam> params) {
+			SPADES_MARK_FUNCTION();
+
+			bool mirror = renderer.IsRenderingMirror();
+
+			device.ActiveTexture(0);
+			aoImage->Bind(IGLDevice::Texture2D);
+			device.TexParamater(IGLDevice::Texture2D, IGLDevice::TextureMinFilter,
+			                     IGLDevice::Linear);
+
+			device.ActiveTexture(1);
+			image->Bind(IGLDevice::Texture2D);
+			device.TexParamater(IGLDevice::Texture2D, IGLDevice::TextureMinFilter,
+			                     IGLDevice::Nearest);
+			device.TexParamater(IGLDevice::Texture2D, IGLDevice::TextureMagFilter,
+			                     IGLDevice::Nearest);
+
+			device.Enable(IGLDevice::CullFace, true);
+			device.Enable(IGLDevice::DepthTest, true);
+
+			device.Enable(IGLDevice::CullFace, true);
+			device.Enable(IGLDevice::DepthTest, true);
+
+			VoxelModelOcclusionTestProgram->Use();
+
+			static GLProgramUniform modelOrigin("modelOrigin");
+			modelOrigin(VoxelModelOcclusionTestProgram);
+			modelOrigin.SetValue(origin.x, origin.y, origin.z);
+
+			// setup attributes
+			static GLProgramAttribute positionAttribute("positionAttribute");
+			positionAttribute(VoxelModelOcclusionTestProgram);
+
+			static GLProgramUniform viewOriginVector("viewOriginVector");
+			viewOriginVector(VoxelModelOcclusionTestProgram);
+			const auto &viewOrigin = renderer.GetSceneDef().viewOrigin;
+			viewOriginVector.SetValue(viewOrigin.x, viewOrigin.y, viewOrigin.z);
+
+			device.BindBuffer(IGLDevice::ArrayBuffer, buffer);
+			device.VertexAttribPointer(positionAttribute(), 4, IGLDevice::UnsignedByte, false,
+			                            sizeof(Vertex), (void *)0);
+
+			device.BindBuffer(IGLDevice::ArrayBuffer, 0);
+			device.EnableVertexAttribArray(positionAttribute(), true);
+			device.BindBuffer(IGLDevice::ElementArrayBuffer, idxBuffer);
+
+			for (size_t i = 0; i < params.size(); i++) {
+				const client::ModelRenderParam &param = params[i];
+
+				if (mirror && param.depthHack)
+					continue;
+
+				// frustrum cull
+				float rad = radius;
+				rad *= param.matrix.GetAxis(0).GetLength();
+				if (!renderer.SphereFrustrumCull(param.matrix.GetOrigin(), rad)) {
+					continue;
+				}
+
+				Matrix4 modelMatrix = param.matrix;
+
+				static GLProgramUniform modelMatrixU("modelMatrix");
+				modelMatrixU(VoxelModelOcclusionTestProgram);
+				modelMatrixU.SetValue(modelMatrix);
+
+				static GLProgramUniform projectionViewModelMatrix("projectionViewModelMatrix");
+				projectionViewModelMatrix(VoxelModelOcclusionTestProgram);
+				const Matrix4 &pvMat = (renderer.GetProjectionViewMatrix());
+				projectionViewModelMatrix.SetValue(pvMat * modelMatrix);
+
+				if (param.depthHack) {
+					device.DepthRange(0.f, 0.1f);
+				}
+
+				device.DrawElements(IGLDevice::Triangles, numIndices, IGLDevice::UnsignedInt,
+				                     (void *)0);
+				if (param.depthHack) {
+					device.DepthRange(0.f, 1.f);
+				}
+			}
+
+			device.BindBuffer(IGLDevice::ElementArrayBuffer, 0);
+			device.EnableVertexAttribArray(positionAttribute(), false);
 		}
 	} // namespace draw
 } // namespace spades
