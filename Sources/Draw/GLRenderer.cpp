@@ -392,7 +392,7 @@ namespace spades {
 		}
 
 		Vector3 GLRenderer::GetFogColorForSolidPass() {
-			if (settings.r_fogShadow && mapShadowRenderer) {
+			if (settings.r_fogShadow && mapShadowRenderer && !sceneDef.allowEsp) {
 				return MakeVector3(0, 0, 0);
 			} else {
 				return GetFogColor();
@@ -769,7 +769,7 @@ namespace spades {
 				GLProfiler::Context p(*profiler, "Shadow Map Pass");
 				device->Enable(IGLDevice::DepthTest, true);
 				device->DepthFunc(IGLDevice::Less);
-				if (shadowMapRenderer)
+				if (shadowMapRenderer && !sceneDef.allowEsp)
 					shadowMapRenderer->Render();
 			}
 
@@ -783,7 +783,7 @@ namespace spades {
 			device->ClearDepth(1.f);
 			device->DepthRange(0.f, 1.f);
 
-			if ((int)settings.r_water >= 2) {
+			if ((int)settings.r_water >= 2 && !sceneDef.allowEsp) {
 				// for Water 2 (r_water >= 2), we need to render
 				// reflection
 				try {
@@ -968,7 +968,7 @@ namespace spades {
 			}
 
 			device->Enable(IGLDevice::CullFace, false);
-			if (settings.r_water && waterRenderer) {
+			if (settings.r_water && waterRenderer && !sceneDef.allowEsp) {
 				GLProfiler::Context p(*profiler, "Water");
 				waterRenderer->Update(dt);
 				waterRenderer->Render();
@@ -1050,7 +1050,7 @@ namespace spades {
 					GLProfiler::Context p(*profiler, "Preparation");
 					handle = fbManager->StartPostProcessing();
 				}
-				if (settings.r_fogShadow && mapShadowRenderer) {
+				if (!sceneDef.allowEsp &&settings.r_fogShadow && mapShadowRenderer) {
 					GLProfiler::Context p(*profiler, "Volumetric Fog");
 					if (settings.ShouldUseFogFilter2()) {
 						if (!fogFilter2) {
@@ -1063,143 +1063,145 @@ namespace spades {
 				}
 				device->BindFramebuffer(IGLDevice::Framebuffer, handle.GetFramebuffer());
 
-				if (settings.r_softParticles) { // softparticle is a part of postprocess
-					GLProfiler::Context p(*profiler, "Soft Particle");
-					device->BlendFunc(IGLDevice::One, IGLDevice::OneMinusSrcAlpha, IGLDevice::Zero,
-					                  IGLDevice::One);
-					spriteRenderer->Render();
-				}
-
-				device->BlendFunc(IGLDevice::SrcAlpha, IGLDevice::OneMinusSrcAlpha, IGLDevice::Zero,
-				                  IGLDevice::One);
-
-				if (settings.r_depthOfField &&
-				    (sceneDef.depthOfFieldFocalLength > 0.f || sceneDef.blurVignette > 0.f)) {
-					GLProfiler::Context p(*profiler, "Depth of Field");
-					handle = GLDepthOfFieldFilter(*this).Filter(
-					  handle, sceneDef.depthOfFieldFocalLength, sceneDef.blurVignette,
-					  sceneDef.globalBlur, sceneDef.depthOfFieldNearBlurStrength,
-					  sceneDef.depthOfFieldFarBlurStrength);
-				}
-
-				if (settings.r_cameraBlur && !sceneDef.denyCameraBlur) {
-					if (!cameraBlur) {
-						cameraBlur = new GLCameraBlurFilter(*this);
+				if (!sceneDef.allowEsp) {
+					if (settings.r_softParticles) { // softparticle is a part of postprocess
+						GLProfiler::Context p(*profiler, "Soft Particle");
+						device->BlendFunc(IGLDevice::One, IGLDevice::OneMinusSrcAlpha, IGLDevice::Zero,
+										  IGLDevice::One);
+						spriteRenderer->Render();
 					}
 
-					GLProfiler::Context p(*profiler, "Camera Blur");
-					// FIXME: better (correctly constructed) radial blur algorithm
-					handle = cameraBlur->Filter(
-					  handle, std::min(settings.r_cameraBlur * 0.2f, 1.0f), sceneDef.radialBlur);
-				}
+					device->BlendFunc(IGLDevice::SrcAlpha, IGLDevice::OneMinusSrcAlpha, IGLDevice::Zero,
+									  IGLDevice::One);
 
-				if (settings.r_temporalAA) {
-					if (!temporalAAFilter) {
-						temporalAAFilter.reset(new GLTemporalAAFilter(*this));
+					if (settings.r_depthOfField &&
+						(sceneDef.depthOfFieldFocalLength > 0.f || sceneDef.blurVignette > 0.f)) {
+						GLProfiler::Context p(*profiler, "Depth of Field");
+						handle = GLDepthOfFieldFilter(*this).Filter(
+						  handle, sceneDef.depthOfFieldFocalLength, sceneDef.blurVignette,
+						  sceneDef.globalBlur, sceneDef.depthOfFieldNearBlurStrength,
+						  sceneDef.depthOfFieldFarBlurStrength);
 					}
-					GLProfiler::Context p(*profiler, "Temporal AA");
-					handle = temporalAAFilter->Filter(handle, settings.r_fxaa);
-				}
 
-				if (settings.r_bloom) {
-					GLProfiler::Context p(*profiler, "Bloom");
-					handle = lensDustFilter->Filter(handle);
-				}
-
-				// Do r_fxaa before lens filter so that color aberration looks nice.
-				if (settings.r_fxaa) {
-					GLProfiler::Context p(*profiler, "FXAA");
-					handle = GLFXAAFilter(*this).Filter(handle);
-				}
-
-				if (settings.r_lens) {
-					GLProfiler::Context p(*profiler, "Lens Filter");
-					handle = GLLensFilter(*this).Filter(handle);
-				}
-
-				if (settings.r_lensFlare) {
-					GLProfiler::Context p(*profiler, "Lens Flare");
-					device->BindFramebuffer(IGLDevice::Framebuffer, handle.GetFramebuffer());
-					GLLensFlareFilter(*this).Draw();
-				}
-
-				if (settings.r_lensFlare && settings.r_lensFlareDynamic) {
-					GLProfiler::Context p(*profiler, "Dynamic Light Lens Flare");
-					GLLensFlareFilter lensFlareRenderer(*this);
-					device->BindFramebuffer(IGLDevice::Framebuffer, handle.GetFramebuffer());
-					for (size_t i = 0; i < lights.size(); i++) {
-						const GLDynamicLight &dl = lights[i];
-						const client::DynamicLightParam &prm = dl.GetParam();
-						if (!prm.useLensFlare)
-							continue;
-						Vector3 color = prm.color * 0.6f;
-						{
-							// distance attenuation
-							float rad = (prm.origin - sceneDef.viewOrigin).GetPoweredLength();
-							rad /= prm.radius * prm.radius * 18.f;
-							if (rad > 1.f)
-								continue;
-							color *= 1.f - rad;
+					if (settings.r_cameraBlur && !sceneDef.denyCameraBlur) {
+						if (!cameraBlur) {
+							cameraBlur = new GLCameraBlurFilter(*this);
 						}
 
-						if (prm.type == client::DynamicLightTypeSpotlight) {
-							// spotlight
-							Vector3 diff = (sceneDef.viewOrigin - prm.origin).Normalize();
-							Vector3 lightdir = prm.spotAxis[2];
-							lightdir = lightdir.Normalize();
-							float cosVal = Vector3::Dot(diff, lightdir);
-							float minCosVal = cosf(prm.spotAngle * 0.5f);
-							if (cosVal < minCosVal) {
-								// out of range
+						GLProfiler::Context p(*profiler, "Camera Blur");
+						// FIXME: better (correctly constructed) radial blur algorithm
+						handle = cameraBlur->Filter(
+						  handle, std::min(settings.r_cameraBlur * 0.2f, 1.0f), sceneDef.radialBlur);
+					}
+
+					if (settings.r_temporalAA) {
+						if (!temporalAAFilter) {
+							temporalAAFilter.reset(new GLTemporalAAFilter(*this));
+						}
+						GLProfiler::Context p(*profiler, "Temporal AA");
+						handle = temporalAAFilter->Filter(handle, settings.r_fxaa);
+					}
+
+					if (settings.r_bloom) {
+						GLProfiler::Context p(*profiler, "Bloom");
+						handle = lensDustFilter->Filter(handle);
+					}
+
+					// Do r_fxaa before lens filter so that color aberration looks nice.
+					if (settings.r_fxaa) {
+						GLProfiler::Context p(*profiler, "FXAA");
+						handle = GLFXAAFilter(*this).Filter(handle);
+					}
+
+					if (settings.r_lens) {
+						GLProfiler::Context p(*profiler, "Lens Filter");
+						handle = GLLensFilter(*this).Filter(handle);
+					}
+
+					if (settings.r_lensFlare) {
+						GLProfiler::Context p(*profiler, "Lens Flare");
+						device->BindFramebuffer(IGLDevice::Framebuffer, handle.GetFramebuffer());
+						GLLensFlareFilter(*this).Draw();
+					}
+
+					if (settings.r_lensFlare && settings.r_lensFlareDynamic) {
+						GLProfiler::Context p(*profiler, "Dynamic Light Lens Flare");
+						GLLensFlareFilter lensFlareRenderer(*this);
+						device->BindFramebuffer(IGLDevice::Framebuffer, handle.GetFramebuffer());
+						for (size_t i = 0; i < lights.size(); i++) {
+							const GLDynamicLight &dl = lights[i];
+							const client::DynamicLightParam &prm = dl.GetParam();
+							if (!prm.useLensFlare)
+								continue;
+							Vector3 color = prm.color * 0.6f;
+							{
+								// distance attenuation
+								float rad = (prm.origin - sceneDef.viewOrigin).GetPoweredLength();
+								rad /= prm.radius * prm.radius * 18.f;
+								if (rad > 1.f)
+									continue;
+								color *= 1.f - rad;
+							}
+
+							if (prm.type == client::DynamicLightTypeSpotlight) {
+								// spotlight
+								Vector3 diff = (sceneDef.viewOrigin - prm.origin).Normalize();
+								Vector3 lightdir = prm.spotAxis[2];
+								lightdir = lightdir.Normalize();
+								float cosVal = Vector3::Dot(diff, lightdir);
+								float minCosVal = cosf(prm.spotAngle * 0.5f);
+								if (cosVal < minCosVal) {
+									// out of range
+									continue;
+								}
+								color *= (cosVal - minCosVal) / (1.f - minCosVal);
+							}
+
+							// view cull
+							if (Vector3::Dot(sceneDef.viewAxis[2], (prm.origin - sceneDef.viewOrigin)) <
+								0.f) {
 								continue;
 							}
-							color *= (cosVal - minCosVal) / (1.f - minCosVal);
+
+							lensFlareRenderer.Draw(prm.origin - sceneDef.viewOrigin, true, color,
+												   false);
 						}
-
-						// view cull
-						if (Vector3::Dot(sceneDef.viewAxis[2], (prm.origin - sceneDef.viewOrigin)) <
-						    0.f) {
-							continue;
-						}
-
-						lensFlareRenderer.Draw(prm.origin - sceneDef.viewOrigin, true, color,
-						                       false);
-					}
-				}
-
-				// FIXME: these passes should be combined for lower VRAM bandwidth usage
-
-				if (settings.r_hdr) {
-					GLProfiler::Context p(*profiler, "Auto Exposure");
-					handle = autoExposureFilter->Filter(handle, dt);
-				}
-
-				if (settings.r_hdr) {
-					GLProfiler::Context p(*profiler, "Gamma Correction");
-					handle = GLNonlinearlizeFilter(*this).Filter(handle);
-				}
-
-				if (settings.r_colorCorrection) {
-					GLProfiler::Context p(*profiler, "Color Correction");
-					Vector3 tint = smoothedFogColor + MakeVector3(1.f, 1.f, 1.f) * 0.5f;
-					tint = MakeVector3(1.f, 1.f, 1.f) / tint;
-					tint = Mix(tint, MakeVector3(1.f, 1.f, 1.f), 0.2f);
-					tint *= 1.f / std::min(std::min(tint.x, tint.y), tint.z);
-
-					float fogLuminance = (fogColor.x + fogColor.y + fogColor.z) * (1.0f / 3.0f);
-
-					if (settings.ShouldUseFogFilter2()) {
-						// `GLFogFilter2` adds a GI factor, so the fog receives some light
-						// even if the fog color is set to dark.
-						fogLuminance = fogLuminance * 0.9 + 0.2;
 					}
 
-					float exposure = powf(2.f, (float)settings.r_exposureValue * 0.5f);
-					handle =
-					  GLColorCorrectionFilter(*this).Filter(handle, tint * exposure, fogLuminance);
+					// FIXME: these passes should be combined for lower VRAM bandwidth usage
 
-					// update smoothed fog color
-					smoothedFogColor = Mix(smoothedFogColor, fogColor, 0.002f);
+					if (settings.r_hdr) {
+						GLProfiler::Context p(*profiler, "Auto Exposure");
+						handle = autoExposureFilter->Filter(handle, dt);
+					}
+
+					if (settings.r_hdr) {
+						GLProfiler::Context p(*profiler, "Gamma Correction");
+						handle = GLNonlinearlizeFilter(*this).Filter(handle);
+					}
+
+					if (settings.r_colorCorrection) {
+						GLProfiler::Context p(*profiler, "Color Correction");
+						Vector3 tint = smoothedFogColor + MakeVector3(1.f, 1.f, 1.f) * 0.5f;
+						tint = MakeVector3(1.f, 1.f, 1.f) / tint;
+						tint = Mix(tint, MakeVector3(1.f, 1.f, 1.f), 0.2f);
+						tint *= 1.f / std::min(std::min(tint.x, tint.y), tint.z);
+
+						float fogLuminance = (fogColor.x + fogColor.y + fogColor.z) * (1.0f / 3.0f);
+
+						if (settings.ShouldUseFogFilter2()) {
+							// `GLFogFilter2` adds a GI factor, so the fog receives some light
+							// even if the fog color is set to dark.
+							fogLuminance = fogLuminance * 0.9 + 0.2;
+						}
+
+						float exposure = powf(2.f, (float)settings.r_exposureValue * 0.5f);
+						handle =
+						  GLColorCorrectionFilter(*this).Filter(handle, tint * exposure, fogLuminance);
+
+						// update smoothed fog color
+						smoothedFogColor = Mix(smoothedFogColor, fogColor, 0.002f);
+					}
 				}
 			}
 
