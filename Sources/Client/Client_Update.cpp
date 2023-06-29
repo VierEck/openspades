@@ -178,7 +178,11 @@ namespace spades {
 				}
 
 				if (player->GetTeamId() >= 2) {
-					UpdateLocalSpectator(dt);
+					if (!player->IsBuilder()) {
+						UpdateLocalSpectator(dt);
+					} else {
+						UpdateLocalBuilder(dt);
+					}
 				} else {
 					UpdateLocalPlayer(dt);
 				}
@@ -550,6 +554,13 @@ namespace spades {
 			}
 
 			inp.jump = false;
+		}
+
+		/** Handles movement of local player in MapEditor. */
+		void Client::UpdateLocalBuilder(float dt) {
+			SPADES_MARK_FUNCTION();
+			Player &player = GetWorld()->GetLocalPlayer().value();
+			player.SetBuilderInput(playerInput, weapInput);
 		}
 
 #pragma mark - IWorldListener Handlers

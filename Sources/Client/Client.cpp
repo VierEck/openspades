@@ -651,6 +651,13 @@ namespace spades {
 			SPRaise("No free file name");
 		}
 
+#pragma mark - MapEditor
+
+		void Client::SetIsMapEditor(bool b) {
+			isMapEditor = b;
+			world->SetIsMapEditor(b);
+		}
+
 		void Client::LoadLocalMapEditor() {
 			std::unique_ptr<IStream> stream;
 			if (canvasFileName.size() > 0) {
@@ -704,7 +711,7 @@ namespace spades {
 			pers.name = (std::string)cg_playerName;
 			pers.kills = 0;
 
-			isMapEditor = true;
+			SetIsMapEditor(true);
 			SPLog("LocalMapEditor set");
 		}
 

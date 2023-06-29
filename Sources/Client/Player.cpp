@@ -90,6 +90,8 @@ namespace spades {
 
 		bool Player::IsLocalPlayer() { return world.GetLocalPlayer() == this; }
 
+		bool Player::IsBuilder() { return teamId >= 2 && world.IsMapEditor(); }
+
 		void Player::SetInput(PlayerInput newInput) {
 			SPADES_MARK_FUNCTION();
 
@@ -271,6 +273,12 @@ namespace spades {
 			weapInput = newInput;
 		}
 
+		void Player::SetBuilderInput(PlayerInput newPInp, WeaponInput newWInp) {
+			SPADES_MARK_FUNCTION();
+			input = newPInp;
+			weapInput = newWInp;
+		}
+
 		void Player::Reload() {
 			SPADES_MARK_FUNCTION();
 			if (health == 0) {
@@ -382,6 +390,11 @@ namespace spades {
 
 		void Player::Update(float dt) {
 			SPADES_MARK_FUNCTION();
+			if (IsBuilder()) {
+				UpdateBuilder(dt);
+				return;
+			}
+
 			auto *listener = world.GetListener();
 
 			MovePlayer(dt);
@@ -521,6 +534,11 @@ namespace spades {
 				blockStocks = 50;
 				pendingRestockBlock = false;
 			}
+		}
+
+		void Player::UpdateBuilder(float dt) {
+			SPADES_MARK_FUNCTION();
+			MoveBuilder(dt);
 		}
 
 		bool Player::RayCastApprox(spades::Vector3 start, spades::Vector3 dir) {
@@ -1245,6 +1263,61 @@ namespace spades {
 					}
 				}
 			}
+		}
+
+		void Player::MoveBuilder(float fsynctics) {
+			float f = fsynctics;
+			if (input.sneak)
+				f *= 0.5f;
+			else if (input.sprint)
+				f *= 10.0f;
+			else
+				f *= 2.0f;
+			if ((input.moveForward || input.moveBackward) && (input.moveRight || input.moveLeft) && (input.crouch || input.jump))
+				f /= sqrtf(2.f);
+
+			Vector3 front = GetFront();
+			Vector3 down = {0, 0, 1};
+			Vector3 right = -Vector3::Cross(down, front).Normalize();
+			Vector3 down2 = Vector3::Cross(right, front).Normalize();
+
+			front *= f;
+			right *= f;
+			down2 *= f;
+
+			if (input.moveForward) {
+				velocity += front;
+			} else if (input.moveBackward) {
+				velocity -= front;
+			}
+			if (input.moveLeft) {
+				velocity += right;
+			} else if (input.moveRight) {
+				velocity -= right;
+			}
+			if (input.crouch) {
+				velocity += down2;
+			} else if (input.jump) {
+				velocity -= down2;
+			}
+			f = fsynctics * 4.f + 1.f;
+			velocity.x /= f;
+			velocity.y /= f;
+			velocity.z /= f;
+
+			f = fsynctics * 32.f;
+			float nx = f * velocity.x + position.x;
+			float ny = f * velocity.y + position.y;
+			float nz = f * velocity.z + position.z;
+
+			nx += 512.f * (nx < 0.f) - 512.f * (nx > 513.f);
+			position.x = nx;
+			ny += 512.f * (ny < 0.f) - 512.f * (ny > 513.f);
+			position.y = ny;
+			if (nz < 62.5f)
+				position.z = nz;
+
+			RepositionPlayer(position);
 		}
 
 		bool Player::TryUncrouch() {

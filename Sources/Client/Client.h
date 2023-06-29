@@ -358,6 +358,7 @@ namespace spades {
 			void UpdateLocalPlayer(float dt);
 			void UpdateAutoFocus(float dt);
 			float RayCastForAutoFocus(const Vector3 &origin, const Vector3 &direction);
+			void UpdateLocalBuilder(float dt);
 
 			void Draw2D();
 
@@ -405,6 +406,7 @@ namespace spades {
 			void NetLog(const char *format, ...);
 
 			bool isMapEditor, isLocalMapEditor;
+			void SetIsMapEditor(bool b);
 			std::string mapFileName, canvasFileName;
 
 			void LoadLocalMapEditor();

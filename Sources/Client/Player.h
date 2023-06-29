@@ -130,6 +130,7 @@ namespace spades {
 			void MovePlayer(float fsynctics);
 			void BoxClipMove(float fsynctics);
 			bool TryUncrouch();
+			void MoveBuilder(float fsynctics);
 
 			void UseSpade();
 			void DigWithSpade();
@@ -149,12 +150,13 @@ namespace spades {
 			Weapon &GetWeapon();
 			WeaponType GetWeaponType() { return weaponType; }
 			int GetTeamId() { return teamId; }
-			bool IsSpectator() { return teamId >= 2; }
+			bool IsSpectator() { return teamId >= 2 && !IsBuilder(); }
 			std::string GetName();
 			IntVector3 GetColor();
 			IntVector3 GetBlockColor() { return blockColor; }
 			ToolType GetTool() { return tool; }
 			bool IsLocalPlayer();
+			bool IsBuilder();
 
 			PlayerInput GetInput() { return input; }
 			WeaponInput GetWeaponInput() { return weapInput; }
@@ -169,6 +171,7 @@ namespace spades {
 			IntVector3 GetBlockCursorDragPos() { return blockCursorDragPos; }
 			bool CanActivateDelayedBlockPlacement() { return canPending; }
 			bool IsReadyToUseTool();
+			void SetBuilderInput(PlayerInput, WeaponInput);
 
 			// ammo counts
 			int GetNumBlocks() { return blockStocks; }
@@ -219,6 +222,7 @@ namespace spades {
 			bool IsOnGroundOrWade();
 
 			void Update(float dt);
+			void UpdateBuilder(float dt);
 
 			float GetToolPrimaryDelay();
 			float GetToolSecondaryDelay();
