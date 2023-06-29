@@ -26,6 +26,7 @@
 #include <string>
 #include <tuple>
 
+#include "GameProperties.h"
 #include "ClientCameraMode.h"
 #include "ILocalEntity.h"
 #include "IRenderer.h"
@@ -67,6 +68,8 @@ namespace spades {
 		class ClientPlayer;
 
 		class ClientUI;
+
+		struct GameProperties;
 
 		class Client : public IWorldListener, public gui::View {
 			friend class ScoreboardView;
@@ -400,6 +403,13 @@ namespace spades {
 			void TakeMapShot();
 
 			void NetLog(const char *format, ...);
+
+			bool isMapEditor, isLocalMapEditor;
+			std::string mapFileName, canvasFileName;
+
+			void LoadLocalMapEditor();
+			std::shared_ptr<GameProperties> makeproperties;
+
 
 		protected:
 			~Client();

@@ -55,6 +55,8 @@
 
 #include "NetClient.h"
 
+#include "CTFGameMode.h"
+
 DEFINE_SPADES_SETTING(cg_chatBeep, "1");
 DEFINE_SPADES_SETTING(cg_alertSounds, "1");
 
@@ -69,7 +71,7 @@ namespace spades {
 
 		Client::Client(Handle<IRenderer> r, Handle<IAudioDevice> audioDev,
 		               const ServerAddress &host, Handle<FontManager> fontManager,
-		               bool localEditor, std::string mapFile, std::string canvas)
+		               bool localEditor, std::string mapFile, std::string canvasFile)
 		    : playerName(cg_playerName.operator std::string().substr(0, 15)),
 		      logStream(nullptr),
 		      hostname(host),
@@ -78,6 +80,10 @@ namespace spades {
 
 		      time(0.f),
 		      readyToClose(false),
+
+			  isLocalMapEditor(localEditor),
+			  mapFileName(mapFile),
+			  canvasFileName(canvasFile),
 
 		      worldSubFrame(0.f),
 		      frameToRendererInit(5),
@@ -334,6 +340,15 @@ namespace spades {
 
 			mumbleLink.setContext(hostname.ToString(false));
 			mumbleLink.setIdentity(playerName);
+
+			if (isLocalMapEditor) {
+				SPLog("Started local Map Editor. new Map: '%s'", mapFileName.c_str());
+				if (canvasFileName.size() > 0)
+					SPLog("Using Canvas Map: '%s'", canvasFileName.c_str());
+				net = stmp::make_unique<NetClient>(this);
+				LoadLocalMapEditor();
+				return;
+			}
 
 			SPLog("Started connecting to '%s'", hostname.ToString(true).c_str());
 			net = stmp::make_unique<NetClient>(this);
@@ -629,6 +644,63 @@ namespace spades {
 			}
 
 			SPRaise("No free file name");
+		}
+
+		void Client::LoadLocalMapEditor() {
+			std::unique_ptr<IStream> stream;
+			if (canvasFileName.size() > 0) {
+				stream = FileManager::OpenForReading(canvasFileName.c_str());
+			} else {
+				stream = FileManager::OpenForReading(mapFileName.c_str());
+			}
+			const Handle<GameMap> &map = GameMap::Load(stream.get());
+			SPLog("The game map was decoded successfully.");
+
+			// now initialize world
+			makeproperties.reset(new GameProperties(hostname.GetProtocolVersion()));
+			World *w = new World(makeproperties);
+			w->SetMap(map);
+			map->Release();
+			SPLog("World initialized.");
+
+			SetWorld(w);
+			SPAssert(world);
+			SPLog("World set.");
+
+			{
+				World::Team &t1 = world->GetTeam(0);
+				World::Team &t2 = world->GetTeam(1);
+				World::Team &spec = world->GetTeam(2);
+				t1.color = {0, 0, 255};
+				t2.color = {0, 255, 0};
+				t1.name = "Team1";
+				t2.name = "Team2";
+				spec.color = {0, 0, 0};
+
+				world->SetFogColor({128, 128, 255});
+
+				auto CTF = stmp::make_unique<CTFGameMode>();
+				CTFGameMode::Team &mt1 = CTF->GetTeam(0);
+				CTFGameMode::Team &mt2 = CTF->GetTeam(1);
+				mt1.score = mt2.score = 0;
+				CTF->SetCaptureLimit(10);
+				mt1.hasIntel = mt2.hasIntel = false;
+				mt1.flagPos = mt2.flagPos = mt1.basePos = mt2.basePos = {0, 0, 0};
+				world->SetMode(std::move(CTF));
+			}
+			JoinedGame();
+
+			world->SetLocalPlayerIndex(0);
+			auto p = stmp::make_unique<Player>(*world, 0, RIFLE_WEAPON, 2, MakeVector3(256, 256, 30), world->GetTeam(2).color);
+			p->SetHeldBlockColor({128, 128, 128});
+			p->SetTool(Player::ToolBlock);
+			world->SetPlayer(0, std::move(p));
+			World::PlayerPersistent &pers = world->GetPlayerPersistent(0);
+			pers.name = (std::string)cg_playerName;
+			pers.kills = 0;
+
+			isMapEditor = true;
+			SPLog("LocalMapEditor set");
 		}
 
 #pragma mark - Chat Messages

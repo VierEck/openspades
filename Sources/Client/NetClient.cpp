@@ -476,6 +476,9 @@ namespace spades {
 		void NetClient::DoEvents(int timeout) {
 			SPADES_MARK_FUNCTION();
 
+			if (!peer)
+				return;
+
 			if (status == NetClientStatusNotConnected)
 				return;
 
