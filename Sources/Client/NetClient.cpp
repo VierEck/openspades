@@ -94,6 +94,7 @@ namespace spades {
 				PacketTypeVersionSend = 34,     // C2S
 				PacketTypeExtensionInfo = 60,
 
+				PacketTypeBlockVolume = 101,
 			};
 
 			enum class VersionInfoPropertyId : std::uint8_t {
@@ -349,6 +350,26 @@ namespace spades {
 
 			ENetPacket *CreatePacket(int flag = ENET_PACKET_FLAG_RELIABLE) {
 				return enet_packet_create(data.data(), data.size(), flag);
+			}
+		};
+
+		class TransformSignedType {
+		public:
+			int16_t GetSignedShort(uint16_t unShort) {
+				union {
+					uint16_t uS;
+					int16_t S;
+				};
+				uS = unShort;
+				return S;
+			}
+			uint16_t GetUnsignedShort(int16_t Short) {
+				union {
+					uint16_t uS;
+					int16_t S;
+				};
+				S = Short;
+				return uS;
 			}
 		};
 
@@ -1476,6 +1497,65 @@ namespace spades {
 					// weapon...
 					// p->SetWeaponType(wType);
 				} break;
+
+				case PacketTypeBlockVolume: {
+					if (!GetWorld()->IsMapEditor())
+						break;
+					TransformSignedType transSign;
+					stmp::optional<Player &> p = GetPlayerOrNull(reader.ReadByte());
+
+					int vol = reader.ReadByte();
+					int volAct = reader.ReadByte();
+
+					IntVector3 pos1, pos2;
+					pos1.x = transSign.GetSignedShort(reader.ReadShort());
+					pos1.y = transSign.GetSignedShort(reader.ReadShort());
+					pos1.z = transSign.GetSignedShort(reader.ReadShort());
+					if (vol != VolumeSingle) {
+						pos2.x = transSign.GetSignedShort(reader.ReadShort());
+						pos2.y = transSign.GetSignedShort(reader.ReadShort());
+						pos2.z = transSign.GetSignedShort(reader.ReadShort());
+					}
+
+					std::vector<IntVector3> cells;
+					switch (vol) {
+						case VolumeSingle:
+							cells.push_back(pos1);
+							break;
+						case VolumeLine:
+							cells = GetWorld()->CubeLine(pos1, pos2, 1088);
+							break;
+						//todo
+						case VolumeBox:
+						case VolumeBall:
+						case VolumeCylinderX:
+						case VolumeCylinderY:
+						case VolumeCylinderZ:
+						//todo
+						break;
+						default: SPRaise("Received invalid block volume type: %d", vol);
+					}
+
+					switch (volAct) {
+						case VolumeActionDestroy: {
+							GetWorld()->DestroyBlock(cells);
+						} break;
+						case VolumeActionBuild: {
+							IntVector3 col = p ? p->GetBlockColor() : temporaryPlayerBlockColor;
+							for (auto c : cells) {
+								GetWorld()->CreateBlock(c, col);
+							}
+						} break;
+						//todo
+						case VolumeActionPaint:
+						case VolumeActionTextureBuild:
+						case VolumeActionTexturePaint:
+						//todo
+						break;
+						default: SPRaise("Received invalid Maptool action: %d", volAct);
+					}
+				} break;
+
 				default:
 					printf("WARNING: dropped packet %d\n", (int)reader.GetType());
 					reader.DumpDebug();
@@ -1786,6 +1866,29 @@ namespace spades {
 			}
 			SPLog("Sending extension support.");
 			enet_peer_send(peer, 0, wri.CreatePacket());
+		}
+
+		void NetClient::SendBlockVolume(spades::IntVector3 v1, spades::IntVector3 v2, VolumeType vol, VolumeActionType toolAct) {
+			SPADES_MARK_FUNCTION();
+			NetPacketWriter wri(PacketTypeBlockVolume);
+			wri.Write((uint8_t)GetLocalPlayer().GetId());
+			wri.Write((uint8_t)vol);
+			wri.Write((uint8_t)toolAct);
+
+			TransformSignedType transSign;
+			wri.Write(transSign.GetUnsignedShort((int16_t)v1.x));
+			wri.Write(transSign.GetUnsignedShort((int16_t)v1.y));
+			wri.Write(transSign.GetUnsignedShort((int16_t)v1.z));
+			wri.Write(transSign.GetUnsignedShort((int16_t)v2.x));
+			wri.Write(transSign.GetUnsignedShort((int16_t)v2.y));
+			wri.Write(transSign.GetUnsignedShort((int16_t)v2.z));
+
+			if (peer) {
+				enet_peer_send(peer, 0, wri.CreatePacket());
+			} else {
+				NetPacketReader read(wri.CreatePacket());
+				HandleGamePacket(read);
+			}
 		}
 
 		void NetClient::MapLoaded() {

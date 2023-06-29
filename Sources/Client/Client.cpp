@@ -82,6 +82,7 @@ namespace spades {
 		      readyToClose(false),
 
 			  isLocalMapEditor(localEditor),
+			  isMapEditor(false),
 			  mapFileName(mapFile),
 			  canvasFileName(canvasFile),
 
@@ -655,7 +656,15 @@ namespace spades {
 
 		void Client::SetIsMapEditor(bool b) {
 			isMapEditor = b;
+
+			//initialise mapeditor stuff. only after world, map and local player were created
 			world->SetIsMapEditor(b);
+			if (b) {
+				auto &p = *world->GetLocalPlayer();
+				p.SetVolumeType(VolumeSingle);
+				p.SetTool(Player::ToolBlock);
+				p.SetHeldBlockColor({0, 0, 0});
+			}
 		}
 
 		void Client::LoadLocalMapEditor() {
@@ -704,8 +713,6 @@ namespace spades {
 
 			world->SetLocalPlayerIndex(0);
 			auto p = stmp::make_unique<Player>(*world, 0, RIFLE_WEAPON, 2, MakeVector3(256, 256, 30), world->GetTeam(2).color);
-			p->SetHeldBlockColor({128, 128, 128});
-			p->SetTool(Player::ToolBlock);
 			world->SetPlayer(0, std::move(p));
 			World::PlayerPersistent &pers = world->GetPlayerPersistent(0);
 			pers.name = (std::string)cg_playerName;

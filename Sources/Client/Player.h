@@ -114,6 +114,7 @@ namespace spades {
 			IntVector3 blockCursorDragPos;
 			bool lastSingleBlockBuildSeqDone;
 			float lastReloadingTime;
+			IntVector3 blockCursorIndentPos;
 
 			bool pendingPlaceBlock;
 			bool pendingRestockBlock;
@@ -136,6 +137,8 @@ namespace spades {
 			void DigWithSpade();
 			void FireWeapon();
 			void ThrowGrenade();
+
+			VolumeType currentVolumeType;
 
 		public:
 			Player(World &, int playerId, WeaponType weapon, int teamId, Vector3 position,
@@ -171,6 +174,7 @@ namespace spades {
 			IntVector3 GetBlockCursorDragPos() { return blockCursorDragPos; }
 			bool CanActivateDelayedBlockPlacement() { return canPending; }
 			bool IsReadyToUseTool();
+			IntVector3 GetBlockCursorIndentPos() { return blockCursorIndentPos; }
 			void SetBuilderInput(PlayerInput, WeaponInput);
 
 			// ammo counts
@@ -249,6 +253,9 @@ namespace spades {
 			bool OverlapsWithOneBlock(IntVector3);
 
 			float BoxDistanceToBlock(IntVector3);
+
+			void SetVolumeType(VolumeType v) { currentVolumeType = v; }
+			VolumeType GetCurrentVolumeType() { return currentVolumeType; }
 		};
 	} // namespace client
 } // namespace spades

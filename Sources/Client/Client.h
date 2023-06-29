@@ -503,6 +503,7 @@ namespace spades {
 			void LocalPlayerCreatedLineBlock(IntVector3, IntVector3) override;
 			void LocalPlayerHurt(HurtType type, bool sourceGiven, Vector3 source) override;
 			void LocalPlayerBuildError(BuildFailureReason reason) override;
+			void LocalPlayerCreatedVolume(IntVector3, IntVector3, VolumeType, VolumeActionType) override;
 			// IWorldListener end
 		};
 	} // namespace client

@@ -133,6 +133,11 @@ namespace spades {
 
 		void World::SetMode(std::unique_ptr<IGameMode> m) { mode = std::move(m); }
 
+		void World::SetIsMapEditor(bool b) {
+			isMapEditor = b;
+			map->SetIsMapEditor(b);
+		}
+
 		void World::MarkBlockForRegeneration(const IntVector3 &blockLocation) {
 			UnmarkBlockForRegeneration(blockLocation);
 
@@ -246,18 +251,20 @@ namespace spades {
 
 			cells = mapWrapper->RemoveBlocks(cells);
 
-			auto clusters = ClusterizeBlocks(cells);
-			std::vector<IntVector3> cells2;
+			if (!isMapEditor) {
+				auto clusters = ClusterizeBlocks(cells);
+				std::vector<IntVector3> cells2;
 
-			for (const auto &cluster : clusters) {
-				cells2.resize(cluster.size());
-				for (std::size_t i = 0; i < cluster.size(); i++) {
-					auto p = cluster[i];
-					cells2[i] = IntVector3(p.x, p.y, p.z);
-					map->Set(p.x, p.y, p.z, false, 0);
+				for (const auto &cluster : clusters) {
+					cells2.resize(cluster.size());
+					for (std::size_t i = 0; i < cluster.size(); i++) {
+						auto p = cluster[i];
+						cells2[i] = IntVector3(p.x, p.y, p.z);
+						map->Set(p.x, p.y, p.z, false, 0);
+					}
+					if (listener)
+						listener->BlocksFell(cells2);
 				}
-				if (listener)
-					listener->BlocksFell(cells2);
 			}
 
 			createdBlocks.clear();

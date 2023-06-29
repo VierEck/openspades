@@ -92,7 +92,7 @@ namespace spades {
 
 			void ApplyBlockActions();
 
-			bool isMapEditor;
+			bool isMapEditor = false;
 
 		public:
 			World(const std::shared_ptr<GameProperties> &);
@@ -175,7 +175,7 @@ namespace spades {
 			IWorldListener *GetListener() { return listener; }
 
 			bool IsMapEditor() { return isMapEditor; }
-			void SetIsMapEditor(bool b) { isMapEditor = b; }
+			void SetIsMapEditor(bool);
 		};
 	} // namespace client
 } // namespace spades

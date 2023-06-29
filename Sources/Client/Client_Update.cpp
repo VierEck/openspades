@@ -1282,6 +1282,10 @@ namespace spades {
 			SPADES_MARK_FUNCTION();
 			net->SendBlockLine(v1, v2);
 		}
+		void Client::LocalPlayerCreatedVolume(spades::IntVector3 v1, spades::IntVector3 v2, VolumeType vol, VolumeActionType volAct) {
+			SPADES_MARK_FUNCTION();
+			net->SendBlockVolume(v1, v2, vol, volAct);
+		}
 
 		void Client::LocalPlayerHurt(HurtType type, bool sourceGiven, spades::Vector3 source) {
 			SPADES_MARK_FUNCTION();

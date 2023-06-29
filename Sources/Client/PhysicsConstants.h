@@ -77,3 +77,21 @@ static inline hitTag_t &operator|=(hitTag_t &left, const hitTag_t &right) {
 	left = static_cast<hitTag_t>(static_cast<int>(left) | static_cast<int>(right));
 	return left;
 }
+
+enum VolumeType { 
+	VolumeSingle = 0, 
+	VolumeLine, 
+	VolumeBox, 
+	VolumeBall, 
+	VolumeCylinderX, 
+	VolumeCylinderY, 
+	VolumeCylinderZ 
+};
+
+enum VolumeActionType { 
+	VolumeActionDestroy = 0, 
+	VolumeActionBuild, 
+	VolumeActionPaint, 
+	VolumeActionTextureBuild, 
+	VolumeActionTexturePaint 
+};

@@ -33,6 +33,8 @@
 #include <Core/Exception.h>
 #include <Core/Settings.h>
 
+DEFINE_SPADES_SETTING(cg_BuildDelayInSec, "0.2");
+
 namespace spades {
 	namespace client {
 
@@ -276,6 +278,66 @@ namespace spades {
 		void Player::SetBuilderInput(PlayerInput newPInp, WeaponInput newWInp) {
 			SPADES_MARK_FUNCTION();
 			input = newPInp;
+
+			auto *listener = GetWorld().GetListener();
+			if (newWInp.primary && newWInp.secondary) {
+				newWInp.primary = newWInp.secondary = weapInput.primary = weapInput.secondary = false;
+				if (listener && this == world.GetLocalPlayer())
+					listener->LocalPlayerBuildError(BuildFailureReason::InvalidPosition);
+				return;
+			}
+
+			Handle<GameMap> map = GetWorld().GetMap();
+
+			IntVector3 blockCursor;
+			IntVector3 indent = GetBlockCursorIndentPos();
+			if (newWInp.secondary != weapInput.secondary && map->IsValidBuildCoord(indent)) {
+				if (map->IsSolidWrapped(indent.x, indent.y, indent.z)) {
+					blockCursor = indent;
+				} else {
+					blockCursor = GetBlockCursorPos();
+				}
+			} else {
+				blockCursor = GetBlockCursorPos();
+			}
+
+			VolumeActionType volAct = VolumeActionBuild;
+			if (newWInp.secondary != weapInput.secondary || (newWInp.secondary && !newWInp.primary)) {
+				volAct = VolumeActionDestroy;
+			}
+
+			float delay = (float)cg_BuildDelayInSec;
+			if (newWInp.secondary != weapInput.secondary || newWInp.primary != weapInput.primary) {
+				if (IsBlockCursorActive()) {
+					if (newWInp.primary || newWInp.secondary) {
+						if (currentVolumeType == VolumeSingle) {
+							listener->LocalPlayerCreatedVolume(blockCursor, blockCursor, currentVolumeType, volAct);
+							nextBlockTime = world.GetTime() + delay;
+						} else {
+							blockCursorDragging = true;
+							blockCursorDragPos = blockCursor;
+						}
+					} else if (IsBlockCursorDragging()) {
+						if (listener && this == world.GetLocalPlayer())
+							listener->LocalPlayerCreatedVolume(blockCursorDragPos, blockCursor, currentVolumeType, volAct);
+						blockCursorDragging = blockCursorActive = false;
+					}
+				} else {
+					if (listener && this == world.GetLocalPlayer())
+						listener->LocalPlayerBuildError(BuildFailureReason::InvalidPosition);
+				}
+			} else if ((newWInp.primary || newWInp.secondary) && world.GetTime() >= nextBlockTime) {
+				if (IsBlockCursorActive()) {
+					if (currentVolumeType == VolumeSingle) {
+						listener->LocalPlayerCreatedVolume(blockCursor, blockCursor, currentVolumeType, volAct);
+						nextBlockTime = world.GetTime() + delay;
+					}
+				} else {
+					if (listener && this == world.GetLocalPlayer())
+						listener->LocalPlayerBuildError(BuildFailureReason::InvalidPosition);
+				}
+			}
+
 			weapInput = newWInp;
 		}
 
@@ -539,6 +601,58 @@ namespace spades {
 		void Player::UpdateBuilder(float dt) {
 			SPADES_MARK_FUNCTION();
 			MoveBuilder(dt);
+
+			auto *listener = world.GetListener();
+			GameMap::RayCastResult result;
+			Handle<GameMap> map = GetWorld().GetMap();
+			SPAssert(map);
+
+			float BuildDist = 12.f;
+
+			Vector3 pos = GetEye();
+			Vector3 ori = GetFront();
+			if (pos.z < 0.f) {
+				if (ori.z > 0.f) {
+					//if above height limit but looking down on map
+					float w = pos.z / ori.z;
+					pos -= ori * w;
+					BuildDist -= (ori * w).GetLength();
+					if (BuildDist > 1) {
+						result = map->CastRay2(pos, ori, BuildDist);
+					} else {
+						//make block cursor "stuck" at height limit
+						result.hitBlock.x = pos.x;
+						result.hitBlock.y = pos.y;
+						result.hitBlock.z = pos.z;
+						result.normal = {0, 0, 0};
+					}
+				} else {
+					//if not looking down on map prevent building
+					blockCursorActive = false;
+					return;
+				}
+			} else {
+				result = map->CastRay2(pos, ori, BuildDist);
+			}
+
+			IntVector3 blockCursor;
+			blockCursorIndentPos = result.hitBlock;
+			if (weapInput.secondary && map->IsValidBuildCoord(blockCursorIndentPos)) {
+				if (map->IsSolidWrapped(blockCursorIndentPos.x, blockCursorIndentPos.y, blockCursorIndentPos.z)) {
+					blockCursor = blockCursorIndentPos;
+				} else {
+					blockCursor = result.hitBlock + result.normal;
+				}
+			} else {
+				blockCursor = result.hitBlock + result.normal;
+			}
+			if (map->IsValidBuildCoord(blockCursor)) {
+				blockCursorActive = true;
+				blockCursorIndentPos = result.hitBlock;
+				blockCursorPos = blockCursor;
+			} else {
+				blockCursorActive = false;
+			}
 		}
 
 		bool Player::RayCastApprox(spades::Vector3 start, spades::Vector3 dir) {
@@ -1414,7 +1528,7 @@ namespace spades {
 			this->respawnTime = world.GetTime() + respawnTime;
 		}
 
-		bool Player::IsAlive() { return health > 0; }
+		bool Player::IsAlive() { return health > 0 || IsBuilder(); }
 
 		std::string Player::GetName() { return world.GetPlayerPersistent(GetId()).name; }
 
