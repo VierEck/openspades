@@ -77,6 +77,10 @@ namespace spades {
 													  "void AlertError(const string& in)",
 													  asMETHOD(ClientUIHelper, AlertError),
 													  asCALL_THISCALL);
+						r = eng->RegisterObjectMethod("ClientUIHelper",
+													  "void SaveMap()",
+													  asMETHOD(ClientUIHelper, MapEditorSaveMap),
+													  asCALL_THISCALL);
 						manager->CheckError(r);
 						break;
 					default:

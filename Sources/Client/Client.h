@@ -400,7 +400,7 @@ namespace spades {
 			void TakeScreenShot(bool sceneOnly);
 
 			std::string MapShotPath();
-			void TakeMapShot();
+			void TakeMapShot(bool mapEditor = false);
 
 			void NetLog(const char *format, ...);
 

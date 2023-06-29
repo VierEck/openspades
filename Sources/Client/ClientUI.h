@@ -50,6 +50,8 @@ namespace spades {
 			void AlertWarning(const std::string &);
 			void AlertError(const std::string &);
 
+			void MapEditorSaveMap();
+
 		protected:
 			~ClientUI();
 
