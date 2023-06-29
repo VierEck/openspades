@@ -546,9 +546,9 @@ namespace spades {
                 Connect();
             } else if (IsEnabled and key == "Escape") {
                 ui.shouldExit = true;
-            } else if (IsEnabled and key == "S") {
+            } else if (IsEnabled and key == "S" and Manager.IsControlPressed) {
                 ChangeList(false);
-            } else if (IsEnabled and key == "M") {
+            } else if (IsEnabled and key == "M" and Manager.IsControlPressed) {
                 ChangeList(true); 
             } else {
                 UIElement::HotKey(key);
