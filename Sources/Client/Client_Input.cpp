@@ -695,8 +695,11 @@ namespace spades {
 				p.SetMapTool(ToolPainting);
 				ret = true;
 			}
-			if (CheckKey(cg_keyToolBrush, name) && down) {
-				p.SetMapTool(ToolBrushing);
+			if (CheckKey(cg_keyToolBrush, name)) {
+				if (down)
+					p.SetMapTool(ToolBrushing);
+				if (p.GetCurrentMapTool() == ToolBrushing)
+					p.SetEditBrushSize(down);
 				ret = true;
 			}
 			if (CheckKey(cg_keyToolCopy, name) && down) {
@@ -718,12 +721,16 @@ namespace spades {
 			}
 			if (down) {
 				if (name == ("WheelDown")) {
-					if (p.GetBuildDistance() > 3.0f) {
+					if (p.GetEditBrushSize()) {
+						p.SetBrushSize(p.GetBrushSize() - 1);
+					} else if (p.GetBuildDistance() > 3.0f) {
 						p.SetBuildDistance(p.GetBuildDistance() - 1);
 					}
 					ret = true;
 				} else if (name == ("WheelUp")) {
-					if (p.GetBuildDistance() <  (float)cg_MaxBuildDistance && p.GetBuildDistance() < 1088) {
+					if (p.GetEditBrushSize()) {
+						p.SetBrushSize(p.GetBrushSize() + 1);
+					} else if (p.GetBuildDistance() <  (float)cg_MaxBuildDistance && p.GetBuildDistance() < 1088) {
 						p.SetBuildDistance(p.GetBuildDistance() + 1);
 					}
 					ret = true;

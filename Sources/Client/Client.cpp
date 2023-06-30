@@ -668,6 +668,8 @@ namespace spades {
 				p.SetMapObjectType(ObjTentTeam1);
 				p.SetBuildDistance(3);
 				p.SetBuildAtMaxDistance(false);
+				p.SetBrushSize(10);
+				p.SetEditBrushSize(false);
 			}
 		}
 

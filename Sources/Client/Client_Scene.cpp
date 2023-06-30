@@ -752,11 +752,22 @@ namespace spades {
 					int y = p->GetBlockCursorPos().y;
 					int z = p->GetBlockCursorPos().z;
 					int dx = 1, dy = 1, dz = 1;
-					if (p->IsBlockCursorDragging()) {
-						dx = p->GetBlockCursorDragPos().x - x;
-						dy = p->GetBlockCursorDragPos().y - y;
-						dz = p->GetBlockCursorDragPos().z - z;
+					if (p->IsBlockCursorDragging() || p->GetCurrentMapTool() == ToolBrushing) {
+						if (p->GetCurrentMapTool() == ToolBrushing) {
+							int brushHalfSize = p->GetBrushSize() / 2;
+							x -= brushHalfSize;
+							y -= brushHalfSize;
+							z -= brushHalfSize;
 
+							brushHalfSize *= 2;
+							dx = (x + brushHalfSize) - x;
+							dy = (y + brushHalfSize) - y;
+							dz = (z + brushHalfSize) - z;
+						} else {
+							dx = p->GetBlockCursorDragPos().x - x;
+							dy = p->GetBlockCursorDragPos().y - y;
+							dz = p->GetBlockCursorDragPos().z - z;
+						}
 						dx += (dx >= 0);
 						dy += (dy >= 0);
 						dz += (dz >= 0);

@@ -140,8 +140,9 @@ namespace spades {
 
 			int BuildDistance;
 			bool BuildAtMaxDistance;
+			int BrushSize;
+			bool editBrushSize;
 			VolumeType currentVolumeType;
-			bool paintnig, brushing;
 			MapTool currentMapTool;
 			MapObjectType currentMapObjectType;
 
@@ -266,7 +267,10 @@ namespace spades {
 					currentMapTool = noMapTool;
 					return;
 				}
-				currentMapTool = t; 
+				currentMapTool = t;
+
+				if (currentMapTool == ToolBrushing && currentVolumeType < VolumeBox)
+					SetVolumeType(VolumeBox);
 			}
 			MapTool GetCurrentMapTool() { return currentMapTool; }
 			void SetMapObjectType(MapObjectType o) { currentMapObjectType = o; }
@@ -276,6 +280,10 @@ namespace spades {
 			bool IsBuildAtMaxDistance() { return BuildAtMaxDistance; }
 			void SetBuildDistance(int i) { BuildDistance = i; }
 			int GetBuildDistance() { return BuildDistance; }
+			void SetBrushSize(int s) { BrushSize = s; }
+			int GetBrushSize() { return BrushSize; }
+			void SetEditBrushSize(bool b) { editBrushSize = b; }
+			bool GetEditBrushSize() { return editBrushSize; }
 		};
 	} // namespace client
 } // namespace spades
