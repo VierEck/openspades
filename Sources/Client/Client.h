@@ -408,6 +408,7 @@ namespace spades {
 			bool isMapEditor, isLocalMapEditor;
 			void SetIsMapEditor(bool b);
 			std::string mapFileName, canvasFileName;
+			bool MapEditorKeyEvent(const std::string &name, bool down);
 
 			void LoadLocalMapEditor();
 			std::shared_ptr<GameProperties> makeproperties;

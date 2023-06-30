@@ -87,6 +87,9 @@ DEFINE_SPADES_SETTING(cg_alerts, "1");
 SPADES_SETTING(cg_manualFocus);
 DEFINE_SPADES_SETTING(cg_keyAutoFocus, "MiddleMouseButton");
 
+DEFINE_SPADES_SETTING(cg_keyVolumeSingle, "1");
+DEFINE_SPADES_SETTING(cg_keyVolumeLine, "2");
+
 namespace spades {
 	namespace client {
 
@@ -371,6 +374,9 @@ namespace spades {
 				if (world->GetLocalPlayer()) {
 					Player &p = world->GetLocalPlayer().value();
 
+					if (MapEditorKeyEvent(name, down))
+						return;
+
 					if (p.IsAlive() && p.GetTool() == Player::ToolBlock && down) {
 						if (paletteView->KeyInput(name)) {
 							return;
@@ -627,6 +633,28 @@ namespace spades {
 					// limbo
 				}
 			}
+		}
+
+		bool Client::MapEditorKeyEvent(const std::string &name, bool down) {
+			SPADES_MARK_FUNCTION();
+			Player &p = world->GetLocalPlayer().value();
+			if (!p.IsBuilder())
+				return false;
+
+			if (CheckKey(cg_keyVolumeSingle, name) && down) {
+				p.SetVolumeType(VolumeSingle);
+				Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
+				audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+				return true;
+			}
+			if (CheckKey(cg_keyVolumeLine, name) && down) {
+				p.SetVolumeType(VolumeLine);
+				Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
+				audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+				return true;
+			}
+
+			return false;
 		}
 	} // namespace client
 } // namespace spades
