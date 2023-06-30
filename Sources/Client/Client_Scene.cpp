@@ -637,7 +637,10 @@ namespace spades {
 
 				// Draw block cursor
 				if (p) {
-					if (p->IsReadyToUseTool() && p->GetTool() == Player::ToolBlock &&
+					if (p->IsBuilder() && p->IsReadyToUseTool() && p->GetTool() == Player::ToolBlock) {
+						DrawBuilderBlockCursor();
+
+					} else if (p->IsReadyToUseTool() && p->GetTool() == Player::ToolBlock &&
 					    p->IsAlive()) {
 						std::vector<IntVector3> blocks;
 						if (p->IsBlockCursorDragging()) {
@@ -705,6 +708,52 @@ namespace spades {
 			}
 
 			renderer->EndScene();
+		}
+
+		void Client::DrawBuilderBlockCursor() {
+			stmp::optional<Player &> p = world->GetLocalPlayer();
+			if (!p)
+				return;
+
+			bool active = p->IsBlockCursorActive();
+			Vector3 color = {1.f, 1.f, 1.f};
+			if (!active)
+				color = MakeVector3(1.f, 1.f, 0.f);
+
+			switch (p->GetCurrentVolumeType()) {
+				case VolumeSingle:
+				case VolumeLine: {
+					std::vector<IntVector3> blocks;
+					if (p->IsBlockCursorDragging()) {
+						blocks = world->CubeLine(p->GetBlockCursorDragPos(), p->GetBlockCursorPos(), 1088);
+					} else {
+						blocks.push_back(p->GetBlockCursorPos());
+					}
+					Handle<IModel> curLine = renderer->RegisterModel("Models/MapObjects/BlockCursorLine.kv6");
+					Handle<IModel> curSingle = renderer->RegisterModel("Models/MapObjects/BlockCursorSingle.kv6");
+					for (size_t i = 0; i < blocks.size(); i++) {
+						IntVector3 &v = blocks[i];
+						bool solid = blocks.size() > 2 && map->IsSolid(v.x, v.y, v.z);
+						ModelRenderParam param;
+						param.ghost = true;
+						param.opacity = active && !solid ? .7f : .3f;
+						param.customColor = color;
+						param.matrix = Matrix4::Translate(MakeVector3(v.x + .5f, v.y + .5f, v.z + .5f));
+						param.matrix = param.matrix * Matrix4::Scale(1.f / 24.f + (solid ? 0.0005f : 0.f));
+						renderer->RenderModel(blocks.size() > 1 ? *curLine : *curSingle, param);
+					}
+				} break;
+				case VolumeBall:
+					//todo. draw an actual ellipsoid instead of box
+				case VolumeCylinderX:
+				case VolumeCylinderY:
+				case VolumeCylinderZ:
+					//todo. draw actual cylinder instead of box
+				case VolumeBox: {
+					//todo
+				} break;
+				default: return;
+			}
 		}
 
 		void Client::UpdateMatrices() {

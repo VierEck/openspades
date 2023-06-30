@@ -398,6 +398,7 @@ namespace spades {
 			void AddDebugObjectToScene(const OBB3 &, const Vector4 &col = MakeVector4(1, 1, 1, 1));
 			void DrawCTFObjects();
 			void DrawTCObjects();
+			void DrawBuilderBlockCursor();
 
 			SceneDefinition CreateSceneDefinition();
 
