@@ -729,14 +729,14 @@ namespace spades {
 				} break;
 				case ToolBrushing: {
 					imgTool = renderer->RegisterImage("Gfx/BuildMode/Brush.png");
-				} break;
-				case ToolCopying: {
-					imgTool = renderer->RegisterImage("Gfx/BuildMode/Copy.png");
 					Handle<IImage> imgDestroy;
 					if (p.GetWeaponInput().secondary) {
 						imgDestroy = renderer->RegisterImage("Gfx/BuildMode/Destroy.png");
 						renderer->DrawImage(imgDestroy, MakeVector2(iconX + imgVolume->GetWidth(), iconY));
 					}
+				} break;
+				case ToolCopying: {
+					imgTool = renderer->RegisterImage("Gfx/BuildMode/Copy.png");
 				} break;
 				case ToolMoving: {
 					imgTool = renderer->RegisterImage("Gfx/BuildMode/Move.png");
