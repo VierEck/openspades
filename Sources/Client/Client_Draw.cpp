@@ -759,6 +759,8 @@ namespace spades {
 
 			Vector3 posxyz = Project(DragPos);
 			Vector2 pos = {posxyz.x, posxyz.y};
+			if (posxyz.z <= 0 || posxyz.z > 1.0004f)
+				return;
 
 			char buf[256];
 			sprintf(buf, "%dx %dy %dz", IntDragPos);
