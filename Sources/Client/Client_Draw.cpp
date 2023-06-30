@@ -726,6 +726,11 @@ namespace spades {
 				} return;
 				case ToolPainting: {
 					imgTool = renderer->RegisterImage("Gfx/BuildMode/Paint.png");
+					Handle<IImage> imgDestroy;
+					if (p.GetWeaponInput().secondary) {
+						imgDestroy = renderer->RegisterImage("Gfx/BuildMode/Destroy.png");
+						renderer->DrawImage(imgDestroy, MakeVector2(iconX + imgVolume->GetWidth(), iconY));
+					}
 				} break;
 				case ToolBrushing: {
 					imgTool = renderer->RegisterImage("Gfx/BuildMode/Brush.png");
