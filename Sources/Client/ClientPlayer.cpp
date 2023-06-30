@@ -1039,7 +1039,7 @@ namespace spades {
 
 			hasValidOriginMatrix = false;
 
-			if (p.GetTeamId() >= 2) {
+			if (p.GetTeamId() >= 2 && !p.IsBuilder()) {
 				// spectator, or dummy player
 				return;
 			}
