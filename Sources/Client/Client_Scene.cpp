@@ -750,7 +750,42 @@ namespace spades {
 				case VolumeCylinderZ:
 					//todo. draw actual cylinder instead of box
 				case VolumeBox: {
-					//todo
+					int x = p->GetBlockCursorPos().x;
+					int y = p->GetBlockCursorPos().y;
+					int z = p->GetBlockCursorPos().z;
+					int dx = 1, dy = 1, dz = 1;
+					if (p->IsBlockCursorDragging()) {
+						dx = p->GetBlockCursorDragPos().x - x;
+						dy = p->GetBlockCursorDragPos().y - y;
+						dz = p->GetBlockCursorDragPos().z - z;
+
+						dx += (dx >= 0);
+						dy += (dy >= 0);
+						dz += (dz >= 0);
+
+						x += (dx < 0);
+						y += (dy < 0);
+						z += (dz < 0);
+						dx -= (dx < 0);
+						dy -= (dy < 0);
+						dz -= (dz < 0);
+					}
+
+					Vector4 col = {color.x, color.y, color.z, 1};
+					renderer->AddDebugLine(MakeVector3(x     , y     , z     ), MakeVector3(x + dx, y     , z     ), col);
+					renderer->AddDebugLine(MakeVector3(x     , y + dy, z     ), MakeVector3(x + dx, y + dy, z     ), col);
+					renderer->AddDebugLine(MakeVector3(x     , y     , z + dz), MakeVector3(x + dx, y     , z + dz), col);
+					renderer->AddDebugLine(MakeVector3(x     , y + dy, z + dz), MakeVector3(x + dx, y + dy, z + dz), col);
+
+					renderer->AddDebugLine(MakeVector3(x     , y     , z     ), MakeVector3(x     , y + dy, z     ), col);
+					renderer->AddDebugLine(MakeVector3(x     , y     , z + dz), MakeVector3(x     , y + dy, z + dz), col);
+					renderer->AddDebugLine(MakeVector3(x + dx, y     , z     ), MakeVector3(x + dx, y + dy, z     ), col);
+					renderer->AddDebugLine(MakeVector3(x + dx, y     , z + dz), MakeVector3(x + dx, y + dy, z + dz), col);
+
+					renderer->AddDebugLine(MakeVector3(x     , y     , z     ), MakeVector3(x     , y     , z + dz), col);	
+					renderer->AddDebugLine(MakeVector3(x     , y + dy, z     ), MakeVector3(x     , y + dy, z + dz), col);
+					renderer->AddDebugLine(MakeVector3(x + dx, y     , z     ), MakeVector3(x + dx, y     , z + dz), col);
+					renderer->AddDebugLine(MakeVector3(x + dx, y + dy, z     ), MakeVector3(x + dx, y + dy, z + dz), col);
 				} break;
 				default: return;
 			}

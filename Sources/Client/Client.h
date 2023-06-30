@@ -359,6 +359,7 @@ namespace spades {
 			void UpdateAutoFocus(float dt);
 			float RayCastForAutoFocus(const Vector3 &origin, const Vector3 &direction);
 			void UpdateLocalBuilder(float dt);
+			void ShowBuilderBlockCountNotice();
 
 			void Draw2D();
 

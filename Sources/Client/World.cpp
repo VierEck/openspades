@@ -368,21 +368,66 @@ namespace spades {
 
 				if ((dz <= dx) && (dz <= dy)) {
 					c.z += izi;
-					if (c.z < 0 || c.z >= MAXZDIM)
+					if ((c.z < 0 || c.z >= MAXZDIM) && !isMapEditor)
 						break;
 					dz += dzi;
 				} else {
 					if (dx < dy) {
 						c.x += ixi;
-						if ((unsigned long)c.x >= VSID)
+						if ((unsigned long)c.x >= VSID && !isMapEditor)
 							break;
 						dx += dxi;
 					} else {
 						c.y += iyi;
-						if ((unsigned long)c.y >= VSID)
+						if ((unsigned long)c.y >= VSID && !isMapEditor)
 							break;
 						dy += dyi;
 					}
+				}
+			}
+
+			return ret;
+		}
+		std::vector<IntVector3> World::CubeBox(IntVector3 v1, IntVector3 v2) {
+			SPADES_MARK_FUNCTION_DEBUG();
+
+			IntVector3 c = v1;
+			IntVector3 d = v2 - v1;
+			long ixi, iyi, izi, cx, cy;
+			std::vector<IntVector3> ret;
+
+			cx = c.x;
+			cy = c.y;
+
+			if (d.x < 0)
+				ixi = -1;
+			else
+				ixi = 1;
+			if (d.y < 0)
+				iyi = -1;
+			else
+				iyi = 1;
+			if (d.z < 0)
+				izi = -1;
+			else
+				izi = 1;
+
+			while (1) {
+				if (map->IsValidBuildCoord(c))
+					ret.push_back(c);
+
+				if (c.x == v2.x && c.y == v2.y && c.z == v2.z)
+					break;
+
+				if (c.x != v2.x) {
+					c.x += ixi;
+				} else if (c.y != v2.y) {
+					c.x = cx;
+					c.y += iyi;
+				} else if (c.z != v2.z) {
+					c.x = cx;
+					c.y = cy;
+					c.z += izi;
 				}
 			}
 

@@ -1525,8 +1525,9 @@ namespace spades {
 						case VolumeLine:
 							cells = GetWorld()->CubeLine(pos1, pos2, 1088);
 							break;
-						//todo
 						case VolumeBox:
+							cells = GetWorld()->CubeBox(pos1, pos2);
+							break;
 						case VolumeBall:
 						case VolumeCylinderX:
 						case VolumeCylinderY:

@@ -568,28 +568,41 @@ namespace spades {
 			Player &player = GetWorld()->GetLocalPlayer().value();
 			if (player.GetTool() == Player::ToolBlock && player.IsBlockCursorDragging()) {
 				if (player.IsBlockCursorActive()) {
+					std::string msg;
 					switch (player.GetCurrentVolumeType()) {
 						case VolumeSingle: break;
 						case VolumeLine: {
-							auto blocks = world->CubeLine(player.GetBlockCursorDragPos(), player.GetBlockCursorPos(), 1088);
-							auto msg = _TrN("Client", "{0} block", "{0} blocks", blocks.size());
-							AlertType type = static_cast<int>(blocks.size()) > player.GetNumBlocks() ? AlertType::Warning : AlertType::Notice;
-							ShowAlert(msg, type, 0.f, true);
+							IntVector3 diagonal = player.GetBlockCursorDragPos() - player.GetBlockCursorPos();
+							diagonal.x *= 1 - 2 * (diagonal.x < 0);
+							diagonal.y *= 1 - 2 * (diagonal.y < 0);
+							diagonal.z *= 1 - 2 * (diagonal.z < 0);
+
+							diagonal.x += 1;
+							int blockCount = diagonal.x + diagonal.y + diagonal.z;
+							msg = _TrN("Client", "{0} block", "{0} blocks", blockCount);
 						} break;
 						case VolumeBox: {
-							//todo
+							IntVector3 diagonal = player.GetBlockCursorDragPos() - player.GetBlockCursorPos();
+							diagonal.x += 1 - 2 * (diagonal.x < 0);
+							diagonal.y += 1 - 2 * (diagonal.y < 0);
+							diagonal.z += 1 - 2 * (diagonal.z < 0);
+
+							int blockCount = diagonal.x * diagonal.y * diagonal.z;
+							blockCount *= 1 - 2 * (blockCount < 0);
+							msg = _TrN("Client", "{0} block", "{0} blocks", blockCount);
 						} break;
 						case VolumeBall:
 						case VolumeCylinderX:
 						case VolumeCylinderY:
 						case VolumeCylinderZ:
+						break;
 						default: return;
 					}
+					ShowAlert(msg, AlertType::Notice, 0.f, true);
 				} else {
 					// invalid
 					auto msg = _Tr("Client", "-- blocks");
-					AlertType type = AlertType::Warning;
-					ShowAlert(msg, type, 0.f, true);
+					ShowAlert(msg, AlertType::Warning, 0.f, true);
 				}
 			}
 		}
