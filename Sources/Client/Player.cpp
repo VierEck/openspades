@@ -292,7 +292,8 @@ namespace spades {
 
 			IntVector3 blockCursor;
 			IntVector3 indent = GetBlockCursorIndentPos();
-			if (newWInp.secondary != weapInput.secondary && map->IsValidBuildCoord(indent)) {
+			if (map->IsValidBuildCoord(indent) &&
+				(newWInp.secondary != weapInput.secondary || currentMapTool == ToolPainting)) {
 				if (map->IsSolidWrapped(indent.x, indent.y, indent.z)) {
 					blockCursor = indent;
 				} else {
@@ -305,6 +306,12 @@ namespace spades {
 			VolumeActionType volAct = VolumeActionBuild;
 			if (newWInp.secondary != weapInput.secondary || (newWInp.secondary && !newWInp.primary)) {
 				volAct = VolumeActionDestroy;
+			} else {
+				if (currentMapTool == ToolPainting) {
+					volAct = VolumeActionPaint;
+				} else if (currentMapTool == ToolCopying || currentMapTool == ToolMoving) {
+					//todo
+				}
 			}
 
 			float delay = (float)cg_BuildDelayInSec;
@@ -653,7 +660,8 @@ namespace spades {
 
 			IntVector3 blockCursor;
 			blockCursorIndentPos = result.hitBlock;
-			if (weapInput.secondary && map->IsValidBuildCoord(blockCursorIndentPos)) {
+			if (map->IsValidBuildCoord(blockCursorIndentPos) &&
+				(weapInput.secondary || currentMapTool == ToolPainting)) {
 				if (map->IsSolidWrapped(blockCursorIndentPos.x, blockCursorIndentPos.y, blockCursorIndentPos.z)) {
 					blockCursor = blockCursorIndentPos;
 				} else {

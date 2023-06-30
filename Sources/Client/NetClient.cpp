@@ -1556,8 +1556,17 @@ namespace spades {
 								client->PlayerCreatedBlock(*p);
 							}
 						} break;
-						//todo
-						case VolumeActionPaint:
+						case VolumeActionPaint: {
+							IntVector3 col = p ? p->GetBlockColor() : temporaryPlayerBlockColor;
+							for (size_t i = 0; i < cells.size(); i++) {
+								if (GetWorld()->GetMap()->IsSolid(cells[i].x, cells[i].y, cells[i].z)) {
+									GetWorld()->CreateBlock(cells[i], col);
+								}
+							}
+							if (p) {
+								client->PlayerCreatedBlock(*p);
+							}
+						} break;
 						case VolumeActionTextureBuild:
 						case VolumeActionTexturePaint:
 						//todo
