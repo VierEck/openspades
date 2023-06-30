@@ -561,7 +561,39 @@ namespace spades {
 			SPADES_MARK_FUNCTION();
 			Player &player = GetWorld()->GetLocalPlayer().value();
 			player.SetBuilderInput(playerInput, weapInput);
+			ShowBuilderBlockCountNotice();
 		}
+
+		void Client::ShowBuilderBlockCountNotice() {
+			Player &player = GetWorld()->GetLocalPlayer().value();
+			if (player.GetTool() == Player::ToolBlock && player.IsBlockCursorDragging()) {
+				if (player.IsBlockCursorActive()) {
+					switch (player.GetCurrentVolumeType()) {
+						case VolumeSingle: break;
+						case VolumeLine: {
+							auto blocks = world->CubeLine(player.GetBlockCursorDragPos(), player.GetBlockCursorPos(), 1088);
+							auto msg = _TrN("Client", "{0} block", "{0} blocks", blocks.size());
+							AlertType type = static_cast<int>(blocks.size()) > player.GetNumBlocks() ? AlertType::Warning : AlertType::Notice;
+							ShowAlert(msg, type, 0.f, true);
+						} break;
+						case VolumeBox: {
+							//todo
+						} break;
+						case VolumeBall:
+						case VolumeCylinderX:
+						case VolumeCylinderY:
+						case VolumeCylinderZ:
+						default: return;
+					}
+				} else {
+					// invalid
+					auto msg = _Tr("Client", "-- blocks");
+					AlertType type = AlertType::Warning;
+					ShowAlert(msg, type, 0.f, true);
+				}
+			}
+		}
+		
 
 #pragma mark - IWorldListener Handlers
 
