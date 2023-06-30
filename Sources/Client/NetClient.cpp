@@ -1539,11 +1539,17 @@ namespace spades {
 					switch (volAct) {
 						case VolumeActionDestroy: {
 							GetWorld()->DestroyBlock(cells);
+							if (p) {
+								client->PlayerDigBlockSound(*p);
+							}
 						} break;
 						case VolumeActionBuild: {
 							IntVector3 col = p ? p->GetBlockColor() : temporaryPlayerBlockColor;
 							for (auto c : cells) {
 								GetWorld()->CreateBlock(c, col);
+							}
+							if (p) {
+								client->PlayerCreatedBlock(*p);
 							}
 						} break;
 						//todo

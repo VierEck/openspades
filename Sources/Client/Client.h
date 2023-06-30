@@ -474,6 +474,7 @@ namespace spades {
 			void PlayerLeaving(Player &);
 			void PlayerJoinedTeam(Player &);
 			void PlayerSpawned(Player &);
+			void PlayerDigBlockSound(Player &);
 
 			// IWorldListener begin
 			void PlayerObjectSet(int) override;

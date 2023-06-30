@@ -77,6 +77,15 @@ namespace spades {
 			}
 		}
 
+		void Client::PlayerDigBlockSound(Player &p) {
+			SPADES_MARK_FUNCTION();
+
+			if (!IsMuted()) {
+				Handle<IAudioChunk> c = audioDevice->RegisterSound("Sounds/Misc/BlockDestroy.opus");
+				audioDevice->Play(c.GetPointerOrNull(), p.GetEye() + p.GetFront(), AudioParam());
+			}
+		}
+
 		void Client::TeamCapturedTerritory(int teamId, int terId) {
 			TCGameMode::Territory &ter =
 			  dynamic_cast<TCGameMode &>(*world->GetMode()).GetTerritory(terId);
