@@ -718,8 +718,71 @@ namespace spades {
 			pers.name = (std::string)cg_playerName;
 			pers.kills = 0;
 
+			std::string txtFile = mapFileName.substr(0, mapFileName.size() - 4);
+			txtFile += ".txt";
+			if (FileManager::FileExists(txtFile.c_str())) {
+				LoadMapTxt(txtFile);
+			}
+
 			SetIsMapEditor(true);
 			SPLog("LocalMapEditor set");
+		}
+
+		void Client::LoadMapTxt(std::string txtFile) {
+			if (!FileManager::FileExists(txtFile.c_str())) {
+				return;
+			}
+			mapTxtFileName = txtFile;
+			std::unique_ptr<IStream> stream = FileManager::OpenForReading(mapTxtFileName.c_str());
+			int len = (int)(stream->GetLength() - stream->GetPosition());
+			std::string txt = stream->Read(len);
+
+			scriptedUI->LoadMapTxt(txt);
+
+			std::string note = "Map.txt loaded: " + mapTxtFileName;
+			ShowAlert(note, Client::AlertType::Notice);
+			SPLog("Map.txt loaded: %s", mapTxtFileName.c_str());
+		}
+
+		void Client::SaveMapTxt(const std::string &txt) {
+			if (mapTxtFileName == "") {
+				mapTxtFileName = mapTxtFileName.substr(0, mapTxtFileName.length() - 4) + ".txt";
+			}
+			std::unique_ptr<IStream> stream(FileManager::OpenForWriting(mapTxtFileName.c_str()));
+
+			stream->Write(txt);
+			stream->Flush();
+
+			std::string note = "Map.txt saved: " + mapTxtFileName;
+			ShowAlert(note, Client::AlertType::Notice);
+			SPLog("Map.txt saved: %s", mapTxtFileName.c_str());
+		}
+
+		void Client::GenMaptxt() {
+			mapTxtFileName = mapFileName.substr(0, mapTxtFileName.length() - 4) + ".txt";
+			std::unique_ptr<IStream> stream(FileManager::OpenForWriting(mapTxtFileName.c_str()));
+			std::string txt = GenMeta();
+
+			char buf[64];
+			IntVector3 fogColor = world->GetFogColor();
+			sprintf(buf, "fog = (%d, %d, %d)\n", fogColor.x, fogColor.y, fogColor.z);
+			txt += buf;
+
+			stream->Write(txt);
+
+			std::string note = "Map.txt created: " + mapTxtFileName;
+			ShowAlert(note, Client::AlertType::Notice);
+			SPLog("Map.txt created: %s", mapTxtFileName.c_str());
+		}
+
+		std::string Client::GenMeta() {
+			std::string txt = "name = '" + mapTxtFileName.substr(15, (int)mapTxtFileName.length() - 19) + "'\n";
+			txt += "version = '0'\n";
+			txt += "author = '" + (std::string)cg_playerName + "'\n";
+			txt += "description = ('what is this map about?')\n\n";
+			txt += "extensions = {\n\n}\n\n";
+
+			return txt;
 		}
 
 #pragma mark - Chat Messages

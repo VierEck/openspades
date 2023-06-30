@@ -21,6 +21,7 @@
 #include "FieldWithHistory.as"
 #include "ChatLogWindow.as"
 #include "ColorPalette.as"
+#include "MapTxt.as"
 
 namespace spades {
 
@@ -34,6 +35,7 @@ namespace spades {
         spades::ui::UIElement @activeUI;
 
         ChatLogWindow @chatLogWindow;
+        ClientMapTxtWindow @mapTxtWindow;
 
         ClientMenu @clientMenu;
 
@@ -57,6 +59,7 @@ namespace spades {
             clientMenu.Bounds = manager.RootElement.Bounds;
 
             @chatLogWindow = ChatLogWindow(this);
+            @mapTxtWindow = ClientMapTxtWindow(this);
         }
 
         void MouseEvent(float x, float y) { manager.MouseEvent(x, y); }
@@ -133,8 +136,14 @@ namespace spades {
             ClientPaletteWindow wnd(this);
             @ActiveUI = wnd;
         }
+        void EnterMapTxtWindow() {
+            @ActiveUI = mapTxtWindow;
+            @manager.ActiveElement = mapTxtWindow.viewer;
+        }
 
         void RecordChatLog(string text, Vector4 color) { chatLogWindow.Record(text, color); }
+
+        void LoadMapTxt(string text) { mapTxtWindow.Load(text); }
     }
 
     ClientUI @CreateClientUI(Renderer @renderer, AudioDevice @audioDevice, FontManager @fontManager,

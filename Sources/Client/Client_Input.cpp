@@ -87,7 +87,9 @@ DEFINE_SPADES_SETTING(cg_alerts, "1");
 SPADES_SETTING(cg_manualFocus);
 DEFINE_SPADES_SETTING(cg_keyAutoFocus, "MiddleMouseButton");
 
+DEFINE_SPADES_SETTING(cg_keyMapTxt, "j");
 DEFINE_SPADES_SETTING(cg_keyEditColor, "g");
+
 DEFINE_SPADES_SETTING(cg_keyVolumeSingle, "1");
 DEFINE_SPADES_SETTING(cg_keyVolumeLine, "2");
 
@@ -647,6 +649,14 @@ namespace spades {
 			Player &p = world->GetLocalPlayer().value();
 			if (!p.IsBuilder())
 				return false;
+
+			if (CheckKey(cg_keyMapTxt, name) && down) {
+				scriptedUI->EnterMapTxtWindow();
+				scriptedUI->setIgnored(name);
+				Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
+				audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+				return true;
+			}
 
 			if (CheckKey(cg_keyVolumeSingle, name) && down) {
 				p.SetVolumeType(VolumeSingle);

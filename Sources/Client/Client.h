@@ -413,10 +413,12 @@ namespace spades {
 			bool isMapEditor, isLocalMapEditor;
 			void SetIsMapEditor(bool b);
 			std::string mapFileName, canvasFileName;
+			std::shared_ptr<GameProperties> makeproperties;
 			bool MapEditorKeyEvent(const std::string &name, bool down);
 
 			void LoadLocalMapEditor();
-			std::shared_ptr<GameProperties> makeproperties;
+			std::string GenMeta();
+			std::string mapTxtFileName;
 
 
 		protected:
@@ -512,6 +514,10 @@ namespace spades {
 			void LocalPlayerBuildError(BuildFailureReason reason) override;
 			void LocalPlayerCreatedVolume(IntVector3, IntVector3, VolumeType, VolumeActionType) override;
 			// IWorldListener end
+
+			void LoadMapTxt(std::string txtFile);
+			void SaveMapTxt(const std::string &txt);
+			void GenMaptxt();
 		};
 	} // namespace client
 } // namespace spades

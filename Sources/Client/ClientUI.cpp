@@ -371,5 +371,52 @@ namespace spades {
 			client->paletteView->KeyInput(key);
 			client->paletteView->UpdatePaletteWindow();
 		}
+
+		void ClientUI::EnterMapTxtWindow() {
+			SPADES_MARK_FUNCTION();
+			if (!ui) {
+				return;
+			}
+
+			ScopedPrivilegeEscalation privilege;
+			static ScriptFunction func("ClientUI", "void EnterMapTxtWindow()");
+			ScriptContextHandle c = func.Prepare();
+			c->SetObject(&*ui);
+			c.ExecuteChecked();
+		}
+		void ClientUI::LoadMapTxt(const std::string &txt) {
+			SPADES_MARK_FUNCTION();
+			if (!ui) {
+				return;
+			}
+
+			ScopedPrivilegeEscalation privilege;
+			static ScriptFunction func("ClientUI", "void LoadMapTxt(string)");
+			ScriptContextHandle c = func.Prepare();
+			std::string k = txt;
+			c->SetObject(&*ui);
+			c->SetArgObject(0, reinterpret_cast<void *>(&k));
+			c.ExecuteChecked();
+		}
+
+		void ClientUI::requestLoadTxt() {
+			SPADES_MARK_FUNCTION();
+			if (client->mapTxtFileName != "") {
+				client->LoadMapTxt(client->mapTxtFileName);
+			}
+		}
+
+		void ClientUI::requestSaveTxt(const std::string &txt) {
+			SPADES_MARK_FUNCTION();
+			client->SaveMapTxt(txt);
+		}
+
+		void ClientUI::requestGenTxt() {
+			SPADES_MARK_FUNCTION();
+			client->GenMaptxt();
+			if (client->mapTxtFileName != "") {
+				client->LoadMapTxt(client->mapTxtFileName);
+			}
+		}
 	} // namespace client
 } // namespace spades

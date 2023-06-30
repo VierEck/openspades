@@ -100,6 +100,12 @@ namespace spades {
 			void NewPalettePage();
 			void DeleteCurrentPalettePage();
 			void PaletteKeyInput(const std::string &);
+
+			void EnterMapTxtWindow();
+			void LoadMapTxt(const std::string &msg);
+			void requestLoadTxt();
+			void requestSaveTxt(const std::string &txt);
+			void requestGenTxt();
 		};
 		;
 	} // namespace client
