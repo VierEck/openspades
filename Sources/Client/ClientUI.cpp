@@ -329,5 +329,47 @@ namespace spades {
 		void ClientUI::setIgnored(const std::string &key) { ignoreInput = key; }
 
 		void ClientUI::MapEditorSaveMap() { client->TakeMapShot(true);}
+
+		void ClientUI::EnterPaletteWindow() {
+			SPADES_MARK_FUNCTION();
+			if (!ui) {
+				return;
+			}
+
+			ScopedPrivilegeEscalation privilege;
+			static ScriptFunction func("ClientUI", "void EnterPaletteWindow()");
+			ScriptContextHandle c = func.Prepare();
+			c->SetObject(&*ui);
+			c.ExecuteChecked();
+		}
+		void ClientUI::EditCurrentColor() {
+			SPADES_MARK_FUNCTION();
+			client->paletteView->EditCurrentColor();
+		}
+		void ClientUI::ChangePalettePage(int next) {
+			SPADES_MARK_FUNCTION();
+			client->paletteView->ChangePalettePage(next);
+		}
+		void ClientUI::SaveCurrentPalettePage() {
+			SPADES_MARK_FUNCTION();
+			client->paletteView->SaveCurrentPalettePage();
+		}
+		void ClientUI::LoadCurrentPalettePage() {
+			SPADES_MARK_FUNCTION();
+			client->paletteView->LoadCurrentPalettePage();
+		}
+		void ClientUI::NewPalettePage() {
+			SPADES_MARK_FUNCTION();
+			client->paletteView->NewPalettePage();
+		}
+		void ClientUI::DeleteCurrentPalettePage() {
+			SPADES_MARK_FUNCTION();
+			client->paletteView->DeleteCurrentPalettePage();
+		}
+		void ClientUI::PaletteKeyInput(const std::string &key) {
+			SPADES_MARK_FUNCTION();
+			client->paletteView->KeyInput(key);
+			client->paletteView->UpdatePaletteWindow();
+		}
 	} // namespace client
 } // namespace spades

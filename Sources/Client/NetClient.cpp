@@ -1749,6 +1749,8 @@ namespace spades {
 
 		void NetClient::SendHeldBlockColor() {
 			SPADES_MARK_FUNCTION();
+			if (!peer)
+				return;
 			NetPacketWriter wri(PacketTypeSetColour);
 			wri.Write((uint8_t)GetLocalPlayer().GetId());
 			IntVector3 v = GetLocalPlayer().GetBlockColor();

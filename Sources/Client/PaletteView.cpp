@@ -28,10 +28,19 @@
 #include "Player.h"
 #include "World.h"
 
+#include <Core/FileManager.h>
+#include <Core/IStream.h>
+#include "Fonts.h"
+#include "ClientUI.h"
+
 DEFINE_SPADES_SETTING(cg_keyPaletteLeft, "Left");
 DEFINE_SPADES_SETTING(cg_keyPaletteRight, "Right");
 DEFINE_SPADES_SETTING(cg_keyPaletteUp, "Up");
 DEFINE_SPADES_SETTING(cg_keyPaletteDown, "Down");
+
+DEFINE_SPADES_SETTING(cg_CurrentColorRed, "0");
+DEFINE_SPADES_SETTING(cg_CurrentColorGreen, "0");
+DEFINE_SPADES_SETTING(cg_CurrentColorBlue, "0");
 
 namespace spades {
 	namespace client {
@@ -46,28 +55,310 @@ namespace spades {
 		}
 
 		PaletteView::PaletteView(Client *client) : client(client), renderer(client->GetRenderer()) {
-			IntVector3 cols[] = {{128, 128, 128}, {256, 0, 0},   {256, 128, 0}, {256, 256, 0},
-			                     {0, 256, 0},     {0, 256, 256}, {0, 0, 256},   {256, 0, 256}};
-
-			for (int i = 0; i < 8; i++) {
-				colors.push_back(SanitizeCol(cols[i] / 8 - 1));
-				colors.push_back(SanitizeCol(cols[i] * 3 / 8 - 1));
-				colors.push_back(SanitizeCol(cols[i] * 5 / 8 - 1));
-				colors.push_back(SanitizeCol(cols[i] * 7 / 8 - 1));
-
-				IntVector3 rem = IntVector3::Make(256, 256, 256);
-				rem -= cols[i];
-
-				colors.push_back(cols[i] + rem / 8 - 1);
-				colors.push_back(cols[i] + rem * 3 / 8 - 1);
-				colors.push_back(cols[i] + rem * 5 / 8 - 1);
-				colors.push_back(cols[i] + rem * 7 / 8 - 1);
-			}
-
-			defaultColor = 3;
+			currentPalettePage = -1;
+			DefaultPalette();
+			LoadPaletteList();
 		}
 
 		PaletteView::~PaletteView() {}
+
+		void PaletteView::DefaultPalette() {
+			IntVector3 cols[] = {
+			  {128, 128, 128}, {256,   0,   0}, {256, 128,   0}, {256, 256,   0},
+			  {0  , 256,   0}, {  0, 256, 256}, {  0,   0, 256}, {256,   0, 256}
+			};
+
+			paletteRow = paletteColumn = 8;
+
+			colors.clear();
+			auto def = IntVector3::Make(256, 256, 256);
+			for (int i = 0; i < 8; i++) {
+				for (int j = 1; j < 8; j += 2)
+					colors.push_back(SanitizeCol(((cols[i] * j) / 8) - 1));
+
+				auto rem = def - cols[i];
+				for (int j = 1; j < 8; j += 2)
+					colors.push_back((cols[i] + ((rem * j) / 8) - 1));
+			}
+
+			currentColor = defaultColor = 3;
+			SetSelectedIndex(defaultColor);
+		}
+
+		std::string PaletteView::PalettePath(int i) {
+			char filename[256];
+			if (i != -1) {
+				sprintf(filename, "Mapditor/Palettes/%03d.palette", i);
+				return filename;
+			}
+
+			int nextPaletteIndex = 1;
+			while (1) {
+				sprintf(filename, "MapEditor/Palettes/%03d.palette", nextPaletteIndex);
+				if (FileManager::FileExists(filename)) {
+					nextPaletteIndex++;
+					continue;
+				}
+				return filename;
+			}
+		}
+
+		std::string PaletteView::WriteColor(IntVector3 color) {
+			std::string str = "(";
+
+			if (color.x < 9)
+				str += ' ';
+			if (color.x < 99)
+				str += ' ';
+			str += std::to_string(color.x);
+			str += ", ";
+
+			if (color.y < 9)
+				str += ' ';
+			if (color.y < 99)
+				str += ' ';
+			str += std::to_string(color.y);
+			str += ", ";
+
+			if (color.z < 9)
+				str += ' ';
+			if (color.z < 99)
+				str += ' ';
+			str += std::to_string(color.z);
+
+			str += ") ";
+			return str;
+		}
+
+		void PaletteView::WritePaletteList() {
+			std::unique_ptr<IStream> stream(FileManager::OpenForWriting("MapEditor/palette.list"));
+
+			std::string list;
+			for (size_t i = 0; i < paletteList.size(); i++) {
+				list += paletteList[i];
+				list += '\n';
+			}
+
+			stream->Write(list);
+			stream->Flush();
+
+			SPLog("Palette List saved.");
+		}
+
+		void PaletteView::LoadPaletteList() {
+			if (!FileManager::FileExists("MapEditor/palette.list")) {
+				WritePaletteList();
+				return;
+			}
+
+			std::unique_ptr<IStream> stream(FileManager::OpenForReading("MapEditor/palette.list"));
+			int len = (int)(stream->GetLength() - stream->GetPosition());
+			std::string list = stream->Read(len);
+			std::string page;
+
+			for (size_t i = 0; i < list.size(); i++) {
+				if (list[i] != '\n') {
+					page += list[i];
+					continue;
+				}
+				paletteList.push_back(page);
+				page.clear();
+			}
+			SPLog("Palette List loaded.");
+		}
+
+		void PaletteView::LoadPalettePage(std::string name) {
+			if (!FileManager::FileExists(name.c_str()))
+				return;
+
+			std::unique_ptr<IStream> stream(FileManager::OpenForReading(name.c_str()));
+			int len = (int)(stream->GetLength() - stream->GetPosition());
+			std::string list = stream->Read(len);
+
+			colors.clear();
+			IntVector3 color;
+
+			int RowColumn = 2;
+			int rgb = 3;
+
+			std::string strNumber = "";
+			int number;
+			for (char c : list) {
+				if (isdigit(c)) {
+					strNumber += c;
+					continue;
+				}
+				if (strNumber == "")
+					continue;
+				number = stoi(strNumber);
+				strNumber = "";
+
+				if (RowColumn == 2) {
+					RowColumn--;
+					paletteColumn = number;
+					continue;
+				}
+				if (RowColumn == 1) {
+					RowColumn--;
+					paletteRow = number;
+					continue;
+				}
+
+				if (rgb == 3) {
+					rgb--;
+					color.x = number;
+					continue;
+				}
+				if (rgb == 2) {
+					rgb--;
+					color.y = number;
+					continue;
+				}
+				rgb = 3;
+				color.z = number;
+				colors.push_back(color);
+			}
+			SetSelectedIndex(0);
+
+			list = "Palette Page loaded: ";
+			list += name;
+			client->ShowAlert(list, Client::AlertType::Notice);
+			SPLog("Palette Page loaded: %s", name.c_str());
+		}
+
+		void PaletteView::LoadCurrentPalettePage() {
+			if (currentPalettePage < 0 || currentPalettePage >= (int)paletteList.size())
+				return;
+
+			LoadPalettePage(paletteList[currentPalettePage]);
+			UpdatePaletteWindow();
+		}
+
+		void PaletteView::SaveCurrentPalettePage() {
+			if (currentPalettePage < 0 || currentPalettePage >= (int)paletteList.size())
+				return;
+
+			std::unique_ptr<IStream> stream(FileManager::OpenForWriting(paletteList[currentPalettePage].c_str()));
+
+			char buf[256];
+
+			sprintf(buf, "[%d columns, %d rows] \n", paletteColumn, paletteRow);
+			std::string page = buf;
+
+			int newline = 0;
+			for (auto col : colors) {
+				page += WriteColor(col);
+
+				newline++;
+				if (newline >= 8) {
+					page +=  '\n';
+					newline = 0;
+				}
+			}
+
+			stream->Write(page);
+			stream->Flush();
+
+			UpdatePaletteWindow();
+
+			page = "Palette Page saved: " + paletteList[currentPalettePage];
+			client->ShowAlert(page, Client::AlertType::Notice);
+			SPLog("Palette Page saved: %s", paletteList[currentPalettePage].c_str());
+		}
+
+		void PaletteView::NewPalettePage() {
+			paletteRow = paletteColumn = 16;
+
+			//zerospades
+			IntVector3 cols[] = {
+			  {128, 128, 128}, {256,   0,   0}, {256, 128,   0}, {256, 256,   0},
+			  {256, 256, 128}, {128, 256,   0}, {  0, 256,   0}, {  0, 256, 128},
+			  {0  , 256, 256}, {128, 256, 256}, {  0, 128, 256}, {  0,   0, 256},
+			  {128,   0, 256}, {256,   0, 256}, {256, 128, 256}, {256,   0, 128}
+			};
+
+			colors.clear();
+			IntVector3 def = IntVector3::Make(256, 256, 256);
+			int newline = 0;
+			for (int i = 0; i < (int)paletteRow; i++) {
+				for (int j = 1; j < (int)paletteColumn; j += 2) 
+					colors.push_back(SanitizeCol(((cols[i] * j) / (int)paletteColumn) - 1));
+
+				auto rem = def - cols[i];
+				for (int j = 1; j < (int)paletteColumn; j += 2)
+					colors.push_back(cols[i] + ((rem * j) / (int)paletteColumn) - 1);
+			}
+			SetSelectedIndex(7);
+
+			std::string page = PalettePath(-1);
+			paletteList.push_back(page);
+			currentPalettePage = (int)paletteList.size() - 1;
+			SaveCurrentPalettePage();
+
+			WritePaletteList();
+		}
+
+		void PaletteView::DeleteCurrentPalettePage() { //only removes page from palette list
+			if (currentPalettePage < 0 || currentPalettePage >= (int)paletteList.size())
+				return;
+
+			paletteList.erase(paletteList.begin() + currentPalettePage);
+			WritePaletteList();
+			if (currentPalettePage >= (int)paletteList.size()) {
+				ChangePalettePage(-1);
+			} else {
+				LoadCurrentPalettePage();
+			}
+		}
+
+		void PaletteView::ChangePalettePage(int next) {
+			if (next == 0 || (next < 0 && currentPalettePage < 0))
+				return;
+
+			currentPalettePage += next;
+
+			if (currentPalettePage == -1) {
+				DefaultPalette();
+				return;
+			}
+
+			if (currentPalettePage >= (int)paletteList.size()) {
+				currentPalettePage--;
+				return;
+			}
+
+			if (!FileManager::FileExists(paletteList[currentPalettePage].c_str())) {
+				DeleteCurrentPalettePage();
+				return;
+			}
+
+			LoadPalettePage(paletteList[currentPalettePage]);
+			UpdatePaletteWindow();
+		}
+
+		void PaletteView::EditCurrentColor() {
+			int index = GetSelectedIndex();
+			IntVector3 col;
+			col.x = (int)cg_CurrentColorRed;
+			col.y = (int)cg_CurrentColorGreen;
+			col.z = (int)cg_CurrentColorBlue;
+			colors[index] = col;
+			SetSelectedIndex(index);
+		}
+
+		void PaletteView::CompareCurrentColor() {
+			IntVector3 col = colors[GetSelectedIndex()];
+
+			if (col.x != (int)cg_CurrentColorRed ||
+				col.y != (int)cg_CurrentColorGreen ||
+				col.z != (int)cg_CurrentColorBlue) {
+				EditCurrentColor();
+			}
+		}
+
+		void PaletteView::UpdatePaletteWindow() {
+			client->scriptedUI->EnterPaletteWindow();
+		}
 
 		int PaletteView::GetSelectedIndex() {
 			World *w = client->GetWorld();
@@ -79,9 +370,8 @@ namespace spades {
 				return -1;
 
 			IntVector3 col = p->GetBlockColor();
-			for (int i = 0; i < (int)colors.size(); i++) {
-				if (col.x == colors[i].x && col.y == colors[i].y && col.z == colors[i].z)
-					return i;
+			if (currentColor < (int)colors.size()) {
+				return currentColor;
 			}
 			return -1;
 		}
@@ -95,7 +385,11 @@ namespace spades {
 		}
 
 		void PaletteView::SetSelectedIndex(int idx) {
-			IntVector3 col = colors[idx];
+			if (currentColor >= (int)colors.size())
+				return;
+
+			currentColor = idx;
+			IntVector3 col = colors[currentColor];
 
 			World *w = client->GetWorld();
 			if (!w)
@@ -106,6 +400,10 @@ namespace spades {
 				return;
 
 			p->SetHeldBlockColor(col);
+
+			cg_CurrentColorRed = col.x;
+			cg_CurrentColorGreen = col.y;
+			cg_CurrentColorBlue = col.z;
 
 			client->net->SendHeldBlockColor();
 		}
@@ -129,18 +427,18 @@ namespace spades {
 				return true;
 			} else if (EqualsIgnoringCase(keyName, cg_keyPaletteUp)) {
 				int c = GetSelectedOrDefaultIndex();
-				if (c < 8)
-					c += (int)colors.size() - 8;
+				if (c < paletteColumn)
+					c += (int)colors.size() - paletteColumn;
 				else
-					c -= 8;
+					c -= paletteColumn;
 				SetSelectedIndex(c);
 				return true;
 			} else if (EqualsIgnoringCase(keyName, cg_keyPaletteDown)) {
 				int c = GetSelectedOrDefaultIndex();
-				if (c >= (int)colors.size() - 8)
-					c -= (int)colors.size() - 8;
+				if (c >= (int)colors.size() - paletteColumn)
+					c -= (int)colors.size() - paletteColumn;
 				else
-					c += 8;
+					c += paletteColumn;
 				SetSelectedIndex(c);
 				return true;
 			} else {
@@ -158,13 +456,30 @@ namespace spades {
 			float scrW = renderer.ScreenWidth();
 			float scrH = renderer.ScreenHeight();
 
+			std::string str = std::to_string(currentPalettePage + 1);
+			IFont &font = client->fontManager->GetGuiFont();
+			float margin = 5.f;
+
+			float posX = scrW - 18.f;
+			float posY = scrH - 55.f;
+
+			auto size = font.Measure(str);
+			size += Vector2(margin * 2.f, margin * 2.f);
+			size *= 0.9f;
+
+			auto pos = Vector2(posX - size.x, posY - size.y);
+
+			renderer.SetColorAlphaPremultiplied(Vector4(0.f, 0.f, 0.f, 0.5f));
+			renderer.DrawImage(nullptr, AABB2(pos.x, pos.y, size.x, size.y));
+			font.DrawShadow(str, pos + Vector2(margin, margin), 0.8f, Vector4(1.f, 1.f, 1.f, 1.f), Vector4(0.f, 0.f, 0.f, 0.5f));
+
 			for (size_t phase = 0; phase < 2; phase++) {
 				for (size_t i = 0; i < colors.size(); i++) {
 					if ((sel == i) != (phase == 1))
 						continue;
 
-					int row = static_cast<int>(i / 8);
-					int col = static_cast<int>(i % 8);
+					int row = static_cast<int>(i / paletteRow);
+					int col = static_cast<int>(i % paletteColumn);
 
 					bool selected = sel == i;
 
@@ -176,8 +491,8 @@ namespace spades {
 					cl.z = icol.z / 255.f;
 					cl.w = 1.f;
 
-					float x = scrW - 100.f + 10.f * col;
-					float y = scrH - 106.f + 10.f * row - 40.f;
+					float x = scrW - 20.f - (paletteColumn * 10.f) + 10.f * col;
+					float y = scrH - 26.f - (paletteRow * 10.f) + 10.f * row - 60.f;
 
 					renderer.SetColorAlphaPremultiplied(cl);
 					if (selected) {

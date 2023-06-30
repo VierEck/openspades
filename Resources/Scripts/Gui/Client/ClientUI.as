@@ -20,6 +20,7 @@
 #include "Menu.as"
 #include "FieldWithHistory.as"
 #include "ChatLogWindow.as"
+#include "ColorPalette.as"
 
 namespace spades {
 
@@ -127,6 +128,11 @@ namespace spades {
             @manager.ActiveElement = wnd.field;
         }
         void CloseUI() { @ActiveUI = null; }
+
+        void EnterPaletteWindow() {
+            ClientPaletteWindow wnd(this);
+            @ActiveUI = wnd;
+        }
 
         void RecordChatLog(string text, Vector4 color) { chatLogWindow.Record(text, color); }
     }

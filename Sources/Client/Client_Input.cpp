@@ -87,6 +87,7 @@ DEFINE_SPADES_SETTING(cg_alerts, "1");
 SPADES_SETTING(cg_manualFocus);
 DEFINE_SPADES_SETTING(cg_keyAutoFocus, "MiddleMouseButton");
 
+DEFINE_SPADES_SETTING(cg_keyEditColor, "g");
 DEFINE_SPADES_SETTING(cg_keyVolumeSingle, "1");
 DEFINE_SPADES_SETTING(cg_keyVolumeLine, "2");
 
@@ -117,6 +118,8 @@ namespace spades {
 
 			if (scriptedUI->NeedsInput()) {
 				scriptedUI->MouseEvent(x, y);
+				if (world->IsMapEditor() && paletteView->currentPalettePage >= 0)
+					paletteView->CompareCurrentColor();
 				return;
 			}
 
@@ -540,6 +543,10 @@ namespace spades {
 						scriptedUI->setIgnored(name);
 					} else if (CheckKey(cg_keyCaptureColor, name) && down) {
 						CaptureColor();
+					} else if (CheckKey(cg_keyEditColor, name) && down) {
+						scriptedUI->EnterPaletteWindow();
+						Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
+						audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
 					} else if (CheckKey(cg_keyChangeMapScale, name) && down) {
 						mapView->SwitchScale();
 						Handle<IAudioChunk> chunk =

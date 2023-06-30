@@ -81,6 +81,34 @@ namespace spades {
 													  "void SaveMap()",
 													  asMETHOD(ClientUIHelper, MapEditorSaveMap),
 													  asCALL_THISCALL);
+						r = eng->RegisterObjectMethod("ClientUIHelper",
+													  "void EditCurrentColor()",
+													  asMETHOD(ClientUIHelper, EditCurrentColor),
+													  asCALL_THISCALL);
+						r = eng->RegisterObjectMethod("ClientUIHelper",
+													  "void ChangePalettePage(int)",
+													  asMETHOD(ClientUIHelper, ChangePalettePage),
+													  asCALL_THISCALL);
+						r = eng->RegisterObjectMethod("ClientUIHelper",
+													  "void SaveCurrentPalettePage()",
+													  asMETHOD(ClientUIHelper, SaveCurrentPalettePage),
+													  asCALL_THISCALL);
+						r = eng->RegisterObjectMethod("ClientUIHelper",
+													  "void LoadCurrentPalettePage()",
+													  asMETHOD(ClientUIHelper, LoadCurrentPalettePage),
+													  asCALL_THISCALL);
+						r = eng->RegisterObjectMethod("ClientUIHelper",
+													  "void NewPalettePage()",
+													  asMETHOD(ClientUIHelper, NewPalettePage),
+													  asCALL_THISCALL);
+						r = eng->RegisterObjectMethod("ClientUIHelper",
+													  "void DeleteCurrentPalettePage()",
+													  asMETHOD(ClientUIHelper, DeleteCurrentPalettePage),
+													  asCALL_THISCALL);
+						r = eng->RegisterObjectMethod("ClientUIHelper",
+													  "void PaletteKeyInput(const string& in)",
+													  asMETHOD(ClientUIHelper, PaletteKeyInput),
+													  asCALL_THISCALL);
 						manager->CheckError(r);
 						break;
 					default:
