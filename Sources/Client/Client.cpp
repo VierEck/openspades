@@ -739,6 +739,46 @@ namespace spades {
 
 			scriptedUI->LoadMapTxt(txt);
 
+			int find = txt.rfind("fog =");
+			if (find < 0) {
+				find = txt.rfind("fog=");
+			}
+			if (find >= 0) {
+				int endLine = txt.find('\n', find);
+
+				if (endLine > 0) {
+					std::string numString = "";
+					IntVector3 fogCol;
+					int count = 3;
+					for (char c : txt.substr(find, endLine - find)) {
+						if (isdigit(c)) {
+							numString += c;
+							continue;
+						}
+						if (numString.length() <= 0) {
+							continue;
+						}
+						if (count == 3) {
+							fogCol.x = std::stoi(numString);
+							numString = "";
+							count--;
+							continue;
+						}
+						if (count == 2) {
+							fogCol.y = std::stoi(numString);
+							numString = "";
+							count--;
+							continue;
+						}
+						if (count == 1) {
+							fogCol.z = std::stoi(numString);
+							net->SendFogColor(fogCol);
+							break;
+						}
+					}
+				}
+			}
+
 			std::string note = "Map.txt loaded: " + mapTxtFileName;
 			ShowAlert(note, Client::AlertType::Notice);
 			SPLog("Map.txt loaded: %s", mapTxtFileName.c_str());
