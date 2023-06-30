@@ -672,6 +672,53 @@ namespace spades {
 			mapView->Draw();
 		}
 
+		void Client::DrawBuilderHUD() {
+			if (cg_hideHud)
+				return;
+			Player &p = GetWorld()->GetLocalPlayer().value();
+			paletteView->Draw();
+			mapView->Draw();
+			DrawBuilderIcons();
+		}
+
+		void Client::DrawBuilderIcons() {
+			Player &p = GetWorld()->GetLocalPlayer().value();
+
+			float iconX = renderer->ScreenWidth() * 0.52f;
+			float iconY = renderer->ScreenHeight() * 0.52f;
+
+			Handle<IImage> imgTool;
+			switch (p.GetCurrentVolumeType()) {
+				case VolumeSingle: {
+					imgTool = renderer->RegisterImage("Gfx/BuildMode/SingleBlock.png");
+				} break;
+				case VolumeLine: {
+					imgTool = renderer->RegisterImage("Gfx/BuildMode/BlockLine.png");
+				} break;
+				case VolumeBox: {
+					imgTool = renderer->RegisterImage("Gfx/BuildMode/Box.png");
+				} break;
+				case VolumeBall: {
+					imgTool = renderer->RegisterImage("Gfx/BuildMode/Ball.png");
+				} break;
+				case VolumeCylinderX:
+				case VolumeCylinderY:
+				case VolumeCylinderZ:{
+					imgTool = renderer->RegisterImage("Gfx/BuildMode/Cylinder.png");
+				} break;
+				default: return;
+			}
+			renderer->DrawImage(imgTool, MakeVector2(iconX, iconY));
+
+			Handle<IImage> imgMode;
+			if (p.GetWeaponInput().secondary) {
+				imgMode = renderer->RegisterImage("Gfx/BuildMode/Destroy.png");
+			} else {
+				return;
+			}
+			renderer->DrawImage(imgMode, MakeVector2(iconX + imgTool->GetWidth(), iconY));
+		}
+
 		void Client::DrawAlert() {
 			SPADES_MARK_FUNCTION();
 
@@ -817,7 +864,11 @@ namespace spades {
 						DrawSpectateHUD();
 					}
 				} else {
-					DrawSpectateHUD();
+					if (!p->IsBuilder()) {
+						DrawSpectateHUD();
+					} else {
+						DrawBuilderHUD();
+					}
 				}
 
 				if (!cg_hideHud) {

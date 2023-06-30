@@ -380,6 +380,8 @@ namespace spades {
 			 * Called when the local player is dead or a spectator.
 			 */
 			void DrawSpectateHUD();
+			void DrawBuilderHUD();
+			void DrawBuilderIcons();
 
 			void DrawHottrackedPlayerName();
 			void DrawHurtScreenEffect();
