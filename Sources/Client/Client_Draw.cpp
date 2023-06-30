@@ -692,36 +692,92 @@ namespace spades {
 			float iconX = renderer->ScreenWidth() * 0.52f;
 			float iconY = renderer->ScreenHeight() * 0.52f;
 
-			Handle<IImage> imgTool;
+			Handle<IImage> imgVolume;
 			switch (p.GetCurrentVolumeType()) {
 				case VolumeSingle: {
-					imgTool = renderer->RegisterImage("Gfx/BuildMode/SingleBlock.png");
+					imgVolume = renderer->RegisterImage("Gfx/BuildMode/SingleBlock.png");
 				} break;
 				case VolumeLine: {
-					imgTool = renderer->RegisterImage("Gfx/BuildMode/BlockLine.png");
+					imgVolume = renderer->RegisterImage("Gfx/BuildMode/BlockLine.png");
 				} break;
 				case VolumeBox: {
-					imgTool = renderer->RegisterImage("Gfx/BuildMode/Box.png");
+					imgVolume = renderer->RegisterImage("Gfx/BuildMode/Box.png");
 				} break;
 				case VolumeBall: {
-					imgTool = renderer->RegisterImage("Gfx/BuildMode/Ball.png");
+					imgVolume = renderer->RegisterImage("Gfx/BuildMode/Ball.png");
 				} break;
 				case VolumeCylinderX:
 				case VolumeCylinderY:
 				case VolumeCylinderZ:{
-					imgTool = renderer->RegisterImage("Gfx/BuildMode/Cylinder.png");
+					imgVolume = renderer->RegisterImage("Gfx/BuildMode/Cylinder.png");
 				} break;
 				default: return;
 			}
-			renderer->DrawImage(imgTool, MakeVector2(iconX, iconY));
+			renderer->DrawImage(imgVolume, MakeVector2(iconX, iconY));
 
-			Handle<IImage> imgMode;
-			if (p.GetWeaponInput().secondary) {
-				imgMode = renderer->RegisterImage("Gfx/BuildMode/Destroy.png");
-			} else {
-				return;
+			Handle<IImage> imgTool;
+			switch (p.GetCurrentMapTool()) {
+				case noMapTool: {
+					Handle<IImage> imgDestroy;
+					if (p.GetWeaponInput().secondary) {
+						imgDestroy = renderer->RegisterImage("Gfx/BuildMode/Destroy.png");
+						renderer->DrawImage(imgDestroy, MakeVector2(iconX + imgVolume->GetWidth(), iconY));
+					}
+				} return;
+				case ToolPainting: {
+					imgTool = renderer->RegisterImage("Gfx/BuildMode/Paint.png");
+				} break;
+				case ToolBrushing: {
+					imgTool = renderer->RegisterImage("Gfx/BuildMode/Brush.png");
+				} break;
+				case ToolCopying: {
+					imgTool = renderer->RegisterImage("Gfx/BuildMode/Copy.png");
+					Handle<IImage> imgDestroy;
+					if (p.GetWeaponInput().secondary) {
+						imgDestroy = renderer->RegisterImage("Gfx/BuildMode/Destroy.png");
+						renderer->DrawImage(imgDestroy, MakeVector2(iconX + imgVolume->GetWidth(), iconY));
+					}
+				} break;
+				case ToolMoving: {
+					imgTool = renderer->RegisterImage("Gfx/BuildMode/Move.png");
+				} break;
+				case ToolMapObject: {
+					switch (p.GetCurrentMapObjectType()) {
+						case ObjTentTeam1:
+						case ObjTentTeam2:
+						case ObjTentNeutral: {
+							imgTool = renderer->RegisterImage("Gfx/BuildMode/Tent.png");
+						} break;
+						case ObjIntelTeam1:
+						case ObjIntelTeam2: {
+							imgTool = renderer->RegisterImage("Gfx/BuildMode/Intel.png");
+						} break;
+						case ObjSpawnTeam1:
+						case ObjSpawnTeam2: {
+							imgTool = renderer->RegisterImage("Gfx/BuildMode/Spawn.png");
+						} break;
+						default: return;
+					}
+					Vector4 col;
+					IntVector3 icol;
+					col.x = icol.x / 255.f;
+					col.y = icol.y / 255.f;
+					col.z = icol.z / 255.f;
+					col.w = 1.f;
+					renderer->SetColorAlphaPremultiplied(col);
+					float h = imgTool->GetHeight();
+					float w = imgTool->GetWidth();
+					renderer->DrawImage(imgTool, MakeVector2(iconX, iconY + imgTool->GetHeight()), AABB2(0, h, w, h));
+
+					Handle<IImage> imgDestroy;
+					if (p.GetWeaponInput().secondary) {
+						imgDestroy = renderer->RegisterImage("Gfx/BuildMode/Destroy.png");
+						renderer->DrawImage(imgDestroy, MakeVector2(iconX + imgVolume->GetWidth(), iconY));
+					}
+				} return;
+				default: return;
 			}
-			renderer->DrawImage(imgMode, MakeVector2(iconX + imgTool->GetWidth(), iconY));
+			renderer->DrawImage(imgTool, MakeVector2(iconX, iconY + imgVolume->GetHeight()));
 		}
 
 		void Client::DrawBuilderCursor() {

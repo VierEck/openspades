@@ -664,6 +664,8 @@ namespace spades {
 				p.SetTool(Player::ToolBlock);
 				p.SetHeldBlockColor({0, 0, 0});
 				p.SetVolumeType(VolumeSingle);
+				p.SetMapTool(noMapTool);
+				p.SetMapObjectType(ObjTentTeam1);
 				p.SetBuildDistance(3);
 				p.SetBuildAtMaxDistance(false);
 			}

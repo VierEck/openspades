@@ -138,9 +138,12 @@ namespace spades {
 			void FireWeapon();
 			void ThrowGrenade();
 
-			VolumeType currentVolumeType;
 			int BuildDistance;
 			bool BuildAtMaxDistance;
+			VolumeType currentVolumeType;
+			bool paintnig, brushing;
+			MapTool currentMapTool;
+			MapObjectType currentMapObjectType;
 
 		public:
 			Player(World &, int playerId, WeaponType weapon, int teamId, Vector3 position,
@@ -258,6 +261,17 @@ namespace spades {
 
 			void SetVolumeType(VolumeType v) { currentVolumeType = v; }
 			VolumeType GetCurrentVolumeType() { return currentVolumeType; }
+			void SetMapTool(MapTool t) {
+				if (currentMapTool == t) {
+					currentMapTool = noMapTool;
+					return;
+				}
+				currentMapTool = t; 
+			}
+			MapTool GetCurrentMapTool() { return currentMapTool; }
+			void SetMapObjectType(MapObjectType o) { currentMapObjectType = o; }
+			MapObjectType GetCurrentMapObjectType() { return currentMapObjectType; }
+
 			void SetBuildAtMaxDistance(bool b) { BuildAtMaxDistance = b; }
 			bool IsBuildAtMaxDistance() { return BuildAtMaxDistance; }
 			void SetBuildDistance(int i) { BuildDistance = i; }

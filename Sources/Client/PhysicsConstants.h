@@ -85,7 +85,7 @@ enum VolumeType {
 	VolumeBall, 
 	VolumeCylinderX, 
 	VolumeCylinderY, 
-	VolumeCylinderZ 
+	VolumeCylinderZ,
 };
 
 enum VolumeActionType { 
@@ -93,5 +93,24 @@ enum VolumeActionType {
 	VolumeActionBuild, 
 	VolumeActionPaint, 
 	VolumeActionTextureBuild, 
-	VolumeActionTexturePaint 
+	VolumeActionTexturePaint,
+};
+
+enum MapTool {
+	noMapTool = 0,
+	ToolPainting,
+	ToolBrushing,
+	ToolCopying,
+	ToolMoving,
+	ToolMapObject,
+};
+
+enum MapObjectType {
+	ObjTentTeam1 = 1, 
+	ObjTentTeam2, 
+	ObjTentNeutral, 
+	ObjIntelTeam1, 
+	ObjIntelTeam2, 
+	ObjSpawnTeam1, 
+	ObjSpawnTeam2,
 };

@@ -96,6 +96,12 @@ DEFINE_SPADES_SETTING(cg_keyVolumeBox, "3");
 DEFINE_SPADES_SETTING(cg_keyVolumeBall, "4");
 DEFINE_SPADES_SETTING(cg_keyVolumeCylinder, "5");
 
+DEFINE_SPADES_SETTING(cg_keyToolPaint, "f");
+DEFINE_SPADES_SETTING(cg_keyToolBrush, "r");
+DEFINE_SPADES_SETTING(cg_keyToolCopy, "c");
+DEFINE_SPADES_SETTING(cg_keyToolMove, "x");
+DEFINE_SPADES_SETTING(cg_keyToolMapObject, "y");
+
 DEFINE_SPADES_SETTING(cg_keyScaleBuildDistance, "MiddleMouseButton");
 SPADES_SETTING(cg_MaxBuildDistance);
 
@@ -656,66 +662,79 @@ namespace spades {
 			if (!p.IsBuilder())
 				return false;
 
+			bool ret = false;
+
 			if (CheckKey(cg_keyMapTxt, name) && down) {
 				scriptedUI->EnterMapTxtWindow();
 				scriptedUI->setIgnored(name);
-				Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
-				audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
-				return true;
+				ret = true;
 			}
 
 			if (CheckKey(cg_keyVolumeSingle, name) && down) {
 				p.SetVolumeType(VolumeSingle);
-				Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
-				audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
-				return true;
+				ret = true;
 			}
 			if (CheckKey(cg_keyVolumeLine, name) && down) {
 				p.SetVolumeType(VolumeLine);
-				Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
-				audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
-				return true;
+				ret = true;
 			}
 			if (CheckKey(cg_keyVolumeBox, name) && down) {
 				p.SetVolumeType(VolumeBox);
-				Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
-				audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
-				return true;
+				ret = true;
 			}
 			if (CheckKey(cg_keyVolumeBall, name) && down) {
 				p.SetVolumeType(VolumeBall);
-				Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
-				audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
-				return true;
+				ret = true;
 			}
 			if (CheckKey(cg_keyVolumeCylinder, name) && down) {
 				p.SetVolumeType(VolumeCylinderX);
-				Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
-				audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
-				return true;
+				ret = true;
+			}
+
+			if (CheckKey(cg_keyToolPaint, name) && down) {
+				p.SetMapTool(ToolPainting);
+				ret = true;
+			}
+			if (CheckKey(cg_keyToolBrush, name) && down) {
+				p.SetMapTool(ToolBrushing);
+				ret = true;
+			}
+			if (CheckKey(cg_keyToolCopy, name) && down) {
+				p.SetMapTool(ToolCopying);
+				ret = true;
+			}
+			if (CheckKey(cg_keyToolMove, name) && down) {
+				p.SetMapTool(ToolMoving);
+				ret = true;
+			}
+			if (CheckKey(cg_keyToolMapObject, name) && down) {
+				p.SetMapTool(ToolMapObject);
+				ret = true;
 			}
 
 			if (CheckKey(cg_keyScaleBuildDistance, name) && down) {
 				p.SetBuildAtMaxDistance(!p.IsBuildAtMaxDistance());
-				Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
-				audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
-				return true;
+				ret = true;
 			}
 			if (down) {
 				if (name == ("WheelDown")) {
 					if (p.GetBuildDistance() > 3.0f) {
 						p.SetBuildDistance(p.GetBuildDistance() - 1);
 					}
-					return true;
+					ret = true;
 				} else if (name == ("WheelUp")) {
 					if (p.GetBuildDistance() <  (float)cg_MaxBuildDistance && p.GetBuildDistance() < 1088) {
 						p.SetBuildDistance(p.GetBuildDistance() + 1);
 					}
-					return true;
+					ret = true;
 				}
 			}
 
-			return false;
+			if (ret) {
+				Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
+				audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+			}
+			return ret;
 		}
 	} // namespace client
 } // namespace spades
