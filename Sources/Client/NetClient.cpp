@@ -1529,6 +1529,8 @@ namespace spades {
 							cells = GetWorld()->CubeBox(pos1, pos2);
 							break;
 						case VolumeBall:
+							cells = GetWorld()->CubeBall(pos1, pos2);
+							break;
 						case VolumeCylinderX:
 						case VolumeCylinderY:
 						case VolumeCylinderZ:

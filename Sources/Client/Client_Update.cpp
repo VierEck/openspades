@@ -591,7 +591,19 @@ namespace spades {
 							blockCount *= 1 - 2 * (blockCount < 0);
 							msg = _TrN("Client", "{0} block", "{0} blocks", blockCount);
 						} break;
-						case VolumeBall:
+						case VolumeBall: {
+							IntVector3 diagonal = player.GetBlockCursorDragPos() - player.GetBlockCursorPos();
+							float x = diagonal.x + 1.f - 2.f * (diagonal.x < 0);
+							float y = diagonal.y + 1.f - 2.f * (diagonal.y < 0);
+							float z = diagonal.z + 1.f - 2.f * (diagonal.z < 0);
+							x *= 0.5f;
+							y *= 0.5f;
+							z *= 0.5f;
+							float blockCount = x * y * z * 3.f;
+							blockCount *= 1.f - 2.f * (blockCount < 0);
+							//to do. fix count to be accurate
+							msg = _TrN("Client", "{0} block", "{0} ~blocks (not accurate)", (int)blockCount);
+						} break;
 						case VolumeCylinderX:
 						case VolumeCylinderY:
 						case VolumeCylinderZ:

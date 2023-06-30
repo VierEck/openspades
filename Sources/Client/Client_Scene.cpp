@@ -743,12 +743,10 @@ namespace spades {
 						renderer->RenderModel(blocks.size() > 1 ? *curLine : *curSingle, param);
 					}
 				} break;
-				case VolumeBall:
-					//todo. draw an actual ellipsoid instead of box
+				case VolumeBall: // todo. draw actual ellipsoid
 				case VolumeCylinderX:
 				case VolumeCylinderY:
-				case VolumeCylinderZ:
-					//todo. draw actual cylinder instead of box
+				case VolumeCylinderZ: //todo. draw actual cylinder instead of box
 				case VolumeBox: {
 					int x = p->GetBlockCursorPos().x;
 					int y = p->GetBlockCursorPos().y;
