@@ -74,6 +74,8 @@ DEFINE_SPADES_SETTING(cg_playerNames, "2");
 DEFINE_SPADES_SETTING(cg_playerNameX, "0");
 DEFINE_SPADES_SETTING(cg_playerNameY, "0");
 
+DEFINE_SPADES_SETTING(cg_DrawDragCursorPos, "1");
+
 namespace spades {
 	namespace client {
 
@@ -679,6 +681,9 @@ namespace spades {
 			paletteView->Draw();
 			mapView->Draw();
 			DrawBuilderIcons();
+			DrawBuilderCursor();
+			if (cg_DrawDragCursorPos && p.IsBlockCursorDragging())
+				DrawBuilderDragCursor();
 		}
 
 		void Client::DrawBuilderIcons() {
@@ -717,6 +722,58 @@ namespace spades {
 				return;
 			}
 			renderer->DrawImage(imgMode, MakeVector2(iconX + imgTool->GetWidth(), iconY));
+		}
+
+		void Client::DrawBuilderCursor() {
+			Player &p = GetWorld()->GetLocalPlayer().value();
+
+			float curX = renderer->ScreenWidth() * 0.52f;
+			float curY = renderer->ScreenHeight() * 0.51f;
+
+			char buf[256];
+			sprintf(buf, "%dx %dy %dz", p.GetBlockCursorPos());
+			std::string str = buf;
+
+			IFont &font = fontManager->GetGuiFont();
+			float margin = 5.f;
+
+			auto size = font.Measure(str);
+			size += Vector2(margin * 2.f, margin * 2.f);
+			size *= 0.9f;
+
+			auto pos = Vector2(curX, curY - size.y);
+			//y - size.y put the "anchor" point at the bottom so cursorpos ui doesnt overlap with build icons 
+
+			renderer->SetColorAlphaPremultiplied(Vector4(0.f, 0.f, 0.f, 0.5f));
+			renderer->DrawImage(nullptr, AABB2(pos.x, pos.y, size.x, size.y));
+			font.DrawShadow(str, pos + Vector2(margin, margin), 0.9f, Vector4(1.f, 1.f, 1.f, 1.f), Vector4(0.f, 0.f, 0.f, 0.5f));
+		}
+
+		void Client::DrawBuilderDragCursor() {
+			Player &p = GetWorld()->GetLocalPlayer().value();
+			IntVector3 IntDragPos = p.GetBlockCursorDragPos();
+			Vector3 DragPos;
+			DragPos.x = IntDragPos.x;
+			DragPos.y = IntDragPos.y;
+			DragPos.z = IntDragPos.z;
+
+			Vector3 posxyz = Project(DragPos);
+			Vector2 pos = {posxyz.x, posxyz.y};
+
+			char buf[256];
+			sprintf(buf, "%dx %dy %dz", IntDragPos);
+			std::string str = buf;
+
+			IFont &font = fontManager->GetGuiFont();
+			float margin = 5.f;
+
+			auto size = font.Measure(str);
+			size += Vector2(margin * 2.f, margin * 2.f);
+			size *= 0.8f;
+
+			renderer->SetColorAlphaPremultiplied(Vector4(0.f, 0.f, 0.f, 0.5f));
+			renderer->DrawImage(nullptr, AABB2(pos.x, pos.y, size.x, size.y));
+			font.DrawShadow(str, pos + Vector2(margin, margin), 0.8f, Vector4(1.f, 1.f, 1.f, 1.f), Vector4(0.f, 0.f, 0.f, 0.5f));
 		}
 
 		void Client::DrawAlert() {
