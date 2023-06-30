@@ -94,6 +94,7 @@ DEFINE_SPADES_SETTING(cg_keyVolumeSingle, "1");
 DEFINE_SPADES_SETTING(cg_keyVolumeLine, "2");
 DEFINE_SPADES_SETTING(cg_keyVolumeBox, "3");
 DEFINE_SPADES_SETTING(cg_keyVolumeBall, "4");
+DEFINE_SPADES_SETTING(cg_keyVolumeCylinder, "5");
 
 DEFINE_SPADES_SETTING(cg_keyScaleBuildDistance, "MiddleMouseButton");
 SPADES_SETTING(cg_MaxBuildDistance);
@@ -683,6 +684,12 @@ namespace spades {
 			}
 			if (CheckKey(cg_keyVolumeBall, name) && down) {
 				p.SetVolumeType(VolumeBall);
+				Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
+				audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+				return true;
+			}
+			if (CheckKey(cg_keyVolumeCylinder, name) && down) {
+				p.SetVolumeType(VolumeCylinderX);
 				Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
 				audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
 				return true;

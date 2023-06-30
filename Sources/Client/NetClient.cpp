@@ -1534,7 +1534,8 @@ namespace spades {
 						case VolumeCylinderX:
 						case VolumeCylinderY:
 						case VolumeCylinderZ:
-						//todo
+							cells = GetWorld()->CubeCylinder(pos1, pos2, VolumeType(vol));
+							break;
 						break;
 						default: SPRaise("Received invalid block volume type: %d", vol);
 					}

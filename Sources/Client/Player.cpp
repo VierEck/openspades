@@ -311,6 +311,18 @@ namespace spades {
 			if (newWInp.secondary != weapInput.secondary || newWInp.primary != weapInput.primary) {
 				if (IsBlockCursorActive()) {
 					if (newWInp.primary || newWInp.secondary) {
+						if (currentVolumeType == VolumeCylinderX || currentVolumeType == VolumeCylinderY || currentVolumeType == VolumeCylinderZ) {
+							Vector3 ori = orientation;
+							ori.x *= 1 - 2 * (ori.x < 0);
+							ori.y *= 1 - 2 * (ori.y < 0);
+							ori.z *= 1 - 2 * (ori.z < 0);
+							if (ori.x > ori.z && ori.x > ori.y)
+								currentVolumeType = VolumeCylinderX;
+							if (ori.y > ori.x && ori.y > ori.z)
+								currentVolumeType = VolumeCylinderY;
+							if (ori.z > ori.y && ori.z > ori.x)
+								currentVolumeType = VolumeCylinderZ;
+						}
 						if (currentVolumeType == VolumeSingle) {
 							listener->LocalPlayerCreatedVolume(blockCursor, blockCursor, currentVolumeType, volAct);
 							nextBlockTime = world.GetTime() + delay;
