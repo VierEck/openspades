@@ -93,6 +93,9 @@ DEFINE_SPADES_SETTING(cg_keyEditColor, "g");
 DEFINE_SPADES_SETTING(cg_keyVolumeSingle, "1");
 DEFINE_SPADES_SETTING(cg_keyVolumeLine, "2");
 
+DEFINE_SPADES_SETTING(cg_keyScaleBuildDistance, "MiddleMouseButton");
+SPADES_SETTING(cg_MaxBuildDistance);
+
 namespace spades {
 	namespace client {
 
@@ -669,6 +672,26 @@ namespace spades {
 				Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
 				audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
 				return true;
+			}
+
+			if (CheckKey(cg_keyScaleBuildDistance, name) && down) {
+				p.SetBuildAtMaxDistance(!p.IsBuildAtMaxDistance());
+				Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
+				audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+				return true;
+			}
+			if (down) {
+				if (name == ("WheelDown")) {
+					if (p.GetBuildDistance() > 3.0f) {
+						p.SetBuildDistance(p.GetBuildDistance() - 1);
+					}
+					return true;
+				} else if (name == ("WheelUp")) {
+					if (p.GetBuildDistance() <  (float)cg_MaxBuildDistance && p.GetBuildDistance() < 1088) {
+						p.SetBuildDistance(p.GetBuildDistance() + 1);
+					}
+					return true;
+				}
 			}
 
 			return false;

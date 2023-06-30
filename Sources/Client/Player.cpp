@@ -34,6 +34,7 @@
 #include <Core/Settings.h>
 
 DEFINE_SPADES_SETTING(cg_BuildDelayInSec, "0.2");
+DEFINE_SPADES_SETTING(cg_MaxBuildDistance, "1088");
 
 namespace spades {
 	namespace client {
@@ -607,7 +608,10 @@ namespace spades {
 			Handle<GameMap> map = GetWorld().GetMap();
 			SPAssert(map);
 
-			float BuildDist = 12.f;
+			float BuildDist = BuildDistance;
+			if (BuildAtMaxDistance || BuildDist > (float)cg_MaxBuildDistance) {
+				BuildDist = (float)cg_MaxBuildDistance;
+			}
 
 			Vector3 pos = GetEye();
 			Vector3 ori = GetFront();

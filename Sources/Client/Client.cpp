@@ -661,9 +661,11 @@ namespace spades {
 			world->SetIsMapEditor(b);
 			if (b) {
 				auto &p = *world->GetLocalPlayer();
-				p.SetVolumeType(VolumeSingle);
 				p.SetTool(Player::ToolBlock);
 				p.SetHeldBlockColor({0, 0, 0});
+				p.SetVolumeType(VolumeSingle);
+				p.SetBuildDistance(3);
+				p.SetBuildAtMaxDistance(false);
 			}
 		}
 

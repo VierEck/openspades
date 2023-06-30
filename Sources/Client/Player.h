@@ -139,6 +139,8 @@ namespace spades {
 			void ThrowGrenade();
 
 			VolumeType currentVolumeType;
+			int BuildDistance;
+			bool BuildAtMaxDistance;
 
 		public:
 			Player(World &, int playerId, WeaponType weapon, int teamId, Vector3 position,
@@ -256,6 +258,10 @@ namespace spades {
 
 			void SetVolumeType(VolumeType v) { currentVolumeType = v; }
 			VolumeType GetCurrentVolumeType() { return currentVolumeType; }
+			void SetBuildAtMaxDistance(bool b) { BuildAtMaxDistance = b; }
+			bool IsBuildAtMaxDistance() { return BuildAtMaxDistance; }
+			void SetBuildDistance(int i) { BuildDistance = i; }
+			int GetBuildDistance() { return BuildDistance; }
 		};
 	} // namespace client
 } // namespace spades
