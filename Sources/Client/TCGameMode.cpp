@@ -37,6 +37,17 @@ namespace spades {
 			territories.push_back(t);
 		}
 
+		void TCGameMode::RemoveTerritory(int index) {
+			//why cant i use erase here
+			std::vector<Territory> ter;
+			for (int i = 0; i < (int)territories.size(); i++) {
+				if (i != index) {
+					ter.push_back(territories.at(i));
+				}
+			}
+			territories = std::move(ter);
+		}
+
 		float TCGameMode::Territory::GetProgress() {
 			float dt = mode.world.GetTime() - progressStartTime;
 			float prog = progressBasePos;

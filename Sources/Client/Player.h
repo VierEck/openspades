@@ -260,23 +260,39 @@ namespace spades {
 
 			float BoxDistanceToBlock(IntVector3);
 
-			void SetVolumeType(VolumeType v) { 
-				currentVolumeType = v; 
+			void SetVolumeType(VolumeType v) {
+				if (currentMapTool == ToolMapObject)
+					return;
+
 				TextureColors.clear();
+
+				blockCursorActive = false;
+				blockCursorDragging = false;
+				WeaponInput inp;
+				SetWeaponInput(inp);
+
+				currentVolumeType = v; 
 			}
 			VolumeType GetCurrentVolumeType() { return currentVolumeType; }
 			void SetMapTool(MapTool t) {
 				TextureColors.clear();
+
+				blockCursorActive = false;
+				blockCursorDragging = false;
+				WeaponInput inp;
+				SetWeaponInput(inp);
 
 				if (currentMapTool == t) {
 					currentMapTool = noMapTool;
 					return;
 				}
 
-				currentMapTool = t;
-
+				if (currentMapTool == ToolMapObject)
+					SetVolumeType(VolumeSingle);
 				if (currentMapTool == ToolBrushing && currentVolumeType < VolumeBox)
 					SetVolumeType(VolumeBox);
+
+				currentMapTool = t;
 			}
 			MapTool GetCurrentMapTool() { return currentMapTool; }
 			void SetMapObjectType(MapObjectType o) { currentMapObjectType = o; }
@@ -292,6 +308,8 @@ namespace spades {
 			int GetBrushSize() { return BrushSize; }
 			void SetEditBrushSize(bool b) { editBrushSize = b; }
 			bool GetEditBrushSize() { return editBrushSize; }
+
+			void ShootMapObject() { FireWeapon(); }
 
 			float walkFlySpeed;
 			float sprintFlySpeed;

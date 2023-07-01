@@ -53,7 +53,6 @@ namespace spades {
 		namespace {
 			const char UtfSign = -1;
 
-			enum { BLUE_FLAG = 0, GREEN_FLAG = 1, BLUE_BASE = 2, GREEN_BASE = 3 };
 			enum PacketType {
 				PacketTypePositionData = 0,
 				PacketTypeOrientationData = 1,
@@ -355,6 +354,7 @@ namespace spades {
 
 		class TransformSignedType {
 		public:
+			//get char?
 			int16_t GetSignedShort(uint16_t unShort) {
 				union {
 					uint16_t uS;
@@ -983,6 +983,61 @@ namespace spades {
 						pos.x = reader.ReadFloat();
 						pos.y = reader.ReadFloat();
 						pos.z = reader.ReadFloat();
+
+						if (GetWorld()->IsMapEditor()) {
+							if (state == DESTROY_SPAWN) {//removeing spawns
+								stmp::optional<Player &> p = GetPlayerOrNull(type);
+								if (!p) {
+									break;
+								}
+								savedPlayerTeam[type] = -1;
+								GetWorld()->SetPlayer(type, NULL);
+								break;
+							}
+							if (state == SPAWN_TEAM_1 || state == SPAWN_TEAM_2) {
+								state -= SPAWN_TEAM_1;
+								auto p = stmp::make_unique<Player>(*GetWorld(), type, RIFLE_WEAPON, state, pos, GetWorld()->GetTeam(state).color);
+								p->SetPosition(pos);
+								p->SetTool(Player::ToolBlock);
+								GetWorld()->SetPlayer(type, std::move(p));
+								if (savedPlayerTeam[type] != state) {
+									savedPlayerTeam[type] = state;
+								}
+
+								World::PlayerPersistent &pers = GetWorld()->GetPlayerPersistent(type);
+								char buf[32];
+								sprintf(buf, "%.02fx %.02fy %.02fz", pos.x, pos.y, pos.z);
+								pers.name = buf;
+								break;
+							}
+
+							stmp::optional<IGameMode &> mode = GetWorld()->GetMode();
+							if (mode && IGameMode::m_CTF == mode->ModeType()) {
+								auto &ctf = dynamic_cast<CTFGameMode &>(mode.value());
+								switch (type) {
+									case BLUE_BASE: ctf.GetTeam(0).basePos = pos; break;
+									case BLUE_FLAG: ctf.GetTeam(0).flagPos = pos; break;
+									case GREEN_BASE: ctf.GetTeam(1).basePos = pos; break;
+									case GREEN_FLAG: ctf.GetTeam(1).flagPos = pos; break;
+								}
+							} else if (mode && IGameMode::m_TC == mode->ModeType()) {
+								auto &tc = dynamic_cast<TCGameMode &>(mode.value());
+								if (type >= tc.GetNumTerritories() ) {
+									TCGameMode::Territory ter{tc};
+									ter.pos = pos;
+									ter.ownerTeamId = state;
+									ter.progressBasePos = 0.f;
+									ter.progressStartTime = 0.f;
+									ter.progressRate = 0.f;
+									ter.capturingTeamId = -1;
+									tc.AddTerritory(ter);
+								} else if (state > 2) {
+									tc.RemoveTerritory(type);
+								}
+							}
+
+							break;
+						}
 
 						stmp::optional<IGameMode &> mode = GetWorld()->GetMode();
 						if (mode && IGameMode::m_CTF == mode->ModeType()) {
@@ -1970,6 +2025,9 @@ namespace spades {
 
 		void NetClient::SendBlockVolume(spades::IntVector3 v1, spades::IntVector3 v2, VolumeType vol, VolumeActionType toolAct, std::vector<uint8_t> colors) {
 			SPADES_MARK_FUNCTION();
+			if (!GetWorld()->IsMapEditor())
+				return;
+
 			NetPacketWriter wri(PacketTypeBlockVolume);
 			wri.Write((uint8_t)GetLocalPlayer().GetId());
 			wri.Write((uint8_t)vol);
@@ -2003,6 +2061,26 @@ namespace spades {
 			wri.Write((uint8_t)col.z);
 			wri.Write((uint8_t)col.y);
 			wri.Write((uint8_t)col.x);
+			if (peer) {
+				enet_peer_send(peer, 0, wri.CreatePacket());
+			} else {
+				NetPacketReader read(wri.CreatePacket());
+				HandleGamePacket(read);
+			}
+		}
+
+		void NetClient::SendMapObject(int type, int state, spades::Vector3 v) {
+			SPADES_MARK_FUNCTION();
+			if (!GetWorld()->IsMapEditor())
+				return;
+
+			NetPacketWriter wri(PacketTypeMoveObject);
+			wri.Write((uint8_t)type);
+			wri.Write((uint8_t)state);
+			wri.Write(v.x);
+			wri.Write(v.y);
+			wri.Write(v.z);
+
 			if (peer) {
 				enet_peer_send(peer, 0, wri.CreatePacket());
 			} else {

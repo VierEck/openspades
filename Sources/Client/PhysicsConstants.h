@@ -78,6 +78,8 @@ static inline hitTag_t &operator|=(hitTag_t &left, const hitTag_t &right) {
 	return left;
 }
 
+enum { BLUE_FLAG = 0, GREEN_FLAG = 1, BLUE_BASE = 2, GREEN_BASE = 3 };
+
 enum VolumeType { 
 	VolumeSingle = 0, 
 	VolumeLine, 
@@ -112,4 +114,10 @@ enum MapObjectType {
 	ObjSpawnTeam1, 
 	ObjSpawnTeam2,
 	MAPOBJECTTYPEMAX
+};
+
+enum MoveObjSpawnType {
+	DESTROY_SPAWN = 3,
+	SPAWN_TEAM_1,
+	SPAWN_TEAM_2,
 };

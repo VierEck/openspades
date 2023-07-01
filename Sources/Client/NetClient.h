@@ -205,6 +205,7 @@ namespace spades {
 			void SendHandShakeValid(int challenge);
 			void SendBlockVolume(IntVector3, IntVector3, VolumeType, VolumeActionType, std::vector<uint8_t> colors = {});
 			void SendFogColor(IntVector3);
+			void SendMapObject(int type, int state, Vector3 pos1 = {0, 0, 0});
 
 			double GetDownlinkBps() { return bandwidthMonitor->GetDownlinkBps(); }
 			double GetUplinkBps() { return bandwidthMonitor->GetUplinkBps(); }

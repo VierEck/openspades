@@ -48,6 +48,9 @@
 
 #include "NetClient.h"
 
+#include "IGameMode.h"
+#include "TCGameMode.h"
+
 DEFINE_SPADES_SETTING(cg_ragdoll, "1");
 SPADES_SETTING(cg_blood);
 DEFINE_SPADES_SETTING(cg_ejectBrass, "1");
@@ -1084,7 +1087,11 @@ namespace spades {
 			}
 
 			if (&by == world->GetLocalPlayer()) {
-				net->SendHit(hurtPlayer.GetId(), type);
+				if (!world->GetLocalPlayer()->IsBuilder()) {
+					net->SendHit(hurtPlayer.GetId(), type);
+				} else {
+					net->SendMapObject(hurtPlayer.GetId(), DESTROY_SPAWN);
+				}
 
 				if (type == HitTypeHead && !hitScanState.hasPlayedHeadshotSound) {
 					Handle<IAudioChunk> c =
@@ -1350,6 +1357,82 @@ namespace spades {
 		void Client::LocalPlayerCreatedVolume(spades::IntVector3 v1, spades::IntVector3 v2, VolumeType vol, VolumeActionType volAct) {
 			SPADES_MARK_FUNCTION();
 			stmp::optional<Player &> p = world->GetLocalPlayer();
+
+			if (p->GetCurrentMapTool() == ToolMapObject) {
+				int type, state;
+				Vector3 pos;
+				pos.x = v1.x;
+				pos.y = v1.y;
+				pos.z = v1.z;
+
+				if (p->GetCurrentMapObjectType() == ObjSpawnTeam1 || p->GetCurrentMapObjectType() == ObjSpawnTeam2) {
+					if (volAct == VolumeActionDestroy) {
+						p->ShootMapObject();
+						return;
+					}
+
+					if (p->GetCurrentMapObjectType() == ObjSpawnTeam1) {
+						state = SPAWN_TEAM_1;
+					} else {
+						state = SPAWN_TEAM_2;
+					}
+
+					type = 40;
+					for (int i = 0; i < world->GetNumPlayerSlots(); i++) {
+						auto maybePlayer = world->GetPlayer(i);
+						if (maybePlayer && type == i) {
+							type = i + 1;
+						}
+					}
+					pos.z--;
+					pos.x += 0.5f;
+					pos.y += 0.5f;
+
+					net->SendMapObject(type, state, pos);
+					return;
+				}
+
+				pos.z++;
+
+				stmp::optional<IGameMode &> mode = GetWorld()->GetMode();
+				if (mode && mode->ModeType() == IGameMode::m_CTF) {
+					state = 0;
+					switch (p->GetCurrentMapObjectType()) {
+						case ObjTentTeam1: {
+							type = BLUE_BASE;
+						} break;
+						case ObjTentTeam2: {
+							type = GREEN_BASE;
+						} break;
+						case ObjIntelTeam1: {
+							type = BLUE_FLAG;
+						} break;
+						case ObjIntelTeam2: {
+							type = GREEN_FLAG;
+						} break;
+						default: return;
+					}
+				} else if (mode && mode->ModeType() == IGameMode::m_TC) {
+					auto &tc = dynamic_cast<TCGameMode &>(mode.value());
+					if (volAct == VolumeActionDestroy) {
+						for (int i = 0; i < tc.GetNumTerritories(); i++) {
+							auto ter = tc.GetTerritory(i);
+							if ((pos - ter.pos).GetLength() <= 3.f) {
+
+								net->SendMapObject(i, 255);
+								return;
+							} 
+						}
+						return;
+					} else if (p->GetCurrentMapObjectType() <= ObjTentNeutral) {
+						state = p->GetCurrentMapObjectType() - ObjTentTeam1;
+					}
+					type = tc.GetNumTerritories();
+				}
+				net->SendMapObject(type, state, pos);
+
+				return;
+			}
 
 			if (volAct == VolumeActionTextureBuild) {
 				if (p->TextureColors.size() == 0) {

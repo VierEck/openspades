@@ -824,6 +824,9 @@ namespace spades {
 					// might hit water surface.
 				}
 
+				if (IsBuilder() && !hitPlayer)
+					return;
+
 				if (mapResult.hit && GetHorizontalLength(mapResult.hitPos - muzzle) < 128.f &&
 				    (!hitPlayer ||
 				     GetHorizontalLength(mapResult.hitPos - muzzle) < hitPlayerDistance)) {
@@ -929,6 +932,9 @@ namespace spades {
 
 				// one pellet done
 			}
+
+			if (IsBuilder())
+				return;
 
 			// do hit test debugging
 			auto *debugger = world.GetHitTestDebugger();
