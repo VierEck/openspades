@@ -149,6 +149,11 @@ namespace spades {
 			void SendVersionEnhanced(const std::set<std::uint8_t> &propertyIds);
 			void SendSupportedExtensions();
 
+			void MapEditorCommands(std::string &);
+			void CommandSetRespawn(std::string &);
+			void CommandRespawn();
+			void CommandSwitchTeam(std::string &);
+
 		public:
 			NetClient(Client *);
 			~NetClient();
@@ -202,6 +207,9 @@ namespace spades {
 
 			double GetDownlinkBps() { return bandwidthMonitor->GetDownlinkBps(); }
 			double GetUplinkBps() { return bandwidthMonitor->GetUplinkBps(); }
+
+			int switchModeTeam;
+			Vector3 localRespawnPos;
 		};
 	} // namespace client
 } // namespace spades

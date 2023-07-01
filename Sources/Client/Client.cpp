@@ -670,6 +670,8 @@ namespace spades {
 				p.SetBuildAtMaxDistance(false);
 				p.SetBrushSize(10);
 				p.SetEditBrushSize(false);
+				net->switchModeTeam = 0;
+				net->localRespawnPos = {255, 255, 255};
 			}
 		}
 

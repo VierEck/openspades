@@ -627,7 +627,6 @@ namespace spades {
 				}
 			}
 		}
-		
 
 #pragma mark - IWorldListener Handlers
 
