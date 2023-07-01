@@ -67,6 +67,7 @@ namespace spades {
 			IWorldListener *listener = nullptr;
 
 			std::unique_ptr<IGameMode> mode;
+			std::unique_ptr<IGameMode> modeInactive;
 
 			Handle<GameMap> map;
 			std::unique_ptr<GameMapWrapper> mapWrapper;
@@ -181,6 +182,7 @@ namespace spades {
 
 			bool IsMapEditor() { return isMapEditor; }
 			void SetIsMapEditor(bool);
+			void SwitchMode();
 		};
 	} // namespace client
 } // namespace spades

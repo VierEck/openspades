@@ -153,6 +153,7 @@ namespace spades {
 			void CommandSetRespawn(std::string &);
 			void CommandRespawn();
 			void CommandSwitchTeam(std::string &);
+			void CommandSwitchGameMode();
 
 		public:
 			NetClient(Client *);

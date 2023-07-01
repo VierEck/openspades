@@ -747,24 +747,27 @@ namespace spades {
 					imgTool = renderer->RegisterImage("Gfx/BuildMode/Move.png");
 				} break;
 				case ToolMapObject: {
+					IntVector3 icol;
 					switch (p.GetCurrentMapObjectType()) {
 						case ObjTentTeam1:
 						case ObjTentTeam2:
 						case ObjTentNeutral: {
 							imgTool = renderer->RegisterImage("Gfx/BuildMode/Tent.png");
+							icol = world->GetTeam(p.GetCurrentMapObjectType() - ObjTentTeam1).color;
 						} break;
 						case ObjIntelTeam1:
 						case ObjIntelTeam2: {
 							imgTool = renderer->RegisterImage("Gfx/BuildMode/Intel.png");
+							icol = world->GetTeam(p.GetCurrentMapObjectType() - ObjIntelTeam1).color;
 						} break;
 						case ObjSpawnTeam1:
 						case ObjSpawnTeam2: {
 							imgTool = renderer->RegisterImage("Gfx/BuildMode/Spawn.png");
+							icol = world->GetTeam(p.GetCurrentMapObjectType() - ObjSpawnTeam1).color;
 						} break;
 						default: return;
 					}
 					Vector4 col;
-					IntVector3 icol;
 					col.x = icol.x / 255.f;
 					col.y = icol.y / 255.f;
 					col.z = icol.z / 255.f;

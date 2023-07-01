@@ -112,4 +112,5 @@ enum MapObjectType {
 	ObjIntelTeam2, 
 	ObjSpawnTeam1, 
 	ObjSpawnTeam2,
+	MAPOBJECTTYPEMAX
 };

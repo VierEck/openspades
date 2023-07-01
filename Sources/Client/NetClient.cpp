@@ -2151,6 +2151,10 @@ namespace spades {
 			if ((int)text.find("/s", 0) == 0) {
 				CommandSwitchTeam(text);
 			}
+
+			if ((int)text.find("/g", 0) == 0) {
+				CommandSwitchGameMode();
+			}
 		}
 
 		void NetClient::CommandSetRespawn(std::string &text) {
@@ -2207,6 +2211,21 @@ namespace spades {
 					GetLocalPlayer().SetTeam(switchModeTeam);
 				} else {
 					GetLocalPlayer().SetTeam(2);
+				}
+			}
+		}
+
+		void NetClient::CommandSwitchGameMode() {
+			GetWorld()->SwitchMode();
+			stmp::optional<IGameMode &> mode = GetWorld()->GetMode();
+			if (mode && IGameMode::m_TC == mode->ModeType()) {
+				if (GetLocalPlayer().GetCurrentMapObjectType() == ObjIntelTeam1 ||
+					GetLocalPlayer().GetCurrentMapObjectType() == ObjIntelTeam2) {
+					GetLocalPlayer().SetMapObjectType(ObjTentTeam1);
+				}
+			} else if (mode && IGameMode::m_CTF == mode->ModeType()) {
+				if (GetLocalPlayer().GetCurrentMapObjectType() == ObjTentNeutral) {
+					GetLocalPlayer().SetMapObjectType(ObjTentTeam1);
 				}
 			}
 		}

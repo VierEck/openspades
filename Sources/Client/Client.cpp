@@ -56,6 +56,7 @@
 #include "NetClient.h"
 
 #include "CTFGameMode.h"
+#include "TCGameMode.h"
 
 DEFINE_SPADES_SETTING(cg_chatBeep, "1");
 DEFINE_SPADES_SETTING(cg_alertSounds, "1");
@@ -696,6 +697,7 @@ namespace spades {
 			SPAssert(world);
 			SPLog("World set.");
 
+			world->SetIsMapEditor(true);
 			{
 				World::Team &t1 = world->GetTeam(0);
 				World::Team &t2 = world->GetTeam(1);
@@ -707,6 +709,9 @@ namespace spades {
 				spec.color = {0, 0, 0};
 
 				world->SetFogColor({128, 128, 255});
+
+				auto TC = stmp::make_unique<TCGameMode>(*world);
+				world->SetMode(std::move(TC));
 
 				auto CTF = stmp::make_unique<CTFGameMode>();
 				CTFGameMode::Team &mt1 = CTF->GetTeam(0);

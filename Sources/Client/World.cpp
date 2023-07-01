@@ -131,7 +131,22 @@ namespace spades {
 			}
 		}
 
-		void World::SetMode(std::unique_ptr<IGameMode> m) { mode = std::move(m); }
+		void World::SetMode(std::unique_ptr<IGameMode> m) {
+			if (isMapEditor && mode) {
+				//servers need to initially send two state data pkts.
+				if (mode->ModeType() != m->ModeType()) {
+					modeInactive = std::move(mode);
+				}
+			}
+			mode = std::move(m);
+		}
+
+		void World::SwitchMode() {
+			if (!mode || !modeInactive)
+				return;
+
+			std::swap(mode, modeInactive);
+		}
 
 		void World::SetIsMapEditor(bool b) {
 			isMapEditor = b;

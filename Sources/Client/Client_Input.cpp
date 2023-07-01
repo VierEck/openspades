@@ -39,6 +39,8 @@
 
 #include "NetClient.h"
 
+#include "IGameMode.h"
+
 using namespace std;
 
 DEFINE_SPADES_SETTING(cg_mouseSensitivity, "1");
@@ -734,6 +736,36 @@ namespace spades {
 						p.SetBuildDistance(p.GetBuildDistance() + 1);
 					}
 					ret = true;
+				}
+
+				if (p.GetCurrentMapTool() == ToolMapObject) {
+					if (name == "Up") {
+						ret = true;
+						if (p.GetCurrentMapObjectType() + 1 < MAPOBJECTTYPEMAX) {
+							p.SetMapObjectType(MapObjectType(p.GetCurrentMapObjectType() + 1));
+
+							stmp::optional<IGameMode &> mode = GetWorld()->GetMode();
+							if (mode->ModeType() == IGameMode::m_CTF && p.GetCurrentMapObjectType() == ObjTentNeutral) {
+								p.SetMapObjectType(MapObjectType(p.GetCurrentMapObjectType() + 1));
+							}
+							if (mode->ModeType() == IGameMode::m_TC && p.GetCurrentMapObjectType() == ObjIntelTeam1) {
+								p.SetMapObjectType(MapObjectType(p.GetCurrentMapObjectType() + ObjIntelTeam2 - ObjIntelTeam1 + 1));
+							}
+						}
+					} else if (name == "Down") {
+						ret = true;
+						if (p.GetCurrentMapObjectType() - ObjTentTeam1 > 0) {
+							p.SetMapObjectType(MapObjectType(p.GetCurrentMapObjectType() - 1));
+
+							stmp::optional<IGameMode &> mode = GetWorld()->GetMode();
+							if (mode->ModeType() == IGameMode::m_CTF && p.GetCurrentMapObjectType() == ObjTentNeutral) {
+								p.SetMapObjectType(MapObjectType(p.GetCurrentMapObjectType() - 1));
+							}
+							if (mode->ModeType() == IGameMode::m_TC && p.GetCurrentMapObjectType() == ObjIntelTeam1) {
+								p.SetMapObjectType(MapObjectType(p.GetCurrentMapObjectType() - ObjIntelTeam2 + ObjIntelTeam1 - 1));
+							}
+						}
+					}
 				}
 			}
 
