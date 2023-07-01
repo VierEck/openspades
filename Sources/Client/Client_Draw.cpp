@@ -743,9 +743,6 @@ namespace spades {
 				case ToolCopying: {
 					imgTool = renderer->RegisterImage("Gfx/BuildMode/Copy.png");
 				} break;
-				case ToolMoving: {
-					imgTool = renderer->RegisterImage("Gfx/BuildMode/Move.png");
-				} break;
 				case ToolMapObject: {
 					IntVector3 icol;
 					switch (p.GetCurrentMapObjectType()) {

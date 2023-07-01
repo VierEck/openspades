@@ -100,7 +100,6 @@ enum MapTool {
 	ToolPainting,
 	ToolBrushing,
 	ToolCopying,
-	ToolMoving,
 	ToolMapObject,
 };
 
