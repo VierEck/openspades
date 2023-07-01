@@ -1450,7 +1450,7 @@ namespace spades {
 			if (volAct == VolumeActionTextureBuild) {
 				if (p->TextureColors.size() == 0) {
 					p->savedTexturePkt = std::make_tuple(v1, v2, vol);
-					p->TextureColors = world->ColorVolume(v1, v2, vol);
+					p->TextureColors = world->ColorVolume(v1, v2, vol, world->GetCubeVolume(v1, v2, vol));
 					return;
 				}
 				IntVector3 move = v1 - std::get<0>(p->savedTexturePkt);

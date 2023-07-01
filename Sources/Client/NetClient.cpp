@@ -1578,55 +1578,30 @@ namespace spades {
 						pos2.z = transSign.GetSignedShort(reader.ReadShort());
 					}
 
-					std::vector<IntVector3> cells;
-					switch (vol) {
-						case VolumeSingle:
-							cells.push_back(pos1);
-							break;
-						case VolumeLine:
-							cells = GetWorld()->CubeLine(pos1, pos2, 1088);
-							break;
-						case VolumeBox:
-							cells = GetWorld()->CubeBox(pos1, pos2);
-							break;
-						case VolumeBall:
-							cells = GetWorld()->CubeBall(pos1, pos2);
-							break;
-						case VolumeCylinderX:
-						case VolumeCylinderY:
-						case VolumeCylinderZ:
-							cells = GetWorld()->CubeCylinder(pos1, pos2, VolumeType(vol));
-							break;
-						break;
-						default: SPRaise("Received invalid block volume type: %d", vol);
-					}
+					std::vector<IntVector3> cells = GetWorld()->GetCubeVolume(pos1, pos2, VolumeType(vol));
+					if (cells.size() == 0)
+						SPRaise("Received invalid block volume type: %d", vol);
 
 					switch (volAct) {
 						case VolumeActionDestroy: {
 							GetWorld()->DestroyBlock(cells);
-							if (p) {
+							if (p)
 								client->PlayerDigBlockSound(*p);
-							}
 						} break;
 						case VolumeActionBuild: {
 							IntVector3 col = p ? p->GetBlockColor() : temporaryPlayerBlockColor;
-							for (auto &c : cells) {
+							for (auto &c : cells)
 								GetWorld()->CreateBlock(c, col);
-							}
-							if (p) {
+							if (p)
 								client->PlayerCreatedBlock(*p);
-							}
 						} break;
 						case VolumeActionPaint: {
 							IntVector3 col = p ? p->GetBlockColor() : temporaryPlayerBlockColor;
-							for (auto &c : cells) {
-								if (GetWorld()->GetMap()->IsSolid(c.x, c.y, c.z)) {
+							for (auto &c : cells)
+								if (GetWorld()->GetMap()->IsSolid(c.x, c.y, c.z))
 									GetWorld()->CreateBlock(c, col);
-								}
-							}
-							if (p) {
+							if (p)
 								client->PlayerCreatedBlock(*p);
-							}
 						} break;
 						case VolumeActionTextureBuild: {
 							IntVector3 col;
@@ -1643,12 +1618,12 @@ namespace spades {
 									col.y = reader.ReadByte();
 									col.z = reader.ReadByte();
 									i += 3;
-									GetWorld()->CreateBlock(cells[j], col);
+									if (GetWorld()->GetMap()->IsValidBuildCoord(cells[j]))
+										GetWorld()->CreateBlock(cells[j], col);
 								}
 							}
-							if (p) {
+							if (p)
 								client->PlayerCreatedBlock(*p);
-							}
 						} break;
 						break;
 						default: SPRaise("Received invalid Maptool action: %d", volAct);

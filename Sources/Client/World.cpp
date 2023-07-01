@@ -617,10 +617,7 @@ namespace spades {
 			return ret;
 		}
 
-		std::vector<uint8_t> World::ColorVolume(spades::IntVector3 v1, spades::IntVector3 v2, VolumeType vol) {
-			SPADES_MARK_FUNCTION_DEBUG();
-			std::vector<uint8_t> ret;
-
+		std::vector<IntVector3> World::GetCubeVolume(spades::IntVector3 v1, spades::IntVector3 v2, VolumeType vol) {
 			std::vector<IntVector3> cells;
 			switch (vol) {
 				case VolumeSingle:
@@ -640,9 +637,14 @@ namespace spades {
 				case VolumeCylinderZ:
 					cells = CubeCylinder(v1, v2, vol);
 					break;
-				default:
-					return ret;
+				default: return cells;
 			}
+			return cells;
+		}
+
+		std::vector<uint8_t> World::ColorVolume(spades::IntVector3 v1, spades::IntVector3 v2, VolumeType vol, std::vector<spades::IntVector3> cells) {
+			SPADES_MARK_FUNCTION_DEBUG();
+			std::vector<uint8_t> ret;
 
 			for (auto c : cells) {
 				if (!map->IsValidBuildCoord(c))
