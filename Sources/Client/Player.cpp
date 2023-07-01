@@ -1421,11 +1421,11 @@ namespace spades {
 		void Player::MoveBuilder(float fsynctics) {
 			float f = fsynctics;
 			if (input.sneak)
-				f *= 0.5f;
+				f *= sneakFlySpeed;
 			else if (input.sprint)
-				f *= 10.0f;
+				f *= sprintFlySpeed;
 			else
-				f *= 2.0f;
+				f *= walkFlySpeed;
 			if ((input.moveForward || input.moveBackward) && (input.moveRight || input.moveLeft) && (input.crouch || input.jump))
 				f /= sqrtf(2.f);
 

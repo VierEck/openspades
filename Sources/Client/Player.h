@@ -292,6 +292,10 @@ namespace spades {
 			int GetBrushSize() { return BrushSize; }
 			void SetEditBrushSize(bool b) { editBrushSize = b; }
 			bool GetEditBrushSize() { return editBrushSize; }
+
+			float walkFlySpeed;
+			float sprintFlySpeed;
+			float sneakFlySpeed;
 		};
 	} // namespace client
 } // namespace spades

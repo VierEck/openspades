@@ -67,6 +67,10 @@ DEFINE_SPADES_SETTING(cg_skipDeadPlayersWhenDead, "1");
 
 SPADES_SETTING(cg_playerName);
 
+SPADES_SETTING(cg_FlySpeedWalk);
+SPADES_SETTING(cg_FlySpeedSprint);
+SPADES_SETTING(cg_FlySpeedSneak);
+
 namespace spades {
 	namespace client {
 
@@ -672,7 +676,10 @@ namespace spades {
 				p.SetBrushSize(10);
 				p.SetEditBrushSize(false);
 				net->switchModeTeam = 0;
-				net->localRespawnPos = {255, 255, 255};
+				net->localRespawnPos = {255, 255, 30};
+				p.walkFlySpeed = (float)cg_FlySpeedWalk;
+				p.sprintFlySpeed = (float)cg_FlySpeedSprint;
+				p.sneakFlySpeed = (float)cg_FlySpeedSneak;
 			}
 		}
 
