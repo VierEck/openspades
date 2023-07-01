@@ -287,7 +287,7 @@ namespace spades {
 					return;
 				}
 
-				if (currentMapTool == ToolMapObject)
+				if (t == ToolMapObject && currentMapTool != ToolMapObject)
 					SetVolumeType(VolumeSingle);
 				if (currentMapTool == ToolBrushing && currentVolumeType < VolumeBox)
 					SetVolumeType(VolumeBox);
