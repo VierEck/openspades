@@ -686,6 +686,7 @@ namespace spades {
 			DrawBuilderCursor();
 			if (cg_DrawDragCursorPos && p.IsBlockCursorDragging())
 				DrawBuilderDragCursor();
+			DrawMapObjectPosition();
 		}
 
 		void Client::DrawBuilderIcons() {
