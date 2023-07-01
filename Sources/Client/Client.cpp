@@ -662,24 +662,26 @@ namespace spades {
 		void Client::SetIsMapEditor(bool b) {
 			isMapEditor = b;
 
-			//initialise mapeditor stuff. only after world, map and local player were created
-			world->SetIsMapEditor(b);
-			if (b) {
-				auto &p = *world->GetLocalPlayer();
-				p.SetTool(Player::ToolBlock);
-				p.SetHeldBlockColor({0, 0, 0});
-				p.SetVolumeType(VolumeSingle);
-				p.SetMapTool(noMapTool);
-				p.SetMapObjectType(ObjTentTeam1);
-				p.SetBuildDistance(3);
-				p.SetBuildAtMaxDistance(false);
-				p.SetBrushSize(10);
-				p.SetEditBrushSize(false);
+			//initialise mapeditor stuff. may need to be done multiple times
+			if (world)
+				world->SetIsMapEditor(b);
+
+			stmp::optional<Player &> p = *world->GetLocalPlayer();
+			if (b && p) {
+				p->SetTool(Player::ToolBlock);
+				p->SetHeldBlockColor({0, 0, 0});
+				p->SetVolumeType(VolumeSingle);
+				p->SetMapTool(noMapTool);
+				p->SetMapObjectType(ObjTentTeam1);
+				p->SetBuildDistance(3);
+				p->SetBuildAtMaxDistance(false);
+				p->SetBrushSize(10);
+				p->SetEditBrushSize(false);
 				net->switchModeTeam = 0;
 				net->localRespawnPos = {255, 255, 30};
-				p.walkFlySpeed = (float)cg_FlySpeedWalk;
-				p.sprintFlySpeed = (float)cg_FlySpeedSprint;
-				p.sneakFlySpeed = (float)cg_FlySpeedSneak;
+				p->walkFlySpeed = (float)cg_FlySpeedWalk;
+				p->sprintFlySpeed = (float)cg_FlySpeedSprint;
+				p->sneakFlySpeed = (float)cg_FlySpeedSneak;
 			}
 		}
 

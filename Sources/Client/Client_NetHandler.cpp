@@ -56,6 +56,8 @@ namespace spades {
 			keypadInput = KeypadInput();
 
 			toolRaiseState = .0f;
+
+			net->HandleMapEditorExtension();
 		}
 
 		void Client::JoinedGame() {
@@ -65,6 +67,8 @@ namespace spades {
 			followCameraState.enabled = false;
 			freeCameraState.position = MakeVector3(256, 256, 30);
 			freeCameraState.velocity = MakeVector3(0, 0, 0);
+
+			net->HandleMapEditorExtension();
 		}
 
 		void Client::PlayerCreatedBlock(Player &p) {

@@ -57,6 +57,8 @@ namespace spades {
 			ExtensionType128Player = 192,
 			ExtensionTypeMessageTypes = 193,
 			ExtensionTypeKickReason = 194,
+
+			ExtensionTypeMapEditor = 101,
 		};
 
 		class World;
@@ -100,6 +102,7 @@ namespace spades {
 			/** Extensions implemented in this client (map of extension id → version) */
 			std::unordered_map<uint8_t, uint8_t> implementedExtensions{
 			  {ExtensionType128Player, 1},
+			  {ExtensionTypeMapEditor, 1}
 			};
 
 			class BandwidthMonitor {
@@ -210,6 +213,7 @@ namespace spades {
 			double GetDownlinkBps() { return bandwidthMonitor->GetDownlinkBps(); }
 			double GetUplinkBps() { return bandwidthMonitor->GetUplinkBps(); }
 
+			void HandleMapEditorExtension();
 			int switchModeTeam;
 			Vector3 localRespawnPos;
 		};

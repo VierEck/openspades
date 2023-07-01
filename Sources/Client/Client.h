@@ -413,7 +413,6 @@ namespace spades {
 			void NetLog(const char *format, ...);
 
 			bool isMapEditor, isLocalMapEditor;
-			void SetIsMapEditor(bool b);
 			std::string mapFileName, canvasFileName;
 			std::shared_ptr<GameProperties> makeproperties;
 			bool MapEditorKeyEvent(const std::string &name, bool down);
@@ -515,6 +514,8 @@ namespace spades {
 			void LocalPlayerBuildError(BuildFailureReason reason) override;
 			void LocalPlayerCreatedVolume(IntVector3, IntVector3, VolumeType, VolumeActionType) override;
 			// IWorldListener end
+
+			void SetIsMapEditor(bool b);
 
 			void LoadMapTxt(std::string txtFile);
 			void SaveMapTxt(const std::string &txt);

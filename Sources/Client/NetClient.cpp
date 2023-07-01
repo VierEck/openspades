@@ -762,6 +762,12 @@ namespace spades {
 			SendSupportedExtensions();
 		}
 
+		void NetClient::HandleMapEditorExtension() {
+			auto got = extensions.find(ExtensionTypeMapEditor);
+			if (got != extensions.end())
+				client->SetIsMapEditor(true);
+		}
+
 		void NetClient::HandleGamePacket(spades::client::NetPacketReader &reader) {
 			SPADES_MARK_FUNCTION();
 
@@ -2118,6 +2124,8 @@ namespace spades {
 			SPLog("World loaded. Processing saved packets (%d)...", (int)savedPackets.size());
 
 			std::fill(savedPlayerTeam.begin(), savedPlayerTeam.end(), -1);
+
+			HandleMapEditorExtension();
 
 			// do saved packets
 			try {
