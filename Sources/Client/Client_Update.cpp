@@ -565,6 +565,19 @@ namespace spades {
 			Player &player = GetWorld()->GetLocalPlayer().value();
 			player.SetBuilderInput(playerInput, weapInput);
 			ShowBuilderBlockCountNotice();
+
+			if (!isLocalMapEditor) {
+				Vector3 curFront = player.GetFront();
+				if (curFront.x != lastFront.x || curFront.y != lastFront.y ||
+					curFront.z != lastFront.z) {
+					lastFront = curFront;
+					net->SendOrientation(curFront);
+				}
+				if (time > lastPosSentTime + 0.2f) {
+					net->SendPosition();
+					lastPosSentTime = time;
+				}
+			}
 		}
 
 		void Client::ShowBuilderBlockCountNotice() {
