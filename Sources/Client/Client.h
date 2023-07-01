@@ -421,7 +421,6 @@ namespace spades {
 			std::string GenMeta();
 			std::string mapTxtFileName;
 
-
 		protected:
 			~Client();
 

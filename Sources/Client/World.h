@@ -122,6 +122,8 @@ namespace spades {
 			std::vector<IntVector3> CubeBall(IntVector3 v1, IntVector3 v2);
 			std::vector<IntVector3> CubeCylinder(IntVector3 v1, IntVector3 v2, VolumeType axis);
 
+			std::vector<uint8_t> ColorVolume(spades::IntVector3 v1, spades::IntVector3 v2, VolumeType vol);
+
 			stmp::optional<Player &> GetPlayer(unsigned int i) {
 				SPAssert(i < players.size());
 				return players[i].get();

@@ -92,8 +92,7 @@ enum VolumeActionType {
 	VolumeActionDestroy = 0, 
 	VolumeActionBuild, 
 	VolumeActionPaint, 
-	VolumeActionTextureBuild, 
-	VolumeActionTexturePaint,
+	VolumeActionTextureBuild,
 };
 
 enum MapTool {

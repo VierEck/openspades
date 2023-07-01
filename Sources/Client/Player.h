@@ -260,13 +260,19 @@ namespace spades {
 
 			float BoxDistanceToBlock(IntVector3);
 
-			void SetVolumeType(VolumeType v) { currentVolumeType = v; }
+			void SetVolumeType(VolumeType v) { 
+				currentVolumeType = v; 
+				TextureColors.clear();
+			}
 			VolumeType GetCurrentVolumeType() { return currentVolumeType; }
 			void SetMapTool(MapTool t) {
+				TextureColors.clear();
+
 				if (currentMapTool == t) {
 					currentMapTool = noMapTool;
 					return;
 				}
+
 				currentMapTool = t;
 
 				if (currentMapTool == ToolBrushing && currentVolumeType < VolumeBox)
@@ -276,6 +282,8 @@ namespace spades {
 			void SetMapObjectType(MapObjectType o) { currentMapObjectType = o; }
 			MapObjectType GetCurrentMapObjectType() { return currentMapObjectType; }
 
+			std::tuple<IntVector3, IntVector3, VolumeType> savedTexturePkt;
+			std::vector<uint8_t> TextureColors;
 			void SetBuildAtMaxDistance(bool b) { BuildAtMaxDistance = b; }
 			bool IsBuildAtMaxDistance() { return BuildAtMaxDistance; }
 			void SetBuildDistance(int i) { BuildDistance = i; }

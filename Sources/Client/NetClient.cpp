@@ -1549,7 +1549,7 @@ namespace spades {
 						} break;
 						case VolumeActionBuild: {
 							IntVector3 col = p ? p->GetBlockColor() : temporaryPlayerBlockColor;
-							for (auto c : cells) {
+							for (auto &c : cells) {
 								GetWorld()->CreateBlock(c, col);
 							}
 							if (p) {
@@ -1558,18 +1558,37 @@ namespace spades {
 						} break;
 						case VolumeActionPaint: {
 							IntVector3 col = p ? p->GetBlockColor() : temporaryPlayerBlockColor;
-							for (size_t i = 0; i < cells.size(); i++) {
-								if (GetWorld()->GetMap()->IsSolid(cells[i].x, cells[i].y, cells[i].z)) {
-									GetWorld()->CreateBlock(cells[i], col);
+							for (auto &c : cells) {
+								if (GetWorld()->GetMap()->IsSolid(c.x, c.y, c.z)) {
+									GetWorld()->CreateBlock(c, col);
 								}
 							}
 							if (p) {
 								client->PlayerCreatedBlock(*p);
 							}
 						} break;
-						case VolumeActionTextureBuild:
-						case VolumeActionTexturePaint:
-						//todo
+						case VolumeActionTextureBuild: {
+							IntVector3 col;
+							int remainingBytes = reader.GetNumRemainingBytes();
+							// forth a mapsection (32^3) alone potentially gives us
+							// over 100.000 bytes here already.
+							// wont make a client side limitation here though. the lag
+							// itself is already a hardlimit on the user lol. theyll
+							// know what they get themselves into. 
+							// however checks should definetely happen at server level.
+							for (int i = 0, j = 0; i < remainingBytes; i++, j++) {
+								if (reader.ReadByte() && i + 3 < remainingBytes) {
+									col.x = reader.ReadByte();
+									col.y = reader.ReadByte();
+									col.z = reader.ReadByte();
+									i += 3;
+									GetWorld()->CreateBlock(cells[j], col);
+								}
+							}
+							if (p) {
+								client->PlayerCreatedBlock(*p);
+							}
+						} break;
 						break;
 						default: SPRaise("Received invalid Maptool action: %d", volAct);
 					}
@@ -1889,7 +1908,7 @@ namespace spades {
 			enet_peer_send(peer, 0, wri.CreatePacket());
 		}
 
-		void NetClient::SendBlockVolume(spades::IntVector3 v1, spades::IntVector3 v2, VolumeType vol, VolumeActionType toolAct) {
+		void NetClient::SendBlockVolume(spades::IntVector3 v1, spades::IntVector3 v2, VolumeType vol, VolumeActionType toolAct, std::vector<uint8_t> colors) {
 			SPADES_MARK_FUNCTION();
 			NetPacketWriter wri(PacketTypeBlockVolume);
 			wri.Write((uint8_t)GetLocalPlayer().GetId());
@@ -1903,6 +1922,11 @@ namespace spades {
 			wri.Write(transSign.GetUnsignedShort((int16_t)v2.x));
 			wri.Write(transSign.GetUnsignedShort((int16_t)v2.y));
 			wri.Write(transSign.GetUnsignedShort((int16_t)v2.z));
+
+			if (toolAct == VolumeActionTextureBuild) {
+				for (uint8_t &col : colors)
+					wri.Write(col);
+			}
 
 			if (peer) {
 				enet_peer_send(peer, 0, wri.CreatePacket());

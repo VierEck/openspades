@@ -1350,6 +1350,29 @@ namespace spades {
 		}
 		void Client::LocalPlayerCreatedVolume(spades::IntVector3 v1, spades::IntVector3 v2, VolumeType vol, VolumeActionType volAct) {
 			SPADES_MARK_FUNCTION();
+			stmp::optional<Player &> p = world->GetLocalPlayer();
+
+			if (volAct == VolumeActionTextureBuild) {
+				if (p->TextureColors.size() == 0) {
+					p->savedTexturePkt = std::make_tuple(v1, v2, vol);
+					p->TextureColors = world->ColorVolume(v1, v2, vol);
+					return;
+				}
+				if (p->GetCurrentMapTool() == ToolMoving) {
+					net->SendBlockVolume(
+						std::get<0>(p->savedTexturePkt), std::get<1>(p->savedTexturePkt),
+						std::get<2>(p->savedTexturePkt), VolumeActionDestroy
+					);
+				}
+				IntVector3 move = v1 - std::get<0>(p->savedTexturePkt);
+				net->SendBlockVolume(
+					std::get<0>(p->savedTexturePkt) + move, std::get<1>(p->savedTexturePkt) + move,
+					std::get<2>(p->savedTexturePkt), volAct, p->TextureColors
+				);
+				if (p->GetCurrentMapTool() == ToolMoving)
+					p->TextureColors.clear();
+			}
+
 			net->SendBlockVolume(v1, v2, vol, volAct);
 		}
 

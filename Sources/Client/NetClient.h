@@ -197,7 +197,7 @@ namespace spades {
 			void SendWeaponChange(WeaponType);
 			void SendTeamChange(int team);
 			void SendHandShakeValid(int challenge);
-			void SendBlockVolume(IntVector3, IntVector3, VolumeType, VolumeActionType);
+			void SendBlockVolume(IntVector3, IntVector3, VolumeType, VolumeActionType, std::vector<uint8_t> colors = {});
 			void SendFogColor(IntVector3);
 
 			double GetDownlinkBps() { return bandwidthMonitor->GetDownlinkBps(); }

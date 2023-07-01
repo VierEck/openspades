@@ -290,19 +290,6 @@ namespace spades {
 
 			Handle<GameMap> map = GetWorld().GetMap();
 
-			IntVector3 blockCursor;
-			IntVector3 indent = GetBlockCursorIndentPos();
-			if (map->IsValidBuildCoord(indent) &&
-				(newWInp.secondary != weapInput.secondary || currentMapTool == ToolPainting)) {
-				if (map->IsSolidWrapped(indent.x, indent.y, indent.z)) {
-					blockCursor = indent;
-				} else {
-					blockCursor = GetBlockCursorPos();
-				}
-			} else {
-				blockCursor = GetBlockCursorPos();
-			}
-
 			VolumeActionType volAct = VolumeActionBuild;
 			if (newWInp.secondary != weapInput.secondary || (newWInp.secondary && !newWInp.primary)) {
 				volAct = VolumeActionDestroy;
@@ -310,8 +297,22 @@ namespace spades {
 				if (currentMapTool == ToolPainting) {
 					volAct = VolumeActionPaint;
 				} else if (currentMapTool == ToolCopying || currentMapTool == ToolMoving) {
-					//todo
+					volAct = VolumeActionTextureBuild;
 				}
+			}
+
+			IntVector3 blockCursor;
+			IntVector3 indent = GetBlockCursorIndentPos();
+			if (map->IsValidBuildCoord(indent) &&
+				(newWInp.secondary != weapInput.secondary || volAct == VolumeActionPaint ||
+				(volAct == VolumeActionTextureBuild && TextureColors.size() == 0))) {
+				if (map->IsSolidWrapped(indent.x, indent.y, indent.z)) {
+					blockCursor = indent;
+				} else {
+					blockCursor = GetBlockCursorPos();
+				}
+			} else {
+				blockCursor = GetBlockCursorPos();
 			}
 
 			float delay = (float)cg_BuildDelayInSec;
@@ -673,7 +674,8 @@ namespace spades {
 			IntVector3 blockCursor;
 			blockCursorIndentPos = result.hitBlock;
 			if (map->IsValidBuildCoord(blockCursorIndentPos) &&
-				(weapInput.secondary || currentMapTool == ToolPainting)) {
+				(weapInput.secondary || currentMapTool == ToolPainting ||
+				(currentMapTool == ToolCopying || currentMapTool == ToolMoving) && TextureColors.size() == 0)) {
 				if (map->IsSolidWrapped(blockCursorIndentPos.x, blockCursorIndentPos.y, blockCursorIndentPos.z)) {
 					blockCursor = blockCursorIndentPos;
 				} else {
@@ -682,6 +684,7 @@ namespace spades {
 			} else {
 				blockCursor = result.hitBlock + result.normal;
 			}
+
 			if (map->IsValidBuildCoord(blockCursor)) {
 				blockCursorActive = true;
 				blockCursorIndentPos = result.hitBlock;
