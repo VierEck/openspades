@@ -274,7 +274,11 @@ namespace spades {
 
 				currentVolumeType = v; 
 			}
-			VolumeType GetCurrentVolumeType() { return currentVolumeType; }
+			VolumeType GetCurrentVolumeType() { 
+				if (TextureColors.size() > 0 || currentMapTool == ToolMapObject)
+					return VolumeSingle;
+				return currentVolumeType; 
+			}
 			void SetMapTool(MapTool t) {
 				TextureColors.clear();
 
@@ -288,8 +292,6 @@ namespace spades {
 					return;
 				}
 
-				if (t == ToolMapObject && currentMapTool != ToolMapObject)
-					SetVolumeType(VolumeSingle);
 				if (t == ToolBrushing && currentVolumeType < VolumeBox)
 					SetVolumeType(VolumeBox);
 

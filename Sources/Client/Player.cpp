@@ -319,7 +319,10 @@ namespace spades {
 			if (newWInp.secondary != weapInput.secondary || newWInp.primary != weapInput.primary) {
 				if (IsBlockCursorActive()) {
 					if (newWInp.primary || newWInp.secondary) {
-						if (currentVolumeType == VolumeCylinderX || currentVolumeType == VolumeCylinderY || currentVolumeType == VolumeCylinderZ) {
+						if (GetCurrentVolumeType() == VolumeCylinderX ||
+							GetCurrentVolumeType() == VolumeCylinderY ||
+							GetCurrentVolumeType() == VolumeCylinderZ
+							) {
 							Vector3 ori = orientation;
 							ori.x *= 1 - 2 * (ori.x < 0);
 							ori.y *= 1 - 2 * (ori.y < 0);
@@ -331,14 +334,16 @@ namespace spades {
 							if (ori.z > ori.y && ori.z > ori.x)
 								currentVolumeType = VolumeCylinderZ;
 						}
-						if (currentVolumeType == VolumeSingle) {
-							listener->LocalPlayerCreatedVolume(blockCursor, blockCursor, currentVolumeType, volAct);
+						if (GetCurrentVolumeType() == VolumeSingle) {
+							listener->LocalPlayerCreatedVolume(blockCursor, blockCursor, GetCurrentVolumeType(), volAct);
 							nextBlockTime = world.GetTime() + delay;
 						} else {
 							if (currentMapTool == ToolBrushing) {
 								int brushHalfSize = BrushSize / 2;
 								IntVector3 brushHalfDiagonal = {brushHalfSize, brushHalfSize, brushHalfSize};
-								listener->LocalPlayerCreatedVolume(blockCursor + brushHalfDiagonal, blockCursor - brushHalfDiagonal, currentVolumeType, volAct);
+								listener->LocalPlayerCreatedVolume(
+									blockCursor + brushHalfDiagonal, blockCursor - brushHalfDiagonal, GetCurrentVolumeType(), volAct
+								);
 								nextBlockTime = world.GetTime() + delay;
 							} else {
 								blockCursorDragging = true;
@@ -347,7 +352,7 @@ namespace spades {
 						}
 					} else if (IsBlockCursorDragging()) {
 						if (listener && this == world.GetLocalPlayer())
-							listener->LocalPlayerCreatedVolume(blockCursorDragPos, blockCursor, currentVolumeType, volAct);
+							listener->LocalPlayerCreatedVolume(blockCursorDragPos, blockCursor, GetCurrentVolumeType(), volAct);
 						blockCursorDragging = blockCursorActive = false;
 					}
 				} else {
@@ -359,10 +364,12 @@ namespace spades {
 					if (currentMapTool == ToolBrushing) {
 						int brushHalfSize = BrushSize / 2;
 						IntVector3 brushHalfDiagonal = {brushHalfSize, brushHalfSize, brushHalfSize};
-						listener->LocalPlayerCreatedVolume(blockCursor + brushHalfDiagonal, blockCursor - brushHalfDiagonal, currentVolumeType, volAct);
+						listener->LocalPlayerCreatedVolume(
+							blockCursor + brushHalfDiagonal, blockCursor - brushHalfDiagonal, GetCurrentVolumeType(), volAct
+						);
 						nextBlockTime = world.GetTime() + delay;
-					} else if (currentVolumeType == VolumeSingle) {
-						listener->LocalPlayerCreatedVolume(blockCursor, blockCursor, currentVolumeType, volAct);
+					} else if (GetCurrentVolumeType() == VolumeSingle) {
+						listener->LocalPlayerCreatedVolume(blockCursor, blockCursor, GetCurrentVolumeType(), volAct);
 						nextBlockTime = world.GetTime() + delay;
 					}
 				} else {
