@@ -1593,11 +1593,9 @@ namespace spades {
 					pos1.x = transSign.GetSignedShort(reader.ReadShort());
 					pos1.y = transSign.GetSignedShort(reader.ReadShort());
 					pos1.z = transSign.GetSignedShort(reader.ReadShort());
-					if (vol != VolumeSingle) {
-						pos2.x = transSign.GetSignedShort(reader.ReadShort());
-						pos2.y = transSign.GetSignedShort(reader.ReadShort());
-						pos2.z = transSign.GetSignedShort(reader.ReadShort());
-					}
+					pos2.x = transSign.GetSignedShort(reader.ReadShort());
+					pos2.y = transSign.GetSignedShort(reader.ReadShort());
+					pos2.z = transSign.GetSignedShort(reader.ReadShort());
 
 					std::vector<IntVector3> cells = GetWorld()->GetCubeVolume(pos1, pos2, VolumeType(vol));
 					if (cells.size() == 0)
@@ -1647,6 +1645,8 @@ namespace spades {
 							// know what they get themselves into. 
 							// however checks should definetely happen at server level.
 							for (int i = 0, j = 0; i < remainingBytes; i++, j++) {
+								if (j >= cells.size())
+									break;
 								uint8_t action = reader.ReadByte();
 								if (client->IsLocalMapEditor())
 									newColors.push_back(action);
@@ -2058,7 +2058,10 @@ namespace spades {
 			enet_peer_send(peer, 0, wri.CreatePacket());
 		}
 
-		void NetClient::SendBlockVolume(spades::IntVector3 v1, spades::IntVector3 v2, VolumeType vol, VolumeActionType toolAct, std::vector<uint8_t> colors) {
+		void NetClient::SendBlockVolume(
+			spades::IntVector3 v1, spades::IntVector3 v2, VolumeType vol,
+			VolumeActionType toolAct, std::vector<uint8_t> colors
+		) {
 			SPADES_MARK_FUNCTION();
 			if (!GetWorld()->IsMapEditor())
 				return;
@@ -2401,6 +2404,8 @@ namespace spades {
 					IntVector3 col;
 					int remainingBytes = colors.size();
 					for (int i = 0, j = 0; i < remainingBytes; i++, j++) {
+						if (j >= cells.size())
+							break;
 						int action = colors[i];
 						if (action && i + 3 < remainingBytes) {
 							col.x = colors[i + 1];
