@@ -759,7 +759,7 @@ namespace spades {
 								p.SetMapObjectType(MapObjectType(p.GetCurrentMapObjectType() + 1));
 							}
 							if (mode->ModeType() == IGameMode::m_TC && p.GetCurrentMapObjectType() == ObjIntelTeam1) {
-								p.SetMapObjectType(MapObjectType(p.GetCurrentMapObjectType() + ObjIntelTeam2 - ObjIntelTeam1 + 1));
+								p.SetMapObjectType(MapObjectType(p.GetCurrentMapObjectType() + (ObjIntelTeam2 - ObjIntelTeam1 + 1)));
 							}
 						}
 					} else if (name == "Down") {
@@ -771,8 +771,8 @@ namespace spades {
 							if (mode->ModeType() == IGameMode::m_CTF && p.GetCurrentMapObjectType() == ObjTentNeutral) {
 								p.SetMapObjectType(MapObjectType(p.GetCurrentMapObjectType() - 1));
 							}
-							if (mode->ModeType() == IGameMode::m_TC && p.GetCurrentMapObjectType() == ObjIntelTeam1) {
-								p.SetMapObjectType(MapObjectType(p.GetCurrentMapObjectType() - ObjIntelTeam2 + ObjIntelTeam1 - 1));
+							if (mode->ModeType() == IGameMode::m_TC && p.GetCurrentMapObjectType() == ObjIntelTeam2) {
+								p.SetMapObjectType(MapObjectType(p.GetCurrentMapObjectType() - (ObjIntelTeam2 - ObjIntelTeam1 + 1)));
 							}
 						}
 					}
