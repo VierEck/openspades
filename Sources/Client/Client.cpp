@@ -918,6 +918,10 @@ namespace spades {
 				}
 			}
 
+			if (msg == " /g switching gamemode" && isMapEditor) {
+				net->CommandSwitchGameMode();
+			}
+
 			chatWindow->AddMessage(msg);
 		}
 

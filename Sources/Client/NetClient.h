@@ -156,7 +156,6 @@ namespace spades {
 			void CommandSetRespawn(std::string &);
 			void CommandRespawn();
 			void CommandSwitchTeam(std::string &);
-			void CommandSwitchGameMode();
 
 		public:
 			NetClient(Client *);
@@ -213,8 +212,7 @@ namespace spades {
 			double GetDownlinkBps() { return bandwidthMonitor->GetDownlinkBps(); }
 			double GetUplinkBps() { return bandwidthMonitor->GetUplinkBps(); }
 
-			void BlockVolumeUndo();
-			void BlockVolumeRedo();
+			void CommandSwitchGameMode();
 			void BlockVolumeUndoRedo(bool);
 
 			void HandleMapEditorExtension();
