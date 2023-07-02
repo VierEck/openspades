@@ -82,14 +82,6 @@ namespace spades {
 													  asMETHOD(ClientUIHelper, MapEditorSaveMap),
 													  asCALL_THISCALL);
 						r = eng->RegisterObjectMethod("ClientUIHelper",
-													  "void BlockVolumeUndo()",
-													  asMETHOD(ClientUIHelper, BlockVolumeUndo),
-													  asCALL_THISCALL);
-						r = eng->RegisterObjectMethod("ClientUIHelper",
-													  "void BlockVolumeRedo()",
-													  asMETHOD(ClientUIHelper, BlockVolumeRedo),
-													  asCALL_THISCALL);
-						r = eng->RegisterObjectMethod("ClientUIHelper",
 													  "void EditCurrentColor()",
 													  asMETHOD(ClientUIHelper, EditCurrentColor),
 													  asCALL_THISCALL);

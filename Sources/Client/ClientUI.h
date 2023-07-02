@@ -92,9 +92,6 @@ namespace spades {
 			bool isIgnored(const std::string &key);
 			void setIgnored(const std::string &key);
 
-			void BlockVolumeUndo();
-			void BlockVolumeRedo();
-
 			void EnterPaletteWindow();
 			void EditCurrentColor();
 			void ChangePalettePage(int next);

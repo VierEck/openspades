@@ -69,7 +69,7 @@ namespace spades {
 			{
 				spades::ui::Button button(Manager);
 				button.Caption = _Tr("Client", "Undo");
-				button.Bounds = AABB2(winX * 0.47f - 30.f, winY * 0.5f - 15.f, 50.f, 30.f);
+				button.Bounds = AABB2(winX * 0.48f - 50.f, winY * 0.5f - 15.f, 50.f, 30.f);
 				@button.Activated = spades::ui::EventHandler(this.OnUndo);
 				AddChild(button);
 				@doButton = button;
@@ -77,8 +77,40 @@ namespace spades {
 			{
 				spades::ui::Button button(Manager);
 				button.Caption = _Tr("Client", "Redo");
-				button.Bounds = AABB2(winX * 0.47f - 83.f, winY * 0.5f - 15.f, 50.f, 30.f);
+				button.Bounds = AABB2(winX * 0.48f - 103.f, winY * 0.5f - 15.f, 50.f, 30.f);
 				@button.Activated = spades::ui::EventHandler(this.OnRedo);
+				AddChild(button);
+				@doButton = button;
+			}
+			{
+				spades::ui::Button button(Manager);
+				button.Caption = _Tr("Client", "Respawn");
+				button.Bounds = AABB2(winX * 0.48f - 103.f, winY * 0.5f - 15.f + 60.f, 103.f, 30.f);
+				@button.Activated = spades::ui::EventHandler(this.OnRespawn);
+				AddChild(button);
+				@doButton = button;
+			}
+			{
+				spades::ui::Button button(Manager);
+				button.Caption = _Tr("Client", "Set Respawn");
+				button.Bounds = AABB2(winX * 0.48f - 103.f, winY * 0.5f - 15.f + 60.f + 33.f, 103.f, 30.f);
+				@button.Activated = spades::ui::EventHandler(this.OnSetRespawn);
+				AddChild(button);
+				@doButton = button;
+			}
+			{
+				spades::ui::Button button(Manager);
+				button.Caption = _Tr("Client", "Switch GameMode");
+				button.Bounds = AABB2(winX * 0.48f - 236.f, winY * 0.5f - 15.f + 60.f, 130.f, 30.f);
+				@button.Activated = spades::ui::EventHandler(this.OnSwitchGameMode);
+				AddChild(button);
+				@doButton = button;
+			}
+			{
+				spades::ui::Button button(Manager);
+				button.Caption = _Tr("Client", "Switch Team");
+				button.Bounds = AABB2(winX * 0.48f - 236.f, winY * 0.5f - 15.f + 60.f + 33.f, 130.f, 30.f);
+				@button.Activated = spades::ui::EventHandler(this.OnSwitchTeam);
 				AddChild(button);
 				@doButton = button;
 			}
@@ -116,10 +148,23 @@ namespace spades {
 		}
 		
 		private void OnUndo(spades::ui::UIElement @sender) {
-			ui.helper.BlockVolumeUndo();
+			ui.helper.SayGlobal("/ud");
 		}
 		private void OnRedo(spades::ui::UIElement @sender) {
-			ui.helper.BlockVolumeRedo();
+			ui.helper.SayGlobal("/rd");
+		}
+		
+		private void OnSwitchGameMode(spades::ui::UIElement @sender) {
+			ui.helper.SayGlobal("/g");
+		}
+		private void OnSwitchTeam(spades::ui::UIElement @sender) {
+			ui.helper.SayGlobal("/s");
+		}
+		private void OnSetRespawn(spades::ui::UIElement @sender) {
+			ui.helper.SayGlobal("/r");
+		}
+		private void OnRespawn(spades::ui::UIElement @sender) {
+			ui.helper.SayGlobal("/k");
 		}
 		
 		private void Close() { @ui.ActiveUI = null; }
@@ -133,7 +178,28 @@ namespace spades {
 				} 
 			if (IsEnabled and (key == "Escape" or key == "Enter" or key == cg_keyEditColor.StringValue)) {
 				Close();
-			} 
+				return;
+			}
+			
+			if (IsEnabled and Manager.IsControlPressed and key == "Z") {
+				ui.helper.SayGlobal("/ud");
+			}
+			if (IsEnabled and Manager.IsControlPressed and key == "Y") {
+				ui.helper.SayGlobal("/rd");
+			}
+			
+			if (IsEnabled and Manager.IsControlPressed and key == "R") {
+				ui.helper.SayGlobal("/r");
+			}
+			if (IsEnabled and Manager.IsControlPressed and key == "E") {
+				ui.helper.SayGlobal("/k");
+			}
+			if (IsEnabled and Manager.IsControlPressed and key == "F") {
+				ui.helper.SayGlobal("/s");
+			}
+			if (IsEnabled and Manager.IsControlPressed and key == "D") {
+				ui.helper.SayGlobal("/g");
+			}
 		}
 	}
 	

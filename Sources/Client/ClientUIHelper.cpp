@@ -61,17 +61,6 @@ namespace spades {
 			ui->MapEditorSaveMap();
 		}
 
-		void ClientUIHelper::BlockVolumeUndo() {
-			if (!ui)
-				return;
-			ui->BlockVolumeUndo();
-		}
-		void ClientUIHelper::BlockVolumeRedo() {
-			if (!ui)
-				return;
-			ui->BlockVolumeRedo();
-		}
-
 		void ClientUIHelper::EditCurrentColor() {
 			if (!ui)
 				return;

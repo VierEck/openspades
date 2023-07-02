@@ -44,9 +44,6 @@ namespace spades {
 
 			void MapEditorSaveMap();
 
-			void BlockVolumeUndo();
-			void BlockVolumeRedo();
-
 			void EditCurrentColor();
 			void ChangePalettePage(int next);
 			void SaveCurrentPalettePage();
