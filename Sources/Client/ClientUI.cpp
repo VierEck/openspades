@@ -330,8 +330,8 @@ namespace spades {
 
 		void ClientUI::MapEditorSaveMap() { client->TakeMapShot(true);}
 
-		void ClientUI::BlockVolumeUndo() { client->net->BlockVolumeUndo(); }
-		void ClientUI::BlockVolumeRedo() { client->net->BlockVolumeRedo(); }
+		void ClientUI::BlockVolumeUndo() { client->net->BlockVolumeUndoRedo(false); }
+		void ClientUI::BlockVolumeRedo() { client->net->BlockVolumeUndoRedo(true); }
 
 		void ClientUI::EnterPaletteWindow() {
 			SPADES_MARK_FUNCTION();
