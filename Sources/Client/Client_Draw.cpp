@@ -729,19 +729,9 @@ namespace spades {
 				} return;
 				case ToolPainting: {
 					imgTool = renderer->RegisterImage("Gfx/BuildMode/Paint.png");
-					Handle<IImage> imgDestroy;
-					if (p.GetWeaponInput().secondary) {
-						imgDestroy = renderer->RegisterImage("Gfx/BuildMode/Destroy.png");
-						renderer->DrawImage(imgDestroy, MakeVector2(iconX + imgVolume->GetWidth(), iconY));
-					}
 				} break;
 				case ToolBrushing: {
 					imgTool = renderer->RegisterImage("Gfx/BuildMode/Brush.png");
-					Handle<IImage> imgDestroy;
-					if (p.GetWeaponInput().secondary) {
-						imgDestroy = renderer->RegisterImage("Gfx/BuildMode/Destroy.png");
-						renderer->DrawImage(imgDestroy, MakeVector2(iconX + imgVolume->GetWidth(), iconY));
-					}
 				} break;
 				case ToolCopying: {
 					imgTool = renderer->RegisterImage("Gfx/BuildMode/Copy.png");
@@ -786,6 +776,12 @@ namespace spades {
 				default: return;
 			}
 			renderer->DrawImage(imgTool, MakeVector2(iconX, iconY + imgVolume->GetHeight()));
+
+			Handle<IImage> imgDestroy;
+			if (p.GetWeaponInput().secondary) {
+				imgDestroy = renderer->RegisterImage("Gfx/BuildMode/Destroy.png");
+				renderer->DrawImage(imgDestroy, MakeVector2(iconX + imgVolume->GetWidth(), iconY));
+			}
 		}
 
 		void Client::DrawBuilderCursor() {
