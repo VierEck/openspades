@@ -152,6 +152,12 @@ namespace spades {
 			void SendVersionEnhanced(const std::set<std::uint8_t> &propertyIds);
 			void SendSupportedExtensions();
 
+			std::vector<std::pair<
+				std::tuple<IntVector3, IntVector3, VolumeType, std::vector<uint8_t>>, //oldBlockVol, first
+				std::tuple<IntVector3, IntVector3, VolumeType, std::vector<uint8_t>>  //newBlockVol, second
+			>> BlockVolHistory;
+			int BlockVolHistoryIdx;
+
 			void MapEditorCommands(std::string &);
 			void CommandSetRespawn(std::string &);
 			void CommandRespawn();
@@ -212,6 +218,9 @@ namespace spades {
 
 			double GetDownlinkBps() { return bandwidthMonitor->GetDownlinkBps(); }
 			double GetUplinkBps() { return bandwidthMonitor->GetUplinkBps(); }
+
+			void BlockVolumeUndo();
+			void BlockVolumeRedo();
 
 			void HandleMapEditorExtension();
 			int switchModeTeam;

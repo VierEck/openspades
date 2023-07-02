@@ -125,7 +125,7 @@ namespace spades {
 
 			std::vector<IntVector3> GetCubeVolume(IntVector3 v1, IntVector3 v2, VolumeType vol);
 
-			std::vector<uint8_t> ColorVolume(IntVector3, IntVector3, VolumeType, std::vector<IntVector3> &);
+			std::vector<uint8_t> GetColorVolume(std::vector<IntVector3> &);
 
 			stmp::optional<Player &> GetPlayer(unsigned int i) {
 				SPAssert(i < players.size());

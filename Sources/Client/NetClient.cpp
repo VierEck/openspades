@@ -403,6 +403,9 @@ namespace spades {
 			std::fill(savedPlayerTeam.begin(), savedPlayerTeam.end(), -1);
 
 			bandwidthMonitor.reset(new BandwidthMonitor(host));
+
+			if (client->IsLocalMapEditor())
+				BlockVolHistoryIdx = 0;
 		}
 		NetClient::~NetClient() {
 			SPADES_MARK_FUNCTION();
@@ -1582,28 +1585,52 @@ namespace spades {
 					if (cells.size() == 0)
 						SPRaise("Received invalid block volume type: %d", vol);
 
+					std::tuple<IntVector3, IntVector3, VolumeType, std::vector<uint8_t>> newBlockVol;
+					std::tuple<IntVector3, IntVector3, VolumeType, std::vector<uint8_t>> oldBlockVol;
+
+					if (client->IsLocalMapEditor())
+						oldBlockVol = std::make_tuple(pos1, pos2, VolumeType(vol), GetWorld()->GetColorVolume(cells));
+
 					switch (volAct) {
 						case VolumeActionDestroy: {
 							GetWorld()->DestroyBlock(cells);
 							if (p)
 								client->PlayerDigBlockSound(*p);
+							if (client->IsLocalMapEditor()) {
+								std::vector<uint8_t> act = {(uint8_t)(volAct + 2)};
+								newBlockVol = std::make_tuple(pos1, pos2, VolumeType(vol), act);
+							}
 						} break;
 						case VolumeActionBuild: {
 							IntVector3 col = p ? p->GetBlockColor() : temporaryPlayerBlockColor;
 							for (auto &c : cells)
-								GetWorld()->CreateBlock(c, col);
+								if (GetWorld()->GetMap()->IsValidBuildCoord(c))
+									GetWorld()->CreateBlock(c, col);
 							if (p)
 								client->PlayerCreatedBlock(*p);
+							if (client->IsLocalMapEditor()) {
+								std::vector<uint8_t> actAndCol = {(uint8_t)(volAct + 2), (uint8_t)col.x, (uint8_t)col.y, (uint8_t)col.z};
+								newBlockVol = std::make_tuple(pos1, pos2, VolumeType(vol), actAndCol);
+							}
 						} break;
 						case VolumeActionPaint: {
 							IntVector3 col = p ? p->GetBlockColor() : temporaryPlayerBlockColor;
 							for (auto &c : cells)
-								if (GetWorld()->GetMap()->IsSolid(c.x, c.y, c.z))
+								if (GetWorld()->GetMap()->IsValidBuildCoord(c) &&
+									GetWorld()->GetMap()->IsSolid(c.x, c.y, c.z)
+									)
 									GetWorld()->CreateBlock(c, col);
 							if (p)
 								client->PlayerCreatedBlock(*p);
+							if (client->IsLocalMapEditor()) {
+								std::vector<uint8_t> actAndCol = {(uint8_t)(volAct + 2), (uint8_t)col.x, (uint8_t)col.y, (uint8_t)col.z};
+								newBlockVol = std::make_tuple(pos1, pos2, VolumeType(vol), actAndCol);
+							}
 						} break;
 						case VolumeActionTextureBuild: {
+							std::vector<uint8_t> actAndCols;
+							if (client->IsLocalMapEditor())
+								actAndCols.push_back((uint8_t)(volAct + 2));
 							IntVector3 col;
 							int remainingBytes = reader.GetNumRemainingBytes();
 							// forth a mapsection (32^3) alone potentially gives us
@@ -1613,20 +1640,38 @@ namespace spades {
 							// know what they get themselves into. 
 							// however checks should definetely happen at server level.
 							for (int i = 0, j = 0; i < remainingBytes; i++, j++) {
-								if (reader.ReadByte() && i + 3 < remainingBytes) {
+								uint8_t action = reader.ReadByte();
+								if (client->IsLocalMapEditor())
+									actAndCols.push_back(action);
+								if (action && i + 3 < remainingBytes) {
 									col.x = reader.ReadByte();
 									col.y = reader.ReadByte();
 									col.z = reader.ReadByte();
 									i += 3;
+
+									if (client->IsLocalMapEditor()) {
+										actAndCols.push_back((uint8_t)col.x);
+										actAndCols.push_back((uint8_t)col.y);
+										actAndCols.push_back((uint8_t)col.z);
+									}
+
 									if (GetWorld()->GetMap()->IsValidBuildCoord(cells[j]))
 										GetWorld()->CreateBlock(cells[j], col);
 								}
 							}
 							if (p)
 								client->PlayerCreatedBlock(*p);
+							if (client->IsLocalMapEditor())
+								newBlockVol = std::make_tuple(pos1, pos2, VolumeType(vol), actAndCols);
 						} break;
 						break;
 						default: SPRaise("Received invalid Maptool action: %d", volAct);
+					}
+
+					if (client->IsLocalMapEditor()) {
+						BlockVolHistory.resize(BlockVolHistoryIdx);
+						BlockVolHistory.push_back(std::make_pair(oldBlockVol, newBlockVol));
+						BlockVolHistoryIdx++;
 					}
 				} break;
 
@@ -2216,6 +2261,14 @@ namespace spades {
 			if ((int)text.find("/g", 0) == 0) {
 				CommandSwitchGameMode();
 			}
+
+			if ((int)text.find("/ud", 0) == 0) {
+				BlockVolumeUndo();
+			}
+
+			if ((int)text.find("/rd", 0) == 0) {
+				BlockVolumeRedo();
+			}
 		}
 
 		void NetClient::CommandSetRespawn(std::string &text) {
@@ -2288,6 +2341,106 @@ namespace spades {
 				if (GetLocalPlayer().GetCurrentMapObjectType() == ObjTentNeutral) {
 					GetLocalPlayer().SetMapObjectType(ObjTentTeam1);
 				}
+			}
+		}
+
+		void NetClient::BlockVolumeUndo() {
+			if (BlockVolHistoryIdx <= 0 || !GetWorld()->IsMapEditor())
+				return;
+
+			BlockVolHistoryIdx--;
+
+			IntVector3 &pos1 = std::get<0>(BlockVolHistory[BlockVolHistoryIdx].first);
+			IntVector3 &pos2 = std::get<1>(BlockVolHistory[BlockVolHistoryIdx].first);
+			VolumeType &vol = std::get<2>(BlockVolHistory[BlockVolHistoryIdx].first);
+			std::vector<uint8_t> &colors = std::get<3>(BlockVolHistory[BlockVolHistoryIdx].first);
+
+			std::vector<IntVector3> cells = GetWorld()->GetCubeVolume(pos1, pos2, vol);
+			std::vector<IntVector3> delCells;
+
+			stmp::optional<Player &> p = GetWorld()->GetLocalPlayer();
+			IntVector3 col;
+			int remainingBytes = colors.size();
+			for (int i = 0, j = 0; i < remainingBytes; i++, j++) {
+				int action = colors[i];
+				if (action && i + 3 < remainingBytes) {
+					col.x = colors[i + 1];
+					col.y = colors[i + 2];
+					col.z = colors[i + 3];
+					i += 3;
+					if (GetWorld()->GetMap()->IsValidBuildCoord(cells[j]))
+						GetWorld()->CreateBlock(cells[j], col);
+				} else {
+					delCells.push_back(cells[j]);
+				}
+			}
+			if (delCells.size() > 0)
+				GetWorld()->DestroyBlock(delCells);
+			if (p)
+				client->PlayerCreatedBlock(*p);
+		}
+
+		void NetClient::BlockVolumeRedo() {
+			if (BlockVolHistoryIdx >= BlockVolHistory.size() || !GetWorld()->IsMapEditor())
+				return;
+
+			IntVector3 &pos1 = std::get<0>(BlockVolHistory[BlockVolHistoryIdx].second);
+			IntVector3 &pos2 = std::get<1>(BlockVolHistory[BlockVolHistoryIdx].second);
+			VolumeType &vol = std::get<2>(BlockVolHistory[BlockVolHistoryIdx].second);
+			std::vector<uint8_t> colors = std::get<3>(BlockVolHistory[BlockVolHistoryIdx].second);
+
+			BlockVolHistoryIdx++;
+
+			std::vector<IntVector3> cells = GetWorld()->GetCubeVolume(pos1, pos2, vol);
+			std::vector<IntVector3> delCells;
+
+			stmp::optional<Player &> p = GetWorld()->GetLocalPlayer();
+			switch (colors[0] - 2) {
+				case VolumeActionDestroy: {
+					GetWorld()->DestroyBlock(cells);
+					if (p)
+						client->PlayerDigBlockSound(*p);
+				} break;
+				case VolumeActionBuild: {
+					IntVector3 col = {colors[1], colors[2], colors[3]};
+					for (auto &c : cells)
+						if (GetWorld()->GetMap()->IsValidBuildCoord(c))
+							GetWorld()->CreateBlock(c, col);
+					if (p)
+						client->PlayerCreatedBlock(*p);
+				} break;
+				case VolumeActionPaint: {
+					IntVector3 col = {colors[1], colors[2], colors[3]};
+					for (auto &c : cells)
+						if (GetWorld()->GetMap()->IsValidBuildCoord(c) &&
+							GetWorld()->GetMap()->IsSolid(c.x, c.y, c.z)
+							)
+							GetWorld()->CreateBlock(c, col);
+					if (p)
+						client->PlayerCreatedBlock(*p);
+				} break;
+				case VolumeActionTextureBuild: {
+					IntVector3 col;
+					int remainingBytes = colors.size();
+					for (int i = 1, j = 0; i < remainingBytes; i++, j++) {
+						int action = colors[i];
+						if (action && i + 3 < remainingBytes) {
+							col.x = colors[i + 1];
+							col.y = colors[i + 2];
+							col.z = colors[i + 3];
+							i += 3;
+							if (GetWorld()->GetMap()->IsValidBuildCoord(cells[j]))
+								GetWorld()->CreateBlock(cells[j], col);
+						} else {
+							delCells.push_back(cells[j]);
+						}
+					}
+					if (delCells.size() > 0)
+						GetWorld()->DestroyBlock(delCells);
+					if (p)
+						client->PlayerCreatedBlock(*p);
+				} break;
+				default: return;
 			}
 		}
 	} // namespace client

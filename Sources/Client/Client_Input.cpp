@@ -89,8 +89,8 @@ DEFINE_SPADES_SETTING(cg_alerts, "1");
 SPADES_SETTING(cg_manualFocus);
 DEFINE_SPADES_SETTING(cg_keyAutoFocus, "MiddleMouseButton");
 
-DEFINE_SPADES_SETTING(cg_keyMapTxt, "j");
-DEFINE_SPADES_SETTING(cg_keyEditColor, "g");
+DEFINE_SPADES_SETTING(cg_keyMapTxt, "J");
+DEFINE_SPADES_SETTING(cg_keyEditColor, "G");
 
 DEFINE_SPADES_SETTING(cg_keyVolumeSingle, "1");
 DEFINE_SPADES_SETTING(cg_keyVolumeLine, "2");
@@ -98,10 +98,10 @@ DEFINE_SPADES_SETTING(cg_keyVolumeBox, "3");
 DEFINE_SPADES_SETTING(cg_keyVolumeBall, "4");
 DEFINE_SPADES_SETTING(cg_keyVolumeCylinder, "5");
 
-DEFINE_SPADES_SETTING(cg_keyToolPaint, "f");
-DEFINE_SPADES_SETTING(cg_keyToolBrush, "r");
-DEFINE_SPADES_SETTING(cg_keyToolCopy, "c");
-DEFINE_SPADES_SETTING(cg_keyToolMapObject, "x");
+DEFINE_SPADES_SETTING(cg_keyToolPaint, "F");
+DEFINE_SPADES_SETTING(cg_keyToolBrush, "R");
+DEFINE_SPADES_SETTING(cg_keyToolCopy, "C");
+DEFINE_SPADES_SETTING(cg_keyToolMapObject, "X");
 
 DEFINE_SPADES_SETTING(cg_keyScaleBuildDistance, "MiddleMouseButton");
 SPADES_SETTING(cg_MaxBuildDistance);

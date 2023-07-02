@@ -330,6 +330,9 @@ namespace spades {
 
 		void ClientUI::MapEditorSaveMap() { client->TakeMapShot(true);}
 
+		void ClientUI::BlockVolumeUndo() { client->net->BlockVolumeUndo(); }
+		void ClientUI::BlockVolumeRedo() { client->net->BlockVolumeRedo(); }
+
 		void ClientUI::EnterPaletteWindow() {
 			SPADES_MARK_FUNCTION();
 			if (!ui) {
@@ -398,19 +401,16 @@ namespace spades {
 			c->SetArgObject(0, reinterpret_cast<void *>(&k));
 			c.ExecuteChecked();
 		}
-
 		void ClientUI::requestLoadTxt() {
 			SPADES_MARK_FUNCTION();
 			if (client->mapTxtFileName != "") {
 				client->LoadMapTxt(client->mapTxtFileName);
 			}
 		}
-
 		void ClientUI::requestSaveTxt(const std::string &txt) {
 			SPADES_MARK_FUNCTION();
 			client->SaveMapTxt(txt);
 		}
-
 		void ClientUI::requestGenTxt() {
 			SPADES_MARK_FUNCTION();
 			client->GenMaptxt();

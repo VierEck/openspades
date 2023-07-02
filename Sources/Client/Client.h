@@ -516,6 +516,7 @@ namespace spades {
 			// IWorldListener end
 
 			void SetIsMapEditor(bool b);
+			bool IsLocalMapEditor() { return isLocalMapEditor; }
 
 			void LoadMapTxt(std::string txtFile);
 			void SaveMapTxt(const std::string &txt);

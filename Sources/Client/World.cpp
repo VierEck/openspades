@@ -642,7 +642,7 @@ namespace spades {
 			return cells;
 		}
 
-		std::vector<uint8_t> World::ColorVolume(spades::IntVector3 v1, spades::IntVector3 v2, VolumeType vol, std::vector<spades::IntVector3> &cells) {
+		std::vector<uint8_t> World::GetColorVolume(std::vector<spades::IntVector3> &cells) {
 			SPADES_MARK_FUNCTION_DEBUG();
 			std::vector<uint8_t> ret;
 
