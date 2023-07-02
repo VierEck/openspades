@@ -261,7 +261,8 @@ namespace spades {
 			float BoxDistanceToBlock(IntVector3);
 
 			void SetVolumeType(VolumeType v) {
-				if (currentMapTool == ToolMapObject)
+				if (currentMapTool == ToolMapObject ||
+					(currentMapTool == ToolBrushing && v < VolumeBox))
 					return;
 
 				TextureColors.clear();
@@ -289,7 +290,7 @@ namespace spades {
 
 				if (t == ToolMapObject && currentMapTool != ToolMapObject)
 					SetVolumeType(VolumeSingle);
-				if (currentMapTool == ToolBrushing && currentVolumeType < VolumeBox)
+				if (t == ToolBrushing && currentVolumeType < VolumeBox)
 					SetVolumeType(VolumeBox);
 
 				currentMapTool = t;
