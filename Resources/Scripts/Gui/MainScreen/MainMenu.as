@@ -79,6 +79,7 @@ namespace spades {
         bool loading = false, loaded = false, mapList = false, canvasList = false;
         string MapFile = "";
         MainScreenServerItem@[]@ savedlist = array<spades::MainScreenServerItem@>();
+        int savedlistIdx = 0;
 
         private ConfigItem cg_protocolVersion("cg_protocolVersion", "3");
         private ConfigItem cg_lastQuickConnectHost("cg_lastQuickConnectHost", "127.0.0.1");
@@ -285,6 +286,10 @@ namespace spades {
         }
 
         void ServerListItemActivated(ServerListModel @sender, MainScreenServerItem @item) {
+            ServerListItemActivatedPass(item);
+        }
+
+        void ServerListItemActivatedPass(MainScreenServerItem @item) {
             if (!mapList) {
                 addressField.Text = item.Address;
                 cg_lastQuickConnectHost = addressField.Text;
@@ -550,6 +555,23 @@ namespace spades {
                 ChangeList(false);
             } else if (IsEnabled and key == "M" and Manager.IsControlPressed) {
                 ChangeList(true); 
+            } else if (IsEnabled and key == "Down") {
+                if (savedlistIdx >= savedlist.length - 1 and savedlist.length > 0) {
+                    UIElement::HotKey(key);
+                    return;
+                }
+                savedlistIdx++;
+                ServerListItemActivatedPass(savedlist[savedlistIdx]);
+            } else if (IsEnabled and key == "Up") {
+                if (savedlistIdx <= 0 and savedlist.length > 0) {
+                    if (savedlist.length > 0) {
+                        ServerListItemActivatedPass(savedlist[0]);
+                    }
+                    UIElement::HotKey(key);
+                    return;
+                }
+                savedlistIdx--;
+                ServerListItemActivatedPass(savedlist[savedlistIdx]);
             } else {
                 UIElement::HotKey(key);
             }
