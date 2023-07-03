@@ -89,6 +89,7 @@ DEFINE_SPADES_SETTING(cg_alerts, "1");
 SPADES_SETTING(cg_manualFocus);
 DEFINE_SPADES_SETTING(cg_keyAutoFocus, "MiddleMouseButton");
 
+DEFINE_SPADES_SETTING(cg_UIHotKeyLayout, "qwerty");
 DEFINE_SPADES_SETTING(cg_keyMapTxt, "J");
 DEFINE_SPADES_SETTING(cg_keyEditColor, "G");
 

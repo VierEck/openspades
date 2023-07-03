@@ -79,7 +79,7 @@ namespace spades {
 				@genButton = button;
 			}
 			{
-				spades::ui::TxtViewer viewer(Manager);
+				spades::ui::TxtViewer viewer(Manager, ui);
 				AddChild(viewer);
 				viewer.Bounds = AABB2(contentsLeft + 10.f, contentsTop + 10.f, contentsWidth - 20.f, contentsHeight - 50.f);
 				@this.viewer = viewer;
@@ -102,12 +102,12 @@ namespace spades {
 		void HotKey(string key) {
 			if (IsEnabled and (key == "Escape")) {
 				Close();
-			} else if (key == "S" and (Manager.IsControlPressed or Manager.IsMetaPressed)) {
+			} else if (key == ui.qwerty_S and (Manager.IsControlPressed or Manager.IsMetaPressed)) {
 				requestSave();
 				requestLoad();
-			} else if (key == "L" and (Manager.IsControlPressed or Manager.IsMetaPressed)) {
+			} else if (key == ui.qwerty_L and (Manager.IsControlPressed or Manager.IsMetaPressed)) {
 				requestLoad();
-			} else if (key == "G" and (Manager.IsControlPressed or Manager.IsMetaPressed) and genButton.Enable) {
+			} else if (key == ui.qwerty_G and (Manager.IsControlPressed or Manager.IsMetaPressed) and genButton.Enable) {
 				requestGen();
 			} else {
 				UIElement::HotKey(key);
@@ -396,6 +396,8 @@ namespace spades {
 			
 			private TxtAction@ [] history;
 			private int historyPos = 0;
+			
+			ClientUI @ui;
 
 			/**
 			 * The maximum number of lines. This affects the behavior of the
@@ -403,8 +405,10 @@ namespace spades {
 			 */
 			int MaxNumLines = 0;
 
-			TxtViewer(UIManager @manager) {
+			TxtViewer(UIManager @manager, ClientUI @ui) {
 				super(manager);
+				
+				@this.ui = @ui;
 
 				@selection.FocusElement = this;
 				AcceptsFocus = true;
@@ -510,30 +514,30 @@ namespace spades {
 				//keydown seems to use qwerty regardless to ur actual keyboard layout. 
 				//u may need to customize the keys to match ur layout or to whatever else to ur own liking. 
 				if (Manager.IsControlPressed or Manager.IsMetaPressed /* for OSX; Cmd + [a-z] */) {
-					if (key == "C" && this.selection.SelectionEnd > this.selection.SelectionStart) {
+					if (key == ui.qwerty_C && this.selection.SelectionEnd > this.selection.SelectionStart) {
 						copyText = this.SelectedText;
 						return;
-					} else if (key == "V" and copyText != "") {
+					} else if (key == ui.qwerty_V and copyText != "") {
 						Write(copyText);
 						AdjustHeight();
 						return;
-					} else if (key == "A") {
+					} else if (key == ui.qwerty_A) {
 						if (textmodel is null) {
 							return;
 						}
 						this.selection.MarkPosition = textmodel.contentStart;
 						this.selection.CursorPosition = textmodel.contentEnd;
 						return;
-					} else if (key == "X" and this.selection.MarkPosition != this.selection.CursorPosition) {
+					} else if (key == ui.qwerty_X and this.selection.MarkPosition != this.selection.CursorPosition) {
 						copyText = this.SelectedText;
 						BackSpace();
 						AdjustHeight();
 						return;
-					} else if (key == "Z") {
+					} else if (key == ui.qwerty_Z) {
 						Undo();
 						AdjustHeight();
 						return;
-					} else if (key == "Y") {
+					} else if (key == ui.qwerty_Y) {
 						Redo();
 						AdjustHeight();
 						return;

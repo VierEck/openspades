@@ -62,6 +62,101 @@ namespace spades {
             @mapTxtWindow = ClientMapTxtWindow(this);
         }
 
+        //doesnt translate all keys. only the ones mapeditor UI uses. cursed way of doing this tbh
+        ConfigItem cg_UIHotKeyLayout("cg_UIHotKeyLayout");
+        string qwerty_Z = "Z";
+        string qwerty_Y = "Y";
+        string qwerty_R = "R";
+        string qwerty_E = "E";
+        string qwerty_F = "F";
+        string qwerty_D = "D";
+        string qwerty_A = "A";
+        string qwerty_S = "S";
+        string qwerty_L = "L";
+        string qwerty_C = "C";
+        string qwerty_V = "V";
+        string qwerty_X = "X";
+        string qwerty_G = "G";
+        void UpdateHotKeylayout(){
+            if (cg_UIHotKeyLayout.StringValue == "qwertz" or cg_UIHotKeyLayout.StringValue == "german") {
+                qwerty_Z = "Y";
+                qwerty_Y = "Z";
+            } else if (cg_UIHotKeyLayout.StringValue == "azerty" or cg_UIHotKeyLayout.StringValue == "french") {
+                qwerty_Z = "W";
+                qwerty_A = "Q";
+            } else if (cg_UIHotKeyLayout.StringValue == "dvorak") {
+                qwerty_R = "O";
+                qwerty_E = "D";
+                qwerty_F = "Y";
+                qwerty_D = "E";
+                qwerty_C = "I";
+                qwerty_V = ".";
+                qwerty_Y = "T";
+                qwerty_L = "P"; 
+                qwerty_Z = "/";
+                qwerty_X = "B";
+                qwerty_G = "U";
+                qwerty_S = ";";
+            } else if (cg_UIHotKeyLayout.StringValue == "colemak") {
+                qwerty_R = "S";
+                qwerty_E = "K";
+                qwerty_F = "E";
+                qwerty_D = "G";
+                qwerty_Y = "O";
+                qwerty_L = "U";
+                qwerty_G = "T";
+                qwerty_S = "D";
+            } else if (cg_UIHotKeyLayout.StringValue == "workman") {
+                qwerty_R = "E";
+                qwerty_E = "K";
+                qwerty_F = "U";
+                qwerty_D = "W";
+                qwerty_C = "V";
+                qwerty_V = "B";
+                qwerty_Y = "H";
+                qwerty_L = "M";
+            } else if (cg_UIHotKeyLayout.StringValue == "neo") {
+                qwerty_R = "K";
+                qwerty_E = "F";
+                qwerty_F = "O";
+                qwerty_D = ";";
+                qwerty_C = "R";
+                qwerty_V = "W";
+                qwerty_Y = "'";
+                qwerty_L = "E"; 
+                qwerty_Z = "B";
+                qwerty_X = "Q";
+                qwerty_G = "I";
+                qwerty_S = "H";
+            } else if (cg_UIHotKeyLayout.StringValue == "dvorak french") {
+                qwerty_R = "M";
+                qwerty_E = "F";
+                qwerty_F = "H";
+                qwerty_D = ";";
+                qwerty_C = "I";
+                qwerty_V = "U";
+                qwerty_Y = "B";
+                qwerty_L = ","; 
+                qwerty_Z = "[";
+                qwerty_X = "N";
+                qwerty_G = "R";
+                qwerty_S = "J";
+            } else if (cg_UIHotKeyLayout.StringValue == "bépo" or cg_UIHotKeyLayout.StringValue == "bepo") {
+                qwerty_R = "L";
+                qwerty_E = "F";
+                qwerty_F = "/";
+                qwerty_D = "I";
+                qwerty_C = "H";
+                qwerty_V = "U";
+                qwerty_Y = "X";
+                qwerty_L = "O"; 
+                qwerty_Z = "[";
+                qwerty_X = "C";
+                qwerty_G = ",";
+                qwerty_S = "K";
+            }
+        }
+
         void MouseEvent(float x, float y) { manager.MouseEvent(x, y); }
 
         void WheelEvent(float x, float y) { manager.WheelEvent(x, y); }
@@ -133,10 +228,12 @@ namespace spades {
         void CloseUI() { @ActiveUI = null; }
 
         void EnterPaletteWindow() {
+            UpdateHotKeylayout();
             ClientPaletteWindow wnd(this);
             @ActiveUI = wnd;
         }
         void EnterMapTxtWindow() {
+            UpdateHotKeylayout();
             @ActiveUI = mapTxtWindow;
             @manager.ActiveElement = mapTxtWindow.viewer;
         }

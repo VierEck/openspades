@@ -181,23 +181,23 @@ namespace spades {
 				return;
 			}
 			
-			if (IsEnabled and Manager.IsControlPressed and key == "Z") {
+			if (IsEnabled and Manager.IsControlPressed and key == ui.qwerty_Z) {
 				ui.helper.SayGlobal("/ud");
 			}
-			if (IsEnabled and Manager.IsControlPressed and key == "Y") {
+			if (IsEnabled and Manager.IsControlPressed and key == ui.qwerty_Y) {
 				ui.helper.SayGlobal("/rd");
 			}
 			
-			if (IsEnabled and Manager.IsControlPressed and key == "R") {
+			if (IsEnabled and Manager.IsControlPressed and key == ui.qwerty_R) {
 				ui.helper.SayGlobal("/r");
 			}
-			if (IsEnabled and Manager.IsControlPressed and key == "E") {
+			if (IsEnabled and Manager.IsControlPressed and key == ui.qwerty_F) {
 				ui.helper.SayGlobal("/k");
 			}
-			if (IsEnabled and Manager.IsControlPressed and key == "F") {
+			if (IsEnabled and Manager.IsControlPressed and key == ui.qwerty_E) {
 				ui.helper.SayGlobal("/s");
 			}
-			if (IsEnabled and Manager.IsControlPressed and key == "D") {
+			if (IsEnabled and Manager.IsControlPressed and key == ui.qwerty_D) {
 				ui.helper.SayGlobal("/g");
 			}
 		}

@@ -685,22 +685,27 @@ namespace spades {
             super(manager);
 
             StandardPreferenceLayouter layouter(this, fontManager);
-            layouter.AddHeading(_Tr("Preferences", "Equip MapEditor Controls"));
+            layouter.AddHeading(_Tr("Preferences", "MapEditor Controls"));
             layouter.AddControl(_Tr("Preferences", "Equip Paint"), "cg_keyToolPaint");
             layouter.AddControl(_Tr("Preferences", "Equip Brush"), "cg_keyToolBrush");
             layouter.AddControl(_Tr("Preferences", "Equip Copy"), "cg_keyToolCopy");
             layouter.AddControl(_Tr("Preferences", "Equip MapObject"), "cg_keyToolMapObject");
-
-            layouter.AddControl(_Tr("Preferences", "Open Color Palette Setting"), "cg_keyEditColor");
-            layouter.AddControl(_Tr("Preferences", "Open map.TXT Editor"), "cg_keyMapTxt");
-
-            layouter.AddControl(_Tr("Preferences", "Toggle Build Distance"), "cg_keyScaleBuildDistance");
+            layouter.AddHeading(_Tr("Preferences", " "));
 
             layouter.AddControl(_Tr("Preferences", "Equip Single Block"), "cg_keyVolumeSingle");
             layouter.AddControl(_Tr("Preferences", "Equip BlockLine"), "cg_keyVolumeLine");
             layouter.AddControl(_Tr("Preferences", "Equip Box"), "cg_keyVolumeBox");
             layouter.AddControl(_Tr("Preferences", "Equip Ball"), "cg_keyVolumeBall");
             layouter.AddControl(_Tr("Preferences", "Equip Cylinder"), "cg_keyVolumeCylinder");
+            layouter.AddHeading(_Tr("Preferences", " "));
+
+            layouter.AddControl(_Tr("Preferences", "Open Color Palette Setting"), "cg_keyEditColor");
+            layouter.AddControl(_Tr("Preferences", "Open map.TXT Editor"), "cg_keyMapTxt");
+            ConfigField @nameField = layouter.AddInputField(_Tr("Preferences", "UI HotKey keyboard layout"), "cg_UIHotKeyLayout");
+            layouter.AddHeading(_Tr("Preferences", " "));
+
+            layouter.AddControl(_Tr("Preferences", "Toggle Build Distance"), "cg_keyScaleBuildDistance");
+            layouter.AddHeading(_Tr("Preferences", " "));
 
             layouter.AddHeading(_Tr("Preferences", "MapEditor Build Options"));
             layouter.AddSliderField(_Tr("Preferences", "Build Delay"),
@@ -709,6 +714,7 @@ namespace spades {
             layouter.AddSliderField(_Tr("Preferences", "Max Build Distance"),
                                     "cg_MaxBuildDistance", 3, 1088, 1,
                                     ConfigNumberFormatter(1, "b"));
+            layouter.AddHeading(_Tr("Preferences", " "));
 
             layouter.AddHeading(_Tr("Preferences", "MapEditor Fly Speed"));
             layouter.AddSliderField(_Tr("Preferences", "Flying Speed Walk"),
