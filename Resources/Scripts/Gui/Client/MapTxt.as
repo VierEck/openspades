@@ -132,7 +132,15 @@ namespace spades {
 			genButton.Enable = false;
 		}
 		
-		void requestLoad() { ui.helper.requestLoadTxt(); }
+		void requestLoad() { 
+			int cursor = viewer.selection.CursorPosition;
+			ui.helper.requestLoadTxt(); 
+			if (viewer.Text.length > cursor) {
+				viewer.selection.CursorPosition = viewer.selection.MarkPosition = cursor;
+			} else {
+				viewer.selection.CursorPosition = viewer.selection.MarkPosition = viewer.Text.length;
+			}
+		}
 		
 		void requestSave() { 
 			if (viewer.textmodel is null) {
@@ -390,7 +398,7 @@ namespace spades {
 		class TxtViewer : ListViewBase {
 			private string text;
 			TxtViewerModel @textmodel;
-			private TxtViewerSelectionState selection;
+			TxtViewerSelectionState selection;
 			private bool dragging = false;
 			private string copyText = "";
 			
