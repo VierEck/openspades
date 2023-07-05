@@ -37,6 +37,7 @@ And many others which weren't mentioned here.
 "ZeroGrey" - PM message highlight
 "Doctor Dank" - PubOVL
 "BR" - aos_replay
+"Liza" - block color inverting and mixing
 "MuffinTastic" - glow blocks
 "iSkyte" - killfeed images
 

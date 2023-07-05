@@ -753,6 +753,10 @@ namespace spades {
             ConfigField @hotkeyField = layouter.AddInputField(_Tr("Preferences", "UI HotKey keyboard layout"), "cg_UIHotKeyLayout");
             layouter.AddHeading(_Tr("Preferences", " "));
 
+            layouter.AddControl(_Tr("Preferences", "Key Mix Held Color"), "cg_keyPaletteMix");
+            layouter.AddControl(_Tr("Preferences", "Key Invert Held Color"), "cg_keyPaletteInvert");
+            layouter.AddHeading(_Tr("Preferences", " "));
+
             layouter.AddControl(_Tr("Preferences", "Toggle Build Distance"), "cg_keyScaleBuildDistance");
             layouter.AddHeading(_Tr("Preferences", " "));
 

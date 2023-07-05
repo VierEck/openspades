@@ -38,6 +38,9 @@ DEFINE_SPADES_SETTING(cg_keyPaletteRight, "Right");
 DEFINE_SPADES_SETTING(cg_keyPaletteUp, "Up");
 DEFINE_SPADES_SETTING(cg_keyPaletteDown, "Down");
 
+DEFINE_SPADES_SETTING(cg_keyPaletteInvert, "Keypad 1");
+DEFINE_SPADES_SETTING(cg_keyPaletteMix, "Keypad 0");
+
 DEFINE_SPADES_SETTING(cg_CurrentColorRed, "0");
 DEFINE_SPADES_SETTING(cg_CurrentColorGreen, "0");
 DEFINE_SPADES_SETTING(cg_CurrentColorBlue, "0");
@@ -440,6 +443,63 @@ namespace spades {
 				else
 					c += paletteColumn;
 				SetSelectedIndex(c);
+				return true;
+			} else if (EqualsIgnoringCase(keyName, cg_keyPaletteInvert)) {
+				World *w = client->GetWorld();
+				if (!w)
+					return true;
+				stmp::optional<Player &> p = w->GetLocalPlayer();
+				if (!p)
+					return true;
+				IntVector3 clr = p->GetBlockColor();
+				clr.x = 255 - clr.x;
+				clr.y = 255 - clr.y;
+				clr.z = 255 - clr.z;
+				p->SetHeldBlockColor(clr);
+				client->net->SendHeldBlockColor();
+				return true;
+			} else if (EqualsIgnoringCase(keyName, cg_keyPaletteMix)) {
+				World *w = client->GetWorld();
+				if (!w)
+					return true;
+				stmp::optional<Player &> p = w->GetLocalPlayer();
+				if (!p)
+					return true;
+
+				IntVector3 clr_a = p->GetBlockColor();
+				double a_x = clr_a.x / 255.0;
+				double a_y = clr_a.y / 255.0;
+				double a_z = clr_a.z / 255.0;
+				a_x = a_x <= 0.04045 ? a_x / 12.92 : std::pow((a_x + 0.055) / 1.055, 2.4);
+				a_y = a_y <= 0.04045 ? a_y / 12.92 : std::pow((a_y + 0.055) / 1.055, 2.4);
+				a_z = a_z <= 0.04045 ? a_z / 12.92 : std::pow((a_z + 0.055) / 1.055, 2.4);
+
+				client->CaptureColor();
+
+				IntVector3 clr_b = p->GetBlockColor();
+				double b_x = clr_b.x / 255.0;
+				double b_y = clr_b.y / 255.0;
+				double b_z = clr_b.z / 255.0;
+				b_x = b_x <= 0.04045 ? b_x / 12.92 : std::pow((b_x + 0.055) / 1.055, 2.4);
+				b_y = b_y <= 0.04045 ? b_y / 12.92 : std::pow((b_y + 0.055) / 1.055, 2.4);
+				b_z = b_z <= 0.04045 ? b_z / 12.92 : std::pow((b_z + 0.055) / 1.055, 2.4);
+
+				b_x = (a_x + b_x) / 2.;
+				b_y = (a_y + b_y) / 2.;
+				b_z = (a_z + b_z) / 2.;
+				b_x = b_x <= 0.0031308 ? b_x * 12.92 : (1.055 * std::pow(b_x, 1./2.4) - 0.055);
+				b_y = b_y <= 0.0031308 ? b_y * 12.92 : (1.055 * std::pow(b_y, 1./2.4) - 0.055);
+				b_z = b_z <= 0.0031308 ? b_z * 12.92 : (1.055 * std::pow(b_z, 1./2.4) - 0.055);
+				b_x = b_x * 255.0 + 0.49;
+				b_y = b_y * 255.0 + 0.49;
+				b_z = b_z * 255.0 + 0.49;
+				clr_b.x = (int)b_x;
+				clr_b.y = (int)b_y;
+				clr_b.z = (int)b_z;
+
+				colors[defaultColor] = clr_b;
+				p->SetHeldBlockColor(clr_b);
+				client->net->SendHeldBlockColor();
 				return true;
 			} else {
 				return false;
