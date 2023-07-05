@@ -1017,6 +1017,12 @@ namespace spades {
 				}
 			}
 
+			if (msg.substr(0, 8) == "PM from ") {
+				std::string s = "PM from " + msg.substr(8);
+				chatWindow->AddMessage(ChatWindow::ColoredMessage(s, MsgColorGreen));
+				return;
+			}
+
 			if (msg == " /g switching gamemode" && isMapEditor) {
 				net->CommandSwitchGameMode();
 			}
