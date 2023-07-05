@@ -27,6 +27,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <enet/enet.h>
 
 #include "PhysicsConstants.h"
 #include "Player.h"
@@ -149,6 +150,43 @@ namespace spades {
 			void SendVersionEnhanced(const std::set<std::uint8_t> &propertyIds);
 			void SendSupportedExtensions();
 
+			struct {
+				std::unique_ptr<IStream> stream;
+				std::vector<char> data;
+
+				float startTime;
+				float deltaTime;
+				float endTime;
+				int countUps;
+				int endUps;
+
+				std::string endTimeStr;
+
+				bool recording;
+				bool replaying;
+
+				bool paused;
+				bool skimming;
+
+				std::vector<char> lastWorldUpdate;
+				std::vector<char> lastFogColour;
+
+				bool isFirstJoin;
+			} demo;
+
+			void ScanDemo();
+
+			void DemoRegisterPacket(ENetPacket *);
+			void DemoReadNextPacket();
+			void DemoHandleCurrentData();
+
+			void DemoSkipMap();
+			void DemoJoinGame();
+			void DemoSetSkimOfs(float sec_ups, float skipToTime);
+			void DemoSkimEnd();
+			void DemoSkimReadLastFogWorld();
+			bool DemoSkimIgnoreType(int type, float skipToTime);
+
 		public:
 			NetClient(Client *);
 			~NetClient();
@@ -180,6 +218,8 @@ namespace spades {
 			int GetPing();
 
 			void DoEvents(int timeout = 0);
+			void DoDemo();
+			void DoPackets(NetPacketReader &);
 
 			void SendJoin(int team, WeaponType, std::string name, int kills);
 			void SendPosition();
@@ -200,6 +240,27 @@ namespace spades {
 
 			double GetDownlinkBps() { return bandwidthMonitor->GetDownlinkBps(); }
 			double GetUplinkBps() { return bandwidthMonitor->GetUplinkBps(); }
+
+			void StartDemo(std::string fileName, const ServerAddress &hostname, bool replay = false);
+			void StopDemo();
+
+			void DemoSkip(float sec);
+			void DemoUps(int ups);
+			void DemoPause(bool unpause = false);
+
+			bool IsDemoRecording() { return demo.recording; }
+			bool IsDemoPaused() { return demo.paused; }
+			bool IsDemoSkimming() { return demo.skimming; }
+
+			void DemoNormalizeTime();
+			bool IsDemoFirstJoin() { 
+				bool b = demo.isFirstJoin;
+				demo.isFirstJoin = false;
+				return b;
+			}
+			float GetDemoDeltaTime() { return demo.deltaTime; }
+			float GetDemoEndTime() { return demo.endTime; }
+			std::string GetDemoEndTimeStr() { return demo.endTimeStr; }
 		};
 	} // namespace client
 } // namespace spades

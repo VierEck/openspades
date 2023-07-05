@@ -57,7 +57,7 @@ namespace spades {
 													 asCALL_THISCALL);
 					manager->CheckError(r);
 					r = eng->RegisterObjectMethod("MainScreenHelper",
-												  "void StartQuery()",
+												  "void StartQuery(bool)",
 												  asMETHOD(gui::MainScreenHelper, StartQuery),
 												  asCALL_THISCALL);
 					manager->CheckError(r);
@@ -82,7 +82,7 @@ namespace spades {
 												  asCALL_THISCALL);
 					manager->CheckError(r);
 					r = eng->RegisterObjectMethod("MainScreenHelper",
-												  "string ConnectServer(string, int)",
+												  "string ConnectServer(string, int, bool, string)",
 												  asMETHOD(gui::MainScreenHelper, ConnectServer),
 												  asCALL_THISCALL);
 					manager->CheckError(r);

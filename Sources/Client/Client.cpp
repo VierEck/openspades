@@ -64,11 +64,14 @@ DEFINE_SPADES_SETTING(cg_skipDeadPlayersWhenDead, "1");
 
 SPADES_SETTING(cg_playerName);
 
+DEFINE_SPADES_SETTING(cg_demoFileNameFormat, "year month day time");
+DEFINE_SPADES_SETTING(cg_demoRecord, "1");
+
 namespace spades {
 	namespace client {
 
 		Client::Client(Handle<IRenderer> r, Handle<IAudioDevice> audioDev,
-		               const ServerAddress &host, Handle<FontManager> fontManager)
+		               const ServerAddress &host, Handle<FontManager> fontManager, bool replay, std::string demoName)
 		    : playerName(cg_playerName.operator std::string().substr(0, 15)),
 		      logStream(nullptr),
 		      hostname(host),
@@ -108,6 +111,13 @@ namespace spades {
 		      nextMapShotIndex(0) {
 			SPADES_MARK_FUNCTION();
 			SPLog("Initializing...");
+
+			demo.speed = 1;
+			demo.replaying = replay;
+			if (demo.replaying) {
+				demo.fileName = demoName;
+				demo.Initiate();
+			}
 
 			renderer->SetFogDistance(128.f);
 			renderer->SetFogColor(MakeVector3(.8f, 1.f, 1.f));
@@ -334,13 +344,26 @@ namespace spades {
 			mumbleLink.setContext(hostname.ToString(false));
 			mumbleLink.setIdentity(playerName);
 
-			SPLog("Started connecting to '%s'", hostname.ToString(true).c_str());
 			net = stmp::make_unique<NetClient>(this);
+
+			if (demo.replaying) {
+				try {
+					net->StartDemo(demo.fileName, hostname, demo.replaying);
+					SPLog("Demo Replay started: %s", demo.fileName.c_str());
+				} catch (...) {
+					SPRaise("Demo Replay Error: couldnt start Demo Replay");
+				}
+				return;
+			}
+
+			SPLog("Started connecting to '%s'", hostname.ToString(true).c_str());
 			net->Connect(hostname);
 
 			// decide log file name
 			std::string fn = hostname.ToString(false);
 			std::string fn2;
+			std::string demoName = "Demos/";
+			std::string demoNameFormat = (std::string)cg_demoFileNameFormat;
 			{
 				time_t t;
 				struct tm tm;
@@ -350,15 +373,69 @@ namespace spades {
 				sprintf(buf, "%04d%02d%02d%02d%02d%02d_", tm.tm_year + 1900, tm.tm_mon + 1,
 				        tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
 				fn2 = buf;
+
+				if ((bool)cg_demoRecord) {
+					int yearIdx = demoNameFormat.find("year");
+					int monthIdx = demoNameFormat.find("month");
+					int dayIdx = demoNameFormat.find("day");
+					int timeIdx = demoNameFormat.find("time");
+
+					int count = 0;
+					for (int i = 0; i < demoNameFormat.size(); i++) {
+						if (i == timeIdx) {
+							sprintf(buf, "%02d_%02d_%02d_", tm.tm_hour, tm.tm_min, tm.tm_sec);
+							demoName += buf;
+							count++;
+						}
+						if (i == dayIdx) {
+							sprintf(buf, "%02d_", tm.tm_mday);
+							demoName += buf;
+							count++;
+						}
+						if (i == monthIdx) {
+							sprintf(buf, "%02d_", tm.tm_mon + 1);
+							demoName += buf;
+							count++;
+						}
+						if (i == yearIdx) {
+							sprintf(buf, "%04d_", tm.tm_year + 1900);
+							demoName += buf;
+							count++;
+						}
+					}
+					if (count != 4) {
+						demoNameFormat = "log";
+					}
+				}
 			}
+
+			std::string hostName;
 			for (size_t i = 0; i < fn.size(); i++) {
 				char c = fn[i];
 				if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')) {
-					fn2 += c;
+					hostName += c;
 				} else {
-					fn2 += '_';
+					hostName += '_';
 				}
 			}
+			fn2 += hostName;
+
+			if ((bool)cg_demoRecord) {
+				if (demoNameFormat == "log") {
+					demoName = "Demos/" + fn2;
+				} else {
+					demoName += hostName;
+				}
+
+				demoName += ".demo";
+				try {
+					net->StartDemo(demoName, hostname);
+					SPLog("Demo Recording Started at '%s'", demoName.c_str());
+				} catch (const std::exception &ex) {
+					SPLog("Failed to open new demo file '%s' (%s)", demoName.c_str(), ex.what());
+				}
+			}
+
 			fn2 = "NetLogs/" + fn2 + ".log";
 
 			try {
@@ -478,6 +555,9 @@ namespace spades {
 		}
 
 		bool Client::IsLimboViewActive() {
+			if (demo.replaying)
+				return false;
+
 			if (world) {
 				if (!world->GetLocalPlayer()) {
 					return true;
@@ -545,6 +625,9 @@ namespace spades {
 
 		/** Records chat message/game events to the log file. */
 		void Client::NetLog(const char *format, ...) {
+			if (demo.replaying)
+				return;
+
 			char buf[4096];
 			va_list va;
 			va_start(va, format);

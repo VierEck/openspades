@@ -60,6 +60,8 @@ namespace spades {
 
             AddTab(GameOptionsPanel(Manager, options, fontManager),
                    _Tr("Preferences", "Game Options"));
+            AddTab(DemoOptionsPanel(Manager, options, fontManager),
+                   _Tr("Preferences", "Demo"));
             AddTab(ControlOptionsPanel(Manager, options, fontManager),
                    _Tr("Preferences", "Controls"));
             AddTab(MiscOptionsPanel(Manager, options, fontManager), _Tr("Preferences", "Misc"));
@@ -677,6 +679,38 @@ namespace spades {
             layouter.AddSliderField(_Tr("Preferences", "Minimap size"), "cg_minimapSize", 128, 256,
                                     8, ConfigNumberFormatter(0, " px"));
             layouter.AddToggleField(_Tr("Preferences", "Show Statistics"), "cg_stats");
+            layouter.FinishLayout();
+        }
+    }
+
+    class DemoOptionsPanel : spades::ui::UIElement {
+        DemoOptionsPanel(spades::ui::UIManager @manager, PreferenceViewOptions @options,
+                         FontManager @fontManager) {
+            super(manager);
+
+            StandardPreferenceLayouter layouter(this, fontManager);
+            layouter.AddHeading(_Tr("Preferences", "Demo Recording"));
+            layouter.AddToggleField(_Tr("Preferences", "Enable Demo Recording"), "cg_demoRecord");
+            ConfigField @nameField = layouter.AddInputField(_Tr("Preferences", "Demo Filename Date Format"), "cg_demoFileNameFormat");
+
+            layouter.AddHeading(_Tr("Preferences", "Demo Replaying"));
+            layouter.AddToggleField(_Tr("Preferences", "Show Progressbar only in UI"), "cg_DemoProgressBarOnlyInUi");
+
+            layouter.AddHeading(_Tr("Preferences", "Replay Keys"));
+            layouter.AddControl(_Tr("Preferences", "Toggle UI"), "cg_KeyProgressUi");
+            layouter.AddControl(_Tr("Preferences", "Pause"), "cg_keyPause");
+
+            layouter.AddControl(_Tr("Preferences", "FastForward"), "cg_keySkipForward");
+            layouter.AddControl(_Tr("Preferences", "Rewind"), "cg_keySkipRewind");
+            layouter.AddSliderField(_Tr("Preferences", "FastForward/Rewind Time"), "cg_SkipValue", 1, 60, 1, ConfigNumberFormatter(1, "sec"));
+
+            layouter.AddControl(_Tr("Preferences", "Next Ups"), "cg_keyNextUps");
+            layouter.AddControl(_Tr("Preferences", "Previous Ups"), "cg_keyPrevUps");
+
+            layouter.AddControl(_Tr("Preferences", "increase Speed"), "cg_keySpeedUp");
+            layouter.AddControl(_Tr("Preferences", "decrease Speed"), "cg_keySpeedDown");
+            layouter.AddControl(_Tr("Preferences", "normalize Speed"), "cg_keySpeedNormalize");
+            layouter.AddSliderField(_Tr("Preferences", "increase/decrease Speed value"), "cg_SpeedChangeValue", 0.1, 1, 0.1, ConfigNumberFormatter(1, "sec"));
             layouter.FinishLayout();
         }
     }

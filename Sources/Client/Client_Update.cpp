@@ -191,13 +191,15 @@ namespace spades {
 #else
 			// accurately resembles server's physics
 			// but not smooth
-			if (dt > 0.f)
-				worldSubFrame += dt;
+			if (!demo.replaying || (demo.replaying && !net->IsDemoPaused())) {
+				if (dt > 0.f)
+					worldSubFrame += dt;
 
-			float frameStep = 1.f / 60.f;
-			while (worldSubFrame >= frameStep) {
-				world->Advance(frameStep);
-				worldSubFrame -= frameStep;
+				float frameStep = 1.f / 60.f;
+				while (worldSubFrame >= frameStep) {
+					world->Advance(frameStep * demo.speed);
+					worldSubFrame -= frameStep;
+				}
 			}
 #endif
 
@@ -632,6 +634,9 @@ namespace spades {
 
 		void Client::PlayerFiredWeapon(spades::client::Player &p) {
 			SPADES_MARK_FUNCTION();
+
+			if (IsMuted())
+				return;
 
 			if (&p == world->GetLocalPlayer()) {
 				localFireVibrationTime = time;

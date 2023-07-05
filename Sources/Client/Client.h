@@ -385,6 +385,7 @@ namespace spades {
 			void DrawDebugAim();
 			void DrawStats();
 			void DrawAllPlayerNames();
+			void DrawDemoProgress();
 
 			void DrawScene();
 			void AddGrenadeToScene(Grenade &);
@@ -402,12 +403,34 @@ namespace spades {
 
 			void NetLog(const char *format, ...);
 
+			struct {
+				bool replaying;
+				std::string fileName;
+				float speed;
+				void SetSpeed(float sp) {
+					if (sp < 0.1f || sp > 10)
+						return;
+					speed = sp;
+				}
+
+				bool uiActive;
+				float skipTo;
+				Vector2 cursor;
+
+				void Initiate() {
+					cursor = MakeVector2(0.f,0.f);
+					skipTo = -1.f;
+					uiActive = false; 
+				}
+			} demo;
+			void DemoUiMouseInput(float x, float y);
+
 		protected:
 			~Client();
 
 		public:
 			Client(Handle<IRenderer>, Handle<IAudioDevice>, const ServerAddress &host,
-			       Handle<FontManager>);
+			       Handle<FontManager>, bool replay, std::string demoName);
 
 			void RunFrame(float dt) override;
 			void RunFrameLate(float dt) override;
@@ -493,6 +516,9 @@ namespace spades {
 			void LocalPlayerHurt(HurtType type, bool sourceGiven, Vector3 source) override;
 			void LocalPlayerBuildError(BuildFailureReason reason) override;
 			// IWorldListener end
+
+			float GetClientTime() { return time; }
+			float GetClientTimeMultiplied() { return time * demo.speed; }
 		};
 	} // namespace client
 } // namespace spades

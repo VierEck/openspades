@@ -49,7 +49,7 @@ namespace spades {
 
 			void RestoreRenderer();
 
-			std::string Connect(const ServerAddress &host);
+			std::string Connect(const ServerAddress &host, bool replay, std::string demoName);
 
 		protected:
 			~MainScreen();

@@ -75,6 +75,8 @@ DEFINE_SPADES_SETTING(cg_playerNameX, "0");
 DEFINE_SPADES_SETTING(cg_playerNameY, "0");
 DEFINE_SPADES_SETTING(cg_specNames, "1");
 
+DEFINE_SPADES_SETTING(cg_DemoProgressBarOnlyInUi, "0");
+
 namespace spades {
 	namespace client {
 
@@ -865,6 +867,9 @@ namespace spades {
 
 					chatWindow->Draw();
 					killfeedWindow->Draw();
+
+					if (demo.replaying)
+						DrawDemoProgress();
 				}
 
 				// large map view should come in front
@@ -968,7 +973,7 @@ namespace spades {
 				}
 			}
 
-			if (net) {
+			if (net && !demo.replaying) {
 				auto ping = net->GetPing();
 				auto upbps = net->GetUplinkBps();
 				auto downbps = net->GetDownlinkBps();
@@ -991,6 +996,82 @@ namespace spades {
 			renderer->DrawImage(nullptr, AABB2(pos.x, pos.y, size.x, size.y));
 			font.DrawShadow(str, pos + Vector2(margin, margin), 1.f, Vector4(1.f, 1.f, 1.f, 1.f),
 			                Vector4(0.f, 0.f, 0.f, 0.5f));
+		}
+
+		void Client::DrawDemoProgress() {
+			SPADES_MARK_FUNCTION();
+
+			float scrWidth = renderer->ScreenWidth();
+			float scrHeight = renderer->ScreenHeight();
+			IFont &font = fontManager->GetGuiFont();
+			float margin = 5.f;
+
+			int deltaTime = (int)net->GetDemoDeltaTime();
+			int hour = deltaTime / 3600;
+			int min  = (deltaTime % 3600) / 60;
+			int sec  = deltaTime % 60;
+			char buf[64];
+			sprintf(buf, "%02d:%02d:%02d / ", hour, min, sec);
+
+			std::string str = "Demo: ";
+			str += buf;
+			str += net->GetDemoEndTimeStr();
+
+			auto size = font.Measure(str);
+			size += Vector2(margin * 2.f, margin * 2.f);
+
+			auto pos = (Vector2(scrWidth, scrHeight - size.y - 4) - size) * Vector2(0.5f, 1.f);
+
+			renderer->SetColorAlphaPremultiplied(Vector4(0.f, 0.f, 0.f, 0.5f));
+			renderer->DrawImage(nullptr, AABB2(pos.x, pos.y, size.x, size.y));
+			font.DrawShadow(str, pos + Vector2(margin, margin), 1.f, Vector4(1.f, 1.f, 1.f, 1.f), Vector4(0.f, 0.f, 0.f, 0.5f));
+
+			if (!(bool)cg_DemoProgressBarOnlyInUi || ((bool)cg_DemoProgressBarOnlyInUi && demo.uiActive)) {
+				float sizeBar = scrWidth * 0.5f;
+				float sizeBg = sizeBar + 12;
+				float sizeP = sizeBar * net->GetDemoDeltaTime() / net->GetDemoEndTime();
+
+				Handle<IImage> img = renderer->RegisterImage("Gfx/White.tga");
+
+				//draw progressbar background
+				pos = (Vector2(scrWidth - sizeBg, scrHeight - size.y * 3.f)) * Vector2(0.5f, 1.f);
+				renderer->SetColorAlphaPremultiplied(MakeVector4(0.f, 0.f, 0.f, 0.8f));
+				renderer->DrawImage(img, AABB2(pos.x, pos.y, sizeBg, 18.f));
+
+				//draw progressbar
+				pos += Vector2(6, 4);
+				renderer->SetColorAlphaPremultiplied(MakeVector4(0.6f, 0.6f, 0.6f, 0.4f));
+				renderer->DrawImage(img, AABB2(pos.x, pos.y, sizeP, 10.f));
+				
+				if (demo.uiActive) {
+					//draw cursor
+					Handle<IImage> cursor = renderer->RegisterImage("Gfx/Limbo/Cursor.png");
+					renderer->SetColorAlphaPremultiplied(MakeVector4(1.f, 1.f, 1.f, 1.f));
+					renderer->DrawImage(cursor, AABB2(demo.cursor.x - 8, demo.cursor.y - 8, 32, 32));
+
+					if (demo.skipTo >= 0) {
+						//draw delta pos
+						pos += Vector2(sizeP - 2, -2);
+						renderer->SetColorAlphaPremultiplied(MakeVector4(1.f, 1.f, 1.f, 1.f));
+						renderer->DrawImage(img, AABB2(pos.x, pos.y, 4, 14.f));
+
+						//draw hovered time
+						float hoverTime = demo.skipTo;
+						int hour = (int)hoverTime / 3600;
+						int min  = ((int)hoverTime % 3600) / 60;
+						int sec  = (int)hoverTime % 60;
+						sprintf(buf, " %02d:%02d:%02d ", hour, min, sec);
+						str = buf;
+						auto size = font.Measure(str);
+						size += Vector2(margin * 2.f, margin * 2.f);
+
+						pos = Vector2(demo.cursor.x - size.x * 0.5f, pos.y - size.y * 1.2f);
+						renderer->SetColorAlphaPremultiplied(Vector4(0.f, 0.f, 0.f, 0.5f));
+						renderer->DrawImage(nullptr, AABB2(pos.x, pos.y, size.x, size.y));
+						font.DrawShadow(str, pos + Vector2(margin, margin), 1.f, Vector4(1.f, 1.f, 1.f, 1.f), Vector4(0.f, 0.f, 0.f, 0.5f));
+					}
+				}
+			}
 		}
 
 		void Client::Draw2D() {
