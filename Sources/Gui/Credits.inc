@@ -33,11 +33,12 @@ And many others which weren't mentioned here.
 -------------------
 
 "VierEck." - MapEditor, Demo Replay/Recording based on aos_replay
-"Nuceto" - specific word message highlight
+"Nuceto" - killfeed image feature, specific word message highlight
 "ZeroGrey" - PM message highlight
 "Doctor Dank" - PubOVL
 "BR" - aos_replay
 "MuffinTastic" - glow blocks
+"iSkyte" - killfeed images
 
 
 Translators
