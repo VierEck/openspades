@@ -97,22 +97,22 @@ namespace spades {
             float footerPos = Manager.Renderer.ScreenHeight - 50.f;
             {
                 spades::ui::Button button(Manager);
-                button.Caption = _Tr("MainScreen", "ServerList");
-                button.Bounds = AABB2(contentsLeft, 165, 100.f, 35.f);
+                button.Caption = _Tr("MainScreen", "Servers");
+                button.Bounds = AABB2(contentsLeft, 165, 60.f, 35.f);
                 @button.Activated = spades::ui::EventHandler(this.OnServerList);
                 AddChild(button);
             }
             {
                 spades::ui::Button button(Manager);
-                button.Caption = _Tr("MainScreen", "DemoList");
-                button.Bounds = AABB2(contentsLeft + 103.f, 165, 100.f, 35.f);
+                button.Caption = _Tr("MainScreen", "Demos");
+                button.Bounds = AABB2(contentsLeft + 63.f, 165, 60.f, 35.f);
                 @button.Activated = spades::ui::EventHandler(this.OnDemoList);
                 AddChild(button);
             }
             {
                 spades::ui::Button button(Manager);
-                button.Caption = _Tr("MainScreen", "MapList");
-                button.Bounds = AABB2(contentsLeft + 206.f, 165, 100.f, 35.f);
+                button.Caption = _Tr("MainScreen", "Maps");
+                button.Bounds = AABB2(contentsLeft + 126.f, 165, 60.f, 35.f);
                 @button.Activated = spades::ui::EventHandler(this.OnMapList);
                 AddChild(button);
             }
