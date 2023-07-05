@@ -188,7 +188,7 @@ namespace spades {
 			bool DemoSkimIgnoreType(int type, float skipToTime);
 
 		public:
-			NetClient(Client *, bool replay);
+			NetClient(Client *);
 			~NetClient();
 
 			NetClientStatus GetStatus() { return status; }

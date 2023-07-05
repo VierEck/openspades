@@ -374,24 +374,22 @@ namespace spades {
 			}
 		};
 
-		NetClient::NetClient(Client *c, bool replay) : client(c), host(nullptr), peer(nullptr) {
+		NetClient::NetClient(Client *c) : client(c), host(nullptr), peer(nullptr) {
 			SPADES_MARK_FUNCTION();
 
-			if (!replay) {
-				enet_initialize();
-				SPLog("ENet initialized");
+			enet_initialize();
+			SPLog("ENet initialized");
 
-				host = enet_host_create(NULL, 1, 1, 100000, 100000);
-				SPLog("ENet host created");
-				if (!host) {
-					SPRaise("Failed to create ENet host");
-				}
-
-				if (enet_host_compress_with_range_coder(host) < 0)
-					SPRaise("Failed to enable ENet Range coder.");
-
-				SPLog("ENet Range Coder Enabled");
+			host = enet_host_create(NULL, 1, 1, 100000, 100000);
+			SPLog("ENet host created");
+			if (!host) {
+				SPRaise("Failed to create ENet host");
 			}
+
+			if (enet_host_compress_with_range_coder(host) < 0)
+				SPRaise("Failed to enable ENet Range coder.");
+
+			SPLog("ENet Range Coder Enabled");
 
 			peer = NULL;
 			status = NetClientStatusNotConnected;
@@ -405,12 +403,10 @@ namespace spades {
 
 			std::fill(savedPlayerTeam.begin(), savedPlayerTeam.end(), -1);
 
-			if (!replay) {
-				bandwidthMonitor.reset(new BandwidthMonitor(host));
-			}
+			bandwidthMonitor.reset(new BandwidthMonitor(host));
 
 			demo.recording = false;
-			demo.replaying = replay;
+			demo.replaying = false;
 		}
 		NetClient::~NetClient() {
 			SPADES_MARK_FUNCTION();
@@ -505,11 +501,13 @@ namespace spades {
 		void NetClient::DoEvents(int timeout) {
 			SPADES_MARK_FUNCTION();
 
-			if (demo.replaying) {
-				try {
-					DoDemo();
-				} catch (...) {
-					throw;
+			if (!peer) {
+				if (demo.replaying) {
+					try {
+						DoDemo();
+					} catch (...) {
+						throw;
+					}
 				}
 				return;
 			}
@@ -1560,7 +1558,7 @@ namespace spades {
 		}
 
 		void NetClient::SendVersionEnhanced(const std::set<std::uint8_t> &propertyIds) {
-			if (demo.replaying)
+			if (!peer)
 				return;
 
 			NetPacketWriter wri(PacketTypeExistingPlayer);
@@ -1604,6 +1602,9 @@ namespace spades {
 
 		void NetClient::SendJoin(int team, WeaponType weapType, std::string name, int kills) {
 			SPADES_MARK_FUNCTION();
+			if (!peer)
+				return;
+
 			int weapId;
 			switch (weapType) {
 				case RIFLE_WEAPON: weapId = 0; break;
@@ -1625,6 +1626,9 @@ namespace spades {
 
 		void NetClient::SendPosition() {
 			SPADES_MARK_FUNCTION();
+			if (!peer)
+				return;
+
 			NetPacketWriter wri(PacketTypePositionData);
 			// wri.Write((uint8_t)pId);
 			Player &p = GetLocalPlayer();
@@ -1638,6 +1642,9 @@ namespace spades {
 
 		void NetClient::SendOrientation(spades::Vector3 v) {
 			SPADES_MARK_FUNCTION();
+			if (!peer)
+				return;
+
 			NetPacketWriter wri(PacketTypeOrientationData);
 			// wri.Write((uint8_t)pId);
 			wri.Write(v.x);
@@ -1649,6 +1656,8 @@ namespace spades {
 
 		void NetClient::SendPlayerInput(PlayerInput inp) {
 			SPADES_MARK_FUNCTION();
+			if (!peer)
+				return;
 
 			uint8_t bits = 0;
 			if (inp.moveForward)
@@ -1683,6 +1692,9 @@ namespace spades {
 
 		void NetClient::SendWeaponInput(WeaponInput inp) {
 			SPADES_MARK_FUNCTION();
+			if (!peer)
+				return;
+
 			uint8_t bits = 0;
 			if (inp.primary)
 				bits |= 1 << 0;
@@ -1704,6 +1716,9 @@ namespace spades {
 
 		void NetClient::SendBlockAction(spades::IntVector3 v, BlockActionType type) {
 			SPADES_MARK_FUNCTION();
+			if (!peer)
+				return;
+
 			NetPacketWriter wri(PacketTypeBlockAction);
 			wri.Write((uint8_t)GetLocalPlayer().GetId());
 
@@ -1724,6 +1739,9 @@ namespace spades {
 
 		void NetClient::SendBlockLine(spades::IntVector3 v1, spades::IntVector3 v2) {
 			SPADES_MARK_FUNCTION();
+			if (!peer)
+				return;
+
 			NetPacketWriter wri(PacketTypeBlockLine);
 			wri.Write((uint8_t)GetLocalPlayer().GetId());
 
@@ -1739,6 +1757,9 @@ namespace spades {
 
 		void NetClient::SendReload() {
 			SPADES_MARK_FUNCTION();
+			if (!peer)
+				return;
+
 			NetPacketWriter wri(PacketTypeWeaponReload);
 			wri.Write((uint8_t)GetLocalPlayer().GetId());
 
@@ -1755,7 +1776,7 @@ namespace spades {
 
 		void NetClient::SendHeldBlockColor() {
 			SPADES_MARK_FUNCTION();
-			if (demo.replaying)
+			if (!peer)
 				return;
 
 			NetPacketWriter wri(PacketTypeSetColour);
@@ -1770,6 +1791,9 @@ namespace spades {
 
 		void NetClient::SendTool() {
 			SPADES_MARK_FUNCTION();
+			if (!peer)
+				return;
+
 			NetPacketWriter wri(PacketTypeSetTool);
 			wri.Write((uint8_t)GetLocalPlayer().GetId());
 			switch (GetLocalPlayer().GetTool()) {
@@ -1787,6 +1811,9 @@ namespace spades {
 
 		void NetClient::SendGrenade(const Grenade &g) {
 			SPADES_MARK_FUNCTION();
+			if (!peer)
+				return;
+
 			NetPacketWriter wri(PacketTypeGrenadePacket);
 			wri.Write((uint8_t)GetLocalPlayer().GetId());
 
@@ -1809,6 +1836,9 @@ namespace spades {
 
 		void NetClient::SendHit(int targetPlayerId, HitType type) {
 			SPADES_MARK_FUNCTION();
+			if (!peer)
+				return;
+
 			NetPacketWriter wri(PacketTypeHitPacket);
 			wri.Write((uint8_t)targetPlayerId);
 
@@ -1825,7 +1855,7 @@ namespace spades {
 
 		void NetClient::SendChat(std::string text, bool global) {
 			SPADES_MARK_FUNCTION();
-			if (demo.replaying)
+			if (!peer)
 				return;
 
 			NetPacketWriter wri(PacketTypeChatMessage);
@@ -1838,6 +1868,9 @@ namespace spades {
 
 		void NetClient::SendWeaponChange(WeaponType wt) {
 			SPADES_MARK_FUNCTION();
+			if (!peer)
+				return;
+
 			NetPacketWriter wri(PacketTypeChangeWeapon);
 			wri.Write((uint8_t)GetLocalPlayer().GetId());
 			switch (wt) {
@@ -1850,6 +1883,9 @@ namespace spades {
 
 		void NetClient::SendTeamChange(int team) {
 			SPADES_MARK_FUNCTION();
+			if (!peer)
+				return;
+
 			NetPacketWriter wri(PacketTypeChangeTeam);
 			wri.Write((uint8_t)GetLocalPlayer().GetId());
 			wri.Write((uint8_t)team);
@@ -1858,7 +1894,7 @@ namespace spades {
 
 		void NetClient::SendHandShakeValid(int challenge) {
 			SPADES_MARK_FUNCTION();
-			if (demo.replaying)
+			if (!peer)
 				return;
 
 			NetPacketWriter wri(PacketTypeHandShakeReturn);
@@ -1869,7 +1905,7 @@ namespace spades {
 
 		void NetClient::SendVersion() {
 			SPADES_MARK_FUNCTION();
-			if (demo.replaying)
+			if (!peer)
 				return;
 
 			NetPacketWriter wri(PacketTypeVersionSend);
@@ -1884,7 +1920,7 @@ namespace spades {
 
 		void NetClient::SendSupportedExtensions() {
 			SPADES_MARK_FUNCTION();
-			if (demo.replaying)
+			if (!peer)
 				return;
 
 			NetPacketWriter wri(PacketTypeExtensionInfo);
@@ -2063,6 +2099,7 @@ namespace spades {
 			}
 			demo.startTime = client->GetClientTime();
 			demo.recording = !replay;
+			demo.replaying = replay;
 			demo.paused = false;
 		}
 

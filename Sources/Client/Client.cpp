@@ -344,7 +344,7 @@ namespace spades {
 			mumbleLink.setContext(hostname.ToString(false));
 			mumbleLink.setIdentity(playerName);
 
-			net = stmp::make_unique<NetClient>(this, demo.replaying);
+			net = stmp::make_unique<NetClient>(this);
 
 			if (demo.replaying) {
 				try {
