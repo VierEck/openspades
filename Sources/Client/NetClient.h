@@ -44,6 +44,7 @@ typedef _ENetHost ENetHost;
 typedef _ENetPeer ENetPeer;
 
 namespace spades {
+	class IStream;
 	namespace client {
 		class Client;
 		class Player;
