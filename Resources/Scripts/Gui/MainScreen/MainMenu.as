@@ -77,11 +77,12 @@ namespace spades {
         MainScreenServerListLoadingView @loadingView;
         MainScreenServerListErrorView @errorView;
         bool loading = false, loaded = false, demoList = false;
+        MainScreenServerItem@[]@ savedlist = array<spades::MainScreenServerItem@>();
+        int savedlistIdx = 0;
 
         private ConfigItem cg_protocolVersion("cg_protocolVersion", "3");
         private ConfigItem cg_lastQuickConnectHost("cg_lastQuickConnectHost", "127.0.0.1");
         private ConfigItem cg_serverlistSort("cg_serverlistSort", "16385");
-        MainScreenServerItem@[]@ savedlist = array<spades::MainScreenServerItem@>();
 
         MainScreenMainMenu(MainScreenUI @ui) {
             super(ui.manager);
@@ -283,6 +284,10 @@ namespace spades {
         }
 
         void ServerListItemActivated(ServerListModel @sender, MainScreenServerItem @item) {
+            ServerListItemActivatedPass(item);
+        }
+
+        void ServerListItemActivatedPass(MainScreenServerItem @item) {
             if (!demoList) {
                 addressField.Text = item.Address;
                 cg_lastQuickConnectHost = addressField.Text;
@@ -363,24 +368,24 @@ namespace spades {
             savedlist.resize(0);
             for (int i = 0, count = list.length; i < count; i++) {
                 MainScreenServerItem @item = list[i];
-                if(filterProtocol3 and (item.Protocol != "0.75")) {
-                    continue;
-                }
-                if(filterProtocol4 and (item.Protocol != "0.76")) {
-                    continue;
-                }
                 if (!demoList) {
-                    if(filterEmpty and (item.NumPlayers > 0)) {
+                    if (filterProtocol3 and(item.Protocol != "0.75")) {
                         continue;
                     }
-                    if(filterFull and (item.NumPlayers >= item.MaxPlayers)) {
+                    if (filterProtocol4 and(item.Protocol != "0.76")) {
+                        continue;
+                    }
+                    if (filterEmpty and(item.NumPlayers > 0)) {
+                        continue;
+                    }
+                    if (filterFull and(item.NumPlayers >= item.MaxPlayers)) {
                         continue;
                     }
                 }
-                if(filterText.length > 0) {
-                    if(not (StringContainsCaseInsensitive(item.Name, filterText) or
-                        StringContainsCaseInsensitive(item.MapName, filterText) or
-                        StringContainsCaseInsensitive(item.GameMode, filterText))) {
+                if (filterText.length > 0) {
+                    if (not(StringContainsCaseInsensitive(item.Name, filterText)
+                                or StringContainsCaseInsensitive(item.MapName, filterText)
+                                    or StringContainsCaseInsensitive(item.GameMode, filterText))) {
                         continue;
                     }
                 }
@@ -442,16 +447,10 @@ namespace spades {
             UpdateServerList();
         }
         private void OnFilterFullPressed(spades::ui::UIElement @sender) {
-            if (demoList) {
-                return;
-            }
             filterEmptyButton.Toggled = false;
             UpdateServerList();
         }
         private void OnFilterEmptyPressed(spades::ui::UIElement @sender) {
-            if (demoList) {
-                return;
-            }
             filterFullButton.Toggled = false;
             UpdateServerList();
         }
@@ -505,12 +504,12 @@ namespace spades {
         }
 
         private void OnConnectPressed(spades::ui::UIElement @sender) { Connect(); }
-        
+
         private void OnChangeListPressed(spades::ui::UIElement @sender) {
             demoList = !demoList;
             ChangeList();
         }
-        
+
         private void ChangeList() {
             if (demoList) {
                 addressField.Text = "";
@@ -525,12 +524,29 @@ namespace spades {
                 Connect();
             } else if (IsEnabled and key == "Escape") {
                 ui.shouldExit = true;
-            } else if (IsEnabled and key == "S") {
+            } else if (IsEnabled and key == "S" and Manager.IsControlPressed) {
                 demoList = false;
                 ChangeList();
-            } else if (IsEnabled and key == "D") {
+            } else if (IsEnabled and key == "D" and Manager.IsControlPressed) {
                 demoList = true;
                 ChangeList();
+            } else if (IsEnabled and key == "Down") {
+                if (savedlistIdx >= savedlist.length - 1 and savedlist.length > 0) {
+                    UIElement::HotKey(key);
+                    return;
+                }
+                savedlistIdx++;
+                ServerListItemActivatedPass(savedlist[savedlistIdx]);
+            } else if (IsEnabled and key == "Up") {
+                if (savedlistIdx <= 0 and savedlist.length > 0) {
+                    if (savedlist.length > 0) {
+                        ServerListItemActivatedPass(savedlist[0]);
+                    }
+                    UIElement::HotKey(key);
+                    return;
+                }
+                savedlistIdx--;
+                ServerListItemActivatedPass(savedlist[savedlistIdx]);
             } else {
                 UIElement::HotKey(key);
             }
