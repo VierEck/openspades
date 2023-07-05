@@ -654,6 +654,9 @@ namespace spades {
             layouter.AddToggleField(_Tr("Preferences", "Spectator ESP"), "cg_specEsp");
             layouter.AddToggleField(_Tr("Preferences", "Spectator ESP Names"), "cg_specNames");
 
+            layouter.AddHeading(_Tr("Preferences", "Sound"));
+            layouter.AddSliderField(_Tr("Preferences", "Gain/'Volume'"), "s_gain", 0.0, 4.0, 0.1, ConfigNumberFormatter(1, "gain"));
+
             layouter.AddHeading(_Tr("Preferences", "Effects"));
             layouter.AddToggleField(_Tr("Preferences", "KillFeed Images"), "cg_killFeedImg");
             layouter.AddToggleField(_Tr("Preferences", "Glow Blocks"), "cg_glowBlocks");
