@@ -29,6 +29,14 @@ Credits
 And many others which weren't mentioned here.
 
 
+4 of Spades credits
+-------------------
+
+"VierEck." - MapEditor, Demo Replay/Recording based on aos_replay
+"Doctor Dank" - PubOVL
+"BR" - aos_replay
+
+
 Translators
 -----------
 
