@@ -85,75 +85,77 @@ namespace spades {
                 qwerty_Z = "W";
                 qwerty_A = "Q";
             } else if (cg_UIHotKeyLayout.StringValue == "dvorak") {
+                qwerty_Z = "/";
+                qwerty_Y = "T";
                 qwerty_R = "O";
                 qwerty_E = "D";
                 qwerty_F = "Y";
-                qwerty_D = "E";
+                qwerty_D = "H";
+                qwerty_S = ";";
+                qwerty_L = "P"; 
                 qwerty_C = "I";
                 qwerty_V = ".";
-                qwerty_Y = "T";
-                qwerty_L = "P"; 
-                qwerty_Z = "/";
                 qwerty_X = "B";
                 qwerty_G = "U";
-                qwerty_S = ";";
             } else if (cg_UIHotKeyLayout.StringValue == "colemak") {
-                qwerty_R = "S";
+                qwerty_Y = "O";
+                qwerty_R = "R";
                 qwerty_E = "K";
                 qwerty_F = "E";
                 qwerty_D = "G";
-                qwerty_Y = "O";
+                qwerty_S = "D";
                 qwerty_L = "U";
                 qwerty_G = "T";
-                qwerty_S = "D";
             } else if (cg_UIHotKeyLayout.StringValue == "workman") {
+                qwerty_Y = "H";
                 qwerty_R = "E";
                 qwerty_E = "K";
                 qwerty_F = "U";
                 qwerty_D = "W";
+                qwerty_L = "M";
                 qwerty_C = "V";
                 qwerty_V = "B";
-                qwerty_Y = "H";
-                qwerty_L = "M";
             } else if (cg_UIHotKeyLayout.StringValue == "neo") {
+                qwerty_Z = "B";
+                qwerty_Y = "'";
                 qwerty_R = "K";
                 qwerty_E = "F";
                 qwerty_F = "O";
                 qwerty_D = ";";
+                qwerty_A = "D";
+                qwerty_S = "H";
+                qwerty_L = "E";
                 qwerty_C = "R";
                 qwerty_V = "W";
-                qwerty_Y = "'";
-                qwerty_L = "E"; 
-                qwerty_Z = "B";
                 qwerty_X = "Q";
                 qwerty_G = "I";
-                qwerty_S = "H";
             } else if (cg_UIHotKeyLayout.StringValue == "dvorak french") {
+                qwerty_Z = "[";
+                qwerty_Y = "B";
                 qwerty_R = "M";
                 qwerty_E = "F";
                 qwerty_F = "H";
                 qwerty_D = ";";
+                qwerty_A = "S";
+                qwerty_S = "J";
+                qwerty_L = ",";
                 qwerty_C = "I";
                 qwerty_V = "U";
-                qwerty_Y = "B";
-                qwerty_L = ","; 
-                qwerty_Z = "[";
                 qwerty_X = "N";
                 qwerty_G = "R";
-                qwerty_S = "J";
             } else if (cg_UIHotKeyLayout.StringValue == "bépo" or cg_UIHotKeyLayout.StringValue == "bepo") {
+                qwerty_Z = "[";
+                qwerty_Y = "X";
                 qwerty_R = "L";
                 qwerty_E = "F";
                 qwerty_F = "/";
                 qwerty_D = "I";
+                qwerty_S = "K";
+                qwerty_L = "O";
                 qwerty_C = "H";
                 qwerty_V = "U";
-                qwerty_Y = "X";
-                qwerty_L = "O"; 
-                qwerty_Z = "[";
                 qwerty_X = "C";
                 qwerty_G = ",";
-                qwerty_S = "K";
             }
         }
 
