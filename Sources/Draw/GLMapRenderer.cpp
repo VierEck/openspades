@@ -34,6 +34,8 @@
 #include <Core/Debug.h>
 #include <Core/Settings.h>
 
+DEFINE_SPADES_SETTING(cg_glowBlocks, "1");
+
 namespace spades {
 	namespace draw {
 		void GLMapRenderer::PreloadShaders(GLRenderer &renderer) {
@@ -209,6 +211,10 @@ namespace spades {
 
 			static GLShadowShader shadowShader;
 			shadowShader(&renderer, basicProgram, 2);
+
+			static GLProgramUniform glowBlocks("allowGlow");
+			glowBlocks(basicProgram);
+			glowBlocks.SetValue((bool)cg_glowBlocks);
 
 			static GLProgramUniform fogDistance("fogDistance");
 			fogDistance(basicProgram);

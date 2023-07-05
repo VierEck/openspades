@@ -33,19 +33,37 @@ vec3 EvaluateSunLight();
 vec3 EvaluateAmbientLight(float detailAmbientOcclusion);
 //void VisibilityOfSunLight_Model_Debug();
 
+uniform bool allowGlow;
+
+// Threshold for what block colors should be regarded as a light source
+const float GLOW_LIGHT_THRESHOLD = 255.0;
+
+// Fix floating point comparison errors
+// This decimal should never be a problem, as colors are passed to the shader as integers
+const float GLOW_THRES_FLOAT_ERROR = 0.01;
+const float GLOW_THRES_LINEARIZED = (GLOW_LIGHT_THRESHOLD - GLOW_THRES_FLOAT_ERROR) / 255.0;
+
+bool glglowhelper_isLight(vec3 rgb) {
+	return (rgb.x >= GLOW_THRES_LINEARIZED ||
+			rgb.y >= GLOW_THRES_LINEARIZED ||
+			rgb.z >= GLOW_THRES_LINEARIZED);
+}
+
 void main() {
 	// color is linear
 	gl_FragColor = vec4(color.xyz, 1.);
 	
-	vec3 shading = vec3(color.w);
-	shading *= EvaluateSunLight();
-	
-	float ao = texture2D(ambientOcclusionTexture, ambientOcclusionCoord).x;
-	
-	shading += EvaluateAmbientLight(ao);
-	
-	// apply diffuse shading
-	gl_FragColor.xyz *= shading;
+	if (!glglowhelper_isLight(color.xyz) || !allowGlow) {
+		vec3 shading = vec3(color.w);
+		shading *= EvaluateSunLight();
+		
+		float ao = texture2D(ambientOcclusionTexture, ambientOcclusionCoord).x;
+		
+		shading += EvaluateAmbientLight(ao);
+		
+		// apply diffuse shading
+		gl_FragColor.xyz *= shading;
+	}
 	
 	// apply fog
 	gl_FragColor.xyz = mix(gl_FragColor.xyz, fogColor, fogDensity);

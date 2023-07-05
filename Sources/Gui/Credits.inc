@@ -35,6 +35,7 @@ And many others which weren't mentioned here.
 "VierEck." - MapEditor, Demo Replay/Recording based on aos_replay
 "Doctor Dank" - PubOVL
 "BR" - aos_replay
+"MuffinTastic" - glow blocks
 
 
 Translators
