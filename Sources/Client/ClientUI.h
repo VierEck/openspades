@@ -26,6 +26,8 @@
 #include <Gui/View.h>
 #include <ScriptBindings/ScriptManager.h>
 
+#include "PaletteView.h"
+
 namespace spades {
 	namespace client {
 		class FontManager;
@@ -49,6 +51,8 @@ namespace spades {
 			void AlertNotice(const std::string &);
 			void AlertWarning(const std::string &);
 			void AlertError(const std::string &);
+
+			void MapEditorSaveMap();
 
 		protected:
 			~ClientUI();
@@ -87,6 +91,21 @@ namespace spades {
 			// lm: so the chat does not have the initial chat key
 			bool isIgnored(const std::string &key);
 			void setIgnored(const std::string &key);
+
+			void EnterPaletteWindow();
+			void EditCurrentColor();
+			void ChangePalettePage(int next);
+			void SaveCurrentPalettePage();
+			void LoadCurrentPalettePage();
+			void NewPalettePage();
+			void DeleteCurrentPalettePage();
+			void PaletteKeyInput(const std::string &);
+
+			void EnterMapTxtWindow();
+			void LoadMapTxt(const std::string &msg);
+			void requestLoadTxt();
+			void requestSaveTxt(const std::string &txt);
+			void requestGenTxt();
 		};
 		;
 	} // namespace client

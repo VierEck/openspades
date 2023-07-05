@@ -114,6 +114,7 @@ namespace spades {
 			IntVector3 blockCursorDragPos;
 			bool lastSingleBlockBuildSeqDone;
 			float lastReloadingTime;
+			IntVector3 blockCursorIndentPos;
 
 			bool pendingPlaceBlock;
 			bool pendingRestockBlock;
@@ -130,11 +131,20 @@ namespace spades {
 			void MovePlayer(float fsynctics);
 			void BoxClipMove(float fsynctics);
 			bool TryUncrouch();
+			void MoveBuilder(float fsynctics);
 
 			void UseSpade();
 			void DigWithSpade();
 			void FireWeapon();
 			void ThrowGrenade();
+
+			int BuildDistance;
+			bool BuildAtMaxDistance;
+			int BrushSize;
+			bool editBrushSize;
+			VolumeType currentVolumeType;
+			MapTool currentMapTool;
+			MapObjectType currentMapObjectType;
 
 		public:
 			Player(World &, int playerId, WeaponType weapon, int teamId, Vector3 position,
@@ -149,12 +159,13 @@ namespace spades {
 			Weapon &GetWeapon();
 			WeaponType GetWeaponType() { return weaponType; }
 			int GetTeamId() { return teamId; }
-			bool IsSpectator() { return teamId >= 2; }
+			bool IsSpectator() { return teamId >= 2 && !IsBuilder(); }
 			std::string GetName();
 			IntVector3 GetColor();
 			IntVector3 GetBlockColor() { return blockColor; }
 			ToolType GetTool() { return tool; }
 			bool IsLocalPlayer();
+			bool IsBuilder();
 
 			PlayerInput GetInput() { return input; }
 			WeaponInput GetWeaponInput() { return weapInput; }
@@ -169,6 +180,8 @@ namespace spades {
 			IntVector3 GetBlockCursorDragPos() { return blockCursorDragPos; }
 			bool CanActivateDelayedBlockPlacement() { return canPending; }
 			bool IsReadyToUseTool();
+			IntVector3 GetBlockCursorIndentPos() { return blockCursorIndentPos; }
+			void SetBuilderInput(PlayerInput, WeaponInput);
 
 			// ammo counts
 			int GetNumBlocks() { return blockStocks; }
@@ -219,6 +232,7 @@ namespace spades {
 			bool IsOnGroundOrWade();
 
 			void Update(float dt);
+			void UpdateBuilder(float dt);
 
 			float GetToolPrimaryDelay();
 			float GetToolSecondaryDelay();
@@ -245,6 +259,64 @@ namespace spades {
 			bool OverlapsWithOneBlock(IntVector3);
 
 			float BoxDistanceToBlock(IntVector3);
+
+			void SetVolumeType(VolumeType v) {
+				if (currentMapTool == ToolMapObject ||
+					(currentMapTool == ToolBrushing && v < VolumeBox))
+					return;
+
+				TextureColors.clear();
+
+				blockCursorActive = false;
+				blockCursorDragging = false;
+				WeaponInput inp;
+				SetWeaponInput(inp);
+
+				currentVolumeType = v; 
+			}
+			VolumeType GetCurrentVolumeType() { 
+				if (TextureColors.size() > 0 || currentMapTool == ToolMapObject)
+					return VolumeSingle;
+				return currentVolumeType; 
+			}
+			void SetMapTool(MapTool t) {
+				TextureColors.clear();
+
+				blockCursorActive = false;
+				blockCursorDragging = false;
+				WeaponInput inp;
+				SetWeaponInput(inp);
+
+				if (currentMapTool == t) {
+					currentMapTool = noMapTool;
+					return;
+				}
+
+				if (t == ToolBrushing && currentVolumeType < VolumeBox)
+					SetVolumeType(VolumeBox);
+
+				currentMapTool = t;
+			}
+			MapTool GetCurrentMapTool() { return currentMapTool; }
+			void SetMapObjectType(MapObjectType o) { currentMapObjectType = o; }
+			MapObjectType GetCurrentMapObjectType() { return currentMapObjectType; }
+
+			std::tuple<IntVector3, IntVector3, VolumeType> savedTexturePkt;
+			std::vector<uint8_t> TextureColors;
+			void SetBuildAtMaxDistance(bool b) { BuildAtMaxDistance = b; }
+			bool IsBuildAtMaxDistance() { return BuildAtMaxDistance; }
+			void SetBuildDistance(int i) { BuildDistance = i; }
+			int GetBuildDistance() { return BuildDistance; }
+			void SetBrushSize(int s) { BrushSize = s; }
+			int GetBrushSize() { return BrushSize; }
+			void SetEditBrushSize(bool b) { editBrushSize = b; }
+			bool GetEditBrushSize() { return editBrushSize; }
+
+			void ShootMapObject() { FireWeapon(); }
+
+			float walkFlySpeed;
+			float sprintFlySpeed;
+			float sneakFlySpeed;
 		};
 	} // namespace client
 } // namespace spades

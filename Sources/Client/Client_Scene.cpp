@@ -642,7 +642,10 @@ namespace spades {
 
 				// Draw block cursor
 				if (p) {
-					if (p->IsReadyToUseTool() && p->GetTool() == Player::ToolBlock &&
+					if (p->IsBuilder() && p->IsReadyToUseTool() && p->GetTool() == Player::ToolBlock) {
+						DrawBuilderBlockCursor();
+
+					} else if (p->IsReadyToUseTool() && p->GetTool() == Player::ToolBlock &&
 					    p->IsAlive()) {
 						std::vector<IntVector3> blocks;
 						if (p->IsBlockCursorDragging()) {
@@ -710,6 +713,96 @@ namespace spades {
 			}
 
 			renderer->EndScene();
+		}
+
+		void Client::DrawBuilderBlockCursor() {
+			stmp::optional<Player &> p = world->GetLocalPlayer();
+			if (!p)
+				return;
+
+			bool active = p->IsBlockCursorActive();
+			Vector3 color = {1.f, 1.f, 1.f};
+			if (!active)
+				color = MakeVector3(1.f, 1.f, 0.f);
+
+			switch (p->GetCurrentVolumeType()) {
+				case VolumeSingle:
+				case VolumeLine: {
+					std::vector<IntVector3> blocks;
+					if (p->IsBlockCursorDragging()) {
+						blocks = world->CubeLine(p->GetBlockCursorDragPos(), p->GetBlockCursorPos(), 1088);
+					} else {
+						blocks.push_back(p->GetBlockCursorPos());
+					}
+					Handle<IModel> curLine = renderer->RegisterModel("Models/MapObjects/BlockCursorLine.kv6");
+					Handle<IModel> curSingle = renderer->RegisterModel("Models/MapObjects/BlockCursorSingle.kv6");
+					for (size_t i = 0; i < blocks.size(); i++) {
+						IntVector3 &v = blocks[i];
+						bool solid = blocks.size() > 2 && map->IsSolid(v.x, v.y, v.z);
+						ModelRenderParam param;
+						param.ghost = true;
+						param.opacity = active && !solid ? .7f : .3f;
+						param.customColor = color;
+						param.matrix = Matrix4::Translate(MakeVector3(v.x + .5f, v.y + .5f, v.z + .5f));
+						param.matrix = param.matrix * Matrix4::Scale(1.f / 24.f + (solid ? 0.0005f : 0.f));
+						renderer->RenderModel(blocks.size() > 1 ? *curLine : *curSingle, param);
+					}
+				} break;
+				case VolumeBall: // todo. draw actual ellipsoid
+				case VolumeCylinderX:
+				case VolumeCylinderY:
+				case VolumeCylinderZ: //todo. draw actual cylinder instead of box
+				case VolumeBox: {
+					int x = p->GetBlockCursorPos().x;
+					int y = p->GetBlockCursorPos().y;
+					int z = p->GetBlockCursorPos().z;
+					int dx = 1, dy = 1, dz = 1;
+					if (p->IsBlockCursorDragging() || p->GetCurrentMapTool() == ToolBrushing) {
+						if (p->GetCurrentMapTool() == ToolBrushing) {
+							int brushHalfSize = p->GetBrushSize() / 2;
+							x -= brushHalfSize;
+							y -= brushHalfSize;
+							z -= brushHalfSize;
+
+							brushHalfSize *= 2;
+							dx = (x + brushHalfSize) - x;
+							dy = (y + brushHalfSize) - y;
+							dz = (z + brushHalfSize) - z;
+						} else {
+							dx = p->GetBlockCursorDragPos().x - x;
+							dy = p->GetBlockCursorDragPos().y - y;
+							dz = p->GetBlockCursorDragPos().z - z;
+						}
+						dx += (dx >= 0);
+						dy += (dy >= 0);
+						dz += (dz >= 0);
+
+						x += (dx < 0);
+						y += (dy < 0);
+						z += (dz < 0);
+						dx -= (dx < 0);
+						dy -= (dy < 0);
+						dz -= (dz < 0);
+					}
+
+					Vector4 col = {color.x, color.y, color.z, 1};
+					renderer->AddDebugLine(MakeVector3(x     , y     , z     ), MakeVector3(x + dx, y     , z     ), col);
+					renderer->AddDebugLine(MakeVector3(x     , y + dy, z     ), MakeVector3(x + dx, y + dy, z     ), col);
+					renderer->AddDebugLine(MakeVector3(x     , y     , z + dz), MakeVector3(x + dx, y     , z + dz), col);
+					renderer->AddDebugLine(MakeVector3(x     , y + dy, z + dz), MakeVector3(x + dx, y + dy, z + dz), col);
+
+					renderer->AddDebugLine(MakeVector3(x     , y     , z     ), MakeVector3(x     , y + dy, z     ), col);
+					renderer->AddDebugLine(MakeVector3(x     , y     , z + dz), MakeVector3(x     , y + dy, z + dz), col);
+					renderer->AddDebugLine(MakeVector3(x + dx, y     , z     ), MakeVector3(x + dx, y + dy, z     ), col);
+					renderer->AddDebugLine(MakeVector3(x + dx, y     , z + dz), MakeVector3(x + dx, y + dy, z + dz), col);
+
+					renderer->AddDebugLine(MakeVector3(x     , y     , z     ), MakeVector3(x     , y     , z + dz), col);	
+					renderer->AddDebugLine(MakeVector3(x     , y + dy, z     ), MakeVector3(x     , y + dy, z + dz), col);
+					renderer->AddDebugLine(MakeVector3(x + dx, y     , z     ), MakeVector3(x + dx, y     , z + dz), col);
+					renderer->AddDebugLine(MakeVector3(x + dx, y + dy, z     ), MakeVector3(x + dx, y + dy, z + dz), col);
+				} break;
+				default: return;
+			}
 		}
 
 		void Client::UpdateMatrices() {

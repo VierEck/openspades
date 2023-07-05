@@ -58,6 +58,8 @@ namespace spades {
 			ExtensionType128Player = 192,
 			ExtensionTypeMessageTypes = 193,
 			ExtensionTypeKickReason = 194,
+
+			ExtensionTypeMapEditor = 101,
 		};
 
 		class World;
@@ -101,6 +103,7 @@ namespace spades {
 			/** Extensions implemented in this client (map of extension id → version) */
 			std::unordered_map<uint8_t, uint8_t> implementedExtensions{
 			  {ExtensionType128Player, 1},
+			  {ExtensionTypeMapEditor, 1}
 			};
 
 			class BandwidthMonitor {
@@ -187,6 +190,11 @@ namespace spades {
 			void DemoSkimReadLastFogWorld();
 			bool DemoSkimIgnoreType(int type, float skipToTime);
 
+			void MapEditorCommands(std::string &);
+			void CommandSetRespawn(std::string &);
+			void CommandRespawn();
+			void CommandSwitchTeam(std::string &);
+
 		public:
 			NetClient(Client *);
 			~NetClient();
@@ -237,6 +245,9 @@ namespace spades {
 			void SendWeaponChange(WeaponType);
 			void SendTeamChange(int team);
 			void SendHandShakeValid(int challenge);
+			void SendBlockVolume(IntVector3, IntVector3, VolumeType, VolumeActionType, std::vector<uint8_t> colors = {});
+			void SendFogColor(IntVector3);
+			void SendMapObject(int type, int state, Vector3 pos1 = {0, 0, 0});
 
 			double GetDownlinkBps() { return bandwidthMonitor->GetDownlinkBps(); }
 			double GetUplinkBps() { return bandwidthMonitor->GetUplinkBps(); }
@@ -261,6 +272,16 @@ namespace spades {
 			float GetDemoDeltaTime() { return demo.deltaTime; }
 			float GetDemoEndTime() { return demo.endTime; }
 			std::string GetDemoEndTimeStr() { return demo.endTimeStr; }
+
+			void BlockVolumeUndo();
+			void BlockVolumeRedo();
+
+			void CommandSwitchGameMode();
+			void BlockVolumeUndoRedo(bool);
+
+			void HandleMapEditorExtension();
+			int switchModeTeam;
+			Vector3 localRespawnPos;
 		};
 	} // namespace client
 } // namespace spades

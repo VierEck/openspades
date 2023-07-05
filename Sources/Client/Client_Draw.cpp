@@ -60,6 +60,8 @@
 
 #include "NetClient.h"
 
+#include "TCGameMode.h"
+
 DEFINE_SPADES_SETTING(cg_hitIndicator, "1");
 DEFINE_SPADES_SETTING(cg_debugAim, "0");
 SPADES_SETTING(cg_keyReloadWeapon);
@@ -76,6 +78,8 @@ DEFINE_SPADES_SETTING(cg_playerNameY, "0");
 DEFINE_SPADES_SETTING(cg_specNames, "1");
 
 DEFINE_SPADES_SETTING(cg_DemoProgressBarOnlyInUi, "0");
+
+DEFINE_SPADES_SETTING(cg_DrawDragCursorPos, "1");
 
 namespace spades {
 	namespace client {
@@ -714,6 +718,233 @@ namespace spades {
 			}
 		}
 
+		void Client::DrawBuilderHUD() {
+			if (cg_hideHud)
+				return;
+			Player &p = GetWorld()->GetLocalPlayer().value();
+			paletteView->Draw();
+			mapView->Draw();
+			DrawBuilderIcons();
+			DrawBuilderCursor();
+			if (cg_DrawDragCursorPos && p.IsBlockCursorDragging())
+				DrawBuilderDragCursor();
+			DrawMapObjectPosition();
+		}
+
+		void Client::DrawBuilderIcons() {
+			Player &p = GetWorld()->GetLocalPlayer().value();
+
+			float iconX = renderer->ScreenWidth() * 0.52f;
+			float iconY = renderer->ScreenHeight() * 0.52f;
+
+			Handle<IImage> imgVolume;
+			switch (p.GetCurrentVolumeType()) {
+				case VolumeSingle: {
+					imgVolume = renderer->RegisterImage("Gfx/BuildMode/SingleBlock.png");
+				} break;
+				case VolumeLine: {
+					imgVolume = renderer->RegisterImage("Gfx/BuildMode/BlockLine.png");
+				} break;
+				case VolumeBox: {
+					imgVolume = renderer->RegisterImage("Gfx/BuildMode/Box.png");
+				} break;
+				case VolumeBall: {
+					imgVolume = renderer->RegisterImage("Gfx/BuildMode/Ball.png");
+				} break;
+				case VolumeCylinderX:
+				case VolumeCylinderY:
+				case VolumeCylinderZ:{
+					imgVolume = renderer->RegisterImage("Gfx/BuildMode/Cylinder.png");
+				} break;
+				default: return;
+			}
+			renderer->DrawImage(imgVolume, MakeVector2(iconX, iconY));
+
+			Handle<IImage> imgTool;
+			switch (p.GetCurrentMapTool()) {
+				case noMapTool: {
+					Handle<IImage> imgDestroy;
+					if (p.GetWeaponInput().secondary) {
+						imgDestroy = renderer->RegisterImage("Gfx/BuildMode/Destroy.png");
+						renderer->DrawImage(imgDestroy, MakeVector2(iconX + imgVolume->GetWidth(), iconY));
+					}
+				} return;
+				case ToolPainting: {
+					imgTool = renderer->RegisterImage("Gfx/BuildMode/Paint.png");
+				} break;
+				case ToolBrushing: {
+					imgTool = renderer->RegisterImage("Gfx/BuildMode/Brush.png");
+				} break;
+				case ToolCopying: {
+					imgTool = renderer->RegisterImage("Gfx/BuildMode/Copy.png");
+				} break;
+				case ToolMapObject: {
+					IntVector3 icol;
+					switch (p.GetCurrentMapObjectType()) {
+						case ObjTentTeam1:
+						case ObjTentTeam2:
+						case ObjTentNeutral: {
+							imgTool = renderer->RegisterImage("Gfx/BuildMode/Tent.png");
+							icol = world->GetTeam(p.GetCurrentMapObjectType() - ObjTentTeam1).color;
+						} break;
+						case ObjIntelTeam1:
+						case ObjIntelTeam2: {
+							imgTool = renderer->RegisterImage("Gfx/BuildMode/Intel.png");
+							icol = world->GetTeam(p.GetCurrentMapObjectType() - ObjIntelTeam1).color;
+						} break;
+						case ObjSpawnTeam1:
+						case ObjSpawnTeam2: {
+							imgTool = renderer->RegisterImage("Gfx/BuildMode/Spawn.png");
+							icol = world->GetTeam(p.GetCurrentMapObjectType() - ObjSpawnTeam1).color;
+						} break;
+						default: return;
+					}
+					Vector4 col;
+					col.x = icol.x / 255.f;
+					col.y = icol.y / 255.f;
+					col.z = icol.z / 255.f;
+					col.w = 1.f;
+					renderer->SetColorAlphaPremultiplied(col);
+					float h = imgTool->GetHeight();
+					float w = imgTool->GetWidth();
+					renderer->DrawImage(imgTool, MakeVector2(iconX, iconY + imgTool->GetHeight()), AABB2(0, h, w, h));
+
+					Handle<IImage> imgDestroy;
+					if (p.GetWeaponInput().secondary) {
+						imgDestroy = renderer->RegisterImage("Gfx/BuildMode/Destroy.png");
+						renderer->DrawImage(imgDestroy, MakeVector2(iconX + imgVolume->GetWidth(), iconY));
+					}
+				} return;
+				default: return;
+			}
+			renderer->DrawImage(imgTool, MakeVector2(iconX, iconY + imgVolume->GetHeight()));
+
+			Handle<IImage> imgDestroy;
+			if (p.GetWeaponInput().secondary) {
+				imgDestroy = renderer->RegisterImage("Gfx/BuildMode/Destroy.png");
+				renderer->DrawImage(imgDestroy, MakeVector2(iconX + imgVolume->GetWidth(), iconY));
+			}
+		}
+
+		void Client::DrawBuilderCursor() {
+			Player &p = GetWorld()->GetLocalPlayer().value();
+
+			float curX = renderer->ScreenWidth() * 0.52f;
+			float curY = renderer->ScreenHeight() * 0.51f;
+
+			char buf[256];
+			sprintf(buf, "%dx %dy %dz", p.GetBlockCursorPos());
+			std::string str = buf;
+
+			IFont &font = fontManager->GetGuiFont();
+			float margin = 5.f;
+
+			auto size = font.Measure(str);
+			size += Vector2(margin * 2.f, margin * 2.f);
+			size *= 0.9f;
+
+			auto pos = Vector2(curX, curY - size.y);
+			//y - size.y put the "anchor" point at the bottom so cursorpos ui doesnt overlap with build icons 
+
+			renderer->SetColorAlphaPremultiplied(Vector4(0.f, 0.f, 0.f, 0.5f));
+			renderer->DrawImage(nullptr, AABB2(pos.x, pos.y, size.x, size.y));
+			font.DrawShadow(str, pos + Vector2(margin, margin), 0.9f, Vector4(1.f, 1.f, 1.f, 1.f), Vector4(0.f, 0.f, 0.f, 0.5f));
+		}
+
+		void Client::DrawBuilderDragCursor() {
+			Player &p = GetWorld()->GetLocalPlayer().value();
+			IntVector3 IntDragPos = p.GetBlockCursorDragPos();
+			Vector3 DragPos;
+			DragPos.x = IntDragPos.x;
+			DragPos.y = IntDragPos.y;
+			DragPos.z = IntDragPos.z;
+
+			Vector3 posxyz = Project(DragPos);
+			Vector2 pos = {posxyz.x, posxyz.y};
+			if (posxyz.z <= 0 || posxyz.z > 1.0004f)
+				return;
+
+			char buf[256];
+			sprintf(buf, "%dx %dy %dz", IntDragPos);
+			std::string str = buf;
+
+			IFont &font = fontManager->GetGuiFont();
+			float margin = 5.f;
+
+			auto size = font.Measure(str);
+			size += Vector2(margin * 2.f, margin * 2.f);
+			size *= 0.8f;
+
+			renderer->SetColorAlphaPremultiplied(Vector4(0.f, 0.f, 0.f, 0.5f));
+			renderer->DrawImage(nullptr, AABB2(pos.x, pos.y, size.x, size.y));
+			font.DrawShadow(str, pos + Vector2(margin, margin), 0.8f, Vector4(1.f, 1.f, 1.f, 1.f), Vector4(0.f, 0.f, 0.f, 0.5f));
+		}
+
+		void Client::DrawMapObjectPosition() {
+			if (IGameMode::m_CTF == world->GetMode()->ModeType()) {
+				CTFGameMode &mode = dynamic_cast<CTFGameMode &>(world->GetMode().value());
+
+				for (int tId = 0; tId < 2; tId++) {
+					//draw base
+					Vector3 pos3d = mode.GetTeam(tId).basePos;
+
+					Vector3 posxyz = Project(pos3d);
+					if (posxyz.z <= 0 || posxyz.z > 1.0004f)
+						continue;
+					Vector2 pos = {posxyz.x, posxyz.y};
+					char buf[64];
+					sprintf(buf, "%.02fx %.02fy %.02fz", pos3d.x, pos3d.y, pos3d.z);
+
+					IFont &font = fontManager->GetGuiFont();
+					Vector2 size = font.Measure(buf);
+					size *= 0.8f;
+					pos.x -= size.x * .5f;
+					pos.y -= size.y;
+					font.DrawShadow(buf, pos, 0.8f, MakeVector4(1, 1, 1, 1), MakeVector4(0, 0, 0, 0.5));
+
+					// draw flag
+					if (!mode.GetTeam(1 - tId).hasIntel) {
+						Vector3 pos3d = mode.GetTeam(tId).flagPos;
+
+						Vector3 posxyz = Project(pos3d);
+						if (posxyz.z <= 0 || posxyz.z > 1.0004f)
+							continue;
+						Vector2 pos = {posxyz.x, posxyz.y};
+						char buf[64];
+						sprintf(buf, "%.02fx %.02fy %.02fz", pos3d.x, pos3d.y, pos3d.z);
+
+						IFont &font = fontManager->GetGuiFont();
+						Vector2 size = font.Measure(buf);
+						size *= 0.8f;
+						pos.x -= size.x * .5f;
+						pos.y -= size.y;
+						font.DrawShadow(buf, pos, 0.8f, MakeVector4(1, 1, 1, 1), MakeVector4(0, 0, 0, 0.5));
+					}
+				}
+			} else if (IGameMode::m_TC == world->GetMode()->ModeType()) {
+				TCGameMode &mode = dynamic_cast<TCGameMode &>(world->GetMode().value());
+				int cnt = mode.GetNumTerritories();
+
+				for (int tId = 0; tId < cnt; tId++) {
+					Vector3 pos3d = mode.GetTerritory(tId).pos;
+
+					Vector3 posxyz = Project(pos3d);
+					if (posxyz.z <= 0 || posxyz.z > 1.0004f)
+						continue;
+					Vector2 pos = {posxyz.x, posxyz.y};
+					char buf[64];
+					sprintf(buf, "%.02fx %.02fy %.02fz", pos3d.x, pos3d.y, pos3d.z);
+
+					IFont &font = fontManager->GetGuiFont();
+					Vector2 size = font.Measure(buf);
+					size *= 0.8f;
+					pos.x -= size.x * .5f;
+					pos.y -= size.y;
+					font.DrawShadow(buf, pos, 0.8f, MakeVector4(1, 1, 1, 1), MakeVector4(0, 0, 0, 0.5));
+				}
+			}
+		}
+
 		void Client::DrawAlert() {
 			SPADES_MARK_FUNCTION();
 
@@ -859,7 +1090,11 @@ namespace spades {
 						DrawSpectateHUD();
 					}
 				} else {
-					DrawSpectateHUD();
+					if (!p->IsBuilder()) {
+						DrawSpectateHUD();
+					} else {
+						DrawBuilderHUD();
+					}
 				}
 
 				if (!cg_hideHud) {

@@ -41,6 +41,20 @@ namespace spades {
 			void AlertNotice(const std::string &);
 			void AlertWarning(const std::string &);
 			void AlertError(const std::string &);
+
+			void MapEditorSaveMap();
+
+			void EditCurrentColor();
+			void ChangePalettePage(int next);
+			void SaveCurrentPalettePage();
+			void LoadCurrentPalettePage();
+			void NewPalettePage();
+			void DeleteCurrentPalettePage();
+			void PaletteKeyInput(const std::string &);
+
+			void requestLoadTxt();
+			void requestSaveTxt(const std::string &txt);
+			void requestGenTxt();
 		};
 	} // namespace client
 } // namespace spades

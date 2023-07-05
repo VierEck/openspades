@@ -77,3 +77,47 @@ static inline hitTag_t &operator|=(hitTag_t &left, const hitTag_t &right) {
 	left = static_cast<hitTag_t>(static_cast<int>(left) | static_cast<int>(right));
 	return left;
 }
+
+enum { BLUE_FLAG = 0, GREEN_FLAG = 1, BLUE_BASE = 2, GREEN_BASE = 3 };
+
+enum VolumeType { 
+	VolumeSingle = 0, 
+	VolumeLine, 
+	VolumeBox, 
+	VolumeBall, 
+	VolumeCylinderX, 
+	VolumeCylinderY, 
+	VolumeCylinderZ,
+};
+
+enum VolumeActionType { 
+	VolumeActionDestroy = 0, 
+	VolumeActionBuild, 
+	VolumeActionPaint, 
+	VolumeActionTextureBuild,
+};
+
+enum MapTool {
+	noMapTool = 0,
+	ToolPainting,
+	ToolBrushing,
+	ToolCopying,
+	ToolMapObject,
+};
+
+enum MapObjectType {
+	ObjTentTeam1 = 1, 
+	ObjTentTeam2, 
+	ObjTentNeutral, 
+	ObjIntelTeam1, 
+	ObjIntelTeam2, 
+	ObjSpawnTeam1, 
+	ObjSpawnTeam2,
+	MAPOBJECTTYPEMAX
+};
+
+enum MoveObjSpawnType {
+	DESTROY_SPAWN = 3,
+	SPAWN_TEAM_1,
+	SPAWN_TEAM_2,
+};

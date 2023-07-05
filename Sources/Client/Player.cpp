@@ -33,6 +33,9 @@
 #include <Core/Exception.h>
 #include <Core/Settings.h>
 
+DEFINE_SPADES_SETTING(cg_BuildDelayInSec, "0.2");
+DEFINE_SPADES_SETTING(cg_MaxBuildDistance, "1088");
+
 namespace spades {
 	namespace client {
 
@@ -89,6 +92,8 @@ namespace spades {
 		Player::~Player() { SPADES_MARK_FUNCTION(); }
 
 		bool Player::IsLocalPlayer() { return world.GetLocalPlayer() == this; }
+
+		bool Player::IsBuilder() { return teamId >= 2 && world.IsMapEditor(); }
 
 		void Player::SetInput(PlayerInput newInput) {
 			SPADES_MARK_FUNCTION();
@@ -271,6 +276,111 @@ namespace spades {
 			weapInput = newInput;
 		}
 
+		void Player::SetBuilderInput(PlayerInput newPInp, WeaponInput newWInp) {
+			SPADES_MARK_FUNCTION();
+			input = newPInp;
+
+			auto *listener = GetWorld().GetListener();
+			if (newWInp.primary && newWInp.secondary) {
+				newWInp.primary = newWInp.secondary = weapInput.primary = weapInput.secondary = false;
+				if (listener && this == world.GetLocalPlayer())
+					listener->LocalPlayerBuildError(BuildFailureReason::InvalidPosition);
+				return;
+			}
+
+			Handle<GameMap> map = GetWorld().GetMap();
+
+			VolumeActionType volAct = VolumeActionBuild;
+			if (newWInp.secondary != weapInput.secondary || (newWInp.secondary && !newWInp.primary)) {
+				volAct = VolumeActionDestroy;
+			} else {
+				if (currentMapTool == ToolPainting) {
+					volAct = VolumeActionPaint;
+				} else if (currentMapTool == ToolCopying) {
+					volAct = VolumeActionTextureBuild;
+				}
+			}
+
+			IntVector3 blockCursor;
+			IntVector3 indent = GetBlockCursorIndentPos();
+			if (map->IsValidBuildCoord(indent) &&
+				(newWInp.secondary != weapInput.secondary || volAct == VolumeActionPaint ||
+				(volAct == VolumeActionTextureBuild && TextureColors.size() == 0))) {
+				if (map->IsSolidWrapped(indent.x, indent.y, indent.z)) {
+					blockCursor = indent;
+				} else {
+					blockCursor = GetBlockCursorPos();
+				}
+			} else {
+				blockCursor = GetBlockCursorPos();
+			}
+
+			float delay = (float)cg_BuildDelayInSec;
+			if (newWInp.secondary != weapInput.secondary || newWInp.primary != weapInput.primary) {
+				if (IsBlockCursorActive()) {
+					if (newWInp.primary || newWInp.secondary) {
+						if (GetCurrentVolumeType() == VolumeCylinderX ||
+							GetCurrentVolumeType() == VolumeCylinderY ||
+							GetCurrentVolumeType() == VolumeCylinderZ
+							) {
+							Vector3 ori = orientation;
+							ori.x *= 1 - 2 * (ori.x < 0);
+							ori.y *= 1 - 2 * (ori.y < 0);
+							ori.z *= 1 - 2 * (ori.z < 0);
+							if (ori.x > ori.z && ori.x > ori.y)
+								currentVolumeType = VolumeCylinderX;
+							if (ori.y > ori.x && ori.y > ori.z)
+								currentVolumeType = VolumeCylinderY;
+							if (ori.z > ori.y && ori.z > ori.x)
+								currentVolumeType = VolumeCylinderZ;
+						}
+						if (GetCurrentVolumeType() == VolumeSingle) {
+							listener->LocalPlayerCreatedVolume(blockCursor, blockCursor, GetCurrentVolumeType(), volAct);
+							nextBlockTime = world.GetTime() + delay;
+						} else {
+							if (currentMapTool == ToolBrushing) {
+								int brushHalfSize = BrushSize / 2;
+								IntVector3 brushHalfDiagonal = {brushHalfSize, brushHalfSize, brushHalfSize};
+								listener->LocalPlayerCreatedVolume(
+									blockCursor + brushHalfDiagonal, blockCursor - brushHalfDiagonal, GetCurrentVolumeType(), volAct
+								);
+								nextBlockTime = world.GetTime() + delay;
+							} else {
+								blockCursorDragging = true;
+								blockCursorDragPos = blockCursor;
+							}
+						}
+					} else if (IsBlockCursorDragging()) {
+						if (listener && this == world.GetLocalPlayer())
+							listener->LocalPlayerCreatedVolume(blockCursorDragPos, blockCursor, GetCurrentVolumeType(), volAct);
+						blockCursorDragging = blockCursorActive = false;
+					}
+				} else {
+					if (listener && this == world.GetLocalPlayer())
+						listener->LocalPlayerBuildError(BuildFailureReason::InvalidPosition);
+				}
+			} else if ((newWInp.primary || newWInp.secondary) && world.GetTime() >= nextBlockTime) {
+				if (IsBlockCursorActive()) {
+					if (currentMapTool == ToolBrushing) {
+						int brushHalfSize = BrushSize / 2;
+						IntVector3 brushHalfDiagonal = {brushHalfSize, brushHalfSize, brushHalfSize};
+						listener->LocalPlayerCreatedVolume(
+							blockCursor + brushHalfDiagonal, blockCursor - brushHalfDiagonal, GetCurrentVolumeType(), volAct
+						);
+						nextBlockTime = world.GetTime() + delay;
+					} else if (GetCurrentVolumeType() == VolumeSingle) {
+						listener->LocalPlayerCreatedVolume(blockCursor, blockCursor, GetCurrentVolumeType(), volAct);
+						nextBlockTime = world.GetTime() + delay;
+					}
+				} else {
+					if (listener && this == world.GetLocalPlayer())
+						listener->LocalPlayerBuildError(BuildFailureReason::InvalidPosition);
+				}
+			}
+
+			weapInput = newWInp;
+		}
+
 		void Player::Reload() {
 			SPADES_MARK_FUNCTION();
 			if (health == 0) {
@@ -382,6 +492,11 @@ namespace spades {
 
 		void Player::Update(float dt) {
 			SPADES_MARK_FUNCTION();
+			if (IsBuilder()) {
+				UpdateBuilder(dt);
+				return;
+			}
+
 			auto *listener = world.GetListener();
 
 			MovePlayer(dt);
@@ -523,6 +638,69 @@ namespace spades {
 			}
 		}
 
+		void Player::UpdateBuilder(float dt) {
+			SPADES_MARK_FUNCTION();
+			MoveBuilder(dt);
+
+			auto *listener = world.GetListener();
+			GameMap::RayCastResult result;
+			Handle<GameMap> map = GetWorld().GetMap();
+			SPAssert(map);
+
+			float BuildDist = BuildDistance;
+			if (BuildAtMaxDistance || BuildDist > (float)cg_MaxBuildDistance) {
+				BuildDist = (float)cg_MaxBuildDistance;
+			}
+
+			Vector3 pos = GetEye();
+			Vector3 ori = GetFront();
+			if (pos.z < 0.f) {
+				if (ori.z > 0.f) {
+					//if above height limit but looking down on map
+					float w = pos.z / ori.z;
+					pos -= ori * w;
+					BuildDist -= (ori * w).GetLength();
+					if (BuildDist > 1) {
+						result = map->CastRay2(pos, ori, BuildDist);
+					} else {
+						//make block cursor "stuck" at height limit
+						result.hitBlock.x = pos.x;
+						result.hitBlock.y = pos.y;
+						result.hitBlock.z = pos.z;
+						result.normal = {0, 0, 0};
+					}
+				} else {
+					//if not looking down on map prevent building
+					blockCursorActive = false;
+					return;
+				}
+			} else {
+				result = map->CastRay2(pos, ori, BuildDist);
+			}
+
+			IntVector3 blockCursor;
+			blockCursorIndentPos = result.hitBlock;
+			if (map->IsValidBuildCoord(blockCursorIndentPos) &&
+				(weapInput.secondary || currentMapTool == ToolPainting ||
+				(currentMapTool == ToolCopying && TextureColors.size() == 0))) {
+				if (map->IsSolidWrapped(blockCursorIndentPos.x, blockCursorIndentPos.y, blockCursorIndentPos.z)) {
+					blockCursor = blockCursorIndentPos;
+				} else {
+					blockCursor = result.hitBlock + result.normal;
+				}
+			} else {
+				blockCursor = result.hitBlock + result.normal;
+			}
+
+			if (map->IsValidBuildCoord(blockCursor)) {
+				blockCursorActive = true;
+				blockCursorIndentPos = result.hitBlock;
+				blockCursorPos = blockCursor;
+			} else {
+				blockCursorActive = false;
+			}
+		}
+
 		bool Player::RayCastApprox(spades::Vector3 start, spades::Vector3 dir) {
 			Vector3 diff = position - start;
 
@@ -653,6 +831,9 @@ namespace spades {
 					// might hit water surface.
 				}
 
+				if (IsBuilder() && !hitPlayer)
+					return;
+
 				if (mapResult.hit && GetHorizontalLength(mapResult.hitPos - muzzle) < 128.f &&
 				    (!hitPlayer ||
 				     GetHorizontalLength(mapResult.hitPos - muzzle) < hitPlayerDistance)) {
@@ -758,6 +939,9 @@ namespace spades {
 
 				// one pellet done
 			}
+
+			if (IsBuilder())
+				return;
 
 			// do hit test debugging
 			auto *debugger = world.GetHitTestDebugger();
@@ -1247,6 +1431,61 @@ namespace spades {
 			}
 		}
 
+		void Player::MoveBuilder(float fsynctics) {
+			float f = fsynctics;
+			if (input.sneak)
+				f *= sneakFlySpeed;
+			else if (input.sprint)
+				f *= sprintFlySpeed;
+			else
+				f *= walkFlySpeed;
+			if ((input.moveForward || input.moveBackward) && (input.moveRight || input.moveLeft) && (input.crouch || input.jump))
+				f /= sqrtf(2.f);
+
+			Vector3 front = GetFront();
+			Vector3 down = {0, 0, 1};
+			Vector3 right = -Vector3::Cross(down, front).Normalize();
+			Vector3 down2 = Vector3::Cross(right, front).Normalize();
+
+			front *= f;
+			right *= f;
+			down2 *= f;
+
+			if (input.moveForward) {
+				velocity += front;
+			} else if (input.moveBackward) {
+				velocity -= front;
+			}
+			if (input.moveLeft) {
+				velocity += right;
+			} else if (input.moveRight) {
+				velocity -= right;
+			}
+			if (input.crouch) {
+				velocity += down2;
+			} else if (input.jump) {
+				velocity -= down2;
+			}
+			f = fsynctics * 4.f + 1.f;
+			velocity.x /= f;
+			velocity.y /= f;
+			velocity.z /= f;
+
+			f = fsynctics * 32.f;
+			float nx = f * velocity.x + position.x;
+			float ny = f * velocity.y + position.y;
+			float nz = f * velocity.z + position.z;
+
+			nx += 512.f * (nx < 0.f) - 512.f * (nx > 513.f);
+			position.x = nx;
+			ny += 512.f * (ny < 0.f) - 512.f * (ny > 513.f);
+			position.y = ny;
+			if (nz < 62.5f)
+				position.z = nz;
+
+			RepositionPlayer(position);
+		}
+
 		bool Player::TryUncrouch() {
 			SPADES_MARK_FUNCTION();
 
@@ -1341,7 +1580,7 @@ namespace spades {
 			this->respawnTime = world.GetTime() + respawnTime;
 		}
 
-		bool Player::IsAlive() { return health > 0; }
+		bool Player::IsAlive() { return health > 0 || IsBuilder(); }
 
 		std::string Player::GetName() { return world.GetPlayerPersistent(GetId()).name; }
 

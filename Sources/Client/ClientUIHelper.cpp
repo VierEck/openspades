@@ -54,5 +54,63 @@ namespace spades {
 				return;
 			ui->AlertError(text);
 		}
+
+		void ClientUIHelper::MapEditorSaveMap() {
+			if (!ui)
+				return;
+			ui->MapEditorSaveMap();
+		}
+
+		void ClientUIHelper::EditCurrentColor() {
+			if (!ui)
+				return;
+			ui->EditCurrentColor();
+		}
+		void ClientUIHelper::ChangePalettePage(int next) {
+			if (!ui)
+				return;
+			ui->ChangePalettePage(next);
+		}
+		void ClientUIHelper::SaveCurrentPalettePage() {
+			if (!ui)
+				return;
+			ui->SaveCurrentPalettePage();
+		}
+		void ClientUIHelper::LoadCurrentPalettePage() {
+			if (!ui)
+				return;
+			ui->LoadCurrentPalettePage();
+		}
+		void ClientUIHelper::NewPalettePage() {
+			if (!ui)
+				return;
+			ui->NewPalettePage();
+		}
+		void ClientUIHelper::DeleteCurrentPalettePage() {
+			if (!ui)
+				return;
+			ui->DeleteCurrentPalettePage();
+		}
+		void ClientUIHelper::PaletteKeyInput(const std::string &key) {
+			if (!ui)
+				return;
+			ui->PaletteKeyInput(key);
+		}
+
+		void ClientUIHelper::requestSaveTxt(const std::string &txt) {
+			if (!ui)
+				return;
+			ui->requestSaveTxt(txt);
+		}
+		void ClientUIHelper::requestLoadTxt() {
+			if (!ui)
+				return;
+			ui->requestLoadTxt();
+		}
+		void ClientUIHelper::requestGenTxt() {
+			if (!ui)
+				return;
+			ui->requestGenTxt();
+		}
 	} // namespace client
 } // namespace spades

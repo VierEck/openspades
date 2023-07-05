@@ -67,6 +67,7 @@ namespace spades {
 			IWorldListener *listener = nullptr;
 
 			std::unique_ptr<IGameMode> mode;
+			std::unique_ptr<IGameMode> modeInactive;
 
 			Handle<GameMap> map;
 			std::unique_ptr<GameMapWrapper> mapWrapper;
@@ -92,6 +93,8 @@ namespace spades {
 
 			void ApplyBlockActions();
 
+			bool isMapEditor = false;
+
 		public:
 			World(const std::shared_ptr<GameProperties> &);
 			~World();
@@ -116,6 +119,13 @@ namespace spades {
 			void UnmarkBlockForRegeneration(const IntVector3 &blockLocation);
 
 			std::vector<IntVector3> CubeLine(IntVector3 v1, IntVector3 v2, int maxLength);
+			std::vector<IntVector3> CubeBox(IntVector3 v1, IntVector3 v2);
+			std::vector<IntVector3> CubeBall(IntVector3 v1, IntVector3 v2);
+			std::vector<IntVector3> CubeCylinder(IntVector3 v1, IntVector3 v2, VolumeType axis);
+
+			std::vector<IntVector3> GetCubeVolume(IntVector3 v1, IntVector3 v2, VolumeType vol);
+
+			std::vector<uint8_t> GetColorVolume(std::vector<IntVector3> &);
 
 			stmp::optional<Player &> GetPlayer(unsigned int i) {
 				SPAssert(i < players.size());
@@ -171,6 +181,10 @@ namespace spades {
 
 			void SetListener(IWorldListener *newListener) { listener = newListener; }
 			IWorldListener *GetListener() { return listener; }
+
+			bool IsMapEditor() { return isMapEditor; }
+			void SetIsMapEditor(bool);
+			void SwitchMode();
 		};
 	} // namespace client
 } // namespace spades

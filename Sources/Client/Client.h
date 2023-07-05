@@ -26,6 +26,7 @@
 #include <string>
 #include <tuple>
 
+#include "GameProperties.h"
 #include "ClientCameraMode.h"
 #include "ILocalEntity.h"
 #include "IRenderer.h"
@@ -67,6 +68,8 @@ namespace spades {
 		class ClientPlayer;
 
 		class ClientUI;
+
+		struct GameProperties;
 
 		class Client : public IWorldListener, public gui::View {
 			friend class ScoreboardView;
@@ -355,6 +358,8 @@ namespace spades {
 			void UpdateLocalPlayer(float dt);
 			void UpdateAutoFocus(float dt);
 			float RayCastForAutoFocus(const Vector3 &origin, const Vector3 &direction);
+			void UpdateLocalBuilder(float dt);
+			void ShowBuilderBlockCountNotice();
 
 			void Draw2D();
 
@@ -376,6 +381,11 @@ namespace spades {
 			 * Called when the local player is dead or a spectator.
 			 */
 			void DrawSpectateHUD();
+			void DrawBuilderHUD();
+			void DrawBuilderIcons();
+			void DrawBuilderCursor();
+			void DrawBuilderDragCursor();
+			void DrawMapObjectPosition();
 
 			void DrawHottrackedPlayerName();
 			void DrawHurtScreenEffect();
@@ -392,6 +402,7 @@ namespace spades {
 			void AddDebugObjectToScene(const OBB3 &, const Vector4 &col = MakeVector4(1, 1, 1, 1));
 			void DrawCTFObjects();
 			void DrawTCObjects();
+			void DrawBuilderBlockCursor();
 
 			SceneDefinition CreateSceneDefinition();
 
@@ -399,7 +410,7 @@ namespace spades {
 			void TakeScreenShot(bool sceneOnly);
 
 			std::string MapShotPath();
-			void TakeMapShot();
+			void TakeMapShot(bool mapEditor = false);
 
 			void NetLog(const char *format, ...);
 
@@ -425,12 +436,23 @@ namespace spades {
 			} demo;
 			void DemoUiMouseInput(float x, float y);
 
+			bool isMapEditor, isLocalMapEditor;
+			std::string mapFileName, canvasFileName;
+			std::shared_ptr<GameProperties> makeproperties;
+			bool MapEditorKeyEvent(const std::string &name, bool down);
+
+			void LoadLocalMapEditor();
+			std::string GenMeta();
+			std::string mapTxtFileName;
+
 		protected:
 			~Client();
 
 		public:
-			Client(Handle<IRenderer>, Handle<IAudioDevice>, const ServerAddress &host,
-			       Handle<FontManager>, bool replay, std::string demoName);
+			Client(
+				Handle<IRenderer>, Handle<IAudioDevice>, const ServerAddress &host,
+				Handle<FontManager>, int mode, std::string map_demo, std::string canvas
+			);
 
 			void RunFrame(float dt) override;
 			void RunFrameLate(float dt) override;
@@ -480,6 +502,7 @@ namespace spades {
 			void PlayerLeaving(Player &);
 			void PlayerJoinedTeam(Player &);
 			void PlayerSpawned(Player &);
+			void PlayerDigBlockSound(Player &);
 
 			// IWorldListener begin
 			void PlayerObjectSet(int) override;
@@ -515,10 +538,18 @@ namespace spades {
 			void LocalPlayerCreatedLineBlock(IntVector3, IntVector3) override;
 			void LocalPlayerHurt(HurtType type, bool sourceGiven, Vector3 source) override;
 			void LocalPlayerBuildError(BuildFailureReason reason) override;
+			void LocalPlayerCreatedVolume(IntVector3, IntVector3, VolumeType, VolumeActionType) override;
 			// IWorldListener end
 
 			float GetClientTime() { return time; }
 			float GetClientTimeMultiplied() { return time * demo.speed; }
+
+			void SetIsMapEditor(bool b);
+			bool IsLocalMapEditor() { return isLocalMapEditor; }
+
+			void LoadMapTxt(std::string txtFile);
+			void SaveMapTxt(const std::string &txt);
+			void GenMaptxt();
 		};
 	} // namespace client
 } // namespace spades

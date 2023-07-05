@@ -40,6 +40,8 @@
 
 #include "NetClient.h"
 
+#include "IGameMode.h"
+
 using namespace std;
 
 DEFINE_SPADES_SETTING(cg_mouseSensitivity, "1");
@@ -101,6 +103,28 @@ DEFINE_SPADES_SETTING(cg_keySpeedNormalize, "Keypad 1");
 DEFINE_SPADES_SETTING(cg_SpeedChangeValue, "0.2");
 DEFINE_SPADES_SETTING(cg_KeyProgressUi, "MiddleMouseButton");
 
+DEFINE_SPADES_SETTING(cg_UIHotKeyLayout, "qwerty");
+DEFINE_SPADES_SETTING(cg_keyMapTxt, "J");
+DEFINE_SPADES_SETTING(cg_keyEditColor, "G");
+
+DEFINE_SPADES_SETTING(cg_keyVolumeSingle, "1");
+DEFINE_SPADES_SETTING(cg_keyVolumeLine, "2");
+DEFINE_SPADES_SETTING(cg_keyVolumeBox, "3");
+DEFINE_SPADES_SETTING(cg_keyVolumeBall, "4");
+DEFINE_SPADES_SETTING(cg_keyVolumeCylinder, "5");
+
+DEFINE_SPADES_SETTING(cg_keyToolPaint, "F");
+DEFINE_SPADES_SETTING(cg_keyToolBrush, "R");
+DEFINE_SPADES_SETTING(cg_keyToolCopy, "C");
+DEFINE_SPADES_SETTING(cg_keyToolMapObject, "X");
+
+DEFINE_SPADES_SETTING(cg_keyScaleBuildDistance, "MiddleMouseButton");
+SPADES_SETTING(cg_MaxBuildDistance);
+
+DEFINE_SPADES_SETTING(cg_FlySpeedWalk, "2");
+DEFINE_SPADES_SETTING(cg_FlySpeedSprint, "10");
+DEFINE_SPADES_SETTING(cg_FlySpeedSneak, "0.5");
+
 namespace spades {
 	namespace client {
 
@@ -131,6 +155,8 @@ namespace spades {
 
 			if (scriptedUI->NeedsInput()) {
 				scriptedUI->MouseEvent(x, y);
+				if (paletteView->currentPalettePage >= 0)
+					paletteView->CompareCurrentColor();
 				return;
 			}
 
@@ -389,8 +415,19 @@ namespace spades {
 						scriptedUI->setIgnored("");
 					}
 				}
-				if (!(bool)cg_demoRecord && net->IsDemoRecording()) {
+				if (!(bool)cg_demoRecord && net->IsDemoRecording())
 					net->StopDemo();
+
+				if (isMapEditor) {
+					Player &p = world->GetLocalPlayer().value();
+					if (p.walkFlySpeed != (float)cg_FlySpeedWalk ||
+						p.sprintFlySpeed != (float)cg_FlySpeedSprint ||
+						p.sneakFlySpeed != (float)cg_FlySpeedSneak) {
+
+						p.walkFlySpeed = (float)cg_FlySpeedWalk;
+						p.sprintFlySpeed = (float)cg_FlySpeedSprint;
+						p.sneakFlySpeed = (float)cg_FlySpeedSneak;
+					}
 				}
 				return;
 			}
@@ -547,6 +584,9 @@ namespace spades {
 
 				if (world->GetLocalPlayer()) {
 					Player &p = world->GetLocalPlayer().value();
+
+					if (MapEditorKeyEvent(name, down))
+						return;
 
 					if (p.IsAlive() && p.GetTool() == Player::ToolBlock && down) {
 						if (paletteView->KeyInput(name)) {
@@ -711,6 +751,10 @@ namespace spades {
 						scriptedUI->setIgnored(name);
 					} else if (CheckKey(cg_keyCaptureColor, name) && down) {
 						CaptureColor();
+					} else if (CheckKey(cg_keyEditColor, name) && down) {
+						scriptedUI->EnterPaletteWindow();
+						Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
+						audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
 					} else if (CheckKey(cg_keyChangeMapScale, name) && down) {
 						mapView->SwitchScale();
 						Handle<IAudioChunk> chunk =
@@ -804,6 +848,120 @@ namespace spades {
 					// limbo
 				}
 			}
+		}
+
+		bool Client::MapEditorKeyEvent(const std::string &name, bool down) {
+			SPADES_MARK_FUNCTION();
+			Player &p = world->GetLocalPlayer().value();
+			if (!p.IsBuilder())
+				return false;
+
+			bool ret = false;
+
+			if (CheckKey(cg_keyMapTxt, name) && down) {
+				scriptedUI->EnterMapTxtWindow();
+				scriptedUI->setIgnored(name);
+				ret = true;
+			}
+
+			if (CheckKey(cg_keyVolumeSingle, name) && down) {
+				p.SetVolumeType(VolumeSingle);
+				ret = true;
+			}
+			if (CheckKey(cg_keyVolumeLine, name) && down) {
+				p.SetVolumeType(VolumeLine);
+				ret = true;
+			}
+			if (CheckKey(cg_keyVolumeBox, name) && down) {
+				p.SetVolumeType(VolumeBox);
+				ret = true;
+			}
+			if (CheckKey(cg_keyVolumeBall, name) && down) {
+				p.SetVolumeType(VolumeBall);
+				ret = true;
+			}
+			if (CheckKey(cg_keyVolumeCylinder, name) && down) {
+				p.SetVolumeType(VolumeCylinderX);
+				ret = true;
+			}
+
+			if (CheckKey(cg_keyToolPaint, name) && down) {
+				p.SetMapTool(ToolPainting);
+				ret = true;
+			}
+			if (CheckKey(cg_keyToolBrush, name)) {
+				if (down)
+					p.SetMapTool(ToolBrushing);
+				if (p.GetCurrentMapTool() == ToolBrushing)
+					p.SetEditBrushSize(down);
+				ret = true;
+			}
+			if (CheckKey(cg_keyToolCopy, name) && down) {
+				p.SetMapTool(ToolCopying);
+				ret = true;
+			}
+			if (CheckKey(cg_keyToolMapObject, name) && down) {
+				p.SetMapTool(ToolMapObject);
+				ret = true;
+			}
+
+			if (CheckKey(cg_keyScaleBuildDistance, name) && down) {
+				p.SetBuildAtMaxDistance(!p.IsBuildAtMaxDistance());
+				ret = true;
+			}
+			if (down) {
+				if (name == ("WheelDown")) {
+					if (p.GetEditBrushSize()) {
+						p.SetBrushSize(p.GetBrushSize() - 1);
+					} else if (p.GetBuildDistance() > 3.0f) {
+						p.SetBuildDistance(p.GetBuildDistance() - 1);
+					}
+					ret = true;
+				} else if (name == ("WheelUp")) {
+					if (p.GetEditBrushSize()) {
+						p.SetBrushSize(p.GetBrushSize() + 1);
+					} else if (p.GetBuildDistance() <  (float)cg_MaxBuildDistance && p.GetBuildDistance() < 1088) {
+						p.SetBuildDistance(p.GetBuildDistance() + 1);
+					}
+					ret = true;
+				}
+
+				if (p.GetCurrentMapTool() == ToolMapObject) {
+					if (name == "Up") {
+						ret = true;
+						if (p.GetCurrentMapObjectType() + 1 < MAPOBJECTTYPEMAX) {
+							p.SetMapObjectType(MapObjectType(p.GetCurrentMapObjectType() + 1));
+
+							stmp::optional<IGameMode &> mode = GetWorld()->GetMode();
+							if (mode->ModeType() == IGameMode::m_CTF && p.GetCurrentMapObjectType() == ObjTentNeutral) {
+								p.SetMapObjectType(MapObjectType(p.GetCurrentMapObjectType() + 1));
+							}
+							if (mode->ModeType() == IGameMode::m_TC && p.GetCurrentMapObjectType() == ObjIntelTeam1) {
+								p.SetMapObjectType(MapObjectType(p.GetCurrentMapObjectType() + (ObjIntelTeam2 - ObjIntelTeam1 + 1)));
+							}
+						}
+					} else if (name == "Down") {
+						ret = true;
+						if (p.GetCurrentMapObjectType() - ObjTentTeam1 > 0) {
+							p.SetMapObjectType(MapObjectType(p.GetCurrentMapObjectType() - 1));
+
+							stmp::optional<IGameMode &> mode = GetWorld()->GetMode();
+							if (mode->ModeType() == IGameMode::m_CTF && p.GetCurrentMapObjectType() == ObjTentNeutral) {
+								p.SetMapObjectType(MapObjectType(p.GetCurrentMapObjectType() - 1));
+							}
+							if (mode->ModeType() == IGameMode::m_TC && p.GetCurrentMapObjectType() == ObjIntelTeam2) {
+								p.SetMapObjectType(MapObjectType(p.GetCurrentMapObjectType() - (ObjIntelTeam2 - ObjIntelTeam1 + 1)));
+							}
+						}
+					}
+				}
+			}
+
+			if (ret) {
+				Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
+				audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+			}
+			return ret;
 		}
 	} // namespace client
 } // namespace spades

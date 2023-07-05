@@ -48,6 +48,9 @@
 
 #include "NetClient.h"
 
+#include "IGameMode.h"
+#include "TCGameMode.h"
+
 DEFINE_SPADES_SETTING(cg_ragdoll, "1");
 SPADES_SETTING(cg_blood);
 DEFINE_SPADES_SETTING(cg_ejectBrass, "1");
@@ -178,7 +181,11 @@ namespace spades {
 				}
 
 				if (player->GetTeamId() >= 2) {
-					UpdateLocalSpectator(dt);
+					if (!player->IsBuilder()) {
+						UpdateLocalSpectator(dt);
+					} else {
+						UpdateLocalBuilder(dt);
+					}
 				} else {
 					UpdateLocalPlayer(dt);
 				}
@@ -552,6 +559,91 @@ namespace spades {
 			}
 
 			inp.jump = false;
+		}
+
+		/** Handles movement of local player in MapEditor. */
+		void Client::UpdateLocalBuilder(float dt) {
+			SPADES_MARK_FUNCTION();
+			Player &player = GetWorld()->GetLocalPlayer().value();
+			player.SetBuilderInput(playerInput, weapInput);
+			ShowBuilderBlockCountNotice();
+
+			if (!isLocalMapEditor) {
+				Vector3 curFront = player.GetFront();
+				if (curFront.x != lastFront.x || curFront.y != lastFront.y ||
+					curFront.z != lastFront.z) {
+					lastFront = curFront;
+					net->SendOrientation(curFront);
+				}
+				if (time > lastPosSentTime + 0.2f) {
+					net->SendPosition();
+					lastPosSentTime = time;
+				}
+			}
+		}
+
+		void Client::ShowBuilderBlockCountNotice() {
+			Player &player = GetWorld()->GetLocalPlayer().value();
+			if (player.GetTool() == Player::ToolBlock && player.IsBlockCursorDragging()) {
+				if (player.IsBlockCursorActive()) {
+					std::string msg;
+					switch (player.GetCurrentVolumeType()) {
+						case VolumeSingle: break;
+						case VolumeLine: {
+							IntVector3 diagonal = player.GetBlockCursorDragPos() - player.GetBlockCursorPos();
+							diagonal.x *= 1 - 2 * (diagonal.x < 0);
+							diagonal.y *= 1 - 2 * (diagonal.y < 0);
+							diagonal.z *= 1 - 2 * (diagonal.z < 0);
+
+							diagonal.x += 1;
+							int blockCount = diagonal.x + diagonal.y + diagonal.z;
+							msg = _TrN("Client", "{0} block", "{0} blocks", blockCount);
+						} break;
+						case VolumeBox: {
+							IntVector3 diagonal = player.GetBlockCursorDragPos() - player.GetBlockCursorPos();
+							diagonal.x += 1 - 2 * (diagonal.x < 0);
+							diagonal.y += 1 - 2 * (diagonal.y < 0);
+							diagonal.z += 1 - 2 * (diagonal.z < 0);
+
+							int blockCount = diagonal.x * diagonal.y * diagonal.z;
+							blockCount *= 1 - 2 * (blockCount < 0);
+							msg = _TrN("Client", "{0} block", "{0} blocks", blockCount);
+						} break;
+						case VolumeBall: {
+							IntVector3 diagonal = player.GetBlockCursorDragPos() - player.GetBlockCursorPos();
+							float x = diagonal.x + 1.f - 2.f * (diagonal.x < 0);
+							float y = diagonal.y + 1.f - 2.f * (diagonal.y < 0);
+							float z = diagonal.z + 1.f - 2.f * (diagonal.z < 0);
+							x *= 0.5f;
+							y *= 0.5f;
+							z *= 0.5f;
+							float blockCount = x * y * z * 3.f;
+							blockCount *= 1.f - 2.f * (blockCount < 0);
+							//to do. fix count to be accurate
+							msg = _TrN("Client", "{0} block", "{0} ~blocks (not accurate)", (int)blockCount);
+						} break;
+						case VolumeCylinderX:
+						case VolumeCylinderY:
+						case VolumeCylinderZ: {
+							IntVector3 diagonal = player.GetBlockCursorDragPos() - player.GetBlockCursorPos();
+							float x = diagonal.x + 1.f - 2.f * (diagonal.x < 0);
+							float y = diagonal.y + 1.f - 2.f * (diagonal.y < 0);
+							float z = diagonal.z + 1.f - 2.f * (diagonal.z < 0);
+							float blockCount = x * y * z * 3.14f;
+							blockCount *= 1.f - 2.f * (blockCount < 0);
+							//to do. fix count to be accurate
+							msg = _TrN("Client", "{0} block", "{0} ~blocks (not accurate)", (int)blockCount);
+						} break;
+						break;
+						default: return;
+					}
+					ShowAlert(msg, AlertType::Notice, 0.f, true);
+				} else {
+					// invalid
+					auto msg = _Tr("Client", "-- blocks");
+					ShowAlert(msg, AlertType::Warning, 0.f, true);
+				}
+			}
 		}
 
 #pragma mark - IWorldListener Handlers
@@ -1013,7 +1105,11 @@ namespace spades {
 			}
 
 			if (&by == world->GetLocalPlayer()) {
-				net->SendHit(hurtPlayer.GetId(), type);
+				if (!world->GetLocalPlayer()->IsBuilder()) {
+					net->SendHit(hurtPlayer.GetId(), type);
+				} else {
+					net->SendMapObject(hurtPlayer.GetId(), DESTROY_SPAWN);
+				}
 
 				if (type == HitTypeHead && !hitScanState.hasPlayedHeadshotSound) {
 					Handle<IAudioChunk> c =
@@ -1275,6 +1371,103 @@ namespace spades {
 		void Client::LocalPlayerCreatedLineBlock(spades::IntVector3 v1, spades::IntVector3 v2) {
 			SPADES_MARK_FUNCTION();
 			net->SendBlockLine(v1, v2);
+		}
+		void Client::LocalPlayerCreatedVolume(spades::IntVector3 v1, spades::IntVector3 v2, VolumeType vol, VolumeActionType volAct) {
+			SPADES_MARK_FUNCTION();
+			stmp::optional<Player &> p = world->GetLocalPlayer();
+
+			if (p->GetCurrentMapTool() == ToolMapObject) {
+				int type, state;
+				Vector3 pos;
+				pos.x = v1.x;
+				pos.y = v1.y;
+				pos.z = v1.z;
+
+				if (p->GetCurrentMapObjectType() == ObjSpawnTeam1 || p->GetCurrentMapObjectType() == ObjSpawnTeam2) {
+					if (volAct == VolumeActionDestroy) {
+						p->ShootMapObject();
+						return;
+					}
+
+					if (p->GetCurrentMapObjectType() == ObjSpawnTeam1) {
+						state = SPAWN_TEAM_1;
+					} else {
+						state = SPAWN_TEAM_2;
+					}
+
+					type = 40;
+					for (int i = 0; i < world->GetNumPlayerSlots(); i++) {
+						auto maybePlayer = world->GetPlayer(i);
+						if (maybePlayer && type == i) {
+							type = i + 1;
+						}
+					}
+					pos.z--;
+					pos.x += 0.5f;
+					pos.y += 0.5f;
+
+					net->SendMapObject(type, state, pos);
+					return;
+				}
+
+				pos.z++;
+
+				stmp::optional<IGameMode &> mode = GetWorld()->GetMode();
+				if (mode && mode->ModeType() == IGameMode::m_CTF) {
+					state = 0;
+					switch (p->GetCurrentMapObjectType()) {
+						case ObjTentTeam1: {
+							type = BLUE_BASE;
+						} break;
+						case ObjTentTeam2: {
+							type = GREEN_BASE;
+						} break;
+						case ObjIntelTeam1: {
+							type = BLUE_FLAG;
+						} break;
+						case ObjIntelTeam2: {
+							type = GREEN_FLAG;
+						} break;
+						default: return;
+					}
+				} else if (mode && mode->ModeType() == IGameMode::m_TC) {
+					auto &tc = dynamic_cast<TCGameMode &>(mode.value());
+					if (volAct == VolumeActionDestroy) {
+						for (int i = 0; i < tc.GetNumTerritories(); i++) {
+							auto ter = tc.GetTerritory(i);
+							if ((pos - ter.pos).GetLength() <= 3.f) {
+
+								net->SendMapObject(i, 255);
+								return;
+							} 
+						}
+						return;
+					} else if (p->GetCurrentMapObjectType() <= ObjTentNeutral) {
+						state = p->GetCurrentMapObjectType() - ObjTentTeam1;
+					}
+					type = tc.GetNumTerritories();
+				}
+				net->SendMapObject(type, state, pos);
+
+				return;
+			}
+
+			if (volAct == VolumeActionTextureBuild) {
+				if (p->TextureColors.size() == 0) {
+					p->savedTexturePkt = std::make_tuple(v1, v2, vol);
+					std::vector<IntVector3> cells = world->GetCubeVolume(v1, v2, vol);
+					p->TextureColors = world->GetColorVolume(cells);
+					return;
+				}
+				IntVector3 move = v1 - std::get<0>(p->savedTexturePkt);
+				net->SendBlockVolume(
+					std::get<0>(p->savedTexturePkt) + move, std::get<1>(p->savedTexturePkt) + move,
+					std::get<2>(p->savedTexturePkt), volAct, p->TextureColors
+				);
+				return;
+			}
+
+			net->SendBlockVolume(v1, v2, vol, volAct);
 		}
 
 		void Client::LocalPlayerHurt(HurtType type, bool sourceGiven, spades::Vector3 source) {

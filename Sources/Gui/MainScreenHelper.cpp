@@ -59,6 +59,7 @@ namespace spades {
 	public:
 		static ServerItem *Create(Json::Value &val);
 		static ServerItem *CreateDemoItem(std::string fileName);
+		static ServerItem *MakeMapItem(std::string file_name, bool txtExtension);
 
 		inline const std::string &GetName() const { return mName; }
 		inline const std::string &GetAddress() const { return mIp; }
@@ -145,6 +146,21 @@ namespace spades {
 		return item;
 	}
 
+	ServerItem *ServerItem::MakeMapItem(std::string fileName, bool txtExtension) {
+		ServerItem *item = NULL;
+		std::string name, ip, map = "", gameMode = "", country = "", version = "";
+		int ping = 0, players = 0, maxPlayers = 1;
+
+		name = fileName;
+		ip = "aos://16777343:32887";
+		if (txtExtension) {
+			map = fileName.substr(0, fileName.size() - 4);
+			map += ".txt";
+		}
+
+		item = new ServerItem(name, ip, map, gameMode, country, version, ping, players, maxPlayers);
+		return item;
+	}
 
 	namespace gui {
 		constexpr auto FAVORITE_PATH = "/favorite_servers.json";
@@ -196,14 +212,59 @@ namespace spades {
 				ReturnResult(std::move(resp));
 			}
 
+			void GetMapList(bool canvas) {
+				std::vector<std::string> FileNames;
+				if (canvas) {
+					FileNames = FileManager::EnumFiles("Maps/Canvas");
+				} else {
+					FileNames = FileManager::EnumFiles("MapEditor/Maps");
+				}
+
+				std::vector<std::string> txtFiles;
+				std::unique_ptr<MainScreenServerList> resp{new MainScreenServerList()};
+				for (std::string file : FileNames) {
+					if (file.size() > 4 && file.substr(file.size() - 4, 4) == ".txt" && !canvas) {
+						txtFiles.push_back(file);
+						continue;
+					}
+					if (file.size() < 4 || file.substr(file.size() - 4, 4) != ".vxl")
+						continue;
+
+					bool txtExist = false;
+					for (std::string txt : txtFiles) {
+						if (txt.substr(0, txt.size() - 4) == file.substr(0, file.size() - 4)) {
+							txtExist = true;
+						}
+					}
+
+					std::unique_ptr<ServerItem> srv{ServerItem::MakeMapItem(file, txtExist)};
+
+					if (srv) {
+						resp->list.emplace_back(new MainScreenServerItem(srv.get(), owner->favorites.count(srv->GetAddress()) >= 1),false);
+					}
+				}
+				ReturnResult(std::move(resp));
+			}
+
 		public:
-			ServerListQuery(MainScreenHelper *owner, bool dL) : owner{owner} { demoList = dL; }
-			bool demoList;
+			int Mode;
+			bool Canvas;
+			ServerListQuery(MainScreenHelper *owner, int mode, bool canvas) : owner{owner} {
+				Mode = mode;
+				Canvas = canvas;
+			}
 
 			void Run() override {
 				try {
-					if (demoList) {
+					if (Mode == isDemo) {
 						GetDemoList();
+						return;
+					} else if (Mode == isMap) {
+						if (Canvas) {
+							GetMapList(true);
+						} else {
+							GetMapList(false);
+						}
 						return;
 					}
 					std::unique_ptr<CURL, CURLEasyDeleter> cHandle{curl_easy_init()};
@@ -324,13 +385,13 @@ namespace spades {
 			return false;
 		}
 
-		void MainScreenHelper::StartQuery(bool dL) {
+		void MainScreenHelper::StartQuery(int mode, bool canvas) {
 			if (query) {
 				// There already is an ongoing query
 				return;
 			}
 
-			query = new ServerListQuery(this, dL);
+			query = new ServerListQuery(this, mode, canvas);
 			query->Start();
 		}
 
@@ -438,11 +499,16 @@ namespace spades {
 			return arr;
 		}
 
-		std::string MainScreenHelper::ConnectServer(std::string hostname, int protocolVersion, bool replay, std::string demoName) {
+		std::string MainScreenHelper::ConnectServer(
+			std::string hostname, int protocolVersion, int mode, std::string map_demo, std::string canvasFile
+		) {
 			if (mainScreen == NULL) {
 				return "mainScreen == NULL";
 			}
-			return mainScreen->Connect(ServerAddress(hostname, protocolVersion == 3 ? ProtocolVersion::v075 : ProtocolVersion::v076), replay, demoName);
+			return mainScreen->Connect(
+				ServerAddress(hostname, protocolVersion == 3 ? ProtocolVersion::v075 : ProtocolVersion::v076),
+				mode, map_demo, canvasFile
+			);
 		}
 
 		std::string MainScreenHelper::GetServerListQueryMessage() {

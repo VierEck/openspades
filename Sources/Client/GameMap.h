@@ -89,6 +89,8 @@ namespace spades {
 			}
 
 			inline bool IsSolidWrapped(int x, int y, int z) const {
+				if (isMapEditor && (z < 0 || z > Depth() || x < 0 || x > (Width() - 1) || y < 0 || y > (Height() - 1)))
+					return true;
 				if (z < 0)
 					return false;
 				if (z >= Depth())
@@ -96,6 +98,15 @@ namespace spades {
 				return ((solidMap[x & (Width() - 1)][y & (Height() - 1)] >> (uint64_t)z) & 1ULL) !=
 				       0;
 			}
+
+			inline bool IsValidMapCoord(const int x, const int y, const int z) const {
+				return x >= 0 && y >= 0 && z >= 0 && x < Width() && y < Height() && z < Depth();
+			}
+			inline bool IsValidBuildCoord(const IntVector3 v) const {
+				return IsValidMapCoord(v.x, v.y, v.z) && 0 < v.z < DefaultDepth;
+			}
+
+			void SetIsMapEditor(bool b) { isMapEditor = b; }
 
 			inline uint32_t GetColorWrapped(int x, int y, int z) const {
 				return colorMap[x & (Width() - 1)][y & (Height() - 1)][z & (Depth() - 1)];
@@ -163,6 +174,7 @@ namespace spades {
 			std::mutex listenersMutex;
 
 			bool IsSurface(int x, int y, int z) const;
+			bool isMapEditor = false;
 		};
 	} // namespace client
 } // namespace spades

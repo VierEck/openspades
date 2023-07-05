@@ -327,5 +327,93 @@ namespace spades {
 			return !ignoreInput.empty() && EqualsIgnoringCase(ignoreInput, key);
 		}
 		void ClientUI::setIgnored(const std::string &key) { ignoreInput = key; }
+
+		void ClientUI::MapEditorSaveMap() { client->TakeMapShot(true);}
+
+		void ClientUI::EnterPaletteWindow() {
+			SPADES_MARK_FUNCTION();
+			if (!ui) {
+				return;
+			}
+
+			ScopedPrivilegeEscalation privilege;
+			static ScriptFunction func("ClientUI", "void EnterPaletteWindow()");
+			ScriptContextHandle c = func.Prepare();
+			c->SetObject(&*ui);
+			c.ExecuteChecked();
+		}
+		void ClientUI::EditCurrentColor() {
+			SPADES_MARK_FUNCTION();
+			client->paletteView->EditCurrentColor();
+		}
+		void ClientUI::ChangePalettePage(int next) {
+			SPADES_MARK_FUNCTION();
+			client->paletteView->ChangePalettePage(next);
+		}
+		void ClientUI::SaveCurrentPalettePage() {
+			SPADES_MARK_FUNCTION();
+			client->paletteView->SaveCurrentPalettePage();
+		}
+		void ClientUI::LoadCurrentPalettePage() {
+			SPADES_MARK_FUNCTION();
+			client->paletteView->LoadCurrentPalettePage();
+		}
+		void ClientUI::NewPalettePage() {
+			SPADES_MARK_FUNCTION();
+			client->paletteView->NewPalettePage();
+		}
+		void ClientUI::DeleteCurrentPalettePage() {
+			SPADES_MARK_FUNCTION();
+			client->paletteView->DeleteCurrentPalettePage();
+		}
+		void ClientUI::PaletteKeyInput(const std::string &key) {
+			SPADES_MARK_FUNCTION();
+			client->paletteView->KeyInput(key);
+			client->paletteView->UpdatePaletteWindow();
+		}
+
+		void ClientUI::EnterMapTxtWindow() {
+			SPADES_MARK_FUNCTION();
+			if (!ui) {
+				return;
+			}
+
+			ScopedPrivilegeEscalation privilege;
+			static ScriptFunction func("ClientUI", "void EnterMapTxtWindow()");
+			ScriptContextHandle c = func.Prepare();
+			c->SetObject(&*ui);
+			c.ExecuteChecked();
+		}
+		void ClientUI::LoadMapTxt(const std::string &txt) {
+			SPADES_MARK_FUNCTION();
+			if (!ui) {
+				return;
+			}
+
+			ScopedPrivilegeEscalation privilege;
+			static ScriptFunction func("ClientUI", "void LoadMapTxt(string)");
+			ScriptContextHandle c = func.Prepare();
+			std::string k = txt;
+			c->SetObject(&*ui);
+			c->SetArgObject(0, reinterpret_cast<void *>(&k));
+			c.ExecuteChecked();
+		}
+		void ClientUI::requestLoadTxt() {
+			SPADES_MARK_FUNCTION();
+			if (client->mapTxtFileName != "") {
+				client->LoadMapTxt(client->mapTxtFileName);
+			}
+		}
+		void ClientUI::requestSaveTxt(const std::string &txt) {
+			SPADES_MARK_FUNCTION();
+			client->SaveMapTxt(txt);
+		}
+		void ClientUI::requestGenTxt() {
+			SPADES_MARK_FUNCTION();
+			client->GenMaptxt();
+			if (client->mapTxtFileName != "") {
+				client->LoadMapTxt(client->mapTxtFileName);
+			}
+		}
 	} // namespace client
 } // namespace spades

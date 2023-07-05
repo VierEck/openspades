@@ -56,6 +56,8 @@ namespace spades {
 			keypadInput = KeypadInput();
 
 			toolRaiseState = .0f;
+
+			net->HandleMapEditorExtension();
 		}
 
 		void Client::JoinedGame() {
@@ -68,6 +70,8 @@ namespace spades {
 			followCameraState.enabled = false;
 			freeCameraState.position = MakeVector3(256, 256, 30);
 			freeCameraState.velocity = MakeVector3(0, 0, 0);
+
+			net->HandleMapEditorExtension();
 		}
 
 		void Client::PlayerCreatedBlock(Player &p) {
@@ -76,6 +80,15 @@ namespace spades {
 			if (!IsMuted()) {
 				Handle<IAudioChunk> c =
 				  audioDevice->RegisterSound("Sounds/Weapons/Block/Build.opus");
+				audioDevice->Play(c.GetPointerOrNull(), p.GetEye() + p.GetFront(), AudioParam());
+			}
+		}
+
+		void Client::PlayerDigBlockSound(Player &p) {
+			SPADES_MARK_FUNCTION();
+
+			if (!IsMuted()) {
+				Handle<IAudioChunk> c = audioDevice->RegisterSound("Sounds/Misc/BlockDestroy.opus");
 				audioDevice->Play(c.GetPointerOrNull(), p.GetEye() + p.GetFront(), AudioParam());
 			}
 		}

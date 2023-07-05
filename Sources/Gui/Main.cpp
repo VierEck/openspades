@@ -235,7 +235,7 @@ namespace spades {
 			spades::gui::View *CreateView(spades::client::IRenderer *renderer,
 			                              spades::client::IAudioDevice *audio) override {
 				auto fontManager = Handle<client::FontManager>::New(renderer);
-				auto innerView = Handle<client::Client>::New(renderer, audio, addr, fontManager, false, "");
+				auto innerView = Handle<client::Client>::New(renderer, audio, addr, fontManager, 0, "", "");
 				return new spades::gui::ConsoleScreen(renderer, audio, fontManager,
 													  std::move(innerView).Cast<gui::View>());
 			}

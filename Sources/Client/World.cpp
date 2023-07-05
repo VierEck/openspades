@@ -131,7 +131,27 @@ namespace spades {
 			}
 		}
 
-		void World::SetMode(std::unique_ptr<IGameMode> m) { mode = std::move(m); }
+		void World::SetMode(std::unique_ptr<IGameMode> m) {
+			if (isMapEditor && mode) {
+				//servers need to initially send two state data pkts.
+				if (mode->ModeType() != m->ModeType()) {
+					modeInactive = std::move(mode);
+				}
+			}
+			mode = std::move(m);
+		}
+
+		void World::SwitchMode() {
+			if (!mode || !modeInactive)
+				return;
+
+			std::swap(mode, modeInactive);
+		}
+
+		void World::SetIsMapEditor(bool b) {
+			isMapEditor = b;
+			map->SetIsMapEditor(b);
+		}
 
 		void World::MarkBlockForRegeneration(const IntVector3 &blockLocation) {
 			UnmarkBlockForRegeneration(blockLocation);
@@ -246,18 +266,20 @@ namespace spades {
 
 			cells = mapWrapper->RemoveBlocks(cells);
 
-			auto clusters = ClusterizeBlocks(cells);
-			std::vector<IntVector3> cells2;
+			if (!isMapEditor) {
+				auto clusters = ClusterizeBlocks(cells);
+				std::vector<IntVector3> cells2;
 
-			for (const auto &cluster : clusters) {
-				cells2.resize(cluster.size());
-				for (std::size_t i = 0; i < cluster.size(); i++) {
-					auto p = cluster[i];
-					cells2[i] = IntVector3(p.x, p.y, p.z);
-					map->Set(p.x, p.y, p.z, false, 0);
+				for (const auto &cluster : clusters) {
+					cells2.resize(cluster.size());
+					for (std::size_t i = 0; i < cluster.size(); i++) {
+						auto p = cluster[i];
+						cells2[i] = IntVector3(p.x, p.y, p.z);
+						map->Set(p.x, p.y, p.z, false, 0);
+					}
+					if (listener)
+						listener->BlocksFell(cells2);
 				}
-				if (listener)
-					listener->BlocksFell(cells2);
 			}
 
 			createdBlocks.clear();
@@ -273,7 +295,7 @@ namespace spades {
 		}
 		void World::DestroyBlock(std::vector<spades::IntVector3> &pos) {
 			std::vector<CellPos> cells;
-			bool allowToDestroyLand = pos.size() == 1;
+			bool allowToDestroyLand = pos.size() == 1 || isMapEditor;
 			for (size_t i = 0; i < pos.size(); i++) {
 				const IntVector3 &p = pos[i];
 				if (p.z >= (allowToDestroyLand ? 63 : 62) || p.z < 0 || p.x < 0 || p.y < 0 ||
@@ -361,24 +383,282 @@ namespace spades {
 
 				if ((dz <= dx) && (dz <= dy)) {
 					c.z += izi;
-					if (c.z < 0 || c.z >= MAXZDIM)
+					if ((c.z < 0 || c.z >= MAXZDIM) && !isMapEditor)
 						break;
 					dz += dzi;
 				} else {
 					if (dx < dy) {
 						c.x += ixi;
-						if ((unsigned long)c.x >= VSID)
+						if ((unsigned long)c.x >= VSID && !isMapEditor)
 							break;
 						dx += dxi;
 					} else {
 						c.y += iyi;
-						if ((unsigned long)c.y >= VSID)
+						if ((unsigned long)c.y >= VSID && !isMapEditor)
 							break;
 						dy += dyi;
 					}
 				}
 			}
 
+			return ret;
+		}
+		std::vector<IntVector3> World::CubeBox(IntVector3 v1, IntVector3 v2) {
+			SPADES_MARK_FUNCTION_DEBUG();
+
+			IntVector3 c = v1;
+			IntVector3 d = v2 - v1;
+			long ixi, iyi, izi, cx, cy;
+			std::vector<IntVector3> ret;
+
+			cx = c.x;
+			cy = c.y;
+
+			if (d.x < 0)
+				ixi = -1;
+			else
+				ixi = 1;
+			if (d.y < 0)
+				iyi = -1;
+			else
+				iyi = 1;
+			if (d.z < 0)
+				izi = -1;
+			else
+				izi = 1;
+
+			while (1) {
+				if (map->IsValidBuildCoord(c))
+					ret.push_back(c);
+
+				if (c.x == v2.x && c.y == v2.y && c.z == v2.z)
+					break;
+
+				if (c.x != v2.x) {
+					c.x += ixi;
+				} else if (c.y != v2.y) {
+					c.x = cx;
+					c.y += iyi;
+				} else if (c.z != v2.z) {
+					c.x = cx;
+					c.y = cy;
+					c.z += izi;
+				}
+			}
+
+			return ret;
+		}
+		std::vector<IntVector3> World::CubeBall(spades::IntVector3 v1, spades::IntVector3 v2) {
+			SPADES_MARK_FUNCTION_DEBUG();
+			IntVector3 c = v1;
+			std::vector<IntVector3> ret;
+			if (c == v2) {
+				if (map->IsValidBuildCoord(c))
+					ret.push_back(c);
+				return ret;
+			}
+
+			IntVector3 d = v2 - v1;
+			int x = d.x * (1 - 2 * (d.x < 0));
+			int y = d.y * (1 - 2 * (d.y < 0));
+			int z = d.z * (1 - 2 * (d.z < 0));
+			if (x < 3 && y < 3 ||
+				y < 3 && z < 3 ||
+				z < 3 && x < 3 ||
+				x < 3 && y < 3 && z < 3) {
+				return CubeBox(c, v2);
+			}
+			if (x < 3)
+				return CubeCylinder(c, v2, VolumeCylinderX);
+			if (y < 3)
+				return CubeCylinder(c, v2, VolumeCylinderY);
+			if (z < 3)
+				return CubeCylinder(c, v2, VolumeCylinderZ);
+
+
+			long ixi, iyi, izi, cx, cy;
+
+			cx = c.x;
+			cy = c.y;
+
+			if (d.x < 0)
+				ixi = -1;
+			else
+				ixi = 1;
+			if (d.y < 0)
+				iyi = -1;
+			else
+				iyi = 1;
+			if (d.z < 0)
+				izi = -1;
+			else
+				izi = 1;
+
+			float e = d.x * 0.5f;
+			float f = d.y * 0.5f;
+			float g = d.z * 0.5f;
+			Vector3 m = {c.x + e, c.y + f, c.z + g};
+			e *= e;
+			f *= f;
+			g *= g;
+
+			while (1) {
+				float checkEllipsoid =
+					(((float)c.x - m.x) * ((float)c.x - m.x)) / e +
+					(((float)c.y - m.y) * ((float)c.y - m.y)) / f +
+					(((float)c.z - m.z) * ((float)c.z - m.z)) / g;
+
+				if (map->IsValidBuildCoord(c) && checkEllipsoid <= 1.1f)
+					ret.push_back(c);
+
+				if (c == v2)
+					break;
+
+				if (c.x != v2.x) {
+					c.x += ixi;
+				} else if (c.y != v2.y) {
+					c.x = cx;
+					c.y += iyi;
+				} else if (c.z != v2.z) {
+					c.x = cx;
+					c.y = cy;
+					c.z += izi;
+				}
+			}
+
+			return ret;
+		}
+		std::vector<IntVector3> World::CubeCylinder(spades::IntVector3 v1, spades::IntVector3 v2, VolumeType axis) {
+			SPADES_MARK_FUNCTION_DEBUG();
+			IntVector3 c = v1;
+			std::vector<IntVector3> ret;
+			if (c == v2) {
+				if (map->IsValidBuildCoord(c))
+					ret.push_back(c);
+				return ret;
+			}
+
+			IntVector3 d = v2 - v1;
+			int x = d.x * (1 - 2 * (d.x < 0));
+			int y = d.y * (1 - 2 * (d.y < 0));
+			int z = d.z * (1 - 2 * (d.z < 0));
+			if (x < 3 && y < 3 ||
+				y < 3 && z < 3 ||
+				z < 3 && x < 3 ||
+				x < 3 && y < 3 && z < 3) {
+				return CubeBox(c, v2);
+			}
+
+			long ixi, iyi, izi, cx, cy;
+
+			cx = c.x;
+			cy = c.y;
+
+			if (d.x < 0)
+				ixi = -1;
+			else
+				ixi = 1;
+			if (d.y < 0)
+				iyi = -1;
+			else
+				iyi = 1;
+			if (d.z < 0)
+				izi = -1;
+			else
+				izi = 1;
+
+			float e = d.x * 0.5f;
+			float f = d.y * 0.5f;
+			float g = d.z * 0.5f;
+			Vector3 m = {c.x + e, c.y + f, c.z + g};
+			e *= e;
+			f *= f;
+			g *= g;
+
+			float checkEllipse;
+			while (1) {
+				switch (axis) {
+					case VolumeCylinderX: {
+						checkEllipse =
+							(((float)c.y - m.y) * ((float)c.y - m.y)) / f +
+							(((float)c.z - m.z) * ((float)c.z - m.z)) / g;
+					} break;
+					case VolumeCylinderY: {
+						checkEllipse =
+							(((float)c.x - m.x) * ((float)c.x - m.x)) / e +
+							(((float)c.z - m.z) * ((float)c.z - m.z)) / g;
+					}break;
+					case VolumeCylinderZ: {
+						checkEllipse =
+							(((float)c.x - m.x) * ((float)c.x - m.x)) / e +
+							(((float)c.y - m.y) * ((float)c.y - m.y)) / f;
+					}break;
+					default: return ret;
+				}
+
+				if (map->IsValidBuildCoord(c) && checkEllipse <= 1.1f)
+					ret.push_back(c);
+
+				if (c == v2)
+					break;
+
+				if (c.x != v2.x) {
+					c.x += ixi;
+				} else if (c.y != v2.y) {
+					c.x = cx;
+					c.y += iyi;
+				} else if (c.z != v2.z) {
+					c.x = cx;
+					c.y = cy;
+					c.z += izi;
+				}
+			}
+
+			return ret;
+		}
+
+		std::vector<IntVector3> World::GetCubeVolume(spades::IntVector3 v1, spades::IntVector3 v2, VolumeType vol) {
+			std::vector<IntVector3> cells;
+			switch (vol) {
+				case VolumeSingle:
+					cells.push_back(v1);
+					break;
+				case VolumeLine:
+					cells = CubeLine(v1, v2, 1088);
+					break;
+				case VolumeBox:
+					cells = CubeBox(v1, v2);
+					break;
+				case VolumeBall:
+					cells = CubeBall(v1, v2);
+					break;
+				case VolumeCylinderX:
+				case VolumeCylinderY:
+				case VolumeCylinderZ:
+					cells = CubeCylinder(v1, v2, vol);
+					break;
+				default: return cells;
+			}
+			return cells;
+		}
+
+		std::vector<uint8_t> World::GetColorVolume(std::vector<spades::IntVector3> &cells) {
+			SPADES_MARK_FUNCTION_DEBUG();
+			std::vector<uint8_t> ret;
+
+			for (auto c : cells) {
+				if (!map->IsValidBuildCoord(c))
+					continue;
+				if (map->IsSolid(c.x, c.y, c.z)) {
+					uint32_t col = map->GetColor(c.x, c.y, c.z);
+					ret.push_back((uint8_t)1);
+					ret.push_back((uint8_t)col);
+					ret.push_back((uint8_t)(col >> 8));
+					ret.push_back((uint8_t)(col >> 16));
+				} else {
+					ret.push_back((uint8_t)0);
+				}
+			}
 			return ret;
 		}
 

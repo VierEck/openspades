@@ -91,6 +91,7 @@ namespace spades {
 			virtual void LocalPlayerCreatedLineBlock(IntVector3, IntVector3) = 0;
 			virtual void LocalPlayerHurt(HurtType type, bool sourceGiven, Vector3 source) = 0;
 			virtual void LocalPlayerBuildError(BuildFailureReason reason) = 0;
+			virtual void LocalPlayerCreatedVolume(IntVector3, IntVector3, VolumeType, VolumeActionType) = 0;
 		};
 	} // namespace client
 } // namespace spades

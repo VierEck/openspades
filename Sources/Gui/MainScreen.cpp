@@ -356,9 +356,11 @@ namespace spades {
 			return View::AutocompleteCommandName(name);
 		}
 
-		std::string MainScreen::Connect(const ServerAddress &host, bool replay, std::string demoName) {
+		std::string MainScreen::Connect(const ServerAddress &host, int mode, std::string map_demo, std::string canvasFile) {
 			try {
-				subview = Handle<client::Client>::New(&*renderer, &*audioDevice, host, fontManager, replay, demoName).Cast<View>();
+				subview = Handle<client::Client>::New(
+					&*renderer, &*audioDevice, host, fontManager, mode, map_demo, canvasFile
+				).Cast<View>();
 			} catch (const std::exception &ex) {
 				SPLog("[!] Error while initializing a game client: %s", ex.what());
 				return ex.what();

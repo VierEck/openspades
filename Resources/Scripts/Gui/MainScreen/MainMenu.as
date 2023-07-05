@@ -76,9 +76,12 @@ namespace spades {
         spades::ui::ListView @serverList;
         MainScreenServerListLoadingView @loadingView;
         MainScreenServerListErrorView @errorView;
-        bool loading = false, loaded = false, demoList = false;
+        bool loading = false, loaded = false, canvasList = false;
+        string MapFile = "";
         MainScreenServerItem@[]@ savedlist = array<spades::MainScreenServerItem@>();
         int savedlistIdx = 0;
+        int mode = 0;
+        int isOnline = 0, isDemo = 1, isMap = 2;
 
         private ConfigItem cg_protocolVersion("cg_protocolVersion", "3");
         private ConfigItem cg_lastQuickConnectHost("cg_lastQuickConnectHost", "127.0.0.1");
@@ -94,9 +97,23 @@ namespace spades {
             float footerPos = Manager.Renderer.ScreenHeight - 50.f;
             {
                 spades::ui::Button button(Manager);
-                button.Caption = _Tr("MainScreen", "Server List / Demo List");
-                button.Bounds = AABB2(contentsLeft, 165, 180.f, 30.f);
-                @button.Activated = spades::ui::EventHandler(this.OnChangeListPressed);
+                button.Caption = _Tr("MainScreen", "ServerList");
+                button.Bounds = AABB2(contentsLeft, 165, 100.f, 35.f);
+                @button.Activated = spades::ui::EventHandler(this.OnServerList);
+                AddChild(button);
+            }
+            {
+                spades::ui::Button button(Manager);
+                button.Caption = _Tr("MainScreen", "DemoList");
+                button.Bounds = AABB2(contentsLeft + 103.f, 165, 100.f, 35.f);
+                @button.Activated = spades::ui::EventHandler(this.OnDemoList);
+                AddChild(button);
+            }
+            {
+                spades::ui::Button button(Manager);
+                button.Caption = _Tr("MainScreen", "MapList");
+                button.Bounds = AABB2(contentsLeft + 206.f, 165, 100.f, 35.f);
+                @button.Activated = spades::ui::EventHandler(this.OnMapList);
                 AddChild(button);
             }
             {
@@ -280,7 +297,8 @@ namespace spades {
             @serverList.Model = spades::ui::ListViewModel(); // empty
             errorView.Visible = false;
             loadingView.Visible = true;
-            helper.StartQuery(demoList);
+            helper.StartQuery(mode, canvasList);
+            canvasList = false;
         }
 
         void ServerListItemActivated(ServerListModel @sender, MainScreenServerItem @item) {
@@ -288,7 +306,7 @@ namespace spades {
         }
 
         void ServerListItemActivatedPass(MainScreenServerItem @item) {
-            if (!demoList) {
+            if (mode == isOnline) {
                 addressField.Text = item.Address;
                 cg_lastQuickConnectHost = addressField.Text;
             } else {
@@ -310,6 +328,9 @@ namespace spades {
         }
 
         void ServerListItemRightClicked(ServerListModel @sender, MainScreenServerItem @item) {
+            if (mode != isOnline) {
+                return;
+            }
             helper.SetServerFavorite(item.Address, !item.Favorite);
             UpdateServerList();
         }
@@ -325,7 +346,7 @@ namespace spades {
         private void SortServerListByCountry(spades::ui::UIElement @sender) { SortServerList(6); }
 
         private void SortServerList(int keyId) {
-            if (demoList) {
+            if (mode != isOnline) {
                 return;
             }
             int sort = cg_serverlistSort.IntValue;
@@ -349,8 +370,8 @@ namespace spades {
                 case 5: key = "Protocol"; break;
                 case 6: key = "Country"; break;
             }
-            if (demoList) {
-                key == "Name";
+            if (mode != isOnline) {
+                key = "Name";
             }
             MainScreenServerItem @[] @list =
                 helper.GetServerList(key, (cg_serverlistSort.IntValue & 0x4000) != 0);
@@ -368,7 +389,7 @@ namespace spades {
             savedlist.resize(0);
             for (int i = 0, count = list.length; i < count; i++) {
                 MainScreenServerItem @item = list[i];
-                if (!demoList) {
+                if (mode != isOnline) {
                     if (filterProtocol3 and(item.Protocol != "0.75")) {
                         continue;
                     }
@@ -422,7 +443,7 @@ namespace spades {
         }
 
         private void OnAddressChanged(spades::ui::UIElement @sender) {
-            if (demoList) {
+            if (mode != isOnline) {
                 return;
             }
             cg_lastQuickConnectHost = addressField.Text;
@@ -475,27 +496,91 @@ namespace spades {
             if (addressField.Text == "") {
                 return;
             }
+            if (mode == isOnline) {
+                ConnectServer();
+            } else if (mode == isDemo) {
+                ConnectDemo();
+            } else if (mode == isMap) {
+                ConnectMap();
+            }
+        }
+
+        private void ConnectServer() {
+            string msg = helper.ConnectServer(addressField.Text, cg_protocolVersion.IntValue, isOnline, "", "");
+            if (msg.length > 0) {
+                // failde to initialize client.
+                AlertScreen al(this, msg);
+                al.Run();
+            }
+        }
+
+        private void ConnectDemo() {
             string DemoFile = ""; 
             string FieldText = addressField.Text;
-            if (demoList) {
-                bool Found = false; 
-                for(int i = 0, count = savedlist.length; i < count; i++) {
-                    MainScreenServerItem@ item = savedlist[i];
-                    if (item.Protocol != "0.75" and item.Protocol != "0.76" or item.MapName == "invalid aos_replay") {
-                        continue;
-                    }
-                    if (item.Name == addressField.Text) {
-                        Found = true;
-                        break;
-                    }
+            bool Found = false; 
+            for(int i = 0, count = savedlist.length; i < count; i++) {
+                MainScreenServerItem@ item = savedlist[i];
+                if (item.Protocol != "0.75" and item.Protocol != "0.76" or item.MapName == "invalid aos_replay") {
+                    continue;
                 }
-                if (!Found) {
+                if (item.Name == addressField.Text) {
+                    Found = true;
+                    break;
+                }
+            }
+            if (!Found) {
+                return;
+            }
+            DemoFile = "Demos/" + addressField.Text;
+            FieldText = "aos://16777343:32887";
+            string msg = helper.ConnectServer(FieldText, cg_protocolVersion.IntValue, isDemo, DemoFile, "");
+            if (msg.length > 0) {
+                // failde to initialize client.
+                AlertScreen al(this, msg);
+                al.Run();
+            }
+        }
+
+        private void ConnectMap() {
+            string Canvas = "";
+            string FieldText = addressField.Text;
+            bool Found = false; 
+            for(int i = 0, count = savedlist.length; i < count; i++) {
+                MainScreenServerItem@ item = savedlist[i];
+                if (item.Name == addressField.Text) {
+                    Found = true;
+                    break;
+                }
+            }
+            if (!Found) {
+                if (!canvasList) {
+                    if (loading) {
+                        return;
+                    }
+                    loaded = false;
+                    loading = true;
+                    @serverList.Model = spades::ui::ListViewModel(); // empty
+                    errorView.Visible = false;
+                    loadingView.Visible = true;
+                    canvasList = true;
+                    helper.StartQuery(mode, canvasList);
+                    MapFile = "MapEditor/Maps/" + addressField.Text;
+                    if (MapFile.findFirst(".vxl") < 0) {
+                        MapFile += ".vxl";
+                    }
                     return;
                 }
-                DemoFile = "Demos/" + addressField.Text;
+                return;
+                } else {
+                if (canvasList) {
+                    Canvas = "Maps/Canvas/" + addressField.Text;
+                } else {
+                    MapFile = "MapEditor/Maps/" + addressField.Text;
+                    Canvas = "";
+                }
                 FieldText = "aos://16777343:32887";
             }
-            string msg = helper.ConnectServer(FieldText, cg_protocolVersion.IntValue, demoList, DemoFile);
+            string msg = helper.ConnectServer(FieldText, cg_protocolVersion.IntValue, isMap, MapFile, Canvas);
             if (msg.length > 0) {
                 // failde to initialize client.
                 AlertScreen al(this, msg);
@@ -505,13 +590,20 @@ namespace spades {
 
         private void OnConnectPressed(spades::ui::UIElement @sender) { Connect(); }
 
-        private void OnChangeListPressed(spades::ui::UIElement @sender) {
-            demoList = !demoList;
-            ChangeList();
+        private void OnServerList(spades::ui::UIElement @sender) {
+            ChangeList(isOnline);
+        }
+        private void OnDemoList(spades::ui::UIElement @sender) {
+            ChangeList(isDemo);
+        }
+        private void OnMapList(spades::ui::UIElement @sender) {
+            ChangeList(isMap);
         }
 
-        private void ChangeList() {
-            if (demoList) {
+        private void ChangeList(int whichMode) {
+            mode = whichMode;
+            canvasList = false;
+            if (mode != isOnline) {
                 addressField.Text = "";
             } else {
                 addressField.Text = cg_lastQuickConnectHost.StringValue;
@@ -525,11 +617,11 @@ namespace spades {
             } else if (IsEnabled and key == "Escape") {
                 ui.shouldExit = true;
             } else if (IsEnabled and key == "S" and Manager.IsControlPressed) {
-                demoList = false;
-                ChangeList();
+                ChangeList(isOnline);
             } else if (IsEnabled and key == "D" and Manager.IsControlPressed) {
-                demoList = true;
-                ChangeList();
+                ChangeList(isDemo);
+            } else if (IsEnabled and key == "M" and Manager.IsControlPressed) {
+                ChangeList(isMap);
             } else if (IsEnabled and key == "Down") {
                 if (savedlistIdx >= savedlist.length - 1 and savedlist.length > 0) {
                     UIElement::HotKey(key);

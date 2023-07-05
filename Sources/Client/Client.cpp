@@ -29,6 +29,7 @@
 #include <Core/IStream.h>
 #include <Core/Settings.h>
 #include <Core/Strings.h>
+#include <Core/ServerAddress.h>
 
 #include "IAudioChunk.h"
 #include "IAudioDevice.h"
@@ -55,6 +56,9 @@
 
 #include "NetClient.h"
 
+#include "CTFGameMode.h"
+#include "TCGameMode.h"
+
 DEFINE_SPADES_SETTING(cg_chatBeep, "1");
 DEFINE_SPADES_SETTING(cg_alertSounds, "1");
 
@@ -67,12 +71,17 @@ SPADES_SETTING(cg_playerName);
 DEFINE_SPADES_SETTING(cg_demoFileNameFormat, "year month day time");
 DEFINE_SPADES_SETTING(cg_demoRecord, "1");
 
+SPADES_SETTING(cg_FlySpeedWalk);
+SPADES_SETTING(cg_FlySpeedSprint);
+SPADES_SETTING(cg_FlySpeedSneak);
+
 namespace spades {
 	namespace client {
-
-		Client::Client(Handle<IRenderer> r, Handle<IAudioDevice> audioDev,
-		               const ServerAddress &host, Handle<FontManager> fontManager, bool replay, std::string demoName)
-		    : playerName(cg_playerName.operator std::string().substr(0, 15)),
+		Client::Client(
+			Handle<IRenderer> r, Handle<IAudioDevice> audioDev,
+			const ServerAddress &host, Handle<FontManager> fontManager,
+			int mode, std::string map_demo, std::string canvas
+		)   : playerName(cg_playerName.operator std::string().substr(0, 15)),
 		      logStream(nullptr),
 		      hostname(host),
 		      renderer(r),
@@ -113,10 +122,18 @@ namespace spades {
 			SPLog("Initializing...");
 
 			demo.speed = 1;
-			demo.replaying = replay;
-			if (demo.replaying) {
-				demo.fileName = demoName;
+			demo.replaying = false;
+			if (mode == isDemo) {
+				demo.replaying = true;
+				demo.fileName = map_demo;
 				demo.Initiate();
+			}
+
+			isLocalMapEditor = isMapEditor = false;
+			if (mode == isMap) {
+				mapFileName = map_demo;
+				canvasFileName = canvas;
+				isLocalMapEditor = true;
 			}
 
 			renderer->SetFogDistance(128.f);
@@ -345,6 +362,18 @@ namespace spades {
 			mumbleLink.setIdentity(playerName);
 
 			net = stmp::make_unique<NetClient>(this);
+
+			if (isLocalMapEditor) {
+				try {
+					if (canvasFileName.size() > 0)
+						SPLog("Using Canvas Map: '%s'", canvasFileName.c_str());
+					LoadLocalMapEditor();
+					SPLog("Started local Map Editor. new Map: '%s'", mapFileName.c_str());
+				} catch (...) {
+					SPRaise("MapEditor Error: couldnt start local MapEditor");
+				}
+				return;
+			}
 
 			if (demo.replaying) {
 				try {
@@ -660,10 +689,15 @@ namespace spades {
 
 #pragma mark - Snapshots
 
-		void Client::TakeMapShot() {
+		void Client::TakeMapShot(bool mapEditor) {
 
 			try {
-				std::string name = MapShotPath();
+				std::string name;
+				if (mapEditor && mapFileName.size() > 0) {
+					name = mapFileName;
+				} else {
+					name = MapShotPath();
+				}
 				{
 					std::unique_ptr<IStream> stream(FileManager::OpenForWriting(name.c_str()));
 					try {
@@ -711,6 +745,196 @@ namespace spades {
 			}
 
 			SPRaise("No free file name");
+		}
+
+#pragma mark - MapEditor
+
+		void Client::SetIsMapEditor(bool b) {
+			isMapEditor = b;
+
+			//initialise mapeditor stuff. may need to be done multiple times
+			if (world)
+				world->SetIsMapEditor(b);
+
+			stmp::optional<Player &> p = *world->GetLocalPlayer();
+			if (b && p) {
+				p->SetTool(Player::ToolBlock);
+				p->SetHeldBlockColor({0, 0, 0});
+				p->SetVolumeType(VolumeSingle);
+				p->SetMapTool(noMapTool);
+				p->SetMapObjectType(ObjTentTeam1);
+				p->SetBuildDistance(3);
+				p->SetBuildAtMaxDistance(false);
+				p->SetBrushSize(10);
+				p->SetEditBrushSize(false);
+				net->switchModeTeam = 0;
+				net->localRespawnPos = {255, 255, 30};
+				p->walkFlySpeed = (float)cg_FlySpeedWalk;
+				p->sprintFlySpeed = (float)cg_FlySpeedSprint;
+				p->sneakFlySpeed = (float)cg_FlySpeedSneak;
+			}
+		}
+
+		void Client::LoadLocalMapEditor() {
+			std::unique_ptr<IStream> stream;
+			if (canvasFileName.size() > 0) {
+				stream = FileManager::OpenForReading(canvasFileName.c_str());
+			} else {
+				stream = FileManager::OpenForReading(mapFileName.c_str());
+			}
+			const Handle<GameMap> &map = GameMap::Load(stream.get());
+			SPLog("The game map was decoded successfully.");
+
+			// now initialize world
+			makeproperties.reset(new GameProperties(hostname.GetProtocolVersion()));
+			World *w = new World(makeproperties);
+			w->SetMap(map);
+			map->Release();
+			SPLog("World initialized.");
+
+			SetWorld(w);
+			SPAssert(world);
+			SPLog("World set.");
+
+			world->SetIsMapEditor(true);
+			{
+				World::Team &t1 = world->GetTeam(0);
+				World::Team &t2 = world->GetTeam(1);
+				World::Team &spec = world->GetTeam(2);
+				t1.color = {0, 0, 255};
+				t2.color = {0, 255, 0};
+				t1.name = "Team1";
+				t2.name = "Team2";
+				spec.color = {0, 0, 0};
+
+				world->SetFogColor({128, 128, 255});
+
+				auto TC = stmp::make_unique<TCGameMode>(*world);
+				world->SetMode(std::move(TC));
+
+				auto CTF = stmp::make_unique<CTFGameMode>();
+				CTFGameMode::Team &mt1 = CTF->GetTeam(0);
+				CTFGameMode::Team &mt2 = CTF->GetTeam(1);
+				mt1.score = mt2.score = 0;
+				CTF->SetCaptureLimit(10);
+				mt1.hasIntel = mt2.hasIntel = false;
+				mt1.flagPos = mt2.flagPos = mt1.basePos = mt2.basePos = {0, 0, 0};
+				world->SetMode(std::move(CTF));
+			}
+			JoinedGame();
+
+			world->SetLocalPlayerIndex(0);
+			auto p = stmp::make_unique<Player>(*world, 0, RIFLE_WEAPON, 2, MakeVector3(256, 256, 30), world->GetTeam(2).color);
+			world->SetPlayer(0, std::move(p));
+			World::PlayerPersistent &pers = world->GetPlayerPersistent(0);
+			pers.name = (std::string)cg_playerName;
+			pers.kills = 0;
+
+			std::string txtFile = mapFileName.substr(0, mapFileName.size() - 4);
+			txtFile += ".txt";
+			if (FileManager::FileExists(txtFile.c_str())) {
+				LoadMapTxt(txtFile);
+			}
+
+			SetIsMapEditor(true);
+			SPLog("LocalMapEditor set");
+		}
+
+		void Client::LoadMapTxt(std::string txtFile) {
+			if (!FileManager::FileExists(txtFile.c_str())) {
+				return;
+			}
+			mapTxtFileName = txtFile;
+			std::unique_ptr<IStream> stream = FileManager::OpenForReading(mapTxtFileName.c_str());
+			int len = (int)(stream->GetLength() - stream->GetPosition());
+			std::string txt = stream->Read(len);
+
+			scriptedUI->LoadMapTxt(txt);
+
+			int find = txt.rfind("fog =");
+			if (find < 0) {
+				find = txt.rfind("fog=");
+			}
+			if (find >= 0) {
+				int endLine = txt.find('\n', find);
+
+				if (endLine > 0) {
+					std::string numString = "";
+					IntVector3 fogCol;
+					int count = 3;
+					for (char c : txt.substr(find, endLine - find)) {
+						if (isdigit(c)) {
+							numString += c;
+							continue;
+						}
+						if (numString.length() <= 0) {
+							continue;
+						}
+						if (count == 3) {
+							fogCol.x = std::stoi(numString);
+							numString = "";
+							count--;
+							continue;
+						}
+						if (count == 2) {
+							fogCol.y = std::stoi(numString);
+							numString = "";
+							count--;
+							continue;
+						}
+						if (count == 1) {
+							fogCol.z = std::stoi(numString);
+							net->SendFogColor(fogCol);
+							break;
+						}
+					}
+				}
+			}
+
+			std::string note = "Map.txt loaded: " + mapTxtFileName;
+			ShowAlert(note, Client::AlertType::Notice);
+			SPLog("Map.txt loaded: %s", mapTxtFileName.c_str());
+		}
+
+		void Client::SaveMapTxt(const std::string &txt) {
+			if (mapTxtFileName == "") {
+				mapTxtFileName = mapTxtFileName.substr(0, mapTxtFileName.length() - 4) + ".txt";
+			}
+			std::unique_ptr<IStream> stream(FileManager::OpenForWriting(mapTxtFileName.c_str()));
+
+			stream->Write(txt);
+			stream->Flush();
+
+			std::string note = "Map.txt saved: " + mapTxtFileName;
+			ShowAlert(note, Client::AlertType::Notice);
+			SPLog("Map.txt saved: %s", mapTxtFileName.c_str());
+		}
+
+		void Client::GenMaptxt() {
+			mapTxtFileName = mapFileName.substr(0, mapTxtFileName.length() - 4) + ".txt";
+			std::unique_ptr<IStream> stream(FileManager::OpenForWriting(mapTxtFileName.c_str()));
+			std::string txt = GenMeta();
+
+			char buf[64];
+			IntVector3 fogColor = world->GetFogColor();
+			sprintf(buf, "fog = (%d, %d, %d)\n", fogColor.x, fogColor.y, fogColor.z);
+			txt += buf;
+
+			stream->Write(txt);
+
+			std::string note = "Map.txt created: " + mapTxtFileName;
+			ShowAlert(note, Client::AlertType::Notice);
+			SPLog("Map.txt created: %s", mapTxtFileName.c_str());
+		}
+
+		std::string Client::GenMeta() {
+			std::string txt = "name = '" + mapTxtFileName.substr(15, (int)mapTxtFileName.length() - 19) + "'\n";
+			txt += "version = '0'\n";
+			txt += "author = '" + (std::string)cg_playerName + "'\n";
+			txt += "description = ('what is this map about?')\n\n";
+			txt += "extensions = {\n\n}\n\n";
+
+			return txt;
 		}
 
 #pragma mark - Chat Messages
@@ -782,6 +1006,10 @@ namespace spades {
 					centerMessageView->AddMessage(msg.substr(3));
 					return;
 				}
+			}
+
+			if (msg == " /g switching gamemode" && isMapEditor) {
+				net->CommandSwitchGameMode();
 			}
 
 			chatWindow->AddMessage(msg);
