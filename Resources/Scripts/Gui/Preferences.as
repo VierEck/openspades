@@ -644,6 +644,11 @@ namespace spades {
                 _Tr("Preferences", "Player Name"), "cg_playerName", not options.GameActive);
             nameField.MaxLength = 15;
             nameField.DenyNonAscii = true;
+            ConfigField @mentionField = layouter.AddInputField(
+                _Tr("Preferences", "Mention Word"), "cg_mentionWord");
+            mentionField.MaxLength = 15;
+            mentionField.DenyNonAscii = true;
+            layouter.AddToggleField(_Tr("Preferences", "Highlight mentioning Message"), "cg_shouldMentionWord");
 
             layouter.AddHeading(_Tr("Preferences", "PubOvl"));
             layouter.AddToggleField(_Tr("Preferences", "Spectator ESP"), "cg_specEsp");
@@ -695,7 +700,7 @@ namespace spades {
             StandardPreferenceLayouter layouter(this, fontManager);
             layouter.AddHeading(_Tr("Preferences", "Demo Recording"));
             layouter.AddToggleField(_Tr("Preferences", "Enable Demo Recording"), "cg_demoRecord");
-            ConfigField @nameField = layouter.AddInputField(_Tr("Preferences", "Demo Filename Date Format"), "cg_demoFileNameFormat");
+            ConfigField @dateField = layouter.AddInputField(_Tr("Preferences", "Demo Filename Date Format"), "cg_demoFileNameFormat");
 
             layouter.AddHeading(_Tr("Preferences", "Demo Replaying"));
             layouter.AddToggleField(_Tr("Preferences", "Show Progressbar only in UI"), "cg_DemoProgressBarOnlyInUi");
@@ -742,7 +747,7 @@ namespace spades {
 
             layouter.AddControl(_Tr("Preferences", "Open Color Palette Setting"), "cg_keyEditColor");
             layouter.AddControl(_Tr("Preferences", "Open map.TXT Editor"), "cg_keyMapTxt");
-            ConfigField @nameField = layouter.AddInputField(_Tr("Preferences", "UI HotKey keyboard layout"), "cg_UIHotKeyLayout");
+            ConfigField @hotkeyField = layouter.AddInputField(_Tr("Preferences", "UI HotKey keyboard layout"), "cg_UIHotKeyLayout");
             layouter.AddHeading(_Tr("Preferences", " "));
 
             layouter.AddControl(_Tr("Preferences", "Toggle Build Distance"), "cg_keyScaleBuildDistance");

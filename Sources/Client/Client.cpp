@@ -67,6 +67,8 @@ DEFINE_SPADES_SETTING(cg_serverAlert, "1");
 DEFINE_SPADES_SETTING(cg_skipDeadPlayersWhenDead, "1");
 
 SPADES_SETTING(cg_playerName);
+DEFINE_SPADES_SETTING(cg_mentionWord);
+DEFINE_SPADES_SETTING(cg_shouldMentionWord, "1");
 
 DEFINE_SPADES_SETTING(cg_demoFileNameFormat, "year month day time");
 DEFINE_SPADES_SETTING(cg_demoRecord, "1");
@@ -963,6 +965,11 @@ namespace spades {
 				s += ChatWindow::TeamColorMessage(p.GetName(), p.GetTeamId());
 				s += ": ";
 				s += msg;
+
+				size_t w = msg.find((std::string)cg_mentionWord);
+				if (w != std::string::npos && cg_shouldMentionWord)
+					s += ChatWindow::ColoredMessage(" -> Mention", MsgColorGreen);
+
 				chatWindow->AddMessage(s);
 			}
 			{
