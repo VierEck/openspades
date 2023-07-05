@@ -435,6 +435,7 @@ namespace spades {
 				}
 			} demo;
 			void DemoUiMouseInput(float x, float y);
+			bool DemoKeyEvent(const std::string &name, bool down);
 
 			bool isMapEditor, isLocalMapEditor;
 			std::string mapFileName, canvasFileName;

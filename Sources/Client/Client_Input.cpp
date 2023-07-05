@@ -456,74 +456,8 @@ namespace spades {
 					return;
 				}
 
-				if (demo.replaying) {
-					if (CheckKey(cg_keyPause, name) && down) {
-						net->DemoPause(net->IsDemoPaused());
-						return;
-					}
-					if (CheckKey(cg_keySkipForward, name) && down) {
-						net->DemoSkip((float)cg_SkipValue);
-						return;
-					}
-					if (CheckKey(cg_keySkipRewind, name) && down) {
-						net->DemoSkip((float)cg_SkipValue * (-1.f));
-						return;
-					}
-					if (CheckKey(cg_keyNextUps, name) && down) {
-						net->DemoUps(1);
-						return;
-					}
-					if (CheckKey(cg_keyPrevUps, name) && down) {
-						net->DemoUps(-1);
-						return;
-					}
-					if (CheckKey(cg_keySpeedUp, name) && down) {
-						demo.SetSpeed(demo.speed + (float)cg_SpeedChangeValue);
-						net->DemoNormalizeTime();
-						return;
-					}
-					if (CheckKey(cg_keySpeedDown, name) && down) {
-						demo.SetSpeed(demo.speed - (float)cg_SpeedChangeValue);
-						net->DemoNormalizeTime();
-						return;
-					}
-					if (CheckKey(cg_keySpeedNormalize, name) && down) {
-						demo.SetSpeed(1);
-						net->DemoNormalizeTime();
-						return;
-					}
-					if (demo.uiActive && down) {
-						if (name == "LeftMouseButton") {
-							if (demo.skipTo >= 0.f) 
-								net->DemoSkip(demo.skipTo - net->GetDemoDeltaTime());
-							if (demo.skipTo == -2.f)
-								net->DemoPause(net->IsDemoPaused());
-							if (demo.skipTo == -3.f)
-								net->DemoSkip((float)cg_SkipValue);
-							if (demo.skipTo == -4.f)
-								net->DemoSkip((float)cg_SkipValue * (-1.f));
-							return;
-						} else if (name == "RightMouseButton") {
-							if (demo.skipTo == -3.f)
-								net->DemoUps(1);
-							if (demo.skipTo == -4.f)
-								net->DemoUps(-1);
-							if (demo.skipTo == -2.f) {
-								demo.SetSpeed(1);
-								net->DemoNormalizeTime();
-							}
-							return;
-						} else if (name == "WheelUp") {
-							demo.SetSpeed(demo.speed + (float)cg_SpeedChangeValue);
-							net->DemoNormalizeTime();
-							return;
-						} else if (name == "WheelDown") {
-							demo.SetSpeed(demo.speed - (float)cg_SpeedChangeValue);
-							net->DemoNormalizeTime();
-							return;
-						}
-					}
-				}
+				if (DemoKeyEvent(name, down))
+					return;
 
 				auto cameraMode = GetCameraMode();
 
@@ -848,6 +782,80 @@ namespace spades {
 					// limbo
 				}
 			}
+		}
+
+		bool Client::DemoKeyEvent(const std::string &name, bool down) {
+			if (!demo.replaying)
+				return false;
+
+			if (CheckKey(cg_keyPause, name) && down) {
+				net->DemoPause(net->IsDemoPaused());
+				return true;
+			}
+			if (CheckKey(cg_keySkipForward, name) && down) {
+				net->DemoSkip((float)cg_SkipValue);
+				return true;
+			}
+			if (CheckKey(cg_keySkipRewind, name) && down) {
+				net->DemoSkip((float)cg_SkipValue * (-1.f));
+				return true;
+			}
+			if (CheckKey(cg_keyNextUps, name) && down) {
+				net->DemoUps(1);
+				return true;
+			}
+			if (CheckKey(cg_keyPrevUps, name) && down) {
+				net->DemoUps(-1);
+				return true;
+			}
+			if (CheckKey(cg_keySpeedUp, name) && down) {
+				demo.SetSpeed(demo.speed + (float)cg_SpeedChangeValue);
+				net->DemoNormalizeTime();
+				return true;
+			}
+			if (CheckKey(cg_keySpeedDown, name) && down) {
+				demo.SetSpeed(demo.speed - (float)cg_SpeedChangeValue);
+				net->DemoNormalizeTime();
+				return true;
+			}
+			if (CheckKey(cg_keySpeedNormalize, name) && down) {
+				demo.SetSpeed(1);
+				net->DemoNormalizeTime();
+				return true;
+			}
+			if (demo.uiActive && down) {
+				if (name == "LeftMouseButton") {
+					if (demo.skipTo >= 0.f) 
+						net->DemoSkip(demo.skipTo - net->GetDemoDeltaTime());
+					if (demo.skipTo == -2.f)
+						net->DemoPause(net->IsDemoPaused());
+					if (demo.skipTo == -3.f)
+						net->DemoSkip((float)cg_SkipValue);
+					if (demo.skipTo == -4.f)
+						net->DemoSkip((float)cg_SkipValue * (-1.f));
+					return true;
+				} else if (name == "RightMouseButton") {
+					if (demo.skipTo == -3.f)
+						net->DemoUps(1);
+					if (demo.skipTo == -4.f)
+						net->DemoUps(-1);
+					if (demo.skipTo == -2.f) {
+						demo.SetSpeed(1);
+						net->DemoNormalizeTime();
+					}
+					return true;
+				} else if (name == "WheelUp") {
+					demo.SetSpeed(demo.speed + (float)cg_SpeedChangeValue);
+					net->DemoNormalizeTime();
+					return true;
+				} else if (name == "WheelDown") {
+					demo.SetSpeed(demo.speed - (float)cg_SpeedChangeValue);
+					net->DemoNormalizeTime();
+					return true;
+				}
+			}
+
+			return false;
 		}
 
 		bool Client::MapEditorKeyEvent(const std::string &name, bool down) {
