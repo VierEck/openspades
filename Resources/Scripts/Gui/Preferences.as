@@ -650,6 +650,7 @@ namespace spades {
             layouter.AddToggleField(_Tr("Preferences", "Spectator ESP Names"), "cg_specNames");
 
             layouter.AddHeading(_Tr("Preferences", "Effects"));
+            layouter.AddToggleField(_Tr("Preferences", "KillFeed Images"), "cg_killFeedImg");
             layouter.AddToggleField(_Tr("Preferences", "Glow Blocks"), "cg_glowBlocks");
             layouter.AddToggleField(_Tr("Preferences", "Blood"), "cg_blood");
             layouter.AddToggleField(_Tr("Preferences", "Ejecting Brass"), "cg_ejectBrass");

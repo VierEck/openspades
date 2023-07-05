@@ -64,6 +64,8 @@ SPADES_SETTING(cg_shake);
 
 SPADES_SETTING(cg_holdAimDownSight);
 
+DEFINE_SPADES_SETTING(cg_killFeedImg, "1");
+
 namespace spades {
 	namespace client {
 
@@ -970,38 +972,54 @@ namespace spades {
 			if (&killer == &victim)
 				isFriendlyFire = false;
 
-			Weapon &w = killer.GetWeapon(); // only used in case of KillTypeWeapon
-			switch (kt) {
-				case KillTypeWeapon:
-					switch (w.GetWeaponType()) {
-						case RIFLE_WEAPON: cause += _Tr("Client", "Rifle"); break;
-						case SMG_WEAPON: cause += _Tr("Client", "SMG"); break;
-						case SHOTGUN_WEAPON: cause += _Tr("Client", "Shotgun"); break;
-						default: SPUnreachable();
-					}
-					break;
-				case KillTypeFall:
-					//! A cause of death shown in the kill feed.
-					cause += _Tr("Client", "Fall");
-					break;
-				case KillTypeMelee:
-					//! A cause of death shown in the kill feed.
-					cause += _Tr("Client", "Melee");
-					break;
-				case KillTypeGrenade: cause += _Tr("Client", "Grenade"); break;
-				case KillTypeHeadshot:
-					//! A cause of death shown in the kill feed.
-					cause += _Tr("Client", "Headshot");
-					break;
-				case KillTypeTeamChange:
-					//! A cause of death shown in the kill feed.
-					cause += _Tr("Client", "Team Change");
-					break;
-				case KillTypeClassChange:
-					//! A cause of death shown in the kill feed.
-					cause += _Tr("Client", "Weapon Change");
-					break;
-				default: cause += "???"; break;
+			if (cg_killFeedImg) {
+				Weapon &w = killer.GetWeapon(); // only used in case of KillTypeWeapon
+
+				if(killer.IsToolWeapon() && kt == KillTypeHeadshot){
+					cause += ChatWindow::killImage(0, &w ? w.GetWeaponType() : RIFLE_WEAPON);
+					cause += " ";
+				}
+				cause += ChatWindow::killImage(kt, &w ? w.GetWeaponType() : RIFLE_WEAPON);
+
+				WeaponInput inp = killer.GetWeaponInput();
+				if(!inp.secondary && killer.IsToolWeapon() && killer.IsAlive()){
+					cause += " ";
+					cause += ChatWindow::killImage((int)MsgImage, 3);
+				}
+			} else {
+				Weapon &w = killer.GetWeapon(); // only used in case of KillTypeWeapon
+				switch (kt) {
+					case KillTypeWeapon:
+						switch (w.GetWeaponType()) {
+							case RIFLE_WEAPON: cause += _Tr("Client", "Rifle"); break;
+							case SMG_WEAPON: cause += _Tr("Client", "SMG"); break;
+							case SHOTGUN_WEAPON: cause += _Tr("Client", "Shotgun"); break;
+							default: SPUnreachable();
+						}
+						break;
+					case KillTypeFall:
+						//! A cause of death shown in the kill feed.
+						cause += _Tr("Client", "Fall");
+						break;
+					case KillTypeMelee:
+						//! A cause of death shown in the kill feed.
+						cause += _Tr("Client", "Melee");
+						break;
+					case KillTypeGrenade: cause += _Tr("Client", "Grenade"); break;
+					case KillTypeHeadshot:
+						//! A cause of death shown in the kill feed.
+						cause += _Tr("Client", "Headshot");
+						break;
+					case KillTypeTeamChange:
+						//! A cause of death shown in the kill feed.
+						cause += _Tr("Client", "Team Change");
+						break;
+					case KillTypeClassChange:
+						//! A cause of death shown in the kill feed.
+						cause += _Tr("Client", "Weapon Change");
+						break;
+					default: cause += "???"; break;
+				}
 			}
 
 			s += " [";
@@ -1012,6 +1030,11 @@ namespace spades {
 			else
 				s += cause;
 			s += "] ";
+
+			WeaponInput inp = killer.GetWeaponInput();
+			if(!inp.secondary && !cg_killFeedImg && killer.IsToolWeapon() && killer.IsAlive()){
+				s += "[NoScope] ";
+			}
 
 			if (&killer != &victim) {
 				s += ChatWindow::TeamColorMessage(victim.GetName(), victim.GetTeamId());

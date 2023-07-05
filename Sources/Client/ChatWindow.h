@@ -38,8 +38,9 @@ namespace spades {
 		static const char MsgColorRed = 4;
 		static const char MsgColorGreen = 5;
 		static const char MsgColorRestore = 6;
-		static const char MsgColorGray = 7;
-		static const char MsgColorMax = 8;
+		static const char MsgImage = 7;
+		static const char MsgColorGray = 8;
+		static const char MsgColorMax = 9;
 		static const char MsgColorFriendlyFire = MsgColorRed;
 		static const char MsgColorSysInfo = MsgColorGreen;
 
@@ -71,6 +72,9 @@ namespace spades {
 			float GetLineHeight();
 
 			Vector4 GetColor(char);
+
+			std::vector<IImage *> mKillImages;
+			IImage *imageForIndex(char index);
 
 		public:
 			ChatWindow(Client *, IRenderer *rend, IFont *font, bool killfeed);

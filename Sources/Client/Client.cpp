@@ -351,6 +351,15 @@ namespace spades {
 			renderer->RegisterImage("Gfx/HurtSprite.png");
 			renderer->RegisterImage("Gfx/HurtRing2.png");
 			renderer->RegisterImage("Gfx/Intel.png");
+			renderer->RegisterImage("Gfx/Killfeed/a-Rifle.png");
+			renderer->RegisterImage("Gfx/Killfeed/b-SMG.png");
+			renderer->RegisterImage("Gfx/Killfeed/c-Shotgun.png");
+			renderer->RegisterImage("Gfx/Killfeed/d-Headshot.png");
+			renderer->RegisterImage("Gfx/Killfeed/e-Melee.png");
+			renderer->RegisterImage("Gfx/Killfeed/f-Grenade.png");
+			renderer->RegisterImage("Gfx/Killfeed/g-Falling.png");
+			renderer->RegisterImage("Gfx/Killfeed/h-Teamchange.png");
+			renderer->RegisterImage("Gfx/Killfeed/i-Classchange.png");
 			audioDevice->RegisterSound("Sounds/Feedback/Chat.opus");
 
 			if (mumbleLink.init())

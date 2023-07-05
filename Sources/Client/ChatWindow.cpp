@@ -39,6 +39,21 @@ namespace spades {
 		ChatWindow::ChatWindow(Client *cli, IRenderer *rend, IFont *fnt, bool killfeed)
 		    : client(cli), renderer(rend), font(fnt), killfeed(killfeed) {
 			firstY = 0.f;
+			mKillImages.push_back(renderer->RegisterImage("Gfx/Killfeed/a-Rifle.png").GetPointerOrNull());
+			mKillImages.push_back(renderer->RegisterImage("Gfx/Killfeed/b-SMG.png").GetPointerOrNull());
+			mKillImages.push_back(renderer->RegisterImage("Gfx/Killfeed/c-Shotgun.png").GetPointerOrNull());
+			mKillImages.push_back(renderer->RegisterImage("Gfx/Killfeed/d-Headshot.png").GetPointerOrNull());
+			mKillImages.push_back(renderer->RegisterImage("Gfx/Killfeed/e-Melee.png").GetPointerOrNull());
+			mKillImages.push_back(renderer->RegisterImage("Gfx/Killfeed/f-Grenade.png").GetPointerOrNull());
+			mKillImages.push_back(renderer->RegisterImage("Gfx/Killfeed/g-Falling.png").GetPointerOrNull());
+			mKillImages.push_back(renderer->RegisterImage("Gfx/Killfeed/h-Teamchange.png").GetPointerOrNull());
+			mKillImages.push_back(renderer->RegisterImage("Gfx/Killfeed/i-Classchange.png").GetPointerOrNull());
+			mKillImages.push_back(renderer->RegisterImage("Gfx/Killfeed/j-NoScope.png").GetPointerOrNull());
+			for (size_t n = 0; n < mKillImages.size(); ++n) {
+				if (mKillImages[n]->GetHeight() > GetLineHeight()) {
+					SPRaise("Kill image (%d) height too big ", n);
+				}
+			}
 		}
 		ChatWindow::~ChatWindow() {}
 
@@ -82,7 +97,8 @@ namespace spades {
 				case KillTypeGrenade:
 				case KillTypeFall:
 				case KillTypeTeamChange:
-				case KillTypeClassChange: tmp[1] = 'a' + 2 + type; break;
+				case KillTypeClassChange:
+				case (int)MsgImage: tmp[1] = 'a' + 2 + type; break;
 				default: return "";
 			}
 			return tmp;
@@ -227,6 +243,14 @@ namespace spades {
 			}
 		}
 
+		IImage *ChatWindow::imageForIndex(char index) {
+			int real = index - 'a';
+			if (real >= 0 && real < (int)mKillImages.size()) {
+				return mKillImages[real];
+			}
+			return NULL;
+		}
+
 		void ChatWindow::Draw() {
 			SPADES_MARK_FUNCTION();
 
@@ -285,8 +309,24 @@ namespace spades {
 						tx = 0.f;
 						ty += lHeight;
 					} else if (msg[i] <= MsgColorMax && msg[i] >= 1) {
-						color = GetColor(msg[i]);
-						color.w = fade;
+						if (msg[i] == MsgImage) {
+							IImage *kill = NULL;
+							if (i + 1 < msg.size() && (kill = imageForIndex(msg[i + 1]))) {
+								Vector4 colorpm = color;
+								colorpm.x *= colorpm.w;
+								colorpm.y *= colorpm.w;
+								colorpm.z *= colorpm.w;
+								renderer->SetColorAlphaPremultiplied(colorpm);
+								renderer->DrawImage(kill, MakeVector2(tx + winX, ty + winY));
+								tx += kill->GetWidth();
+								++i;
+							} else {
+								// just ignore invalid icon specifier
+							}
+						} else {
+							color = GetColor(msg[i]);
+							color.w = fade;
+						}
 					} else {
 						size_t ln = 0;
 						GetCodePointFromUTF8String(msg, i, &ln);
