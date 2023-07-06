@@ -138,6 +138,13 @@ namespace spades {
 					selectedWeapon = SHOTGUN_WEAPON;
 				}
 				client->SpawnPressed(); // if we have 3 and are already spec someone wants to spec..
+			} else if ("Q" == key || "q" == key) {
+				selectedTeam = 0;
+			} else if ("W" == key || "w" == key) {
+				selectedTeam = 1;
+			} else if ("E" == key || "e" == key) {
+				selectedTeam = 2;
+				client->SpawnPressed();
 			}
 		}
 
