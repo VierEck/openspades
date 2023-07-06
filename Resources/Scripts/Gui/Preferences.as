@@ -690,6 +690,11 @@ namespace spades {
                                     ConfigNumberFormatter(0, " deg"));
             layouter.AddSliderField(_Tr("Preferences", "Minimap size"), "cg_minimapSize", 128, 256,
                                     8, ConfigNumberFormatter(0, " px"));
+            layouter.AddChoiceField(_Tr("Preferences", "Show Current Map Sector"), "cg_minimapCoords",
+                                    array<string> = {_Tr("Preferences", "Left"),
+                                                     _Tr("Preferences", "Beneath"),
+                                                     _Tr("Preferences", "OFF")},
+                                    array<int> = {2, 1, 0});
             layouter.AddToggleField(_Tr("Preferences", "Show Statistics"), "cg_stats");
             layouter.FinishLayout();
         }

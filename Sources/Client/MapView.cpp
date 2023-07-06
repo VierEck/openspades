@@ -31,12 +31,15 @@
 #include "TCGameMode.h"
 #include "Weapon.h"
 #include "World.h"
+#include "Fonts.h"
 #include <Core/Settings.h>
 #include <Core/TMPUtils.h>
 
 DEFINE_SPADES_SETTING(cg_minimapSize, "128");
 DEFINE_SPADES_SETTING(cg_minimapPlayerColor, "1");
 DEFINE_SPADES_SETTING(cg_minimapPlayerIcon, "1");
+
+DEFINE_SPADES_SETTING(cg_minimapCoords, "1");
 
 using std::pair;
 using stmp::optional;
@@ -649,6 +652,34 @@ namespace spades {
 					renderer.DrawImage(tracerImage, vertices[0], vertices[1], vertices[2],
 					                   tracerInRect);
 				}
+			}
+
+			//draw current map sector
+			if (!largeMap && cg_minimapCoords) {
+				IFont& font = client->fontManager->GetGuiFont();
+
+				auto letter = char(int('A') + int(focusPlayerPos.x / 64));
+				auto number = std::to_string(int(focusPlayerPos.y / 64) + 1);
+				std::string sector = letter + number;
+
+				Vector2 size = font.Measure(sector);
+
+				Vector2 pos = outRect.min;
+				if ((int)cg_minimapCoords < 2) {
+					pos.x += ((outRect.GetWidth() - size.x) * 0.5f);
+					pos.y = outRect.GetMaxY() + size.y * 0.5f - 8.0f;
+				} else {
+					pos.x = (pos.x - 8.0F) - size.x + 2.0f;
+					pos.y += ((outRect.GetHeight() - size.y) * 0.5f);
+				}
+
+				Vector4 color = MakeVector4(focusPlayer.GetColor().x, focusPlayer.GetColor().y, focusPlayer.GetColor().z, 1);
+				float luminosity = color.x + color.y + color.z;
+				Vector4 shadowColor = (luminosity > 0.9f)
+					? MakeVector4(0, 0, 0, 0.8f)
+					: MakeVector4(1, 1, 1, 0.8f);
+
+				font.DrawShadow(sector, pos, 1.0f, color, shadowColor);
 			}
 		}
 
