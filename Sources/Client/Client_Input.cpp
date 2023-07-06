@@ -489,11 +489,14 @@ namespace spades {
 							}
 							return;
 						} else if (CheckKey(cg_keyReloadWeapon, name) &&
-						           world->GetLocalPlayer()->IsSpectator() &&
-						           followCameraState.enabled) {
+						           world->GetLocalPlayer()->IsSpectator()) {
 							if (down) {
-								// Unfollow
-								followCameraState.enabled = false;
+								if (followCameraState.enabled) {
+									//unfollow
+									followCameraState.enabled = false;
+								} else {
+									FollowNextPlayer(false);
+								}
 							}
 							return;
 						}
