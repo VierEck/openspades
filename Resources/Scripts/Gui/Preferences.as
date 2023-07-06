@@ -707,6 +707,7 @@ namespace spades {
                                                      _Tr("Preferences", "OFF")},
                                     array<int> = {2, 1, 0});
             layouter.AddToggleField(_Tr("Preferences", "Show Statistics"), "cg_stats");
+            layouter.AddToggleField(_Tr("Preferences", "Colored Statistics"), "cg_StatsColor");
             layouter.FinishLayout();
         }
     }
