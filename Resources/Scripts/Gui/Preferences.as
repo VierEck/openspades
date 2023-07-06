@@ -692,6 +692,17 @@ namespace spades {
             layouter.AddToggleField(_Tr("Preferences", "Hit Indicator"), "cg_hitIndicator");
             layouter.AddToggleField(_Tr("Preferences", "Show Alerts"), "cg_alerts");
             layouter.AddVolumeSlider(_Tr("Preferences", "Alert Sounds"), "cg_alertSounds");
+			
+            layouter.AddHeading(_Tr("Preferences", "Spectator Fly Speed"));
+            layouter.AddSliderField(_Tr("Preferences", "Flying Speed Walk"),
+                                    "cg_specSpeedWalk", 0.1, 20.0, 0.1,
+                                    ConfigNumberFormatter(1, "x"));
+            layouter.AddSliderField(_Tr("Preferences", "Flying Speed Sprint"),
+                                    "cg_specSpeedSprint", 0.1, 20.0, 0.1,
+                                    ConfigNumberFormatter(1, "x"));
+            layouter.AddSliderField(_Tr("Preferences", "Flying Speed Sneak"),
+                                    "cg_specSpeedSneak", 0.1, 20.0, 0.1,
+                                    ConfigNumberFormatter(1, "x"));
 
             layouter.AddHeading(_Tr("Preferences", "AoS 0.75/0.76 Compatibility"));
             layouter.AddToggleField(_Tr("Preferences", "Allow Unicode"), "cg_unicode");

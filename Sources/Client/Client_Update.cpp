@@ -68,6 +68,10 @@ DEFINE_SPADES_SETTING(cg_killFeedImg, "1");
 DEFINE_SPADES_SETTING(cg_hitMarkSoundGain, "0.5");
 DEFINE_SPADES_SETTING(cg_hitAnalyze, "1");
 
+DEFINE_SPADES_SETTING(cg_specSpeedWalk, "1");
+DEFINE_SPADES_SETTING(cg_specSpeedSprint, "3");
+DEFINE_SPADES_SETTING(cg_specSpeedSneak, "0.3");
+
 namespace spades {
 	namespace client {
 
@@ -368,7 +372,11 @@ namespace spades {
 
 			float scale = 10.f * dt;
 			if (playerInput.sprint) {
-				scale *= 3.f;
+				scale *= (float)cg_specSpeedSprint;
+			} else if (playerInput.sneak) {
+				scale *= (float)cg_specSpeedSneak;
+			} else {
+				scale *= (float)cg_specSpeedWalk;
 			}
 			front *= scale;
 			right *= scale;
