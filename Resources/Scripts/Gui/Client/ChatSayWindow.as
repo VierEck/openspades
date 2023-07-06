@@ -156,7 +156,7 @@ namespace spades {
 
             float winW = Manager.Renderer.ScreenWidth * 0.7f, winH = 66.f;
             float winX = (Manager.Renderer.ScreenWidth - winW) * 0.5f;
-            float winY = (Manager.Renderer.ScreenHeight - winH) - 20.f;
+            float winY = (Manager.Renderer.ScreenHeight - winH) - 86.f;
             /*
             {
                 spades::ui::Label label(Manager);
@@ -168,13 +168,13 @@ namespace spades {
             {
                 spades::ui::Label label(Manager);
                 label.BackgroundColor = Vector4(0, 0, 0, 0.5f);
-                label.Bounds = AABB2(winX - 8.f, winY - 8.f, winW + 16.f, winH + 16.f);
+                label.Bounds = AABB2(winX - 8.f, winY - 8.f, winW + 16.f, winH + 86.f);
                 AddChild(label);
             }
             {
                 spades::ui::Button button(Manager);
                 button.Caption = _Tr("Client", "Say");
-                button.Bounds = AABB2(winX + winW - 244.f, winY + 36.f, 120.f, 30.f);
+                button.Bounds = AABB2(winX + winW - 210.f, winY + 36.f, 105.f, 30.f);
                 @button.Activated = spades::ui::EventHandler(this.OnSay);
                 AddChild(button);
                 @sayButton = button;
@@ -182,7 +182,7 @@ namespace spades {
             {
                 spades::ui::Button button(Manager);
                 button.Caption = _Tr("Client", "Cancel");
-                button.Bounds = AABB2(winX + winW - 120.f, winY + 36.f, 120.f, 30.f);
+                button.Bounds = AABB2(winX + winW - 105.f, winY + 36.f, 105.f, 30.f);
                 @button.Activated = spades::ui::EventHandler(this.OnCancel);
                 AddChild(button);
             }
@@ -198,7 +198,7 @@ namespace spades {
                 globalButton.Toggle = true;
                 globalButton.Toggled = isTeamChat == false;
                 globalButton.Caption = _Tr("Client", "Global");
-                globalButton.Bounds = AABB2(winX, winY + 36.f, 70.f, 30.f);
+                globalButton.Bounds = AABB2(winX, winY + 36.f, 105.f, 30.f);
                 @globalButton.Activated = spades::ui::EventHandler(this.OnSetGlobal);
                 AddChild(globalButton);
             }
@@ -207,10 +207,95 @@ namespace spades {
                 teamButton.Toggle = true;
                 teamButton.Toggled = isTeamChat == true;
                 teamButton.Caption = _Tr("Client", "Team");
-                teamButton.Bounds = AABB2(winX + 70.f, winY + 36.f, 70.f, 30.f);
+                teamButton.Bounds = AABB2(winX + 105.f, winY + 36.f, 105.f, 30.f);
                 @teamButton.Activated = spades::ui::EventHandler(this.OnSetTeam);
                 AddChild(teamButton);
             }
+            {
+                spades::ui::Button GrayButton(Manager);
+                GrayButton.Caption = _Tr("Client", "Gray");
+                GrayButton.Bounds = AABB2(winX, winY + 72.f, 70.f, 30.f);
+                @GrayButton.Activated = spades::ui::EventHandler(this.OnGray);
+                AddChild(GrayButton);
+            }
+            {
+                spades::ui::Button GreenButton(Manager);
+                GreenButton.Caption = _Tr("Client", "Green");
+                GreenButton.Bounds = AABB2(winX + 70.f, winY + 72.f, 70.f, 30.f);
+                @GreenButton.Activated = spades::ui::EventHandler(this.OnGreen);
+                AddChild(GreenButton);
+            }
+            {
+                spades::ui::Button RedButton(Manager);
+                RedButton.Caption = _Tr("Client", "Red");
+                RedButton.Bounds = AABB2(winX + 140.f, winY + 72.f, 70.f, 30.f);
+                @RedButton.Activated = spades::ui::EventHandler(this.OnRed);
+                AddChild(RedButton);
+            }
+            {
+                spades::ui::Button Team1Button(Manager);
+                Team1Button.Caption = _Tr("Client", "Team1");
+                Team1Button.Bounds = AABB2(winX, winY + 106.f, 70.f, 30.f);
+                @Team1Button.Activated = spades::ui::EventHandler(this.OnTeam1);
+                AddChild(Team1Button);
+            }
+            {
+                spades::ui::Button Team2Button(Manager);
+                Team2Button.Caption = _Tr("Client", "Team2");
+                Team2Button.Bounds = AABB2(winX + 70.f, winY + 106.f, 70.f, 30.f);
+                @Team2Button.Activated = spades::ui::EventHandler(this.OnTeam2);
+                AddChild(Team2Button);
+            }
+            {
+                spades::ui::Button Team3Button(Manager);
+                Team3Button.Caption = _Tr("Client", "Team3");
+                Team3Button.Bounds = AABB2(winX + 140.f, winY + 106.f, 70.f, 30.f);
+                @Team3Button.Activated = spades::ui::EventHandler(this.OnTeam3);
+                AddChild(Team3Button);
+            }
+            {
+                spades::ui::Button ClinButton(Manager);
+                ClinButton.Caption = _Tr("Client", "/clin");
+                ClinButton.Bounds = AABB2(winX + winW - 210.f, winY + 72.f, 70.f, 30.f);
+                @ClinButton.Activated = spades::ui::EventHandler(this.OnClin);
+                AddChild(ClinButton);
+            }
+            {
+                spades::ui::Button AccuracyButton(Manager);
+                AccuracyButton.Caption = _Tr("Client", "/accuracy");
+                AccuracyButton.Bounds = AABB2(winX + winW - 140.f, winY + 72.f, 70.f, 30.f);
+                @AccuracyButton.Activated = spades::ui::EventHandler(this.OnAccuracy);
+                AddChild(AccuracyButton);
+            }
+            {
+                spades::ui::Button PingButton(Manager);
+                PingButton.Caption = _Tr("Client", "/ping");
+                PingButton.Bounds = AABB2(winX + winW - 70.f, winY + 72.f, 70.f, 30.f);
+                @PingButton.Activated = spades::ui::EventHandler(this.OnPing);
+                AddChild(PingButton);
+            }
+            {
+                spades::ui::Button RatioButton(Manager);
+                RatioButton.Caption = _Tr("Client", "/ratio");
+                RatioButton.Bounds = AABB2(winX + winW - 70.f, winY + 106.f, 70.f, 30.f);
+                @RatioButton.Activated = spades::ui::EventHandler(this.OnRatio);
+                AddChild(RatioButton);
+            }
+            {
+                spades::ui::Button AnalyzeButton(Manager);
+                AnalyzeButton.Caption = _Tr("Client", "/analyze");
+                AnalyzeButton.Bounds = AABB2(winX + winW - 140.f, winY + 106.f, 70.f, 30.f);
+                @AnalyzeButton.Activated = spades::ui::EventHandler(this.OnAnalyze);
+                AddChild(AnalyzeButton);
+            }
+            {
+                spades::ui::Button ClientButton(Manager);
+                ClientButton.Caption = _Tr("Client", "/client");
+                ClientButton.Bounds = AABB2(winX + winW - 210.f, winY + 106.f, 70.f, 30.f);
+                @ClientButton.Activated = spades::ui::EventHandler(this.OnClient);
+                AddChild(ClientButton);
+            }
+
         }
 
         void UpdateState() { sayButton.Enable = field.Text.length > 0; }
@@ -237,6 +322,79 @@ namespace spades {
         private void OnCancel(spades::ui::UIElement @sender) {
             field.Cancelled();
             Close();
+        }
+
+
+        private void OnAnalyze(spades::ui::UIElement@ sender) {
+           string str = "/analyze ";
+           field.Text = field.Text + str;
+           field.Select(GetByteIndexForString(field.Text, str.length));
+        }
+
+        private void OnRatio(spades::ui::UIElement@ sender) {
+           string str = "/ratio ";
+           field.Text = field.Text + str;
+           field.Select(GetByteIndexForString(field.Text, str.length));
+        }
+
+        private void OnClient(spades::ui::UIElement@ sender) {
+           string str = "/client ";
+           field.Text = field.Text + str;
+           field.Select(GetByteIndexForString(field.Text, str.length));
+        }
+
+        private void OnClin(spades::ui::UIElement@ sender) {
+           string str = "/clin ";
+           field.Text = field.Text + str;
+           field.Select(GetByteIndexForString(field.Text, str.length));
+        }
+
+        private void OnPing(spades::ui::UIElement@ sender) {
+           string str = "/ping ";
+           field.Text = field.Text + str;
+           field.Select(GetByteIndexForString(field.Text, str.length));
+        }
+
+        private void OnAccuracy(spades::ui::UIElement@ sender) {
+           string str = "/accuracy ";
+           field.Text = field.Text + str;
+           field.Select(GetByteIndexForString(field.Text, str.length));
+        }
+
+        private void OnTeam1(spades::ui::UIElement@ sender) {
+           string str1 = "";
+           string str2 = "";
+           field.Text = str1 + field.Text + str2;
+        }
+
+        private void OnTeam2(spades::ui::UIElement@ sender) {
+           string str1 = "";
+           string str2 = "";
+           field.Text = str1 + field.Text + str2;
+        }
+
+        private void OnTeam3(spades::ui::UIElement@ sender) {
+           string str1 = "";
+           string str2 = "";
+           field.Text = str1 + field.Text + str2;
+        }
+
+        private void OnGray(spades::ui::UIElement@ sender) {
+           string str1 = "";
+           string str2 = "";
+           field.Text = str1 + field.Text + str2;
+        }
+
+        private void OnGreen(spades::ui::UIElement@ sender) {
+           string str1 = "";
+           string str2 = "";
+           field.Text = str1 + field.Text + str2;
+        }
+
+        private void OnRed(spades::ui::UIElement@ sender) {
+           string str1 = "";
+           string str2 = "";
+           field.Text = str1 + field.Text + str2;
         }
 
         private bool CheckAndSetConfigVariable() {
