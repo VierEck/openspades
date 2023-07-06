@@ -65,6 +65,7 @@ SPADES_SETTING(cg_shake);
 SPADES_SETTING(cg_holdAimDownSight);
 
 DEFINE_SPADES_SETTING(cg_killFeedImg, "1");
+DEFINE_SPADES_SETTING(cg_hitMarkSoundGain, "0.5");
 
 namespace spades {
 	namespace client {
@@ -1142,6 +1143,13 @@ namespace spades {
 					audioDevice->PlayLocal(c.GetPointerOrNull(), param);
 
 					hitScanState.hasPlayedHeadshotSound = true;
+				}
+
+				if (type != HitTypeHead && (float)cg_hitMarkSoundGain > 0) {
+					Handle<IAudioChunk> c = audioDevice->RegisterSound("Sounds/Feedback/HitFeedback.opus");
+					AudioParam param;
+					param.volume = (float)cg_hitMarkSoundGain;
+					audioDevice->PlayLocal(c.GetPointerOrNull(), param);
 				}
 
 				hitFeedbackIconState = 1.f;
