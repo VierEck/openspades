@@ -45,6 +45,8 @@ DEFINE_SPADES_SETTING(cg_CurrentColorRed, "0");
 DEFINE_SPADES_SETTING(cg_CurrentColorGreen, "0");
 DEFINE_SPADES_SETTING(cg_CurrentColorBlue, "0");
 
+SPADES_SETTING(cg_hudTransparency);
+
 namespace spades {
 	namespace client {
 		static IntVector3 SanitizeCol(IntVector3 col) {
@@ -529,9 +531,13 @@ namespace spades {
 
 			auto pos = Vector2(posX - size.x, posY - size.y);
 
-			renderer.SetColorAlphaPremultiplied(Vector4(0.f, 0.f, 0.f, 0.5f));
+			renderer.SetColorAlphaPremultiplied(Vector4(0.f, 0.f, 0.f, 0.5f * (float)cg_hudTransparency));
 			renderer.DrawImage(nullptr, AABB2(pos.x, pos.y, size.x, size.y));
-			font.DrawShadow(str, pos + Vector2(margin, margin), 0.8f, Vector4(1.f, 1.f, 1.f, 1.f), Vector4(0.f, 0.f, 0.f, 0.5f));
+			font.DrawShadow(
+				str, pos + Vector2(margin, margin), 0.8f,
+				Vector4(1.f, 1.f, 1.f, (float)cg_hudTransparency),
+				Vector4(0.f, 0.f, 0.f, 0.5f * (float)cg_hudTransparency)
+			);
 
 			for (size_t phase = 0; phase < 2; phase++) {
 				for (size_t i = 0; i < colors.size(); i++) {
@@ -549,7 +555,7 @@ namespace spades {
 					cl.x = icol.x / 255.f;
 					cl.y = icol.y / 255.f;
 					cl.z = icol.z / 255.f;
-					cl.w = 1.f;
+					cl.w = (float)cg_hudTransparency;
 
 					float x = scrW - 20.f - (paletteColumn * 10.f) + 10.f * col;
 					float y = scrH - 26.f - (paletteRow * 10.f) + 10.f * row - 60.f;
@@ -561,7 +567,7 @@ namespace spades {
 						renderer.DrawImage(img, MakeVector2(x, y), AABB2(0, 0, 16, 16));
 					}
 
-					renderer.SetColorAlphaPremultiplied(MakeVector4(1, 1, 1, 1));
+					renderer.SetColorAlphaPremultiplied(MakeVector4(1, 1, 1, (float)cg_hudTransparency));
 					if (selected) {
 						renderer.DrawImage(img, MakeVector2(x, y), AABB2(16, 16, 16, 16));
 					} else {

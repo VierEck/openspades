@@ -389,13 +389,13 @@ namespace spades {
 			p2.x += (int)ceilf(boundary.max.x);
 			p2.y += (int)ceilf(boundary.max.y);
 
-			renderer->SetColorAlphaPremultiplied(MakeVector4(0, 0, 0, (float)cg_hudTransparency));
+			renderer->SetColorAlphaPremultiplied(MakeVector4(0, 0, 0, 1));
 			renderer->DrawImage(img, AABB2(p1.x - 2, p1.y - 2, p2.x - p1.x + 4, 1));
 			renderer->DrawImage(img, AABB2(p1.x - 2, p1.y - 2, 1, p2.y - p1.y + 4));
 			renderer->DrawImage(img, AABB2(p1.x - 2, p2.y + 1, p2.x - p1.x + 4, 1));
 			renderer->DrawImage(img, AABB2(p2.x + 1, p1.y - 2, 1, p2.y - p1.y + 4));
 
-			renderer->SetColorAlphaPremultiplied(MakeVector4(1, 1, 1, (float)cg_hudTransparency));
+			renderer->SetColorAlphaPremultiplied(MakeVector4(1, 1, 1, 1));
 			renderer->DrawImage(img, AABB2(p1.x - 1, p1.y - 1, p2.x - p1.x + 2, 1));
 			renderer->DrawImage(img, AABB2(p1.x - 1, p1.y - 1, 1, p2.y - p1.y + 2));
 			renderer->DrawImage(img, AABB2(p1.x - 1, p2.y, p2.x - p1.x + 2, 1));
