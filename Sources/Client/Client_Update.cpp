@@ -66,6 +66,7 @@ SPADES_SETTING(cg_holdAimDownSight);
 
 DEFINE_SPADES_SETTING(cg_killFeedImg, "1");
 DEFINE_SPADES_SETTING(cg_hitMarkSoundGain, "0.5");
+DEFINE_SPADES_SETTING(cg_hitAnalyze, "1");
 
 namespace spades {
 	namespace client {
@@ -1150,6 +1151,37 @@ namespace spades {
 					AudioParam param;
 					param.volume = (float)cg_hitMarkSoundGain;
 					audioDevice->PlayLocal(c.GetPointerOrNull(), param);
+				}
+
+				if (cg_hitAnalyze) {
+					char buf[256];
+
+					std::string distType;
+					float dist;
+					if ((int)cg_hitAnalyze < 2) {
+						dist = (by.GetEye() - hurtPlayer.GetEye()).GetLength();
+						distType = "3D";
+					} else {
+						Vector3 dif = (by.GetEye() - hurtPlayer.GetEye());
+						dist = sqrtf(dif.x * dif.x + dif.y * dif.y);
+						distType = "2D";
+					}
+
+					std::string hitType;
+					switch (type) {
+						case HitTypeTorso: hitType = "Body"; break;
+						case HitTypeHead: hitType = "Head"; break;
+						case HitTypeArms: hitType = "Arm"; break;
+						case HitTypeLegs: hitType = "Leg"; break;
+						default: hitType = "Head"; break;
+					}
+
+					std::string weapoName = (type == HitTypeMelee) ? "Melee" : by.GetWeapon().GetName();
+
+					sprintf(buf, "%s hit %s %s-dist: %.1f blocks", weapoName.c_str(), hitType.c_str(), distType.c_str(), dist);
+
+					scriptedUI->RecordChatLog(buf, MakeVector4(1, 1, 1, 1));
+					chatWindow->AddMessage(buf);
 				}
 
 				hitFeedbackIconState = 1.f;

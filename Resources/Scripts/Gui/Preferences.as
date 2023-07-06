@@ -659,7 +659,6 @@ namespace spades {
             layouter.AddSliderField(_Tr("Preferences", "HitMark Sound"), "cg_hitMarkSoundGain", 0.0, 1.0, 0.1, ConfigNumberFormatter(1, "gain"));
 
             layouter.AddHeading(_Tr("Preferences", "Effects"));
-            layouter.AddToggleField(_Tr("Preferences", "KillFeed Images"), "cg_killFeedImg");
             layouter.AddToggleField(_Tr("Preferences", "Glow Blocks"), "cg_glowBlocks");
             layouter.AddToggleField(_Tr("Preferences", "Blood"), "cg_blood");
             layouter.AddToggleField(_Tr("Preferences", "Ejecting Brass"), "cg_ejectBrass");
@@ -677,9 +676,15 @@ namespace spades {
                                     array<int> = {2, 1, 0});
 
             layouter.AddHeading(_Tr("Preferences", "Feedbacks"));
+            layouter.AddToggleField(_Tr("Preferences", "KillFeed Images"), "cg_killFeedImg");
             layouter.AddChoiceField(_Tr("Preferences", "Ignore Chat Messages"), "cg_ignoreChatMessages",
                                     array<string> = {_Tr("Preferences", "All"),
                                                      _Tr("Preferences", "Players"),
+                                                     _Tr("Preferences", "OFF")},
+                                    array<int> = {2, 1, 0});
+            layouter.AddChoiceField(_Tr("Preferences", "Hit Analyze Messages"), "cg_hitAnalyze",
+                                    array<string> = {_Tr("Preferences", "2D"),
+                                                     _Tr("Preferences", "3D"),
                                                      _Tr("Preferences", "OFF")},
                                     array<int> = {2, 1, 0});
             layouter.AddVolumeSlider(_Tr("Preferences", "Chat Notify Sounds"), "cg_chatBeep");
