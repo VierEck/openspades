@@ -655,8 +655,8 @@ namespace spades {
             layouter.AddToggleField(_Tr("Preferences", "Spectator ESP Names"), "cg_specNames");
 
             layouter.AddHeading(_Tr("Preferences", "Sound"));
-            layouter.AddSliderField(_Tr("Preferences", "Gain/'Volume'"), "s_gain", 0.0, 4.0, 0.1, ConfigNumberFormatter(1, "gain"));
-            layouter.AddSliderField(_Tr("Preferences", "HitMark Sound"), "cg_hitMarkSoundGain", 0.0, 1.0, 0.1, ConfigNumberFormatter(1, "gain"));
+            layouter.AddSliderField(_Tr("Preferences", "Gain/'Volume'"), "s_gain", 0.0, 4.0, 0.1, ConfigNumberFormatter(1, " gain"));
+            layouter.AddSliderField(_Tr("Preferences", "HitMark Sound"), "cg_hitMarkSoundGain", 0.0, 1.0, 0.1, ConfigNumberFormatter(1, " gain"));
 
             layouter.AddHeading(_Tr("Preferences", "Effects"));
             layouter.AddToggleField(_Tr("Preferences", "Glow Blocks"), "cg_glowBlocks");
@@ -699,6 +699,10 @@ namespace spades {
             layouter.AddHeading(_Tr("Preferences", "Misc"));
             layouter.AddSliderField(_Tr("Preferences", "Field of View"), "cg_fov", 45, 90, 1,
                                     ConfigNumberFormatter(0, " deg"));
+            layouter.AddSliderField(_Tr("Preferences", "HUD transparency"), "cg_hudTransparency", 0, 1, 0.01,
+                                    ConfigNumberFormatter(2, "x"));
+            layouter.AddSliderField(_Tr("Preferences", "Minimap transparency"), "cg_minimapTransparency", 0, 1, 0.01,
+                                    ConfigNumberFormatter(2, "x"));
             layouter.AddSliderField(_Tr("Preferences", "Minimap size"), "cg_minimapSize", 128, 256,
                                     8, ConfigNumberFormatter(0, " px"));
             layouter.AddChoiceField(_Tr("Preferences", "Show Current Map Sector"), "cg_minimapCoords",

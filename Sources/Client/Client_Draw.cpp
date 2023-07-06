@@ -76,6 +76,8 @@ DEFINE_SPADES_SETTING(cg_playerNames, "2");
 DEFINE_SPADES_SETTING(cg_playerNameX, "0");
 DEFINE_SPADES_SETTING(cg_playerNameY, "0");
 DEFINE_SPADES_SETTING(cg_specNames, "1");
+
+DEFINE_SPADES_SETTING(cg_hudTransparency, "1");
 DEFINE_SPADES_SETTING(cg_StatsColor, "1");
 
 DEFINE_SPADES_SETTING(cg_DemoProgressBarOnlyInUi, "0");
@@ -387,13 +389,13 @@ namespace spades {
 			p2.x += (int)ceilf(boundary.max.x);
 			p2.y += (int)ceilf(boundary.max.y);
 
-			renderer->SetColorAlphaPremultiplied(MakeVector4(0, 0, 0, 1));
+			renderer->SetColorAlphaPremultiplied(MakeVector4(0, 0, 0, (float)cg_hudTransparency));
 			renderer->DrawImage(img, AABB2(p1.x - 2, p1.y - 2, p2.x - p1.x + 4, 1));
 			renderer->DrawImage(img, AABB2(p1.x - 2, p1.y - 2, 1, p2.y - p1.y + 4));
 			renderer->DrawImage(img, AABB2(p1.x - 2, p2.y + 1, p2.x - p1.x + 4, 1));
 			renderer->DrawImage(img, AABB2(p2.x + 1, p1.y - 2, 1, p2.y - p1.y + 4));
 
-			renderer->SetColorAlphaPremultiplied(MakeVector4(1, 1, 1, 1));
+			renderer->SetColorAlphaPremultiplied(MakeVector4(1, 1, 1, (float)cg_hudTransparency));
 			renderer->DrawImage(img, AABB2(p1.x - 1, p1.y - 1, p2.x - p1.x + 2, 1));
 			renderer->DrawImage(img, AABB2(p1.x - 1, p1.y - 1, 1, p2.y - p1.y + 2));
 			renderer->DrawImage(img, AABB2(p1.x - 1, p2.y, p2.x - p1.x + 2, 1));
@@ -439,7 +441,7 @@ namespace spades {
 					Handle<IImage> img = renderer->RegisterImage("Gfx/Intel.png");
 
 					// Strobe
-					Vector4 color{1.0f, 1.0f, 1.0f, 1.0f};
+					Vector4 color{1.0f, 1.0f, 1.0f, (float)cg_hudTransparency};
 					color *= std::fabs(std::sin(world->GetTime() * 2.0f));
 
 					renderer->SetColorAlphaPremultiplied(color);
@@ -506,9 +508,9 @@ namespace spades {
 						float y = scrHeight - 16.f - iconHeight;
 
 						if (clip >= i + 1) {
-							renderer->SetColorAlphaPremultiplied(MakeVector4(1, 1, 1, 1));
+							renderer->SetColorAlphaPremultiplied(MakeVector4(1, 1, 1, (float)cg_hudTransparency));
 						} else {
-							renderer->SetColorAlphaPremultiplied(MakeVector4(0.4, 0.4, 0.4, 1));
+							renderer->SetColorAlphaPremultiplied(MakeVector4(0.4, 0.4, 0.4, (float)cg_hudTransparency));
 						}
 
 						renderer->DrawImage(ammoIcon, AABB2(x, y, iconWidth, iconHeight));
@@ -528,7 +530,7 @@ namespace spades {
 					}
 				}
 
-				Vector4 numberColor = {1, 1, 1, 1};
+				Vector4 numberColor = {1, 1, 1, (float)cg_hudTransparency};
 
 				if (stockNum == 0) {
 					numberColor.y = 0.3f;
@@ -544,7 +546,7 @@ namespace spades {
 				Vector2 size = font.Measure(stockStr);
 				Vector2 pos = MakeVector2(scrWidth - 16.f, scrHeight - 16.f - iconHeight);
 				pos -= size;
-				font.DrawShadow(stockStr, pos, 1.f, numberColor, MakeVector4(0, 0, 0, 0.5));
+				font.DrawShadow(stockStr, pos, 1.f, numberColor, MakeVector4(0, 0, 0, 0.5 * (float)cg_hudTransparency));
 
 				// draw "press ... to reload"
 				{
@@ -621,8 +623,8 @@ namespace spades {
 						Vector2 size = font.Measure(msg);
 						Vector2 pos = MakeVector2((scrWidth - size.x) * .5f, scrHeight / 3.f);
 
-						font.DrawShadow(msg, pos, 1.f, MakeVector4(1, 1, 1, 1),
-						                MakeVector4(0, 0, 0, 0.5));
+						font.DrawShadow(msg, pos, 1.f, MakeVector4(1, 1, 1, (float)cg_hudTransparency),
+						                MakeVector4(0, 0, 0, 0.5 * (float)cg_hudTransparency));
 					}
 				}
 			}
@@ -646,7 +648,7 @@ namespace spades {
 				Vector2 pos = MakeVector2(textX, textY);
 				pos.x -= size.x;
 				textY += 20.0f;
-				font.DrawShadow(text, pos, 1.f, MakeVector4(1, 1, 1, 1), MakeVector4(0, 0, 0, 0.5));
+				font.DrawShadow(text, pos, 1.f, MakeVector4(1, 1, 1, (float)cg_hudTransparency), MakeVector4(0, 0, 0, 0.5 * (float)cg_hudTransparency));
 			};
 
 			if (HasTargetPlayer(GetCameraMode())) {
@@ -703,19 +705,20 @@ namespace spades {
 					Vector3 pToLocalDiff = p->GetEye() - lastSceneDef.viewOrigin;
 					float dist2d = sqrt(pToLocalDiff.x * pToLocalDiff.x + pToLocalDiff.y * pToLocalDiff.y);
 					if (dist2d <= 128.f) {
-						color = MakeVector4(1, 1, 1, 1);
+						color = MakeVector4(1, 1, 1, (float)cg_hudTransparency);
 					} else {
-						color = MakeVector4(1, 1, 0, 1);
+						color = MakeVector4(1, 1, 0, (float)cg_hudTransparency);
 					}
 				} else {
-					color = MakeVector4(1, 0, 0, 1);
+					color = MakeVector4(1, 0, 0, (float)cg_hudTransparency);
 				}
 
 				IFont &font = fontManager->GetGuiFont();
 				Vector2 size = font.Measure(p->GetName());
 				pos.x -= size.x * .5f;
 				pos.y -= size.y;
-				font.DrawShadow(p->GetName(), pos, 0.85, color, MakeVector4(0, 0, 0, 0.5));
+				font.DrawShadow(p->GetName(), pos, 0.85, color,
+					MakeVector4(0, 0, 0, 0.5 * (float)cg_hudTransparency));
 			}
 		}
 
@@ -759,7 +762,7 @@ namespace spades {
 				} break;
 				default: return;
 			}
-			renderer->SetColorAlphaPremultiplied(MakeVector4(1.f, 1.f, 1.f, 1.f));
+			renderer->SetColorAlphaPremultiplied(MakeVector4(1.f, 1.f, 1.f, (float)cg_hudTransparency));
 			renderer->DrawImage(imgVolume, MakeVector2(iconX, iconY));
 
 			Handle<IImage> imgTool;
@@ -805,7 +808,7 @@ namespace spades {
 					col.x = icol.x / 255.f;
 					col.y = icol.y / 255.f;
 					col.z = icol.z / 255.f;
-					col.w = 1.f;
+					col.w = (float)cg_hudTransparency;
 					renderer->SetColorAlphaPremultiplied(col);
 					float h = imgTool->GetHeight();
 					float w = imgTool->GetWidth();
@@ -814,7 +817,7 @@ namespace spades {
 					Handle<IImage> imgDestroy;
 					if (p.GetWeaponInput().secondary) {
 						imgDestroy = renderer->RegisterImage("Gfx/BuildMode/Destroy.png");
-						renderer->SetColorAlphaPremultiplied(MakeVector4(1.f, 1.f, 1.f, 1.f));
+						renderer->SetColorAlphaPremultiplied(MakeVector4(1.f, 1.f, 1.f, (float)cg_hudTransparency));
 						renderer->DrawImage(imgDestroy, MakeVector2(iconX + imgVolume->GetWidth(), iconY));
 					}
 				} return;
@@ -849,9 +852,13 @@ namespace spades {
 			auto pos = Vector2(curX, curY - size.y);
 			//y - size.y put the "anchor" point at the bottom so cursorpos ui doesnt overlap with build icons 
 
-			renderer->SetColorAlphaPremultiplied(Vector4(0.f, 0.f, 0.f, 0.5f));
+			renderer->SetColorAlphaPremultiplied(Vector4(0.f, 0.f, 0.f, 0.5f * (float)cg_hudTransparency));
 			renderer->DrawImage(nullptr, AABB2(pos.x, pos.y, size.x, size.y));
-			font.DrawShadow(str, pos + Vector2(margin, margin), 0.9f, Vector4(1.f, 1.f, 1.f, 1.f), Vector4(0.f, 0.f, 0.f, 0.5f));
+			font.DrawShadow(
+				str, pos + Vector2(margin, margin), 0.9f,
+				Vector4(1.f, 1.f, 1.f, (float)cg_hudTransparency),
+				Vector4(0.f, 0.f, 0.f, 0.5f * (float)cg_hudTransparency)
+			);
 		}
 
 		void Client::DrawBuilderDragCursor() {
@@ -880,7 +887,11 @@ namespace spades {
 
 			renderer->SetColorAlphaPremultiplied(Vector4(0.f, 0.f, 0.f, 0.5f));
 			renderer->DrawImage(nullptr, AABB2(pos.x, pos.y, size.x, size.y));
-			font.DrawShadow(str, pos + Vector2(margin, margin), 0.8f, Vector4(1.f, 1.f, 1.f, 1.f), Vector4(0.f, 0.f, 0.f, 0.5f));
+			font.DrawShadow(
+				str, pos + Vector2(margin, margin), 0.8f,
+				Vector4(1.f, 1.f, 1.f, (float)cg_hudTransparency),
+				Vector4(0.f, 0.f, 0.f, 0.5f * (float)cg_hudTransparency)
+			);
 		}
 
 		void Client::DrawMapObjectPosition() {
@@ -903,7 +914,10 @@ namespace spades {
 					size *= 0.8f;
 					pos.x -= size.x * .5f;
 					pos.y -= size.y;
-					font.DrawShadow(buf, pos, 0.8f, MakeVector4(1, 1, 1, 1), MakeVector4(0, 0, 0, 0.5));
+					font.DrawShadow(
+						buf, pos, 0.8f, MakeVector4(1, 1, 1, (float)cg_hudTransparency),
+						MakeVector4(0, 0, 0, 0.5 * (float)cg_hudTransparency)
+					);
 
 					// draw flag
 					if (!mode.GetTeam(1 - tId).hasIntel) {
@@ -921,7 +935,10 @@ namespace spades {
 						size *= 0.8f;
 						pos.x -= size.x * .5f;
 						pos.y -= size.y;
-						font.DrawShadow(buf, pos, 0.8f, MakeVector4(1, 1, 1, 1), MakeVector4(0, 0, 0, 0.5));
+						font.DrawShadow(
+							buf, pos, 0.8f, MakeVector4(1, 1, 1, (float)cg_hudTransparency),
+							MakeVector4(0, 0, 0, 0.5 * (float)cg_hudTransparency)
+						);
 					}
 				}
 			} else if (IGameMode::m_TC == world->GetMode()->ModeType()) {
@@ -943,7 +960,10 @@ namespace spades {
 					size *= 0.8f;
 					pos.x -= size.x * .5f;
 					pos.y -= size.y;
-					font.DrawShadow(buf, pos, 0.8f, MakeVector4(1, 1, 1, 1), MakeVector4(0, 0, 0, 0.5));
+					font.DrawShadow(
+						buf, pos, 0.8f, MakeVector4(1, 1, 1, (float)cg_hudTransparency),
+						MakeVector4(0, 0, 0, 0.5 * (float)cg_hudTransparency)
+					);
 				}
 			}
 		}
@@ -996,8 +1016,8 @@ namespace spades {
 			// draw border
 			switch (alertType) {
 				case AlertType::Notice: color = Vector4(0.f, 0.f, 0.f, 0.f); break;
-				case AlertType::Warning: color = Vector4(1.f, 1.f, 0.f, .7f); break;
-				case AlertType::Error: color = Vector4(1.f, 0.f, 0.f, .7f); break;
+				case AlertType::Warning: color = Vector4(1.f, 1.f, 0.f, .7f * (float)cg_hudTransparency); break;
+				case AlertType::Error: color = Vector4(1.f, 0.f, 0.f, .7f * (float)cg_hudTransparency); break;
 			}
 			color *= borderFade;
 			r->SetColorAlphaPremultiplied(color);
@@ -1012,15 +1032,15 @@ namespace spades {
 			r->DrawImage(nullptr, AABB2(pos.x + contentsSize.x, pos.y, border, contentsSize.y));
 
 			// fill background
-			color = Vector4(0.f, 0.f, 0.f, fade * 0.5f);
+			color = Vector4(0.f, 0.f, 0.f, fade * 0.5f * (float)cg_hudTransparency);
 			r->SetColorAlphaPremultiplied(color);
 			r->DrawImage(nullptr, AABB2(pos.x, pos.y, contentsSize.x, contentsSize.y));
 
 			// draw icon
 			switch (alertType) {
 				case AlertType::Notice: color = Vector4(0.f, 0.f, 0.f, 0.f); break;
-				case AlertType::Warning: color = Vector4(1.f, 1.f, 0.f, 1.f); break;
-				case AlertType::Error: color = Vector4(1.f, 0.f, 0.f, 1.f); break;
+				case AlertType::Warning: color = Vector4(1.f, 1.f, 0.f, (float)cg_hudTransparency); break;
+				case AlertType::Error: color = Vector4(1.f, 0.f, 0.f, (float)cg_hudTransparency); break;
 			}
 			color *= fade;
 			r->SetColorAlphaPremultiplied(color);
@@ -1029,13 +1049,13 @@ namespace spades {
 			             Vector2(pos.x + margin, pos.y + (contentsSize.y - 16.f) * 0.5f));
 
 			// draw text
-			color = Vector4(1.f, 1.f, 1.f, 1.f);
+			color = Vector4(1.f, 1.f, 1.f, (float)cg_hudTransparency);
 			color *= fade;
 
 			font.DrawShadow(alertContents,
 			                Vector2(pos.x + contentsSize.x - textSize.x - margin,
 			                        pos.y + (contentsSize.y - textSize.y) * 0.5f),
-			                1.f, color, Vector4(0.f, 0.f, 0.f, fade * 0.5f));
+			                1.f, color, Vector4(0.f, 0.f, 0.f, fade * 0.5f * (float)cg_hudTransparency));
 		}
 
 		void Client::DrawHealth() {
@@ -1047,7 +1067,7 @@ namespace spades {
 
 			std::string str = std::to_string(p.GetHealth());
 
-			Vector4 numberColor = {1, 1, 1, 1};
+			Vector4 numberColor = {1, 1, 1, (float)cg_hudTransparency};
 
 			if (p.GetHealth() == 0) {
 				numberColor.y = 0.3f;
@@ -1060,7 +1080,7 @@ namespace spades {
 			Vector2 size = font.Measure(str);
 			Vector2 pos = MakeVector2(16.f, scrHeight - 16.f);
 			pos.y -= size.y;
-			font.DrawShadow(str, pos, 1.f, numberColor, MakeVector4(0, 0, 0, 0.5));
+			font.DrawShadow(str, pos, 1.f, numberColor, MakeVector4(0, 0, 0, 0.5 * (float)cg_hudTransparency));
 		}
 
 		void Client::Draw2DWithWorld() {
@@ -1211,7 +1231,7 @@ namespace spades {
 					if (fps > 60)
 						fps = 60.f;
 					fps *= 0.016f;
-					fpsColor = MakeVector4(1.f - fps, fps, 0.f, 1.f);
+					fpsColor = MakeVector4(1.f - fps, fps, 0.f, (float)cg_hudTransparency);
 				}
 			}
 			{
@@ -1227,7 +1247,7 @@ namespace spades {
 					if (ups > 20) //upperlimit for voxlap
 						ups = 20.f;
 					ups *= 0.05f;
-					upsColor = MakeVector4(1.f - ups, ups, 0.f, 1.f);
+					upsColor = MakeVector4(1.f - ups, ups, 0.f, (float)cg_hudTransparency);
 				}
 			}
 
@@ -1242,7 +1262,7 @@ namespace spades {
 					if (ping > 300) //this is very generous
 						ping = 300;
 					ping *= 0.0033f;
-					pingColor = MakeVector4(ping, 1.f - ping, 0.f, 1.f);
+					pingColor = MakeVector4(ping, 1.f - ping, 0.f, (float)cg_hudTransparency);
 				}
 
 				sprintf(buf, "up/down: %.02f/%.02fkbps", upbps / 1000.0, downbps / 1000.0);
@@ -1264,28 +1284,28 @@ namespace spades {
 
 			auto pos = (Vector2(scrWidth, scrHeight) - size) * Vector2(0.5f, 1.f);
 
-			renderer->SetColorAlphaPremultiplied(Vector4(0.f, 0.f, 0.f, 0.5f));
+			renderer->SetColorAlphaPremultiplied(Vector4(0.f, 0.f, 0.f, 0.5f * (float)cg_hudTransparency));
 			renderer->DrawImage(nullptr, AABB2(pos.x, pos.y, size.x, size.y));
 
 			if (cg_StatsColor) {
 				font.DrawShadow(fpsStr, pos + Vector2(margin, margin), 
-				1.f, fpsColor, Vector4(0.f, 0.f, 0.f, 1.f));
+				1.f, fpsColor, Vector4(0.f, 0.f, 0.f, 0.5f * (float)cg_hudTransparency));
 			
 				font.DrawShadow(upsStr, pos + Vector2(margin, margin) + 
-				Vector2(font.Measure(fpsStr).x, 0.f), 1.f, upsColor, Vector4(0.f, 0.f, 0.f, 1.f));
+				Vector2(font.Measure(fpsStr).x, 0.f), 1.f, upsColor, Vector4(0.f, 0.f, 0.f, 0.5f * (float)cg_hudTransparency));
 			
 				font.DrawShadow(pingStr, pos + Vector2(margin, margin) +
 				Vector2(font.Measure(fpsStr).x + font.Measure(upsStr).x, 0.f), 
-				1.f, pingColor, Vector4(0.f, 0.f, 0.f, 1.f));
+				1.f, pingColor, Vector4(0.f, 0.f, 0.f, 0.5f * (float)cg_hudTransparency));
 			
 				font.DrawShadow(updownStr, pos + Vector2(margin, margin) + Vector2(font.Measure(fpsStr).x + 
 				font.Measure(upsStr).x + font.Measure(pingStr).x, 0.f), 1.f, 
-				Vector4(1.f, 1.f, 1.f, 1.f), Vector4(0.f, 0.f, 0.f, 1.f));
+				Vector4(1.f, 1.f, 1.f, (float)cg_hudTransparency), Vector4(0.f, 0.f, 0.f, 0.5f * (float)cg_hudTransparency));
 				return;
 			}
 
-			font.DrawShadow(str, pos + Vector2(margin, margin), 1.f, Vector4(1.f, 1.f, 1.f, 1.f),
-			                Vector4(0.f, 0.f, 0.f, 0.5f));
+			font.DrawShadow(str, pos + Vector2(margin, margin), 1.f, Vector4(1.f, 1.f, 1.f, (float)cg_hudTransparency),
+			                Vector4(0.f, 0.f, 0.f, 0.5f * (float)cg_hudTransparency));
 		}
 
 		void Client::DrawDemoProgress() {
@@ -1312,9 +1332,13 @@ namespace spades {
 
 			auto pos = (Vector2(scrWidth, scrHeight - size.y - 4) - size) * Vector2(0.5f, 1.f);
 
-			renderer->SetColorAlphaPremultiplied(Vector4(0.f, 0.f, 0.f, 0.5f));
+			renderer->SetColorAlphaPremultiplied(Vector4(0.f, 0.f, 0.f, 0.5f * (float)cg_hudTransparency));
 			renderer->DrawImage(nullptr, AABB2(pos.x, pos.y, size.x, size.y));
-			font.DrawShadow(str, pos + Vector2(margin, margin), 1.f, Vector4(1.f, 1.f, 1.f, 1.f), Vector4(0.f, 0.f, 0.f, 0.5f));
+			font.DrawShadow(
+				str, pos + Vector2(margin, margin), 1.f,
+				Vector4(1.f, 1.f, 1.f, (float)cg_hudTransparency),
+				Vector4(0.f, 0.f, 0.f, 0.5f * (float)cg_hudTransparency)
+			);
 
 			if (!(bool)cg_DemoProgressBarOnlyInUi || ((bool)cg_DemoProgressBarOnlyInUi && demo.uiActive)) {
 				float sizeBar = scrWidth * 0.5f;
@@ -1325,12 +1349,12 @@ namespace spades {
 
 				//draw progressbar background
 				pos = (Vector2(scrWidth - sizeBg, scrHeight - size.y * 3.f)) * Vector2(0.5f, 1.f);
-				renderer->SetColorAlphaPremultiplied(MakeVector4(0.f, 0.f, 0.f, 0.8f));
+				renderer->SetColorAlphaPremultiplied(MakeVector4(0.f, 0.f, 0.f, 0.8f * (float)cg_hudTransparency));
 				renderer->DrawImage(img, AABB2(pos.x, pos.y, sizeBg, 18.f));
 
 				//draw progressbar
 				pos += Vector2(6, 4);
-				renderer->SetColorAlphaPremultiplied(MakeVector4(0.6f, 0.6f, 0.6f, 0.4f));
+				renderer->SetColorAlphaPremultiplied(MakeVector4(0.6f, 0.6f, 0.6f, 0.4f * (float)cg_hudTransparency));
 				renderer->DrawImage(img, AABB2(pos.x, pos.y, sizeP, 10.f));
 				
 				if (demo.uiActive) {
@@ -1342,7 +1366,7 @@ namespace spades {
 					if (demo.skipTo >= 0) {
 						//draw delta pos
 						pos += Vector2(sizeP - 2, -2);
-						renderer->SetColorAlphaPremultiplied(MakeVector4(1.f, 1.f, 1.f, 1.f));
+						renderer->SetColorAlphaPremultiplied(MakeVector4(1.f, 1.f, 1.f, (float)cg_hudTransparency));
 						renderer->DrawImage(img, AABB2(pos.x, pos.y, 4, 14.f));
 
 						//draw hovered time
@@ -1356,9 +1380,13 @@ namespace spades {
 						size += Vector2(margin * 2.f, margin * 2.f);
 
 						pos = Vector2(demo.cursor.x - size.x * 0.5f, pos.y - size.y * 1.2f);
-						renderer->SetColorAlphaPremultiplied(Vector4(0.f, 0.f, 0.f, 0.5f));
+						renderer->SetColorAlphaPremultiplied(Vector4(0.f, 0.f, 0.f, 0.5f * (float)cg_hudTransparency));
 						renderer->DrawImage(nullptr, AABB2(pos.x, pos.y, size.x, size.y));
-						font.DrawShadow(str, pos + Vector2(margin, margin), 1.f, Vector4(1.f, 1.f, 1.f, 1.f), Vector4(0.f, 0.f, 0.f, 0.5f));
+						font.DrawShadow(
+							str, pos + Vector2(margin, margin), 1.f,
+							Vector4(1.f, 1.f, 1.f, (float)cg_hudTransparency),
+							Vector4(0.f, 0.f, 0.f, 0.5f * (float)cg_hudTransparency)
+						);
 					}
 				}
 			}

@@ -32,6 +32,7 @@
 
 DEFINE_SPADES_SETTING(cg_chatHeight, "30");
 DEFINE_SPADES_SETTING(cg_killfeedHeight, "26");
+SPADES_SETTING(cg_hudTransparency);
 
 namespace spades {
 	namespace client {
@@ -285,11 +286,11 @@ namespace spades {
 
 				float tx = 0.f, ty = y;
 
-				float fade = ent.fade;
+				float fade = ent.fade * (float)cg_hudTransparency;
 
 				if (expanded) {
 					// Display out-dated messages when expanded
-					fade = ent.bufferFade;
+					fade = ent.bufferFade * (float)cg_hudTransparency;
 				} else {
 					if (ent.timeFade < 1.f) {
 						fade *= ent.timeFade;

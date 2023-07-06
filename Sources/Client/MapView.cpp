@@ -40,6 +40,7 @@ DEFINE_SPADES_SETTING(cg_minimapPlayerColor, "1");
 DEFINE_SPADES_SETTING(cg_minimapPlayerIcon, "1");
 
 DEFINE_SPADES_SETTING(cg_minimapCoords, "1");
+DEFINE_SPADES_SETTING(cg_minimapTransparency, "1");
 
 using std::pair;
 using stmp::optional;
@@ -332,7 +333,7 @@ namespace spades {
 				                          (renderer.ScreenHeight() + zoomedSize.y) * .5f);
 			}
 
-			float alpha = 1.f;
+			float alpha = (float)cg_minimapTransparency;
 			if (largeMap) {
 				alpha = zoomState;
 			}
@@ -673,11 +674,13 @@ namespace spades {
 					pos.y += ((outRect.GetHeight() - size.y) * 0.5f);
 				}
 
-				Vector4 color = MakeVector4(focusPlayer.GetColor().x, focusPlayer.GetColor().y, focusPlayer.GetColor().z, 1);
+				Vector4 color = MakeVector4(
+					focusPlayer.GetColor().x, focusPlayer.GetColor().y, focusPlayer.GetColor().z, (float)cg_minimapTransparency
+				);
 				float luminosity = color.x + color.y + color.z;
 				Vector4 shadowColor = (luminosity > 0.9f)
-					? MakeVector4(0, 0, 0, 0.8f)
-					: MakeVector4(1, 1, 1, 0.8f);
+					? MakeVector4(0, 0, 0, 0.8f * (float)cg_minimapTransparency)
+					: MakeVector4(1, 1, 1, 0.8f * (float)cg_minimapTransparency);
 
 				font.DrawShadow(sector, pos, 1.0f, color, shadowColor);
 			}
