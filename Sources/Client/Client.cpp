@@ -782,9 +782,6 @@ namespace spades {
 				p->SetEditBrushSize(false);
 				net->switchModeTeam = 0;
 				net->localRespawnPos = {255, 255, 30};
-				p->walkFlySpeed = (float)cg_FlySpeedWalk;
-				p->sprintFlySpeed = (float)cg_FlySpeedSprint;
-				p->sneakFlySpeed = (float)cg_FlySpeedSneak;
 			}
 		}
 

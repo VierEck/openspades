@@ -121,10 +121,6 @@ DEFINE_SPADES_SETTING(cg_keyToolMapObject, "X");
 DEFINE_SPADES_SETTING(cg_keyScaleBuildDistance, "MiddleMouseButton");
 SPADES_SETTING(cg_MaxBuildDistance);
 
-DEFINE_SPADES_SETTING(cg_FlySpeedWalk, "2");
-DEFINE_SPADES_SETTING(cg_FlySpeedSprint, "10");
-DEFINE_SPADES_SETTING(cg_FlySpeedSneak, "0.5");
-
 namespace spades {
 	namespace client {
 
@@ -417,18 +413,6 @@ namespace spades {
 				}
 				if (!(bool)cg_demoRecord && net->IsDemoRecording())
 					net->StopDemo();
-
-				if (isMapEditor) {
-					Player &p = world->GetLocalPlayer().value();
-					if (p.walkFlySpeed != (float)cg_FlySpeedWalk ||
-						p.sprintFlySpeed != (float)cg_FlySpeedSprint ||
-						p.sneakFlySpeed != (float)cg_FlySpeedSneak) {
-
-						p.walkFlySpeed = (float)cg_FlySpeedWalk;
-						p.sprintFlySpeed = (float)cg_FlySpeedSprint;
-						p.sneakFlySpeed = (float)cg_FlySpeedSneak;
-					}
-				}
 				return;
 			}
 

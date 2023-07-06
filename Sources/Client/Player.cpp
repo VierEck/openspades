@@ -36,6 +36,10 @@
 DEFINE_SPADES_SETTING(cg_BuildDelayInSec, "0.2");
 DEFINE_SPADES_SETTING(cg_MaxBuildDistance, "1088");
 
+DEFINE_SPADES_SETTING(cg_FlySpeedWalk, "2");
+DEFINE_SPADES_SETTING(cg_FlySpeedSprint, "10");
+DEFINE_SPADES_SETTING(cg_FlySpeedSneak, "0.5");
+
 namespace spades {
 	namespace client {
 
@@ -1434,11 +1438,11 @@ namespace spades {
 		void Player::MoveBuilder(float fsynctics) {
 			float f = fsynctics;
 			if (input.sneak)
-				f *= sneakFlySpeed;
+				f *= (float)cg_FlySpeedSneak;
 			else if (input.sprint)
-				f *= sprintFlySpeed;
+				f *= (float)cg_FlySpeedSprint;
 			else
-				f *= walkFlySpeed;
+				f *= (float)cg_FlySpeedWalk;
 			if ((input.moveForward || input.moveBackward) && (input.moveRight || input.moveLeft) && (input.crouch || input.jump))
 				f /= sqrtf(2.f);
 
