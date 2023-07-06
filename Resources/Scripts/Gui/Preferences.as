@@ -60,12 +60,14 @@ namespace spades {
 
             AddTab(GameOptionsPanel(Manager, options, fontManager),
                    _Tr("Preferences", "Game Options"));
+            AddTab(ControlOptionsPanel(Manager, options, fontManager),
+                   _Tr("Preferences", "Controls"));
+            AddTab(GraphicsOptionsPanel(Manager, options, fontManager),
+                   _Tr("Preferences", "Graphics"));
             AddTab(DemoOptionsPanel(Manager, options, fontManager),
                    _Tr("Preferences", "Demo"));
             AddTab(MapEditorOptionsPanel(Manager, options, fontManager),
                    _Tr("Preferences", "MapEditor"));
-            AddTab(ControlOptionsPanel(Manager, options, fontManager),
-                   _Tr("Preferences", "Controls"));
             AddTab(MiscOptionsPanel(Manager, options, fontManager), _Tr("Preferences", "Misc"));
 
             {
@@ -728,6 +730,108 @@ namespace spades {
         }
     }
 
+    class GraphicsOptionsPanel : spades::ui::UIElement {
+        GraphicsOptionsPanel(spades::ui::UIManager@ manager,
+            PreferenceViewOptions@ options, FontManager@ fontManager) {
+            super(manager);
+            StandardPreferenceLayouter layouter(this, fontManager);
+
+            layouter.AddHeading(_Tr("Preferences", "General"));
+            layouter.AddSliderField(_Tr("Preferences", "Render Scale"), "r_scale",
+            0.2, 1, 0.01, ConfigNumberFormatter(0, "%", "", 100));
+            layouter.AddChoiceField(_Tr("Preferences", "Render Scaling Filter"), "r_scaleFilter",
+                                    array<string> = {_Tr("Preferences", "Bilinear"),
+                                                     _Tr("Preferences", "Bicubic"),
+                                                     _Tr("Preferences", "Nearest")},
+                                    array<int> = {2, 1, 0});
+            layouter.AddToggleField(_Tr("Preferences", "Rendering Statistics"), "r_debugTiming");
+            layouter.AddToggleField(_Tr("Preferences", "Allow CPU Rendering"), "r_allowSoftwareRendering");
+
+            layouter.AddHeading(_Tr("Preferences", "World"));
+            layouter.AddToggleField(_Tr("Preferences", "Dynamic Lights"), "r_dlights");
+            layouter.AddToggleField(_Tr("Preferences", "Tracers Lights"), "cg_tracerLights");
+            layouter.AddToggleField(_Tr("Preferences", "Depth Prepass"), "r_depthPrepass");
+            layouter.AddToggleField(_Tr("Preferences", "Occlusion Querying"), "r_occlusionQuery");
+
+            layouter.AddHeading(_Tr("Preferences", "Post-processing"));
+            layouter.AddToggleField(_Tr("Preferences", "Depth Of Field"), "r_depthOfField");
+            layouter.AddToggleField(_Tr("Preferences", "Camera Blur"), "r_cameraBlur");
+            layouter.AddToggleField(_Tr("Preferences", "FXAA Anti-Aliasing"), "r_fxaa");
+            layouter.AddToggleField(_Tr("Preferences", "Lens Flares"), "r_lensFlare");
+            layouter.AddToggleField(_Tr("Preferences", "Flares Lights"), "r_lensFlareDynamic");
+            layouter.AddToggleField(_Tr("Preferences", "Color Correction"), "r_colorCorrection");
+            layouter.AddSliderField(_Tr("Preferences", "Sharpening"), "r_sharpen",
+            0, 1, 0.1, ConfigNumberFormatter(1, ""));
+            layouter.AddSliderField(_Tr("Preferences", "Saturation"), "r_saturation",
+            0, 2, 0.1, ConfigNumberFormatter(1, ""));
+            layouter.AddSliderField(_Tr("Preferences", "Exposure"), "r_exposureValue",
+            -18, 18, 0.1, ConfigNumberFormatter(1, "EV"));
+
+            layouter.AddHeading(_Tr("Preferences", "Software Renderer"));
+            layouter.AddSliderField(_Tr("Preferences", "Thread Count"), "r_swNumThreads",
+            1, 16, 1, ConfigNumberFormatter(0, _Tr("Preferences", " Threads")));
+            layouter.AddSliderField(_Tr("Preferences", "Undersampling"), "r_swUndersampling",
+            0, 4, 1, ConfigNumberFormatter(0, "x"));
+
+            layouter.FinishLayout();
+        }
+    }
+
+    class ControlOptionsPanel : spades::ui::UIElement {
+        ControlOptionsPanel(spades::ui::UIManager @manager, PreferenceViewOptions @options,
+                            FontManager @fontManager) {
+            super(manager);
+
+            StandardPreferenceLayouter layouter(this, fontManager);
+            layouter.AddHeading(_Tr("Preferences", "Weapons/Tools"));
+            layouter.AddControl(_Tr("Preferences", "Attack"), "cg_keyAttack");
+            layouter.AddControl(_Tr("Preferences", "Alt. Attack"), "cg_keyAltAttack");
+            layouter.AddToggleField(_Tr("Preferences", "Hold Aim Down Sight"),
+                                    "cg_holdAimDownSight");
+            layouter.AddSliderField(_Tr("Preferences", "Mouse Sensitivity"), "cg_mouseSensitivity",
+                                    0.1, 10, 0.1, ConfigNumberFormatter(1, "x"));
+            layouter.AddSliderField(_Tr("Preferences", "ADS Mouse Sens. Scale"),
+                                    "cg_zoomedMouseSensScale", 0.05, 3, 0.05,
+                                    ConfigNumberFormatter(2, "x"));
+            layouter.AddSliderField(_Tr("Preferences", "Exponential Power"), "cg_mouseExpPower",
+                                    0.5, 1.5, 0.02, ConfigNumberFormatter(2, "", "^"));
+            layouter.AddToggleField(_Tr("Preferences", "Invert Y-axis Mouse Input"),
+                                    "cg_invertMouseY");
+            layouter.AddControl(_Tr("Preferences", "Reload"), "cg_keyReloadWeapon");
+            layouter.AddControl(_Tr("Preferences", "Capture Color"), "cg_keyCaptureColor");
+            layouter.AddControl(_Tr("Preferences", "Equip Spade"), "cg_keyToolSpade");
+            layouter.AddControl(_Tr("Preferences", "Equip Block"), "cg_keyToolBlock");
+            layouter.AddControl(_Tr("Preferences", "Equip Weapon"), "cg_keyToolWeapon");
+            layouter.AddControl(_Tr("Preferences", "Equip Grenade"), "cg_keyToolGrenade");
+            layouter.AddControl(_Tr("Preferences", "Last Used Tool"), "cg_keyLastTool");
+            layouter.AddPlusMinusField(_Tr("Preferences", "Switch Tools by Wheel"),
+                                       "cg_switchToolByWheel");
+
+            layouter.AddHeading(_Tr("Preferences", "Movement"));
+            layouter.AddControl(_Tr("Preferences", "Walk Forward"), "cg_keyMoveForward");
+            layouter.AddControl(_Tr("Preferences", "Backpedal"), "cg_keyMoveBackward");
+            layouter.AddControl(_Tr("Preferences", "Move Left"), "cg_keyMoveLeft");
+            layouter.AddControl(_Tr("Preferences", "Move Right"), "cg_keyMoveRight");
+            layouter.AddControl(_Tr("Preferences", "Crouch"), "cg_keyCrouch");
+            layouter.AddControl(_Tr("Preferences", "Sneak"), "cg_keySneak");
+            layouter.AddControl(_Tr("Preferences", "Jump"), "cg_keyJump");
+            layouter.AddControl(_Tr("Preferences", "Sprint"), "cg_keySprint");
+
+            layouter.AddHeading(_Tr("Preferences", "Misc"));
+            layouter.AddControl(_Tr("Preferences", "Minimap Scale"), "cg_keyChangeMapScale");
+            layouter.AddControl(_Tr("Preferences", "Toggle Map"), "cg_keyToggleMapZoom");
+            layouter.AddControl(_Tr("Preferences", "Flashlight"), "cg_keyFlashlight");
+            layouter.AddControl(_Tr("Preferences", "Global Chat"), "cg_keyGlobalChat");
+            layouter.AddControl(_Tr("Preferences", "Team Chat"), "cg_keyTeamChat");
+            layouter.AddControl(_Tr("Preferences", "Limbo Menu"), "cg_keyLimbo");
+            layouter.AddControl(_Tr("Preferences", "Save Map"), "cg_keySaveMap");
+            layouter.AddControl(_Tr("Preferences", "Save Sceneshot"), "cg_keySceneshot");
+            layouter.AddControl(_Tr("Preferences", "Save Screenshot"), "cg_keyScreenshot");
+
+            layouter.FinishLayout();
+        }
+    }
+
     class DemoOptionsPanel : spades::ui::UIElement {
         DemoOptionsPanel(spades::ui::UIManager @manager, PreferenceViewOptions @options,
                          FontManager @fontManager) {
@@ -812,61 +916,6 @@ namespace spades {
             layouter.AddSliderField(_Tr("Preferences", "Flying Speed Sneak"),
                                     "cg_FlySpeedSneak", 0.1, 20.0, 0.1,
                                     ConfigNumberFormatter(1, "x"));
-
-            layouter.FinishLayout();
-        }
-    }
-
-    class ControlOptionsPanel : spades::ui::UIElement {
-        ControlOptionsPanel(spades::ui::UIManager @manager, PreferenceViewOptions @options,
-                            FontManager @fontManager) {
-            super(manager);
-
-            StandardPreferenceLayouter layouter(this, fontManager);
-            layouter.AddHeading(_Tr("Preferences", "Weapons/Tools"));
-            layouter.AddControl(_Tr("Preferences", "Attack"), "cg_keyAttack");
-            layouter.AddControl(_Tr("Preferences", "Alt. Attack"), "cg_keyAltAttack");
-            layouter.AddToggleField(_Tr("Preferences", "Hold Aim Down Sight"),
-                                    "cg_holdAimDownSight");
-            layouter.AddSliderField(_Tr("Preferences", "Mouse Sensitivity"), "cg_mouseSensitivity",
-                                    0.1, 10, 0.1, ConfigNumberFormatter(1, "x"));
-            layouter.AddSliderField(_Tr("Preferences", "ADS Mouse Sens. Scale"),
-                                    "cg_zoomedMouseSensScale", 0.05, 3, 0.05,
-                                    ConfigNumberFormatter(2, "x"));
-            layouter.AddSliderField(_Tr("Preferences", "Exponential Power"), "cg_mouseExpPower",
-                                    0.5, 1.5, 0.02, ConfigNumberFormatter(2, "", "^"));
-            layouter.AddToggleField(_Tr("Preferences", "Invert Y-axis Mouse Input"),
-                                    "cg_invertMouseY");
-            layouter.AddControl(_Tr("Preferences", "Reload"), "cg_keyReloadWeapon");
-            layouter.AddControl(_Tr("Preferences", "Capture Color"), "cg_keyCaptureColor");
-            layouter.AddControl(_Tr("Preferences", "Equip Spade"), "cg_keyToolSpade");
-            layouter.AddControl(_Tr("Preferences", "Equip Block"), "cg_keyToolBlock");
-            layouter.AddControl(_Tr("Preferences", "Equip Weapon"), "cg_keyToolWeapon");
-            layouter.AddControl(_Tr("Preferences", "Equip Grenade"), "cg_keyToolGrenade");
-            layouter.AddControl(_Tr("Preferences", "Last Used Tool"), "cg_keyLastTool");
-            layouter.AddPlusMinusField(_Tr("Preferences", "Switch Tools by Wheel"),
-                                       "cg_switchToolByWheel");
-
-            layouter.AddHeading(_Tr("Preferences", "Movement"));
-            layouter.AddControl(_Tr("Preferences", "Walk Forward"), "cg_keyMoveForward");
-            layouter.AddControl(_Tr("Preferences", "Backpedal"), "cg_keyMoveBackward");
-            layouter.AddControl(_Tr("Preferences", "Move Left"), "cg_keyMoveLeft");
-            layouter.AddControl(_Tr("Preferences", "Move Right"), "cg_keyMoveRight");
-            layouter.AddControl(_Tr("Preferences", "Crouch"), "cg_keyCrouch");
-            layouter.AddControl(_Tr("Preferences", "Sneak"), "cg_keySneak");
-            layouter.AddControl(_Tr("Preferences", "Jump"), "cg_keyJump");
-            layouter.AddControl(_Tr("Preferences", "Sprint"), "cg_keySprint");
-
-            layouter.AddHeading(_Tr("Preferences", "Misc"));
-            layouter.AddControl(_Tr("Preferences", "Minimap Scale"), "cg_keyChangeMapScale");
-            layouter.AddControl(_Tr("Preferences", "Toggle Map"), "cg_keyToggleMapZoom");
-            layouter.AddControl(_Tr("Preferences", "Flashlight"), "cg_keyFlashlight");
-            layouter.AddControl(_Tr("Preferences", "Global Chat"), "cg_keyGlobalChat");
-            layouter.AddControl(_Tr("Preferences", "Team Chat"), "cg_keyTeamChat");
-            layouter.AddControl(_Tr("Preferences", "Limbo Menu"), "cg_keyLimbo");
-            layouter.AddControl(_Tr("Preferences", "Save Map"), "cg_keySaveMap");
-            layouter.AddControl(_Tr("Preferences", "Save Sceneshot"), "cg_keySceneshot");
-            layouter.AddControl(_Tr("Preferences", "Save Screenshot"), "cg_keyScreenshot");
 
             layouter.FinishLayout();
         }
