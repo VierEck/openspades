@@ -262,7 +262,7 @@ namespace spades {
             }
             {
                 spades::ui::Button AccuracyButton(Manager);
-                AccuracyButton.Caption = _Tr("Client", "/accuracy");
+                AccuracyButton.Caption = _Tr("Client", "/client");
                 AccuracyButton.Bounds = AABB2(winX + winW - 140.f, winY + 72.f, 70.f, 30.f);
                 @AccuracyButton.Activated = spades::ui::EventHandler(this.OnAccuracy);
                 AddChild(AccuracyButton);
@@ -283,16 +283,16 @@ namespace spades {
             }
             {
                 spades::ui::Button AnalyzeButton(Manager);
-                AnalyzeButton.Caption = _Tr("Client", "/analyze");
+                AnalyzeButton.Caption = _Tr("Client", "/accuracy");
                 AnalyzeButton.Bounds = AABB2(winX + winW - 140.f, winY + 106.f, 70.f, 30.f);
                 @AnalyzeButton.Activated = spades::ui::EventHandler(this.OnAnalyze);
                 AddChild(AnalyzeButton);
             }
             {
                 spades::ui::Button ClientButton(Manager);
-                ClientButton.Caption = _Tr("Client", "/client");
+                ClientButton.Caption = _Tr("Client", "/pubovl");
                 ClientButton.Bounds = AABB2(winX + winW - 210.f, winY + 106.f, 70.f, 30.f);
-                @ClientButton.Activated = spades::ui::EventHandler(this.OnClient);
+                @ClientButton.Activated = spades::ui::EventHandler(this.OnOvl);
                 AddChild(ClientButton);
             }
 
@@ -324,6 +324,9 @@ namespace spades {
             Close();
         }
 
+        private void OnOvl(spades::ui::UIElement@ sender) {
+           ui.helper.SayTeam("/pubovl");
+        }
 
         private void OnAnalyze(spades::ui::UIElement@ sender) {
            string str = "/analyze ";
