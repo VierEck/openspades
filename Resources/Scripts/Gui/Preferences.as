@@ -676,6 +676,11 @@ namespace spades {
                                     array<int> = {2, 1, 0});
 
             layouter.AddHeading(_Tr("Preferences", "Feedbacks"));
+            layouter.AddChoiceField(_Tr("Preferences", "Ignore Chat Messages"), "cg_ignoreChatMessages",
+                                    array<string> = {_Tr("Preferences", "All"),
+                                                     _Tr("Preferences", "Players"),
+                                                     _Tr("Preferences", "OFF")},
+                                    array<int> = {2, 1, 0});
             layouter.AddVolumeSlider(_Tr("Preferences", "Chat Notify Sounds"), "cg_chatBeep");
             layouter.AddToggleField(_Tr("Preferences", "Hit Indicator"), "cg_hitIndicator");
             layouter.AddToggleField(_Tr("Preferences", "Show Alerts"), "cg_alerts");

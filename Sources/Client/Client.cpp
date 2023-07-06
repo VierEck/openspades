@@ -69,6 +69,7 @@ DEFINE_SPADES_SETTING(cg_skipDeadPlayersWhenDead, "1");
 SPADES_SETTING(cg_playerName);
 DEFINE_SPADES_SETTING(cg_mentionWord);
 DEFINE_SPADES_SETTING(cg_shouldMentionWord, "1");
+DEFINE_SPADES_SETTING(cg_ignoreChatMessages, "0");
 
 DEFINE_SPADES_SETTING(cg_demoFileNameFormat, "year month day time");
 DEFINE_SPADES_SETTING(cg_demoRecord, "1");
@@ -951,7 +952,7 @@ namespace spades {
 #pragma mark - Chat Messages
 
 		void Client::PlayerSentChatMessage(Player &p, bool global, const std::string &msg) {
-			{
+			if (!cg_ignoreChatMessages) {
 				std::string s;
 				if (global)
 					//! Prefix added to global chat messages.
@@ -993,7 +994,7 @@ namespace spades {
 				NetLog("[Team] %s (%s): %s", p.GetName().c_str(),
 				       world->GetTeam(p.GetTeamId()).name.c_str(), msg.c_str());
 
-			if (!IsMuted()) {
+			if (!IsMuted() && !cg_ignoreChatMessages) {
 				Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Feedback/Chat.opus");
 				AudioParam params;
 				params.volume = (float)cg_chatBeep;
@@ -1024,7 +1025,7 @@ namespace spades {
 				}
 			}
 
-			if (msg.substr(0, 8) == "PM from ") {
+			if (msg.substr(0, 8) == "PM from " && (int)cg_ignoreChatMessages < 2) {
 				std::string s = "PM from " + msg.substr(8);
 				chatWindow->AddMessage(ChatWindow::ColoredMessage(s, MsgColorGreen));
 				return;
@@ -1034,7 +1035,8 @@ namespace spades {
 				net->CommandSwitchGameMode();
 			}
 
-			chatWindow->AddMessage(msg);
+			if ((int)cg_ignoreChatMessages < 2)
+				chatWindow->AddMessage(msg);
 		}
 
 #pragma mark - Follow / Spectate
