@@ -33,7 +33,7 @@ And many others which weren't mentioned here.
 -------------------
 
 "VierEck." - MapEditor, Demo Replay/Recording based on aos_replay
-"Nuceto" - killfeed image feature, specific word message highlight, colored chat message, colored stats, HUD and minimap transparency
+"Nuceto" - killfeed image feature, specific word message highlight, colored chat message, colored stats, HUD and minimap transparency, teammate map sector in chat message
 "ZeroGrey" - PM message highlight, show map sector, ignore chat, hitfeedback sound, hit analyze message
 "Doctor Dank" - PubOVL
 "BR" - aos_replay

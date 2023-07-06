@@ -70,6 +70,7 @@ SPADES_SETTING(cg_playerName);
 DEFINE_SPADES_SETTING(cg_mentionWord);
 DEFINE_SPADES_SETTING(cg_shouldMentionWord, "1");
 DEFINE_SPADES_SETTING(cg_ignoreChatMessages, "0");
+DEFINE_SPADES_SETTING(cg_showTeamMateLocation, "1");
 
 DEFINE_SPADES_SETTING(cg_demoFileNameFormat, "year month day time");
 DEFINE_SPADES_SETTING(cg_demoRecord, "1");
@@ -964,6 +965,11 @@ namespace spades {
 					//! The extra whitespace is not a typo.
 					s = _Tr("Client", "[Global] ");
 				s += ChatWindow::TeamColorMessage(p.GetName(), p.GetTeamId());
+				if(!global && cg_showTeamMateLocation) {
+					auto letter = char(int('A') + int(p.GetPosition().x / 64));
+					auto number = std::to_string(int(p.GetPosition().y / 64) + 1);
+					s += letter + number;
+				}
 				s += ": ";
 				s += msg;
 

@@ -682,6 +682,7 @@ namespace spades {
                                                      _Tr("Preferences", "Players"),
                                                      _Tr("Preferences", "OFF")},
                                     array<int> = {2, 1, 0});
+            layouter.AddToggleField(_Tr("Preferences", "Show TeamMate Map Sector"), "cg_showTeamMateLocation");
             layouter.AddChoiceField(_Tr("Preferences", "Hit Analyze Messages"), "cg_hitAnalyze",
                                     array<string> = {_Tr("Preferences", "2D"),
                                                      _Tr("Preferences", "3D"),
