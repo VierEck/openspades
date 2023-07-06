@@ -39,6 +39,7 @@ And many others which weren't mentioned here.
 "BR" - aos_replay
 "Liza" - block color inverting and mixing
 "MuffinTastic" - glow blocks
+"sovenance" - original hit analyze message
 "iSkyte" - killfeed images
 
 
