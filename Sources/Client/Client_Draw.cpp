@@ -758,6 +758,7 @@ namespace spades {
 				} break;
 				default: return;
 			}
+			renderer->SetColorAlphaPremultiplied(MakeVector4(1.f, 1.f, 1.f, 1.f));
 			renderer->DrawImage(imgVolume, MakeVector2(iconX, iconY));
 
 			Handle<IImage> imgTool;
@@ -812,6 +813,7 @@ namespace spades {
 					Handle<IImage> imgDestroy;
 					if (p.GetWeaponInput().secondary) {
 						imgDestroy = renderer->RegisterImage("Gfx/BuildMode/Destroy.png");
+						renderer->SetColorAlphaPremultiplied(MakeVector4(1.f, 1.f, 1.f, 1.f));
 						renderer->DrawImage(imgDestroy, MakeVector2(iconX + imgVolume->GetWidth(), iconY));
 					}
 				} return;
