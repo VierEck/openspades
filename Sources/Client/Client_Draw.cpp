@@ -671,9 +671,6 @@ namespace spades {
 			}
 
 			mapView->Draw();
-
-			if (cg_specNames)
-				DrawAllPlayerNames();
 		}
 
 		void Client::DrawAllPlayerNames() {
@@ -858,6 +855,8 @@ namespace spades {
 					}
 				} else {
 					DrawSpectateHUD();
+					if (cg_specNames)
+						DrawAllPlayerNames();
 				}
 
 				if (!cg_hideHud) {
