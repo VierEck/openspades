@@ -38,6 +38,7 @@
 #include <Core/ServerAddress.h>
 #include <Core/Stopwatch.h>
 #include <Gui/View.h>
+#include "IImage.h"
 
 namespace spades {
 	class IStream;
@@ -137,6 +138,9 @@ namespace spades {
 			std::unique_ptr<LimboView> limbo;
 			std::unique_ptr<PaletteView> paletteView;
 			std::unique_ptr<TCProgressView> tcView;
+
+			Handle<IImage> debugHitTestImage;
+			float lastShotTime;
 
 			// chat
 			std::unique_ptr<ChatWindow> chatWindow;
@@ -402,6 +406,7 @@ namespace spades {
 			void DrawAlert();
 			void DrawDebugAim();
 			void DrawStats();
+			void DrawHitTestDebugger();
 			void DrawAllPlayerNames();
 			void DrawDemoProgress();
 
@@ -421,6 +426,8 @@ namespace spades {
 			void TakeMapShot(bool mapEditor = false);
 
 			void NetLog(const char *format, ...);
+
+			bool hitTestSizeToggle;
 
 			struct {
 				bool replaying;

@@ -25,6 +25,7 @@
 #include <map>
 #include <vector>
 
+#include "IImage.h"
 #include <Core/Math.h>
 #include <Core/RefCountedObject.h>
 
@@ -40,6 +41,7 @@ namespace spades {
 			Handle<IRenderer> renderer;
 			World *world; // weak ref
 			Handle<Port> port;
+			Handle<Bitmap> displayShot;
 
 		public:
 			HitTestDebugger(World *world);
@@ -57,6 +59,7 @@ namespace spades {
 			/** Save hit detection debug image */
 			void SaveImage(const std::map<int, PlayerHit> &hits,
 			               const std::vector<Vector3> &bullets);
+			Handle<Bitmap> GetBitmap();
 		};
 	} // namespace client
 } // namespace spades

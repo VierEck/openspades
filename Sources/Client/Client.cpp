@@ -100,6 +100,7 @@ namespace spades {
 		      hasLastTool(false),
 		      lastPosSentTime(0.f),
 			  lastOriSentTime(0.f),
+			  lastShotTime(0.f),
 		      lastAliveTime(0.f),
 		      lastKills(0),
 		      hasDelayedReload(false),
@@ -113,6 +114,7 @@ namespace spades {
 		      focalLength(20.f),
 		      targetFocalLength(20.f),
 		      autoFocusEnabled(true),
+			  hitTestSizeToggle(false),
 
 		      inGameLimbo(false),
 		      fontManager(fontManager),

@@ -746,6 +746,7 @@ namespace spades {
 
 			if (&p == world->GetLocalPlayer()) {
 				localFireVibrationTime = time;
+				lastShotTime = time;
 			}
 
 			clientPlayers.at(p.GetId())->FiredWeapon();

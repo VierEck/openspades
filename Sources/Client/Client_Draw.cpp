@@ -52,6 +52,7 @@
 #include "SmokeSpriteEntity.h"
 #include "TCProgressView.h"
 #include "Tracer.h"
+#include "HitTestDebugger.h"
 
 #include "GameMap.h"
 #include "Grenade.h"
@@ -79,6 +80,9 @@ DEFINE_SPADES_SETTING(cg_specNames, "1");
 
 DEFINE_SPADES_SETTING(cg_hudTransparency, "1");
 DEFINE_SPADES_SETTING(cg_StatsColor, "1");
+SPADES_SETTING(cg_debugHitTest);
+DEFINE_SPADES_SETTING(cg_hitTestSize, "210");
+DEFINE_SPADES_SETTING(cg_hitTestTransparency, "1");
 
 DEFINE_SPADES_SETTING(cg_DemoProgressBarOnlyInUi, "0");
 
@@ -599,6 +603,48 @@ namespace spades {
 			}
 		}
 
+		void Client::DrawHitTestDebugger() {
+			SPADES_MARK_FUNCTION();
+
+			auto dbg = world->GetHitTestDebugger();
+			if (!dbg)
+				return;
+
+			auto bitmap = dbg->GetBitmap();
+			if (bitmap) {
+				auto img = renderer->CreateImage(*bitmap);
+				debugHitTestImage.Set(img.GetPointerOrNull());
+			}
+
+			float fade = 1.f * (float)cg_hitTestTransparency;
+			if ((int)cg_debugHitTest > 1 && !hitTestSizeToggle)
+				fade -= (time - lastShotTime) * 0.2f;
+
+			if (debugHitTestImage && fade > 0) {
+				int size = (int)cg_hitTestSize;
+				if(hitTestSizeToggle)
+					size = renderer->ScreenHeight() - 10;
+
+				float sw = renderer->ScreenWidth();
+				float sh = renderer->ScreenHeight();
+
+				AABB2 outRect((sw - size) - 8.0F, (sh - size) - 84.0F, size, size);
+				if (hitTestSizeToggle) {
+					outRect.min = MakeVector2((sw - size) * 0.5F, (sh - size) * 0.5F);
+					outRect.max = MakeVector2((sw + size) * 0.5F, (sh + size) * 0.5F);
+				}
+
+				renderer->SetColorAlphaPremultiplied(MakeVector4(fade, fade, fade, fade));
+				renderer->DrawImage(debugHitTestImage, outRect, AABB2(128, 512 - 128, 256, 256 - 512)); // flip Y axis
+
+				Handle<IImage> border = renderer->RegisterImage("Gfx/White.tga");
+				renderer->DrawImage(border, AABB2(outRect.min.x, outRect.min.y, outRect.max.x - outRect.min.x, 2));
+				renderer->DrawImage(border, AABB2(outRect.min.x, outRect.min.y, 2, outRect.max.y - outRect.min.y));
+				renderer->DrawImage(border, AABB2(outRect.min.x, outRect.max.y, outRect.max.x - outRect.min.x, 2));
+				renderer->DrawImage(border, AABB2(outRect.max.x, outRect.min.y, 2, outRect.max.y - outRect.min.y));
+			}
+		}
+
 		void Client::DrawDeadPlayerHUD() {
 			SPADES_MARK_FUNCTION();
 
@@ -1103,6 +1149,8 @@ namespace spades {
 
 				if (p->GetTeamId() < 2) {
 					// player is not spectator
+					if (cg_debugHitTest && (float)cg_hitTestTransparency > 0)
+						DrawHitTestDebugger();
 					if (p->IsAlive()) {
 						DrawJoinedAlivePlayerHUD();
 					} else {

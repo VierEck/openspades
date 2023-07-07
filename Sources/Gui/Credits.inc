@@ -33,10 +33,10 @@ And many others which weren't mentioned here.
 -------------------
 
 "VierEck." - MapEditor, Demo Replay/Recording based on aos_replay
-"Nuceto" - Killfeed image feature, Specific word message highlight, Colored chat message, Colored stats, HUD and Minimap transparency, Teammate map sector in chat message
-"ZeroGrey" - PM message highlight, Show map sector, Ignore chat, Hitfeedback sound, Hit analyze message
+"Nuceto" - Killfeed image feature, Specific word message highlight, Colored chat message, Colored stats, HUD and Minimap transparency, Teammate map sector in chat message, HitTest Debug display transparency and size
+"ZeroGrey" - PM message highlight, Show map sector, Ignore chat, Hitfeedback sound, Hit analyze message, HitTest Debug improvements
 "Doctor Dank" - PubOVL
-"BR" - aos_replay, throttle send orientatian time
+"BR" - aos_replay, throttle send orientatian time, HitTest Debug display
 "Liza" - Block color Inverting and Mixing
 "ptrstr" - next Spawn Loadout
 "MuffinTastic" - Glow Blocks

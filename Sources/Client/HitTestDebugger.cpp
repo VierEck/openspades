@@ -54,6 +54,10 @@ namespace spades {
 			port = Handle<Port>::New();
 			renderer = Handle<draw::SWRenderer>::New(port.Cast<draw::SWPort>()).Cast<IRenderer>();
 			renderer->Init();
+
+			GameMap *map = world->GetMap().GetPointerOrNull();
+			if (map != nullptr)
+				renderer->SetGameMap(map);
 		}
 
 		HitTestDebugger::~HitTestDebugger() {
@@ -113,10 +117,10 @@ namespace spades {
 				if (targetViewPos.GetPoweredLength() > 130.f * 130.f)
 					continue;
 
-				if (targetViewPos.z < -3.f) {
+				if (targetViewPos.z <= 0.f) {
 					continue;
 				}
-				targetViewPos.z = std::max(targetViewPos.z, 0.1f);
+				targetViewPos.z = std::max(targetViewPos.z, 0.001f);
 
 				const float bodySize = 3.5f;
 				if (fabsf(targetViewPos.x) > bodySize + 2.5f ||
@@ -221,10 +225,16 @@ namespace spades {
 					}
 				}
 
-				drawBox(hitboxes.head, getColor(hit.numHeadHits));
-				drawBox(hitboxes.torso, getColor(hit.numTorsoHits));
+				int cnt = hit.numHeadHits + hit.numTorsoHits;
 				for (std::size_t i = 0; i < 3; i++)
-					drawBox(hitboxes.limbs[i], getColor(hit.numLimbHits[i]));
+					cnt += hit.numLimbHits[i];
+
+				if (cnt > 0) {
+					drawBox(hitboxes.head, getColor(hit.numHeadHits));
+					drawBox(hitboxes.torso, getColor(hit.numTorsoHits));
+					for (std::size_t i = 0; i < 3; i++)
+						drawBox(hitboxes.limbs[i], getColor(hit.numLimbHits[i]));
+				}
 			}
 
 			renderer->EndScene();
@@ -234,8 +244,8 @@ namespace spades {
 			float size = renderer->ScreenWidth();
 
 			renderer->SetColorAlphaPremultiplied(Vector4(1.f, 0.f, 0.f, 0.9f));
-			renderer->DrawImage(*img, AABB2(size * 0.5f - 1.f, 0.f, 2.f, size));
-			renderer->DrawImage(*img, AABB2(0.f, size * 0.5f - 1.f, size, 2.f));
+			renderer->DrawImage(*img, AABB2(size * 0.5f - 1.f, 0.f, 1.f, size));
+			renderer->DrawImage(*img, AABB2(0.f, size * 0.5f - 1.f, size, 1.f));
 
 			// draw bullet vectors
 			float fov = tanf(def.fovY * .5f);
@@ -247,7 +257,7 @@ namespace spades {
 				x = floorf(x);
 				y = floorf(y);
 				renderer->SetColorAlphaPremultiplied(Vector4(1.f, 0.f, 0.f, 0.9f));
-				renderer->DrawImage(*img, AABB2(x - 1.f, y - 1.f, 3.f, 3.f));
+				renderer->DrawImage(*img, AABB2(x - 3.f, y - 3.f, 7.f, 7.f));
 				renderer->SetColorAlphaPremultiplied(Vector4(1.f, 1.f, 0.f, 0.9f));
 				renderer->DrawImage(*img, AABB2(x, y, 1.f, 1.f));
 			}
@@ -295,14 +305,20 @@ namespace spades {
 			// save image
 			try {
 				Handle<Bitmap> b = renderer->ReadBitmap();
-				b->Save(fileName);
-				SPLog("HitTestDebugger: saved to '%s'", fileName.c_str());
+				displayShot.Set(b.GetPointerOrNull());
+				//SPLog("HitTestDebugger: saved to '%s'", fileName.c_str());
 			} catch (const std::exception &ex) {
 				SPLog("HitTestDebugger failure: failed to save '%s': %s", fileName.c_str(),
 				      ex.what());
 			}
 
 			renderer->Flip();
+		}
+
+		Handle<Bitmap> HitTestDebugger::GetBitmap() {
+			Handle<Bitmap> tmp = displayShot;
+			displayShot.Set(nullptr);
+			return tmp;
 		}
 	} // namespace client
 } // namespace spades

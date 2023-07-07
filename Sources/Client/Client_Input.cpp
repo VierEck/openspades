@@ -90,6 +90,8 @@ DEFINE_SPADES_SETTING(cg_alerts, "1");
 SPADES_SETTING(cg_manualFocus);
 DEFINE_SPADES_SETTING(cg_keyAutoFocus, "MiddleMouseButton");
 
+DEFINE_SPADES_SETTING(cg_hitTestKey, "F8");
+
 SPADES_SETTING(cg_demoRecord);
 DEFINE_SPADES_SETTING(cg_keyPause, "Keypad 5");
 DEFINE_SPADES_SETTING(cg_keySkipForward, "Keypad 6");
@@ -529,6 +531,7 @@ namespace spades {
 							}
 						}
 					}
+
 					if (CheckKey(cg_keyMoveLeft, name)) {
 						playerInput.moveLeft = down;
 						keypadInput.left = down;
@@ -704,6 +707,10 @@ namespace spades {
 						TakeScreenShot(false);
 					} else if (CheckKey(cg_keySaveMap, name) && down) {
 						TakeMapShot();
+					} else if (CheckKey(cg_hitTestKey, name) && down) {
+						Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Misc/OpenMap.opus");
+						audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+						hitTestSizeToggle = !hitTestSizeToggle;		
 					} else if (CheckKey(cg_keyFlashlight, name) && down) {
 						// spectators and dead players should not be able to toggle the flashlight
 						if (world->GetLocalPlayer()->IsSpectator() ||

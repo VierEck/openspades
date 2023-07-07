@@ -694,7 +694,7 @@ namespace spades {
             layouter.AddToggleField(_Tr("Preferences", "Hit Indicator"), "cg_hitIndicator");
             layouter.AddToggleField(_Tr("Preferences", "Show Alerts"), "cg_alerts");
             layouter.AddVolumeSlider(_Tr("Preferences", "Alert Sounds"), "cg_alertSounds");
-			
+
             layouter.AddHeading(_Tr("Preferences", "Spectator Fly Speed"));
             layouter.AddSliderField(_Tr("Preferences", "Flying Speed Walk"),
                                     "cg_specSpeedWalk", 0.1, 20.0, 0.1,
@@ -713,6 +713,9 @@ namespace spades {
             layouter.AddHeading(_Tr("Preferences", "Misc"));
             layouter.AddSliderField(_Tr("Preferences", "Field of View"), "cg_fov", 45, 90, 1,
                                     ConfigNumberFormatter(0, " deg"));
+
+            layouter.AddHeading(_Tr("Preferences", "HUD"));
+            layouter.AddToggleField(_Tr("Preferences", "Hide HUD"), "cg_hideHud");
             layouter.AddSliderField(_Tr("Preferences", "HUD transparency"), "cg_hudTransparency", 0, 1, 0.01,
                                     ConfigNumberFormatter(2, "x"));
             layouter.AddSliderField(_Tr("Preferences", "Minimap transparency"), "cg_minimapTransparency", 0, 1, 0.01,
@@ -724,8 +727,21 @@ namespace spades {
                                                      _Tr("Preferences", "Beneath"),
                                                      _Tr("Preferences", "OFF")},
                                     array<int> = {2, 1, 0});
+            layouter.AddChoiceField(_Tr("Preferences", "HitTest Debugger"), "cg_debugHitTest",
+                                    array<string> = {_Tr("Preferences", "Fade"),
+                                                     _Tr("Preferences", "ON"),
+                                                     _Tr("Preferences", "OFF")},
+                                    array<int> = {2, 1, 0});
+            layouter.AddSliderField(_Tr("Preferences", "HitTest Size"),
+                                    "cg_hitTestSize", 0, 288, 1,
+                                    ConfigNumberFormatter(0, "px"));
+            layouter.AddSliderField(_Tr("Preferences", "HitTest Transparency"),
+                                    "cg_hitTestTransparency", 0, 1.0, 0.01,
+                                    ConfigNumberFormatter(2, "x"));
+            layouter.AddControl(_Tr("Preferences", "Toggle HitTest Zoom"), "cg_hitTestKey");
             layouter.AddToggleField(_Tr("Preferences", "Show Statistics"), "cg_stats");
             layouter.AddToggleField(_Tr("Preferences", "Colored Statistics"), "cg_StatsColor");
+
             layouter.FinishLayout();
         }
     }
