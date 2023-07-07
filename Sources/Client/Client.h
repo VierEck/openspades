@@ -292,10 +292,17 @@ namespace spades {
 
 			bool inGameLimbo;
 
+			struct SpawnConfig {
+				int team;
+				WeaponType weapon;
+			};
+			stmp::optional<SpawnConfig> nextSpawnConfig;
+
 			float GetLocalFireVibration();
 			void CaptureColor();
 			bool IsLimboViewActive();
 			void SpawnPressed();
+			void NextSpawnPressed();
 
 			stmp::optional<std::tuple<Player &, hitTag_t>> HotTrackedPlayer();
 

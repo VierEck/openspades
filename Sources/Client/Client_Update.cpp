@@ -925,6 +925,16 @@ namespace spades {
 				Vector3 v = -victim.GetFront();
 				followAndFreeCameraState.yaw = atan2(v.y, v.x);
 				followAndFreeCameraState.pitch = 30.f * M_PI / 180.f;
+
+				if (nextSpawnConfig) {
+					if (victim.GetTeamId() != (*nextSpawnConfig).team) {
+						net->SendTeamChange((*nextSpawnConfig).team);
+					}
+					if ((*nextSpawnConfig).team < 2 && victim.GetWeapon().GetWeaponType() != (*nextSpawnConfig).weapon) {
+						net->SendWeaponChange((*nextSpawnConfig).weapon);
+					}
+					nextSpawnConfig.reset();
+				}
 			}
 
 			// emit blood (also for local player)
