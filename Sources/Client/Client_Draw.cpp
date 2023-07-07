@@ -19,6 +19,7 @@
 
  */
 
+#include <cstdarg>
 #include <cstdlib>
 
 #include "Client.h"
