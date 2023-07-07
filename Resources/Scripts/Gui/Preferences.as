@@ -658,7 +658,7 @@ namespace spades {
 
             layouter.AddHeading(_Tr("Preferences", "Sound"));
             layouter.AddSliderField(_Tr("Preferences", "Gain/'Volume'"), "s_gain", 0.0, 4.0, 0.01, ConfigNumberFormatter(2, " gain"));
-            layouter.AddSliderField(_Tr("Preferences", "HitMark Sound"), "cg_hitMarkSoundGain", 0.0, 1.0, 0.1, ConfigNumberFormatter(1, " gain"));
+            layouter.AddSliderField(_Tr("Preferences", "HitMark Sound"), "cg_hitMarkSoundGain", 0.0, 2.0, 0.01, ConfigNumberFormatter(2, " gain"));
 
             layouter.AddHeading(_Tr("Preferences", "Effects"));
             layouter.AddToggleField(_Tr("Preferences", "Glow Blocks"), "cg_glowBlocks");
