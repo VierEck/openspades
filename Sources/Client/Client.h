@@ -179,6 +179,15 @@ namespace spades {
 			};
 			std::vector<HurtSprite> hurtSprites;
 
+			struct DamageIndicator {
+				int damage;
+				float fade;
+				Vector3 position;
+				Vector3 velocity;
+				DamageIndicator() : damage(0) { ; }
+			};
+			std::list<DamageIndicator> damageIndicators;
+
 			float GetAimDownState();
 			float GetSprintState();
 
@@ -420,6 +429,9 @@ namespace spades {
 			void DrawPlayerStats();
 			void DrawAllPlayerNames();
 			void DrawDemoProgress();
+
+			void UpdateDamageIndicators(float dt);
+			void DrawDamageIndicators();
 
 			void DrawScene();
 			void AddGrenadeToScene(Grenade &);

@@ -85,9 +85,9 @@ SPADES_SETTING(cg_debugHitTest);
 DEFINE_SPADES_SETTING(cg_hitTestSize, "210");
 DEFINE_SPADES_SETTING(cg_hitTestTransparency, "1");
 DEFINE_SPADES_SETTING(cg_playerStats, "0");
+DEFINE_SPADES_SETTING(cg_damageIndicators, "1");
 
 DEFINE_SPADES_SETTING(cg_DemoProgressBarOnlyInUi, "0");
-
 DEFINE_SPADES_SETTING(cg_DrawDragCursorPos, "1");
 
 namespace spades {
@@ -690,6 +690,55 @@ namespace spades {
 			addLine(" Head Spread Acc:  %.2f", (100 * hitsHead) / float(std::max(1, shotsCount)));
 		}
 
+		void Client::UpdateDamageIndicators(float dt) {
+			for (auto it = damageIndicators.begin();
+			     it != damageIndicators.end();) {
+				DamageIndicator& ent = *it;
+				ent.fade -= dt;
+				if (ent.fade < 0) {
+					std::list<DamageIndicator>::iterator tmp = it++;
+					damageIndicators.erase(tmp);
+					continue;
+				}
+
+				ent.position.x += ent.velocity.x * dt;
+				ent.position.y += ent.velocity.y * dt;
+				ent.position.z -= 2.0F * dt;
+
+				++it;
+			}
+		}
+
+		void Client::DrawDamageIndicators() {
+			SPADES_MARK_FUNCTION();
+
+			for (const auto& damages : damageIndicators) {
+				float fade = damages.fade;
+				if (fade > 1.0F)
+					fade = 1.0F;
+
+				Vector3 posxyz = Project(damages.position);
+				if (posxyz.z <= 0 || posxyz.z > 1.0004f)
+					continue;
+
+				Vector2 pos = {posxyz.x, posxyz.y};
+
+				int damage = damages.damage;
+
+				auto damageStr = "-" + ToString(damage);
+				IFont& font = fontManager->GetGuiFont();
+				Vector2 size = font.Measure(damageStr);
+				pos.x -= size.x * 0.5F;
+				pos.y -= size.y;
+
+				float per = 1.0F - (damage / 100.0F);
+				font.DrawShadow(
+					damageStr, pos, 1.0F, MakeVector4(1, per, per, fade),
+					MakeVector4(0, 0, 0, 0.25F * fade)
+				);
+			}
+		}
+
 		void Client::DrawDeadPlayerHUD() {
 			SPADES_MARK_FUNCTION();
 
@@ -1201,6 +1250,8 @@ namespace spades {
 						DrawHitTestDebugger();
 					if (p->IsAlive()) {
 						DrawJoinedAlivePlayerHUD();
+						if (cg_damageIndicators)
+							DrawDamageIndicators();
 					} else {
 						DrawDeadPlayerHUD();
 						DrawSpectateHUD();

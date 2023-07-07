@@ -543,6 +543,7 @@ namespace spades {
 			mapView->Update(dt);
 			largeMapView->Update(dt);
 
+			UpdateDamageIndicators(dt);
 			UpdateAutoFocus(dt);
 
 			if (world) {

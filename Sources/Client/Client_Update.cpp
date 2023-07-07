@@ -1189,6 +1189,20 @@ namespace spades {
 					audioDevice->PlayLocal(c.GetPointerOrNull(), param);
 				}
 
+				if (type != HitTypeMelee) {
+					Vector3 v;
+					v.x = SampleRandomFloat() - SampleRandomFloat();
+					v.y = SampleRandomFloat() - SampleRandomFloat();
+					v.z = SampleRandomFloat() - SampleRandomFloat();
+
+					DamageIndicator damages;
+					damages.damage = by.GetWeapon().GetDamage(type, 0);
+					damages.fade = 2.0F;
+					damages.position = hitPos;
+					damages.velocity = v.Normalize() * 4.f;
+					damageIndicators.push_back(damages);
+				}
+
 				switch (type) {
 					case HitTypeHead:
 						hitsHead += by.GetWeaponType() == SHOTGUN_WEAPON ? 0.125f : 1;
