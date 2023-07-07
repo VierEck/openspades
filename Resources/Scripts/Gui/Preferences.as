@@ -738,6 +738,7 @@ namespace spades {
             layouter.AddSliderField(_Tr("Preferences", "HitTest Transparency"),
                                     "cg_hitTestTransparency", 0, 1.0, 0.01,
                                     ConfigNumberFormatter(2, "x"));
+            layouter.AddToggleField(_Tr("Preferences", "K/D Streak Stats"), "cg_playerStats");
             layouter.AddToggleField(_Tr("Preferences", "Show Statistics"), "cg_stats");
             layouter.AddToggleField(_Tr("Preferences", "Colored Statistics"), "cg_StatsColor");
 
