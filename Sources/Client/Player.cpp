@@ -756,6 +756,48 @@ namespace spades {
 			// The custom state data, optionally set by `BulletHitPlayer`'s implementation
 			std::unique_ptr<IBulletHitScanState> stateCell;
 
+			if (IsLocalPlayer()) {
+				Vector3 dir = GetFront();
+				GameMap::RayCastResult mapResult;
+				mapResult = map->CastRay2(muzzle, dir, 500);
+				Player *hitPlayer = NULL;
+				for (int i = 0; i < world.GetNumPlayerSlots(); i++) {
+					auto maybeOther = world.GetPlayer(i);
+					if (maybeOther == this || !maybeOther)
+						continue;
+
+					Player &other = maybeOther.value();
+					if (&other == this || &other == NULL)
+						continue;
+					if (&other == this || !other.IsAlive() || other.GetTeamId() >= 2)
+						continue;
+					if (!other.RayCastApprox(muzzle, dir))
+						continue;
+
+					bool hasHit = false;
+					HitBoxes hb = other.GetHitBoxes();
+					Vector3 hitPos;
+
+					if (hb.head.RayCast(muzzle, dir, &hitPos)) {
+						world.GetListener()->AddTrueAccuracy(false, true);
+						break;
+					}
+					if (hb.torso.RayCast(muzzle, dir, &hitPos)) {
+						world.GetListener()->AddTrueAccuracy(true, false);
+						break;
+					}
+					for (int j = 0; j < 3; j++) {
+						if (hb.limbs[j].RayCast(muzzle, dir, &hitPos)) {
+							world.GetListener()->AddTrueAccuracy(true, false);
+							hasHit = true;
+							break;
+						}
+					}
+					if (hasHit)
+						break;
+				}
+			}
+
 			Vector3 dir2 = GetFront();
 			for (int i = 0; i < pellets; i++) {
 

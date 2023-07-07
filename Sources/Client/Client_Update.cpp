@@ -747,6 +747,7 @@ namespace spades {
 			if (&p == world->GetLocalPlayer()) {
 				localFireVibrationTime = time;
 				lastShotTime = time;
+				shotsCount++;
 			}
 
 			clientPlayers.at(p.GetId())->FiredWeapon();
@@ -1188,6 +1189,18 @@ namespace spades {
 					audioDevice->PlayLocal(c.GetPointerOrNull(), param);
 				}
 
+				switch (type) {
+					case HitTypeHead:
+						hitsHead += by.GetWeaponType() == SHOTGUN_WEAPON ? 0.125f : 1;
+						break;
+					case HitTypeTorso:
+					case HitTypeArms: //could add limb accuracy, but thats overkill
+					case HitTypeLegs:
+						hitsPlayer += by.GetWeaponType() == SHOTGUN_WEAPON ? 0.125f : 1;
+						break;
+					default: break;
+				}
+
 				if (cg_hitAnalyze) {
 					char buf[256];
 
@@ -1597,6 +1610,18 @@ namespace spades {
 				case BuildFailureReason::InvalidPosition:
 					ShowAlert(_Tr("Client", "You cannot place a block there."), AlertType::Error);
 					break;
+			}
+		}
+
+		void Client::AddTrueAccuracy(bool trueTotal, bool trueHead) {
+			stmp::optional<Player &> p = world->GetLocalPlayer();
+			if (!p)
+				return;
+
+			if (trueTotal) {
+				clicksPlayer += p->GetWeaponType() == SHOTGUN_WEAPON ? 0.125f : 1;
+			} else if (trueHead) {
+				clicksHead += p->GetWeaponType() == SHOTGUN_WEAPON ? 0.125f : 1;
 			}
 		}
 	} // namespace client

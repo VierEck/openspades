@@ -161,6 +161,11 @@ namespace spades {
 			int lastKills;
 			float worldSetTime;
 			bool hasDelayedReload;
+			int shotsCount;
+			int clicksPlayer;
+			float hitsPlayer;
+			int clicksHead;
+			float hitsHead;
 			int curKills;
 			int curDeaths;
 			int curStreak;
@@ -562,6 +567,8 @@ namespace spades {
 			void LocalPlayerBuildError(BuildFailureReason reason) override;
 			void LocalPlayerCreatedVolume(IntVector3, IntVector3, VolumeType, VolumeActionType) override;
 			// IWorldListener end
+
+			void AddTrueAccuracy(bool trueTotal, bool trueHead) override;
 
 			float GetClientTime() { return time; }
 			float GetClientTimeMultiplied() { return time * demo.speed; }

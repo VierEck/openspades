@@ -656,7 +656,7 @@ namespace spades {
 
 			float x = 8.0f;
 			float y = sh * 0.5f;
-			y -= 64.0f;
+			y -= 74.0f;
 
 			auto addLine = [&](const char* format, ...) {
 				char buf[256];
@@ -668,19 +668,26 @@ namespace spades {
 				Vector2 pos = MakeVector2(x, y);
 				y += 16.0f;
 
-				Vector2 size = font.Measure("Best Streak: 0000");
+				Vector2 size = font.Measure("0Head Spread Acc:  000000");
 				size *= 0.8f;
 
 				renderer->SetColorAlphaPremultiplied(Vector4(0.f, 0.f, 0.f, 0.5f * (float)cg_hudTransparency));
 				renderer->DrawImage(nullptr, AABB2(pos.x, pos.y, size.x, size.y));
 
-				font.DrawShadow(buf, pos, 0.8f, MakeVector4(1, 1, 1, 0.8f * (float)cg_hudTransparency), MakeVector4(0, 0, 0, 0.8f * (float)cg_hudTransparency));
+				font.DrawShadow(
+					buf, pos, 0.8f, MakeVector4(1, 1, 1, (float)cg_hudTransparency),
+					MakeVector4(0, 0, 0, (float)cg_hudTransparency)
+				);
 			};
 
-			addLine("K/D Ratio: %.3g", curKills / float(std::max(1, curDeaths)));
-			addLine("Kill Streak: %d", curStreak);
-			addLine("Last Streak: %d", lastStreak);
-			addLine("Best Streak: %d", bestStreak);
+			addLine(" K/D Ratio:  %.3g", curKills / float(std::max(1, curDeaths)));
+			addLine(" Kill Streak:  %d", curStreak);
+			addLine(" Last Streak:  %d", lastStreak);
+			addLine(" Best Streak:  %d", bestStreak);
+			addLine(" Total True Acc:  %.2f", (100 * clicksPlayer) / float(std::max(1, shotsCount)));
+			addLine(" Total Spread Acc:  %.2f", (100 * hitsPlayer) / float(std::max(1, shotsCount)));
+			addLine(" Head True Acc:  %.2f", (100 * clicksHead) / float(std::max(1, shotsCount)));
+			addLine(" Head Spread Acc:  %.2f", (100 * hitsHead) / float(std::max(1, shotsCount)));
 		}
 
 		void Client::DrawDeadPlayerHUD() {
