@@ -657,7 +657,7 @@ namespace spades {
             layouter.AddToggleField(_Tr("Preferences", "Spectator ESP Names"), "cg_specNames");
 
             layouter.AddHeading(_Tr("Preferences", "Sound"));
-            layouter.AddSliderField(_Tr("Preferences", "Gain/'Volume'"), "s_gain", 0.0, 4.0, 0.1, ConfigNumberFormatter(1, " gain"));
+            layouter.AddSliderField(_Tr("Preferences", "Gain/'Volume'"), "s_gain", 0.0, 4.0, 0.01, ConfigNumberFormatter(2, " gain"));
             layouter.AddSliderField(_Tr("Preferences", "HitMark Sound"), "cg_hitMarkSoundGain", 0.0, 1.0, 0.1, ConfigNumberFormatter(1, " gain"));
 
             layouter.AddHeading(_Tr("Preferences", "Effects"));
@@ -738,7 +738,6 @@ namespace spades {
             layouter.AddSliderField(_Tr("Preferences", "HitTest Transparency"),
                                     "cg_hitTestTransparency", 0, 1.0, 0.01,
                                     ConfigNumberFormatter(2, "x"));
-            layouter.AddControl(_Tr("Preferences", "Toggle HitTest Zoom"), "cg_hitTestKey");
             layouter.AddToggleField(_Tr("Preferences", "Show Statistics"), "cg_stats");
             layouter.AddToggleField(_Tr("Preferences", "Colored Statistics"), "cg_StatsColor");
 
@@ -836,6 +835,7 @@ namespace spades {
             layouter.AddHeading(_Tr("Preferences", "Misc"));
             layouter.AddControl(_Tr("Preferences", "Minimap Scale"), "cg_keyChangeMapScale");
             layouter.AddControl(_Tr("Preferences", "Toggle Map"), "cg_keyToggleMapZoom");
+            layouter.AddControl(_Tr("Preferences", "Toggle HitTest Zoom"), "cg_hitTestKey");
             layouter.AddControl(_Tr("Preferences", "Flashlight"), "cg_keyFlashlight");
             layouter.AddControl(_Tr("Preferences", "Global Chat"), "cg_keyGlobalChat");
             layouter.AddControl(_Tr("Preferences", "Team Chat"), "cg_keyTeamChat");
