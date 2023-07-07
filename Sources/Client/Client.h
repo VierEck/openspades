@@ -161,6 +161,11 @@ namespace spades {
 			int lastKills;
 			float worldSetTime;
 			bool hasDelayedReload;
+			int curKills;
+			int curDeaths;
+			int curStreak;
+			int lastStreak;
+			int bestStreak;
 			struct HurtSprite {
 				float angle;
 				float horzShift;
@@ -407,6 +412,7 @@ namespace spades {
 			void DrawDebugAim();
 			void DrawStats();
 			void DrawHitTestDebugger();
+			void DrawPlayerStats();
 			void DrawAllPlayerNames();
 			void DrawDemoProgress();
 

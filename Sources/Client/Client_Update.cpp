@@ -894,6 +894,20 @@ namespace spades {
 
 		void Client::PlayerKilledPlayer(spades::client::Player &killer,
 		                                spades::client::Player &victim, KillType kt) {
+
+			if (killer.IsLocalPlayer() && &killer != &victim) {
+				curKills++;
+				curStreak++;
+			}
+
+			if (victim.IsLocalPlayer()) {
+				curDeaths++;
+				lastStreak = curStreak;
+				if (curStreak > bestStreak)
+					bestStreak = curStreak;
+				curStreak = 0;
+			}
+
 			// play hit sound
 			if (kt == KillTypeWeapon || kt == KillTypeHeadshot) {
 				// don't play on local: see BullethitPlayer

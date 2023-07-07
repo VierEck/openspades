@@ -83,6 +83,7 @@ DEFINE_SPADES_SETTING(cg_StatsColor, "1");
 SPADES_SETTING(cg_debugHitTest);
 DEFINE_SPADES_SETTING(cg_hitTestSize, "210");
 DEFINE_SPADES_SETTING(cg_hitTestTransparency, "1");
+DEFINE_SPADES_SETTING(cg_playerStats, "0");
 
 DEFINE_SPADES_SETTING(cg_DemoProgressBarOnlyInUi, "0");
 
@@ -645,6 +646,42 @@ namespace spades {
 			}
 		}
 
+		void Client::DrawPlayerStats() {
+			SPADES_MARK_FUNCTION();
+
+			IFont &font = fontManager->GetGuiFont();
+
+			float sh = renderer->ScreenHeight();
+
+			float x = 8.0f;
+			float y = sh * 0.5f;
+			y -= 64.0f;
+
+			auto addLine = [&](const char* format, ...) {
+				char buf[256];
+				va_list va;
+				va_start(va, format);
+				vsnprintf(buf, sizeof(buf), format, va);
+				va_end(va);
+
+				Vector2 pos = MakeVector2(x, y);
+				y += 16.0f;
+
+				Vector2 size = font.Measure("Best Streak: 0000");
+				size *= 0.8f;
+
+				renderer->SetColorAlphaPremultiplied(Vector4(0.f, 0.f, 0.f, 0.5f * (float)cg_hudTransparency));
+				renderer->DrawImage(nullptr, AABB2(pos.x, pos.y, size.x, size.y));
+
+				font.DrawShadow(buf, pos, 0.8f, MakeVector4(1, 1, 1, 0.8f * (float)cg_hudTransparency), MakeVector4(0, 0, 0, 0.8f * (float)cg_hudTransparency));
+			};
+
+			addLine("K/D Ratio: %.3g", curKills / float(std::max(1, curDeaths)));
+			addLine("Kill Streak: %d", curStreak);
+			addLine("Last Streak: %d", lastStreak);
+			addLine("Best Streak: %d", bestStreak);
+		}
+
 		void Client::DrawDeadPlayerHUD() {
 			SPADES_MARK_FUNCTION();
 
@@ -1149,7 +1186,10 @@ namespace spades {
 
 				if (p->GetTeamId() < 2) {
 					// player is not spectator
-					if (cg_debugHitTest && (float)cg_hitTestTransparency > 0)
+					if (cg_playerStats)
+							DrawPlayerStats();
+					if (cg_debugHitTest && p->IsToolWeapon() &&
+						(float)cg_hitTestTransparency > 0)
 						DrawHitTestDebugger();
 					if (p->IsAlive()) {
 						DrawJoinedAlivePlayerHUD();
