@@ -99,6 +99,7 @@ namespace spades {
 		      timeSinceInit(0.f),
 		      hasLastTool(false),
 		      lastPosSentTime(0.f),
+			  lastOriSentTime(0.f),
 		      lastAliveTime(0.f),
 		      lastKills(0),
 		      hasDelayedReload(false),

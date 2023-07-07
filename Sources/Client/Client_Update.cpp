@@ -500,10 +500,11 @@ namespace spades {
 
 			// send orientation
 			Vector3 curFront = player.GetFront();
-			if (curFront.x != lastFront.x || curFront.y != lastFront.y ||
-			    curFront.z != lastFront.z) {
+			if ((curFront.x != lastFront.x || curFront.y != lastFront.y ||
+			    curFront.z != lastFront.z) && time > lastOriSentTime + 0.0084f) {
 				lastFront = curFront;
 				net->SendOrientation(curFront);
+				lastOriSentTime = time;
 			}
 
 			lastKills = world->GetPlayerPersistent(player.GetId()).kills;
@@ -582,10 +583,11 @@ namespace spades {
 
 			if (!isLocalMapEditor) {
 				Vector3 curFront = player.GetFront();
-				if (curFront.x != lastFront.x || curFront.y != lastFront.y ||
-					curFront.z != lastFront.z) {
+				if ((curFront.x != lastFront.x || curFront.y != lastFront.y ||
+					curFront.z != lastFront.z) && time > lastOriSentTime + 0.05f) {
 					lastFront = curFront;
 					net->SendOrientation(curFront);
+					lastOriSentTime = time;
 				}
 				if (time > lastPosSentTime + 0.2f) {
 					net->SendPosition();
