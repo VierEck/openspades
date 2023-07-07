@@ -1617,12 +1617,8 @@ namespace spades {
 			stmp::optional<Player &> p = world->GetLocalPlayer();
 			if (!p)
 				return;
-
-			if (trueTotal) {
-				clicksPlayer += p->GetWeaponType() == SHOTGUN_WEAPON ? 0.125f : 1;
-			} else if (trueHead) {
-				clicksHead += p->GetWeaponType() == SHOTGUN_WEAPON ? 0.125f : 1;
-			}
+			clicksPlayer += trueTotal;
+			clicksHead += trueHead;
 		}
 	} // namespace client
 } // namespace spades
