@@ -73,6 +73,8 @@ DEFINE_SPADES_SETTING(cg_specSpeedWalk, "1");
 DEFINE_SPADES_SETTING(cg_specSpeedSprint, "3");
 DEFINE_SPADES_SETTING(cg_specSpeedSneak, "0.3");
 
+DEFINE_SPADES_SETTING(cg_fallingBlocks, "1");
+
 namespace spades {
 	namespace client {
 
@@ -1370,10 +1372,6 @@ namespace spades {
 		void Client::BlocksFell(std::vector<IntVector3> blocks) {
 			SPADES_MARK_FUNCTION();
 
-			if (blocks.empty())
-				return;
-			AddLocalEntity(stmp::make_unique<FallingBlock>(this, blocks));
-
 			if (!IsMuted()) {
 
 				IntVector3 v = blocks[0];
@@ -1386,6 +1384,13 @@ namespace spades {
 				Handle<IAudioChunk> c = audioDevice->RegisterSound("Sounds/Misc/BlockFall.opus");
 				audioDevice->Play(c.GetPointerOrNull(), o, AudioParam());
 			}
+
+			if (!cg_fallingBlocks)
+				return;
+
+			if (blocks.empty())
+				return;
+			AddLocalEntity(stmp::make_unique<FallingBlock>(this, blocks));
 		}
 
 		void Client::GrenadeBounced(const Grenade &g) {
