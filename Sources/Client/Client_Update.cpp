@@ -1632,9 +1632,6 @@ namespace spades {
 		}
 
 		void Client::AddTrueAccuracy(bool trueTotal, bool trueHead) {
-			stmp::optional<Player &> p = world->GetLocalPlayer();
-			if (!p)
-				return;
 			clicksPlayer += trueTotal;
 			clicksHead += trueHead;
 		}
