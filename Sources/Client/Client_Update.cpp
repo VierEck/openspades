@@ -56,6 +56,7 @@ SPADES_SETTING(cg_blood);
 DEFINE_SPADES_SETTING(cg_ejectBrass, "1");
 DEFINE_SPADES_SETTING(cg_hitFeedbackSoundGain, "0.2");
 DEFINE_SPADES_SETTING(cg_tracersFirstPerson, "1");
+DEFINE_SPADES_SETTING(cg_tracers, "1");
 
 SPADES_SETTING(cg_alerts);
 SPADES_SETTING(cg_centerMessage);
@@ -1325,6 +1326,9 @@ namespace spades {
 		void Client::AddBulletTracer(spades::client::Player &player, spades::Vector3 muzzlePos,
 		                             spades::Vector3 hitPos) {
 			SPADES_MARK_FUNCTION();
+
+			if (!cg_tracers)
+				return;
 
 			bool isFirstPerson =
 			  IsFirstPerson(GetCameraMode()) && GetCameraTargetPlayerId() == player.GetId();
