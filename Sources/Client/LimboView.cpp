@@ -75,12 +75,12 @@ namespace spades {
 
 			//! The "Spawn" button that you press when you're ready to "spawn".
 			items.push_back(MenuItem(MenuSpawn,
-			                         AABB2(left + contentsWidth - 266.f, firstY, 256.f, 48.f),
+			                         AABB2(left + contentsWidth - 266.f, firstY - 20.f, 256.f, 48.f),
 			                         _Tr("Client", "Spawn")));
 
 			//! The next spawn button to activate the settings the next time you spawn
 			items.push_back(MenuItem(MenuNextSpawn,
-				                     AABB2(left + contentsWidth - 266.f, firstY + 52.f, 256.f, 48.f),
+				                     AABB2(left + contentsWidth - 266.f, firstY + 32.f, 256.f, 48.f),
 					                 _Tr("Client", "Set Next Spawn")));
 
 			cursorPos = MakeVector2(renderer.ScreenWidth() * .5f, renderer.ScreenHeight() * .5f);
