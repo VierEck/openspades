@@ -200,6 +200,9 @@ namespace spades {
 				}
 			}
 
+			if (demo.replaying && net->IsDemoPaused())
+				return;
+
 #if 0
 			// dynamic time step
 			// physics diverges from server
@@ -207,22 +210,20 @@ namespace spades {
 #else
 			// accurately resembles server's physics
 			// but not smooth
-			if (!demo.replaying || (demo.replaying && !net->IsDemoPaused())) {
-				if (dt > 0.f)
-					worldSubFrame += dt;
+			if (dt > 0.f)
+				worldSubFrame += dt;
 
-				float frameStep = 1.f / 60.f;
-				while (worldSubFrame >= frameStep) {
-					world->Advance(frameStep * demo.speed);
-					worldSubFrame -= frameStep;
-				}
+			float frameStep = 1.f / 60.f;
+			while (worldSubFrame >= frameStep) {
+				world->Advance(frameStep * demo.speed);
+				worldSubFrame -= frameStep;
 			}
 #endif
 
 			// update player view (doesn't affect physics/game logics)
 			for (auto &clientPlayer : clientPlayers) {
 				if (clientPlayer) {
-					clientPlayer->Update(dt);
+					clientPlayer->Update(dt * demo.speed);
 				}
 			}
 
@@ -241,7 +242,7 @@ namespace spades {
 					}
 				}
 			};
-			CorpseUpdateDispatch corpseDispatch{*this, dt};
+			CorpseUpdateDispatch corpseDispatch{*this, dt * demo.speed};
 			corpseDispatch.Start();
 
 			// local entities should be done in the client thread
@@ -249,7 +250,7 @@ namespace spades {
 				decltype(localEntities)::iterator it;
 				std::vector<decltype(it)> its;
 				for (it = localEntities.begin(); it != localEntities.end(); it++) {
-					if (!(*it)->Update(dt))
+					if (!(*it)->Update(dt * demo.speed))
 						its.push_back(it);
 				}
 				for (size_t i = 0; i < its.size(); i++) {
@@ -260,19 +261,19 @@ namespace spades {
 			corpseDispatch.Join();
 
 			if (grenadeVibration > 0.f) {
-				grenadeVibration -= dt;
+				grenadeVibration -= dt * demo.speed;
 				if (grenadeVibration < 0.f)
 					grenadeVibration = 0.f;
 			}
 
 			if (grenadeVibrationSlow > 0.f) {
-				grenadeVibrationSlow -= dt;
+				grenadeVibrationSlow -= dt * demo.speed;
 				if (grenadeVibrationSlow < 0.f)
 					grenadeVibrationSlow = 0.f;
 			}
 
 			if (hitFeedbackIconState > 0.f) {
-				hitFeedbackIconState -= dt * 4.f;
+				hitFeedbackIconState -= dt * 4.f * demo.speed;
 				if (hitFeedbackIconState < 0.f)
 					hitFeedbackIconState = 0.f;
 			}
