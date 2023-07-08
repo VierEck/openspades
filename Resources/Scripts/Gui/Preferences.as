@@ -652,15 +652,16 @@ namespace spades {
             mentionField.DenyNonAscii = true;
             layouter.AddToggleField(_Tr("Preferences", "Highlight mentioning Message"), "cg_shouldMentionWord");
 
-            layouter.AddHeading(_Tr("Preferences", "PubOvl"));
-            layouter.AddToggleField(_Tr("Preferences", "Spectator ESP"), "cg_specEsp");
-            layouter.AddToggleField(_Tr("Preferences", "Spectator ESP Names"), "cg_specNames");
-
             layouter.AddHeading(_Tr("Preferences", "Sound"));
             layouter.AddSliderField(_Tr("Preferences", "Master Gain/'Volume'"), "s_gain", 0.0, 4.0, 0.01, ConfigNumberFormatter(2, " gain"));
             layouter.AddVolumeSlider(_Tr("Preferences", "Chat Notify Sounds"), "cg_chatBeep");
             layouter.AddVolumeSlider(_Tr("Preferences", "Alert Sounds"), "cg_alertSounds");
             layouter.AddVolumeSlider(_Tr("Preferences", "HitMark Sounds"), "cg_hitMarkSoundGain");
+            layouter.AddVolumeSlider(_Tr("Preferences", "Headshot Sounds"), "cg_hitFeedbackSoundGain");
+
+            layouter.AddHeading(_Tr("Preferences", "PubOvl"));
+            layouter.AddToggleField(_Tr("Preferences", "Spectator ESP"), "cg_specEsp");
+            layouter.AddToggleField(_Tr("Preferences", "Spectator ESP Names"), "cg_specNames");
 
             layouter.AddHeading(_Tr("Preferences", "Effects"));
             layouter.AddToggleField(_Tr("Preferences", "Glow Blocks"), "cg_glowBlocks");
@@ -741,7 +742,7 @@ namespace spades {
             layouter.AddSliderField(_Tr("Preferences", "HitTest Transparency"),
                                     "cg_hitTestTransparency", 0, 1.0, 0.01,
                                     ConfigNumberFormatter(2, "x"));
-            layouter.AddToggleField(_Tr("Preferences", "K/D Streak Stats"), "cg_playerStats");
+            layouter.AddToggleField(_Tr("Preferences", "Show K/D Acc. Stats"), "cg_playerStats");
             layouter.AddToggleField(_Tr("Preferences", "Show Statistics"), "cg_stats");
             layouter.AddToggleField(_Tr("Preferences", "Colored Statistics"), "cg_StatsColor");
 
