@@ -514,10 +514,14 @@ namespace spades {
 			if (player.IsAlive() && player.GetTool() == Player::ToolBlock &&
 			    player.GetWeaponInput().secondary && player.IsBlockCursorDragging()) {
 				if (player.IsBlockCursorActive()) {
-					auto blocks = world->CubeLine(player.GetBlockCursorDragPos(),
-					                              player.GetBlockCursorPos(), 256);
-					auto msg = _TrN("Client", "{0} block", "{0} blocks", blocks.size());
-					AlertType type = static_cast<int>(blocks.size()) > player.GetNumBlocks()
+					IntVector3 diagonal = player.GetBlockCursorDragPos() - player.GetBlockCursorPos();
+					diagonal.x *= 1 - 2 * (diagonal.x < 0);
+					diagonal.y *= 1 - 2 * (diagonal.y < 0);
+					diagonal.z *= 1 - 2 * (diagonal.z < 0);
+					int blockCount = diagonal.x + diagonal.y + diagonal.z + 1;
+
+					auto msg = _TrN("Client", "{0} block", "{0} blocks", blockCount);
+					AlertType type = static_cast<int>(blockCount) > player.GetNumBlocks()
 					                   ? AlertType::Warning
 					                   : AlertType::Notice;
 					ShowAlert(msg, type, 0.f, true);
@@ -610,8 +614,7 @@ namespace spades {
 							diagonal.y *= 1 - 2 * (diagonal.y < 0);
 							diagonal.z *= 1 - 2 * (diagonal.z < 0);
 
-							diagonal.x += 1;
-							int blockCount = diagonal.x + diagonal.y + diagonal.z;
+							int blockCount = diagonal.x + diagonal.y + diagonal.z + 1;
 							msg = _TrN("Client", "{0} block", "{0} blocks", blockCount);
 						} break;
 						case VolumeBox: {
