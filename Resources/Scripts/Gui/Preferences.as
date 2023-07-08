@@ -657,8 +657,10 @@ namespace spades {
             layouter.AddToggleField(_Tr("Preferences", "Spectator ESP Names"), "cg_specNames");
 
             layouter.AddHeading(_Tr("Preferences", "Sound"));
-            layouter.AddSliderField(_Tr("Preferences", "Gain/'Volume'"), "s_gain", 0.0, 4.0, 0.01, ConfigNumberFormatter(2, " gain"));
-            layouter.AddSliderField(_Tr("Preferences", "HitMark Sound"), "cg_hitMarkSoundGain", 0.0, 2.0, 0.01, ConfigNumberFormatter(2, " gain"));
+            layouter.AddSliderField(_Tr("Preferences", "Master Gain/'Volume'"), "s_gain", 0.0, 4.0, 0.01, ConfigNumberFormatter(2, " gain"));
+            layouter.AddVolumeSlider(_Tr("Preferences", "Chat Notify Sounds"), "cg_chatBeep");
+            layouter.AddVolumeSlider(_Tr("Preferences", "Alert Sounds"), "cg_alertSounds");
+            layouter.AddVolumeSlider(_Tr("Preferences", "HitMark Sounds"), "cg_hitMarkSoundGain");
 
             layouter.AddHeading(_Tr("Preferences", "Effects"));
             layouter.AddToggleField(_Tr("Preferences", "Glow Blocks"), "cg_glowBlocks");
@@ -693,10 +695,8 @@ namespace spades {
                                                      _Tr("Preferences", "3D"),
                                                      _Tr("Preferences", "OFF")},
                                     array<int> = {2, 1, 0});
-            layouter.AddVolumeSlider(_Tr("Preferences", "Chat Notify Sounds"), "cg_chatBeep");
             layouter.AddToggleField(_Tr("Preferences", "Hit Indicator"), "cg_hitIndicator");
             layouter.AddToggleField(_Tr("Preferences", "Show Alerts"), "cg_alerts");
-            layouter.AddVolumeSlider(_Tr("Preferences", "Alert Sounds"), "cg_alertSounds");
 
             layouter.AddHeading(_Tr("Preferences", "Spectator Fly Speed"));
             layouter.AddSliderField(_Tr("Preferences", "Flying Speed Walk"),
