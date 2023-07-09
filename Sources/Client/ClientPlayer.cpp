@@ -58,7 +58,7 @@ DEFINE_SPADES_SETTING(cg_viewWeaponY, "0");
 DEFINE_SPADES_SETTING(cg_viewWeaponZ, "0");
 DEFINE_SPADES_SETTING(cg_debugToolSkinAnchors, "0");
 
-DEFINE_SPADES_SETTING(cg_hideFirstPersonModel, "1");
+DEFINE_SPADES_SETTING(cg_hideFirstPersonModel, "0");
 
 namespace spades {
 	namespace client {
