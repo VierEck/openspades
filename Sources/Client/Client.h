@@ -581,7 +581,7 @@ namespace spades {
 			void LocalPlayerCreatedVolume(IntVector3, IntVector3, VolumeType, VolumeActionType) override;
 			// IWorldListener end
 
-			void AddTrueAccuracy(bool trueTotal, bool trueHead) override;
+			void AddTrueAccuracy(bool trueHead) override;
 
 			float GetClientTime() { return time; }
 			float GetClientTimeMultiplied() { return time * demo.speed; }

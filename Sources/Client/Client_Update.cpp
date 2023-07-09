@@ -1213,6 +1213,7 @@ namespace spades {
 				switch (type) {
 					case HitTypeHead:
 						hitsHead += by.GetWeaponType() == SHOTGUN_WEAPON ? 0.125f : 1;
+						hitsPlayer += by.GetWeaponType() == SHOTGUN_WEAPON ? 0.125f : 1;
 						break;
 					case HitTypeTorso:
 					case HitTypeArms: //could add limb accuracy, but thats overkill
@@ -1640,9 +1641,9 @@ namespace spades {
 			}
 		}
 
-		void Client::AddTrueAccuracy(bool trueTotal, bool trueHead) {
-			clicksPlayer += trueTotal;
+		void Client::AddTrueAccuracy(bool trueHead) {
 			clicksHead += trueHead;
+			clicksPlayer++;
 		}
 	} // namespace client
 } // namespace spades

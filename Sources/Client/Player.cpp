@@ -779,16 +779,16 @@ namespace spades {
 					Vector3 hitPos;
 
 					if (hb.head.RayCast(muzzle, dir, &hitPos)) {
-						world.GetListener()->AddTrueAccuracy(false, true);
+						world.GetListener()->AddTrueAccuracy(true);
 						break;
 					}
 					if (hb.torso.RayCast(muzzle, dir, &hitPos)) {
-						world.GetListener()->AddTrueAccuracy(true, false);
+						world.GetListener()->AddTrueAccuracy(false);
 						break;
 					}
 					for (int j = 0; j < 3; j++) {
 						if (hb.limbs[j].RayCast(muzzle, dir, &hitPos)) {
-							world.GetListener()->AddTrueAccuracy(true, false);
+							world.GetListener()->AddTrueAccuracy(false);
 							hasHit = true;
 							break;
 						}
