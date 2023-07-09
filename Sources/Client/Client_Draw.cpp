@@ -86,6 +86,7 @@ DEFINE_SPADES_SETTING(cg_hitTestSize, "210");
 DEFINE_SPADES_SETTING(cg_hitTestTransparency, "1");
 DEFINE_SPADES_SETTING(cg_playerStats, "0");
 DEFINE_SPADES_SETTING(cg_damageIndicators, "1");
+SPADES_SETTING(cg_hideFirstPersonModel);
 
 DEFINE_SPADES_SETTING(cg_DemoProgressBarOnlyInUi, "0");
 DEFINE_SPADES_SETTING(cg_DrawDragCursorPos, "1");
@@ -459,6 +460,9 @@ namespace spades {
 			if (cg_debugAim && player.GetTool() == Player::ToolWeapon && player.IsAlive()) {
 				DrawDebugAim();
 			}
+
+			if ((int)cg_hideFirstPersonModel > 1)
+				DrawCurrentToolIcon(player);
 		}
 
 		void Client::DrawJoinedAlivePlayerHUD() {
@@ -603,6 +607,44 @@ namespace spades {
 
 				DrawHealth();
 			}
+		}
+
+		void Client::DrawCurrentToolIcon(Player &p) {
+			SPADES_MARK_FUNCTION();
+
+			Handle<IImage> img;
+			switch (p.GetTool()) {
+				case Player::ToolSpade:
+					img = renderer->RegisterImage("Gfx/Tools/Spade.png");
+					break;
+				case Player::ToolBlock:
+					img = renderer->RegisterImage("Gfx/Tools/Block.png");
+					break;
+				case Player::ToolGrenade:
+					img = renderer->RegisterImage("Gfx/Tools/Nade.png");
+					break;
+				case Player::ToolWeapon:
+					switch (p.GetWeaponType()) {
+						case RIFLE_WEAPON:
+							img = renderer->RegisterImage("Gfx/Tools/Rifle.png");
+							break;
+						case SMG_WEAPON:
+							img = renderer->RegisterImage("Gfx/Tools/SMG.png");
+							break;
+						case SHOTGUN_WEAPON:
+							img = renderer->RegisterImage("Gfx/Tools/Shotgun.png");
+							break;
+						default: return;
+					}
+					break;
+				default: return;
+			}
+
+			float iconX = renderer->ScreenWidth() - 360.f;
+			float iconY = renderer->ScreenHeight() - 80.f;
+
+			renderer->SetColorAlphaPremultiplied(MakeVector4(1.f, 1.f, 1.f, (float)cg_hudTransparency));
+			renderer->DrawImage(img, MakeVector2(iconX, iconY));
 		}
 
 		void Client::DrawHitTestDebugger() {

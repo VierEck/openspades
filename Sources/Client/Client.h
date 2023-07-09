@@ -429,6 +429,7 @@ namespace spades {
 			void DrawPlayerStats();
 			void DrawAllPlayerNames();
 			void DrawDemoProgress();
+			void DrawCurrentToolIcon(Player &);
 
 			void UpdateDamageIndicators(float dt);
 			void DrawDamageIndicators();

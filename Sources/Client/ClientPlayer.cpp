@@ -58,6 +58,8 @@ DEFINE_SPADES_SETTING(cg_viewWeaponY, "0");
 DEFINE_SPADES_SETTING(cg_viewWeaponZ, "0");
 DEFINE_SPADES_SETTING(cg_debugToolSkinAnchors, "0");
 
+DEFINE_SPADES_SETTING(cg_hideFirstPersonModel, "1");
+
 namespace spades {
 	namespace client {
 
@@ -692,6 +694,9 @@ namespace spades {
 				light.image = NULL;
 				renderer.AddLight(light);
 			}
+
+			if (cg_hideFirstPersonModel)
+				return;
 
 			Vector3 leftHand, rightHand;
 			leftHand = MakeVector3(0, 0, 0);

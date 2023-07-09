@@ -664,12 +664,17 @@ namespace spades {
             layouter.AddToggleField(_Tr("Preferences", "Spectator ESP Names"), "cg_specNames");
 
             layouter.AddHeading(_Tr("Preferences", "Effects"));
+            layouter.AddChoiceField(_Tr("Preferences", "Hide FirstPerson Model"), "cg_hideFirstPersonModel",
+                                    array<string> = {_Tr("Preferences", "Icon"),
+                                                     _Tr("Preferences", "ON"),
+                                                     _Tr("Preferences", "OFF")},
+                                    array<int> = {2, 1, 0});
             layouter.AddToggleField(_Tr("Preferences", "Glow Blocks"), "cg_glowBlocks");
             layouter.AddToggleField(_Tr("Preferences", "Damage indicators"), "cg_damageIndicators");
             layouter.AddToggleField(_Tr("Preferences", "Blood"), "cg_blood");
             layouter.AddToggleField(_Tr("Preferences", "Falling Blocks"), "cg_fallingBlocks");
             layouter.AddToggleField(_Tr("Preferences", "Tracers"), "cg_tracers");
-            layouter.AddToggleField(_Tr("Preferences", "First-Person Tracers"), "cg_tracersFirstPerson");
+            layouter.AddToggleField(_Tr("Preferences", "FirstPerson Tracers"), "cg_tracersFirstPerson");
             layouter.AddToggleField(_Tr("Preferences", "Ejecting Brass"), "cg_ejectBrass");
             layouter.AddToggleField(_Tr("Preferences", "Ragdoll"), "cg_ragdoll");
             layouter.AddToggleField(_Tr("Preferences", "Animations"), "cg_animations");
