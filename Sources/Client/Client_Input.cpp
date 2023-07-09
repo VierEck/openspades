@@ -675,7 +675,8 @@ namespace spades {
 						scriptedUI->setIgnored(name);
 					} else if (CheckKey(cg_keyCaptureColor, name) && down) {
 						CaptureColor();
-					} else if (CheckKey(cg_keyEditColor, name) && down) {
+					} else if (
+						CheckKey(cg_keyEditColor, name) && down && p.GetTool() == Player::ToolBlock) {
 						scriptedUI->EnterPaletteWindow();
 						Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
 						audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
