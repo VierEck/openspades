@@ -47,7 +47,7 @@
 #include <ScriptBindings/IWeaponSkin.h>
 #include <ScriptBindings/ScriptFunction.h>
 
-SPADES_SETTING(cg_ragdoll);
+SPADES_SETTING(cg_corpse);
 SPADES_SETTING(cg_ejectBrass);
 DEFINE_SPADES_SETTING(cg_animations, "1");
 SPADES_SETTING(cg_shake);
@@ -842,7 +842,7 @@ namespace spades {
 			World *world = client.GetWorld();
 
 			if (!p.IsAlive()) {
-				if (!cg_ragdoll) {
+				if ((int)cg_corpse == 1) {
 					ModelRenderParam param;
 					param.matrix = Matrix4::Translate(p.GetOrigin() + MakeVector3(0, 0, 1));
 					param.matrix = param.matrix * Matrix4::Scale(.1f);

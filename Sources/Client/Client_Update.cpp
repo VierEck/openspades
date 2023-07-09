@@ -51,7 +51,7 @@
 #include "IGameMode.h"
 #include "TCGameMode.h"
 
-DEFINE_SPADES_SETTING(cg_ragdoll, "1");
+DEFINE_SPADES_SETTING(cg_corpse, "1");
 SPADES_SETTING(cg_blood);
 DEFINE_SPADES_SETTING(cg_ejectBrass, "1");
 DEFINE_SPADES_SETTING(cg_hitFeedbackSoundGain, "0.2");
@@ -974,7 +974,7 @@ namespace spades {
 			}
 
 			// create ragdoll corpse
-			if (cg_ragdoll && victim.GetTeamId() < 2) {
+			if ((int)cg_corpse > 1 && victim.GetTeamId() < 2) {
 				auto corp = stmp::make_unique<Corpse>(*renderer, *map, victim);
 
 				if (&victim == world->GetLocalPlayer())

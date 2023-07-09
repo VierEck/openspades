@@ -676,7 +676,11 @@ namespace spades {
             layouter.AddToggleField(_Tr("Preferences", "Tracers"), "cg_tracers");
             layouter.AddToggleField(_Tr("Preferences", "FirstPerson Tracers"), "cg_tracersFirstPerson");
             layouter.AddToggleField(_Tr("Preferences", "Ejecting Brass"), "cg_ejectBrass");
-            layouter.AddToggleField(_Tr("Preferences", "Ragdoll"), "cg_ragdoll");
+            layouter.AddChoiceField(_Tr("Preferences", "Dead Player Model"), "cg_corpse",
+                                    array<string> = {_Tr("Preferences", "Ragdoll"),
+                                                     _Tr("Preferences", "ON"),
+                                                     _Tr("Preferences", "OFF")},
+                                    array<int> = {2, 1, 0});
             layouter.AddToggleField(_Tr("Preferences", "Animations"), "cg_animations");
             layouter.AddChoiceField(_Tr("Preferences", "Camera Shake"), "cg_shake",
                                     array<string> = {_Tr("Preferences", "MORE"),
