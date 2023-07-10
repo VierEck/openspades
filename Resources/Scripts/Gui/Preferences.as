@@ -774,6 +774,7 @@ namespace spades {
 
             layouter.AddHeading(_Tr("Preferences", "Sounds"));
             layouter.AddSliderField(_Tr("Preferences", "Master Gain/'Volume'"), "s_gain", 0.0, 4.0, 0.01, ConfigNumberFormatter(2, " gain"));
+            layouter.AddToggleField(_Tr("Preferences", "Environmental Audio"), "cg_environmentalAudio");
             layouter.AddHeading(_Tr("Preferences", " "));
 
             layouter.AddVolumeSlider(_Tr("Preferences", "Chat Notify Sounds"), "cg_chatBeep");
