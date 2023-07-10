@@ -623,14 +623,14 @@ namespace spades {
             } else if (IsEnabled and key == "M" and Manager.IsControlPressed) {
                 ChangeList(isMap);
             } else if (IsEnabled and key == "Down") {
-                if (savedlistIdx >= savedlist.length - 1 and savedlist.length > 0) {
+                if (savedlistIdx >= int(savedlist.length) - 1 and int(savedlist.length) > 0) {
                     UIElement::HotKey(key);
                     return;
                 }
                 savedlistIdx++;
                 ServerListItemActivatedPass(savedlist[savedlistIdx]);
             } else if (IsEnabled and key == "Up") {
-                if (savedlistIdx <= 0 and savedlist.length > 0) {
+                if (savedlistIdx <= 0 and int(savedlist.length) > 0) {
                     if (savedlist.length > 0) {
                         ServerListItemActivatedPass(savedlist[0]);
                     }

@@ -135,7 +135,7 @@ namespace spades {
 		void requestLoad() { 
 			int cursor = viewer.selection.CursorPosition;
 			ui.helper.requestLoadTxt(); 
-			if (viewer.Text.length > cursor) {
+			if (int(viewer.Text.length) > cursor) {
 				viewer.selection.CursorPosition = viewer.selection.MarkPosition = cursor;
 			} else {
 				viewer.selection.CursorPosition = viewer.selection.MarkPosition = viewer.Text.length;
@@ -234,7 +234,7 @@ namespace spades {
 				float textScale = 1.0f;
 				Font @font = this.Font;
 
-				if (text.length > 0) {
+				if (int(text.length) > 0) {
 					Vector2 txtSize = font.Measure(text) * textScale;
 					Vector2 txtPos;
 					txtPos = pos + (size - txtSize) * Vector2(0.0f, 0.0f);
@@ -301,7 +301,7 @@ namespace spades {
 				int startPos = 0;
 				if (font.Measure(text).x <= width) {
 					lines.insertLast(TxtViewerItem(text, color, contentEnd));
-					contentEnd += text.length + 1;
+					contentEnd += int(text.length) + 1;
 					return;
 				}
 
