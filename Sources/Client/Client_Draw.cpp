@@ -789,24 +789,34 @@ namespace spades {
 
 			if (!cg_hideHud) {
 				// draw respawn tme
-				if (!p.IsAlive()) {
-					std::string msg;
+				std::string msg;
 
-					float secs = p.GetRespawnTime() - world->GetTime();
+				int secs = p.GetRespawnTime() - world->GetTime();
 
-					if (secs > 0.f)
-						msg = _Tr("Client", "You will respawn in: {0}", (int)ceilf(secs));
-					else
-						msg = _Tr("Client", "Waiting for respawn");
-
-					if (!msg.empty()) {
-						IFont &font = fontManager->GetGuiFont();
-						Vector2 size = font.Measure(msg);
-						Vector2 pos = MakeVector2((scrWidth - size.x) * .5f, scrHeight / 3.f);
-
-						font.DrawShadow(msg, pos, 1.f, MakeVector4(1, 1, 1, (float)cg_hudTransparency),
-						                MakeVector4(0, 0, 0, 0.5 * (float)cg_hudTransparency));
+				if (secs > 0) {
+					static int lastCount = 0;
+					if (lastCount != secs) {
+						if (secs <= 3) {
+							Handle<IAudioChunk> c = (secs == 1)
+								? audioDevice->RegisterSound("Sounds/Feedback/Beep1.opus")
+								: audioDevice->RegisterSound("Sounds/Feedback/Beep2.opus");
+							audioDevice->PlayLocal(c.GetPointerOrNull(), AudioParam());
+						}
+						lastCount = secs;
 					}
+
+					msg = _Tr("Client", "You will respawn in: {0}", secs);
+				} else {
+					msg = _Tr("Client", "Waiting for respawn");
+				}
+
+				if (!msg.empty()) {
+					IFont &font = fontManager->GetGuiFont();
+					Vector2 size = font.Measure(msg);
+					Vector2 pos = MakeVector2((scrWidth - size.x) * .5f, scrHeight / 3.f);
+
+					font.DrawShadow(msg, pos, 1.f, MakeVector4(1, 1, 1, (float)cg_hudTransparency),
+						            MakeVector4(0, 0, 0, 0.5 * (float)cg_hudTransparency));
 				}
 			}
 		}
