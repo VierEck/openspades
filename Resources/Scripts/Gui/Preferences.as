@@ -657,6 +657,7 @@ namespace spades {
             layouter.AddVolumeSlider(_Tr("Preferences", "Alert Sounds"), "cg_alertSounds");
             layouter.AddVolumeSlider(_Tr("Preferences", "HitMark Sounds"), "cg_hitMarkSoundGain");
             layouter.AddVolumeSlider(_Tr("Preferences", "Headshot Sounds"), "cg_hitFeedbackSoundGain");
+            layouter.AddVolumeSlider(_Tr("Preferences", "Death Sounds"), "cg_deathSoundGain");
 
             layouter.AddHeading(_Tr("Preferences", "PubOvl"));
             layouter.AddToggleField(_Tr("Preferences", "Spectator ESP"), "cg_specEsp");

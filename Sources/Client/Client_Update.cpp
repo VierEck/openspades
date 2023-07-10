@@ -68,6 +68,7 @@ SPADES_SETTING(cg_holdAimDownSight);
 DEFINE_SPADES_SETTING(cg_killFeedImg, "1");
 DEFINE_SPADES_SETTING(cg_hitMarkSoundGain, "0.5");
 DEFINE_SPADES_SETTING(cg_hitAnalyze, "1");
+DEFINE_SPADES_SETTING(cg_deathSoundGain, "0.2");
 
 DEFINE_SPADES_SETTING(cg_specSpeedWalk, "1");
 DEFINE_SPADES_SETTING(cg_specSpeedSprint, "3");
@@ -914,6 +915,12 @@ namespace spades {
 				if (curStreak > bestStreak)
 					bestStreak = curStreak;
 				curStreak = 0;
+
+				// play death sound
+				Handle<IAudioChunk> c = audioDevice->RegisterSound("Sounds/Player/Death.opus");
+				AudioParam param;
+				param.volume = (float)cg_deathSoundGain;
+				audioDevice->PlayLocal(c.GetPointerOrNull(), param);
 			}
 
 			// play hit sound
