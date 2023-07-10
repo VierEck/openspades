@@ -66,6 +66,9 @@ namespace spades {
 			if (demo.replaying && !net->IsDemoFirstJoin())
 				return;
 
+			Handle<IAudioChunk> c = audioDevice->RegisterSound("Sounds/Feedback/Intro.opus");
+			audioDevice->PlayLocal(c.GetPointerOrNull(), AudioParam());
+
 			// Prepare the spectate mode
 			followCameraState.enabled = false;
 			freeCameraState.position = MakeVector3(256, 256, 30);
