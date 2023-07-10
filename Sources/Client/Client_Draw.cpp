@@ -155,6 +155,9 @@ namespace spades {
 				else
 					msg = _Tr("Client", "Screenshot saved: {0}", name);
 				ShowAlert(msg, AlertType::Notice);
+
+				Handle<IAudioChunk> c = audioDevice->RegisterSound("Sounds/Feedback/Screenshot.opus");
+				audioDevice->PlayLocal(c.GetPointerOrNull(), AudioParam());
 			} catch (const Exception &ex) {
 				std::string msg;
 				msg = _Tr("Client", "Screenshot failed: ");
