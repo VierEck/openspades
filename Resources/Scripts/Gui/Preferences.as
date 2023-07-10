@@ -62,6 +62,8 @@ namespace spades {
                    _Tr("Preferences", "Game Options"));
             AddTab(ControlOptionsPanel(Manager, options, fontManager),
                    _Tr("Preferences", "Controls"));
+            AddTab(SoundsOptionsPanel(Manager, options, fontManager),
+                   _Tr("Preferences", "Sounds"));
             AddTab(GraphicsOptionsPanel(Manager, options, fontManager),
                    _Tr("Preferences", "Graphics"));
             AddTab(DemoOptionsPanel(Manager, options, fontManager),
@@ -650,18 +652,12 @@ namespace spades {
                 _Tr("Preferences", "Mention Word"), "cg_mentionWord");
             mentionField.MaxLength = 15;
             mentionField.DenyNonAscii = true;
-
-            layouter.AddHeading(_Tr("Preferences", "Sound"));
-            layouter.AddSliderField(_Tr("Preferences", "Master Gain/'Volume'"), "s_gain", 0.0, 4.0, 0.01, ConfigNumberFormatter(2, " gain"));
-            layouter.AddVolumeSlider(_Tr("Preferences", "Chat Notify Sounds"), "cg_chatBeep");
-            layouter.AddVolumeSlider(_Tr("Preferences", "Alert Sounds"), "cg_alertSounds");
-            layouter.AddVolumeSlider(_Tr("Preferences", "HitMark Sounds"), "cg_hitMarkSoundGain");
-            layouter.AddVolumeSlider(_Tr("Preferences", "Headshot Sounds"), "cg_hitFeedbackSoundGain");
-            layouter.AddVolumeSlider(_Tr("Preferences", "Death Sounds"), "cg_deathSoundGain");
+            layouter.AddHeading(_Tr("Preferences", " "));
 
             layouter.AddHeading(_Tr("Preferences", "PubOvl"));
             layouter.AddToggleField(_Tr("Preferences", "Spectator ESP"), "cg_specEsp");
             layouter.AddToggleField(_Tr("Preferences", "Spectator ESP Names"), "cg_specNames");
+            layouter.AddHeading(_Tr("Preferences", " "));
 
             layouter.AddHeading(_Tr("Preferences", "Effects"));
             layouter.AddChoiceField(_Tr("Preferences", "Hide FirstPerson Model"), "cg_hideFirstPersonModel",
@@ -692,6 +688,7 @@ namespace spades {
                                                      _Tr("Preferences", "LESS"),
                                                      _Tr("Preferences", "OFF")},
                                     array<int> = {2, 1, 0});
+            layouter.AddHeading(_Tr("Preferences", " "));
 
             layouter.AddHeading(_Tr("Preferences", "Feedbacks"));
             layouter.AddChoiceField(_Tr("Preferences", "Ignore Chat Messages"), "cg_ignoreChatMessages",
@@ -708,6 +705,7 @@ namespace spades {
                                     array<int> = {2, 1, 0});
             layouter.AddToggleField(_Tr("Preferences", "Hit Indicator"), "cg_hitIndicator");
             layouter.AddToggleField(_Tr("Preferences", "Show Alerts"), "cg_alerts");
+            layouter.AddHeading(_Tr("Preferences", " "));
 
             layouter.AddHeading(_Tr("Preferences", "Spectator Fly Speed"));
             layouter.AddSliderField(_Tr("Preferences", "Flying Speed Walk"),
@@ -719,14 +717,17 @@ namespace spades {
             layouter.AddSliderField(_Tr("Preferences", "Flying Speed Sneak"),
                                     "cg_specSpeedSneak", 0.1, 20.0, 0.1,
                                     ConfigNumberFormatter(1, "x"));
+            layouter.AddHeading(_Tr("Preferences", " "));
 
             layouter.AddHeading(_Tr("Preferences", "AoS 0.75/0.76 Compatibility"));
             layouter.AddToggleField(_Tr("Preferences", "Allow Unicode"), "cg_unicode");
             layouter.AddToggleField(_Tr("Preferences", "Server Alert"), "cg_serverAlert");
+            layouter.AddHeading(_Tr("Preferences", " "));
 
             layouter.AddHeading(_Tr("Preferences", "Misc"));
             layouter.AddSliderField(_Tr("Preferences", "Field of View"), "cg_fov", 45, 90, 1,
                                     ConfigNumberFormatter(0, " deg"));
+            layouter.AddHeading(_Tr("Preferences", " "));
 
             layouter.AddHeading(_Tr("Preferences", "HUD"));
             layouter.AddToggleField(_Tr("Preferences", "Hide HUD"), "cg_hideHud");
@@ -763,6 +764,27 @@ namespace spades {
         }
     }
 
+    class SoundsOptionsPanel : spades::ui::UIElement {
+        SoundsOptionsPanel(spades::ui::UIManager @manager, PreferenceViewOptions @options,
+                         FontManager @fontManager) {
+            super(manager);
+
+            StandardPreferenceLayouter layouter(this, fontManager);
+
+            layouter.AddHeading(_Tr("Preferences", "Sounds"));
+            layouter.AddSliderField(_Tr("Preferences", "Master Gain/'Volume'"), "s_gain", 0.0, 4.0, 0.01, ConfigNumberFormatter(2, " gain"));
+            layouter.AddHeading(_Tr("Preferences", " "));
+
+            layouter.AddVolumeSlider(_Tr("Preferences", "Chat Notify Sounds"), "cg_chatBeep");
+            layouter.AddVolumeSlider(_Tr("Preferences", "Alert Sounds"), "cg_alertSounds");
+            layouter.AddVolumeSlider(_Tr("Preferences", "HitMark Sounds"), "cg_hitMarkSoundGain");
+            layouter.AddVolumeSlider(_Tr("Preferences", "Headshot Sounds"), "cg_hitFeedbackSoundGain");
+            layouter.AddVolumeSlider(_Tr("Preferences", "Death Sounds"), "cg_deathSoundGain");
+
+            layouter.FinishLayout();
+        }
+    }
+
     class GraphicsOptionsPanel : spades::ui::UIElement {
         GraphicsOptionsPanel(spades::ui::UIManager@ manager,
             PreferenceViewOptions@ options, FontManager@ fontManager) {
@@ -779,12 +801,14 @@ namespace spades {
                                     array<int> = {2, 1, 0});
             layouter.AddToggleField(_Tr("Preferences", "Rendering Statistics"), "r_debugTiming");
             layouter.AddToggleField(_Tr("Preferences", "Allow CPU Rendering"), "r_allowSoftwareRendering");
+            layouter.AddHeading(_Tr("Preferences", " "));
 
             layouter.AddHeading(_Tr("Preferences", "World"));
             layouter.AddToggleField(_Tr("Preferences", "Dynamic Lights"), "r_dlights");
             layouter.AddToggleField(_Tr("Preferences", "Tracers Lights"), "cg_tracerLights");
             layouter.AddToggleField(_Tr("Preferences", "Depth Prepass"), "r_depthPrepass");
             layouter.AddToggleField(_Tr("Preferences", "Occlusion Querying"), "r_occlusionQuery");
+            layouter.AddHeading(_Tr("Preferences", " "));
 
             layouter.AddHeading(_Tr("Preferences", "Post-processing"));
             layouter.AddToggleField(_Tr("Preferences", "Depth Of Field"), "r_depthOfField");
@@ -799,6 +823,7 @@ namespace spades {
             0, 2, 0.1, ConfigNumberFormatter(1, ""));
             layouter.AddSliderField(_Tr("Preferences", "Exposure"), "r_exposureValue",
             -18, 18, 0.1, ConfigNumberFormatter(1, "EV"));
+            layouter.AddHeading(_Tr("Preferences", " "));
 
             layouter.AddHeading(_Tr("Preferences", "Software Renderer"));
             layouter.AddSliderField(_Tr("Preferences", "Thread Count"), "r_swNumThreads",
@@ -839,6 +864,7 @@ namespace spades {
             layouter.AddControl(_Tr("Preferences", "Last Used Tool"), "cg_keyLastTool");
             layouter.AddPlusMinusField(_Tr("Preferences", "Switch Tools by Wheel"),
                                        "cg_switchToolByWheel");
+            layouter.AddHeading(_Tr("Preferences", " "));
 
             layouter.AddHeading(_Tr("Preferences", "Movement"));
             layouter.AddControl(_Tr("Preferences", "Walk Forward"), "cg_keyMoveForward");
@@ -849,6 +875,7 @@ namespace spades {
             layouter.AddControl(_Tr("Preferences", "Sneak"), "cg_keySneak");
             layouter.AddControl(_Tr("Preferences", "Jump"), "cg_keyJump");
             layouter.AddControl(_Tr("Preferences", "Sprint"), "cg_keySprint");
+            layouter.AddHeading(_Tr("Preferences", " "));
 
             layouter.AddHeading(_Tr("Preferences", "Misc"));
             layouter.AddControl(_Tr("Preferences", "Minimap Scale"), "cg_keyChangeMapScale");
@@ -875,21 +902,20 @@ namespace spades {
             layouter.AddHeading(_Tr("Preferences", "Demo Recording"));
             layouter.AddToggleField(_Tr("Preferences", "Enable Demo Recording"), "cg_demoRecord");
             ConfigField @dateField = layouter.AddInputField(_Tr("Preferences", "Demo Filename Date Format"), "cg_demoFileNameFormat");
+            layouter.AddHeading(_Tr("Preferences", " "));
 
             layouter.AddHeading(_Tr("Preferences", "Demo Replaying"));
             layouter.AddToggleField(_Tr("Preferences", "Show Progressbar only in UI"), "cg_DemoProgressBarOnlyInUi");
+            layouter.AddHeading(_Tr("Preferences", " "));
 
             layouter.AddHeading(_Tr("Preferences", "Replay Keys"));
             layouter.AddControl(_Tr("Preferences", "Toggle UI"), "cg_KeyProgressUi");
             layouter.AddControl(_Tr("Preferences", "Pause"), "cg_keyPause");
-
             layouter.AddControl(_Tr("Preferences", "FastForward"), "cg_keySkipForward");
             layouter.AddControl(_Tr("Preferences", "Rewind"), "cg_keySkipRewind");
             layouter.AddSliderField(_Tr("Preferences", "FastForward/Rewind Time"), "cg_SkipValue", 1, 60, 1, ConfigNumberFormatter(1, "sec"));
-
             layouter.AddControl(_Tr("Preferences", "Next Ups"), "cg_keyNextUps");
             layouter.AddControl(_Tr("Preferences", "Previous Ups"), "cg_keyPrevUps");
-
             layouter.AddControl(_Tr("Preferences", "increase Speed"), "cg_keySpeedUp");
             layouter.AddControl(_Tr("Preferences", "decrease Speed"), "cg_keySpeedDown");
             layouter.AddControl(_Tr("Preferences", "normalize Speed"), "cg_keySpeedNormalize");
