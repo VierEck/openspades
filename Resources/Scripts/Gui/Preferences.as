@@ -650,7 +650,6 @@ namespace spades {
                 _Tr("Preferences", "Mention Word"), "cg_mentionWord");
             mentionField.MaxLength = 15;
             mentionField.DenyNonAscii = true;
-            layouter.AddToggleField(_Tr("Preferences", "Highlight mentioning Message"), "cg_shouldMentionWord");
 
             layouter.AddHeading(_Tr("Preferences", "Sound"));
             layouter.AddSliderField(_Tr("Preferences", "Master Gain/'Volume'"), "s_gain", 0.0, 4.0, 0.01, ConfigNumberFormatter(2, " gain"));
@@ -694,8 +693,8 @@ namespace spades {
                                     array<int> = {2, 1, 0});
 
             layouter.AddHeading(_Tr("Preferences", "Feedbacks"));
-            layouter.AddToggleField(_Tr("Preferences", "KillFeed Images"), "cg_killFeedImg");
             layouter.AddChoiceField(_Tr("Preferences", "Ignore Chat Messages"), "cg_ignoreChatMessages",
+            layouter.AddToggleField(_Tr("Preferences", "KillFeed Images"), "cg_killFeedImg");
                                     array<string> = {_Tr("Preferences", "All"),
                                                      _Tr("Preferences", "Players"),
                                                      _Tr("Preferences", "OFF")},
@@ -746,15 +745,18 @@ namespace spades {
                                                      _Tr("Preferences", "ON"),
                                                      _Tr("Preferences", "OFF")},
                                     array<int> = {2, 1, 0});
-            layouter.AddSliderField(_Tr("Preferences", "HitTest Size"),
-                                    "cg_hitTestSize", 0, 288, 1,
-                                    ConfigNumberFormatter(0, "px"));
             layouter.AddSliderField(_Tr("Preferences", "HitTest Transparency"),
                                     "cg_hitTestTransparency", 0, 1.0, 0.01,
                                     ConfigNumberFormatter(2, "x"));
+            layouter.AddSliderField(_Tr("Preferences", "HitTest Size"),
+                                    "cg_hitTestSize", 0, 288, 1,
+                                    ConfigNumberFormatter(0, "px"));
             layouter.AddToggleField(_Tr("Preferences", "Show K/D Acc. Stats"), "cg_playerStats");
-            layouter.AddToggleField(_Tr("Preferences", "Show Statistics"), "cg_stats");
-            layouter.AddToggleField(_Tr("Preferences", "Colored Statistics"), "cg_StatsColor");
+            layouter.AddChoiceField(_Tr("Preferences", "Show Network Stats"), "cg_stats",
+                                    array<string> = {_Tr("Preferences", "Colored"),
+                                                     _Tr("Preferences", "ON"),
+                                                     _Tr("Preferences", "OFF")},
+                                    array<int> = {2, 1, 0});
 
             layouter.FinishLayout();
         }

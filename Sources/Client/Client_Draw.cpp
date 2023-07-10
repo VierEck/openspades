@@ -80,11 +80,10 @@ DEFINE_SPADES_SETTING(cg_playerNameY, "0");
 DEFINE_SPADES_SETTING(cg_specNames, "1");
 
 DEFINE_SPADES_SETTING(cg_hudTransparency, "1");
-DEFINE_SPADES_SETTING(cg_StatsColor, "1");
 SPADES_SETTING(cg_debugHitTest);
 DEFINE_SPADES_SETTING(cg_hitTestSize, "210");
 DEFINE_SPADES_SETTING(cg_hitTestTransparency, "1");
-DEFINE_SPADES_SETTING(cg_playerStats, "0");
+DEFINE_SPADES_SETTING(cg_playerStats, "1");
 DEFINE_SPADES_SETTING(cg_damageIndicators, "1");
 SPADES_SETTING(cg_hideFirstPersonModel);
 
@@ -1415,7 +1414,7 @@ namespace spades {
 					sprintf(buf, "%.02f fps", fps);
 					fpsStr += buf;
 				}
-				if (cg_StatsColor) {
+				if ((int)cg_stats > 1) {
 					if (fps > 60)
 						fps = 60.f;
 					fps *= 0.016f;
@@ -1431,7 +1430,7 @@ namespace spades {
 					sprintf(buf, ", %.02f ups", ups);
 					upsStr  += buf;
 				}
-				if (cg_StatsColor) {
+				if ((int)cg_stats > 1) {
 					if (ups > 20) //upperlimit for voxlap
 						ups = 20.f;
 					ups *= 0.05f;
@@ -1446,7 +1445,7 @@ namespace spades {
 
 				sprintf(buf, ", ping: %dms, ", (int)ping);
 				pingStr += buf;
-				if (cg_StatsColor) {
+				if ((int)cg_stats > 1) {
 					if (ping > 300) //this is very generous
 						ping = 300;
 					ping *= 0.0033f;
@@ -1475,7 +1474,7 @@ namespace spades {
 			renderer->SetColorAlphaPremultiplied(Vector4(0.f, 0.f, 0.f, 0.5f * (float)cg_hudTransparency));
 			renderer->DrawImage(nullptr, AABB2(pos.x, pos.y, size.x, size.y));
 
-			if (cg_StatsColor) {
+			if ((int)cg_stats > 1) {
 				font.DrawShadow(fpsStr, pos + Vector2(margin, margin), 
 				1.f, fpsColor, Vector4(0.f, 0.f, 0.f, 0.5f * (float)cg_hudTransparency));
 			

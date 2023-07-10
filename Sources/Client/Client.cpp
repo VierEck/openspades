@@ -68,7 +68,6 @@ DEFINE_SPADES_SETTING(cg_skipDeadPlayersWhenDead, "1");
 
 SPADES_SETTING(cg_playerName);
 DEFINE_SPADES_SETTING(cg_mentionWord);
-DEFINE_SPADES_SETTING(cg_shouldMentionWord, "1");
 DEFINE_SPADES_SETTING(cg_ignoreChatMessages, "0");
 DEFINE_SPADES_SETTING(cg_showTeamMateLocation, "1");
 
@@ -1015,9 +1014,10 @@ namespace spades {
 				s += ": ";
 				s += msg;
 
-				size_t w = msg.find((std::string)cg_mentionWord);
-				if (w != std::string::npos && cg_shouldMentionWord)
-					s += ChatWindow::ColoredMessage(" -> Mention", MsgColorGreen);
+				if (std::string(cg_mentionWord).size() > 0) {
+					if (msg.find(std::string(cg_mentionWord)) != std::string::npos)
+						s += ChatWindow::ColoredMessage(" -> Mention", MsgColorGreen);
+				}
 
 				chatWindow->AddMessage(s);
 			}
