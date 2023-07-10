@@ -43,6 +43,7 @@
 #include "NetClient.h"
 
 DEFINE_SPADES_SETTING(cg_centerMessage, "2");
+DEFINE_SPADES_SETTING(cg_scoreMessages, "0");
 
 namespace spades {
 	namespace client {
@@ -164,6 +165,13 @@ namespace spades {
 					Handle<IAudioChunk> chunk =
 					  audioDevice->RegisterSound("Sounds/Feedback/CTF/EnemyCaptured.opus");
 					audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+				}
+
+				if (p.IsLocalPlayer() && cg_scoreMessages) {
+					std::string s;
+					s += ChatWindow::ColoredMessage("+10", MsgColorSysInfo);
+					s += " points for capturing the enemy flag";
+					chatWindow->AddMessage(s);
 				}
 			}
 		}

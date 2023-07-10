@@ -69,6 +69,7 @@ DEFINE_SPADES_SETTING(cg_killFeedImg, "1");
 DEFINE_SPADES_SETTING(cg_hitMarkSoundGain, "0.5");
 DEFINE_SPADES_SETTING(cg_hitAnalyze, "1");
 DEFINE_SPADES_SETTING(cg_deathSoundGain, "0.2");
+SPADES_SETTING(cg_scoreMessages);
 
 DEFINE_SPADES_SETTING(cg_specSpeedWalk, "1");
 DEFINE_SPADES_SETTING(cg_specSpeedSprint, "3");
@@ -1112,6 +1113,12 @@ namespace spades {
 					if (&killer == local) {
 						if ((int)cg_centerMessage == 2)
 							msg = _Tr("Client", "You have killed {0}", victim.GetName());
+						if (cg_scoreMessages) {
+							std::string s;
+							s += ChatWindow::ColoredMessage("+1", MsgColorSysInfo);
+							s += " point for neutralizing an enemy";
+							chatWindow->AddMessage(s);
+						}
 					} else {
 						msg = _Tr("Client", "You were killed by {0}", killer.GetName());
 					}
