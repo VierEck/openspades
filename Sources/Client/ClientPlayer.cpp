@@ -59,6 +59,7 @@ DEFINE_SPADES_SETTING(cg_viewWeaponZ, "0");
 DEFINE_SPADES_SETTING(cg_debugToolSkinAnchors, "0");
 
 DEFINE_SPADES_SETTING(cg_hideFirstPersonModel, "0");
+DEFINE_SPADES_SETTING(cg_hideArms, "0");
 
 namespace spades {
 	namespace client {
@@ -765,6 +766,9 @@ namespace spades {
 				leftHand = interface.GetLeftHandPosition();
 				rightHand = interface.GetRightHandPosition();
 			}
+
+			if (cg_hideArms)
+				return;
 
 			// view hands
 			if (leftHand.GetPoweredLength() > 0.001f && rightHand.GetPoweredLength() > 0.001f) {

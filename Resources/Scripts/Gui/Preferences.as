@@ -696,6 +696,7 @@ namespace spades {
 													 _Tr("Preferences", "ON"),
 													 _Tr("Preferences", "OFF")},
 									array<int> = {2, 1, 0});
+			layouter.AddToggleField(_Tr("Preferences", "Hide FirstPerson Arms"), "cg_hideArms");
 			layouter.AddSliderField(_Tr("Preferences", "View Weapon X"),
 									"cg_viewWeaponX", -1.5, 1.5, 0.01,
 									ConfigNumberFormatter(2, ""));
