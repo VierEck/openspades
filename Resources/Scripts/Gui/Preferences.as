@@ -706,6 +706,7 @@ namespace spades {
                                                      _Tr("Preferences", "targa"),
                                                      _Tr("Preferences", "jpeg")},
                                     array<int> = {2, 1, 0});
+            layouter.AddToggleField(_Tr("Preferences", "Debug Aim Spread"), "cg_debugAim");
             layouter.AddHeading(_Tr("Preferences", " "));
 
             layouter.AddHeading(_Tr("Preferences", "AoS 0.75/0.76 Compatibility"));
