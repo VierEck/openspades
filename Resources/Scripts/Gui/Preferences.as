@@ -60,12 +60,16 @@ namespace spades {
 
             AddTab(GameOptionsPanel(Manager, options, fontManager),
                    _Tr("Preferences", "Game Options"));
-            AddTab(ControlOptionsPanel(Manager, options, fontManager),
-                   _Tr("Preferences", "Controls"));
+            AddTab(HudOptionsPanel(Manager, options, fontManager),
+                   _Tr("Preferences", "HUD"));
             AddTab(SoundsOptionsPanel(Manager, options, fontManager),
                    _Tr("Preferences", "Sounds"));
+            AddTab(EffectsOptionsPanel(Manager, options, fontManager),
+                   _Tr("Preferences", "Effects"));
             AddTab(GraphicsOptionsPanel(Manager, options, fontManager),
                    _Tr("Preferences", "Graphics"));
+            AddTab(ControlOptionsPanel(Manager, options, fontManager),
+                   _Tr("Preferences", "Controls"));
             AddTab(DemoOptionsPanel(Manager, options, fontManager),
                    _Tr("Preferences", "Demo"));
             AddTab(MapEditorOptionsPanel(Manager, options, fontManager),
@@ -659,37 +663,6 @@ namespace spades {
             layouter.AddToggleField(_Tr("Preferences", "Spectator ESP Names"), "cg_specNames");
             layouter.AddHeading(_Tr("Preferences", " "));
 
-            layouter.AddHeading(_Tr("Preferences", "Effects"));
-            layouter.AddChoiceField(_Tr("Preferences", "Hide FirstPerson Model"), "cg_hideFirstPersonModel",
-                                    array<string> = {_Tr("Preferences", "Icon"),
-                                                     _Tr("Preferences", "ON"),
-                                                     _Tr("Preferences", "OFF")},
-                                    array<int> = {2, 1, 0});
-            layouter.AddToggleField(_Tr("Preferences", "Glow Blocks"), "cg_glowBlocks");
-            layouter.AddToggleField(_Tr("Preferences", "Damage indicators"), "cg_damageIndicators");
-            layouter.AddToggleField(_Tr("Preferences", "Blood"), "cg_blood");
-            layouter.AddToggleField(_Tr("Preferences", "Falling Blocks"), "cg_fallingBlocks");
-            layouter.AddToggleField(_Tr("Preferences", "Tracers"), "cg_tracers");
-            layouter.AddToggleField(_Tr("Preferences", "FirstPerson Tracers"), "cg_tracersFirstPerson");
-            layouter.AddToggleField(_Tr("Preferences", "Ejecting Brass"), "cg_ejectBrass");
-            layouter.AddChoiceField(_Tr("Preferences", "Dead Player Model"), "cg_corpse",
-                                    array<string> = {_Tr("Preferences", "Ragdoll"),
-                                                     _Tr("Preferences", "ON"),
-                                                     _Tr("Preferences", "OFF")},
-                                    array<int> = {2, 1, 0});
-            layouter.AddToggleField(_Tr("Preferences", "Animations"), "cg_animations");
-            layouter.AddChoiceField(_Tr("Preferences", "Camera Shake"), "cg_shake",
-                                    array<string> = {_Tr("Preferences", "MORE"),
-                                                     _Tr("Preferences", "NORMAL"),
-                                                     _Tr("Preferences", "OFF")},
-                                    array<int> = {2, 1, 0});
-            layouter.AddChoiceField(_Tr("Preferences", "Particles"), "cg_particles",
-                                    array<string> = {_Tr("Preferences", "NORMAL"),
-                                                     _Tr("Preferences", "LESS"),
-                                                     _Tr("Preferences", "OFF")},
-                                    array<int> = {2, 1, 0});
-            layouter.AddHeading(_Tr("Preferences", " "));
-
             layouter.AddHeading(_Tr("Preferences", "Feedbacks"));
             layouter.AddChoiceField(_Tr("Preferences", "Ignore Chat Messages"), "cg_ignoreChatMessages",
                                     array<string> = {_Tr("Preferences", "All"),
@@ -720,20 +693,33 @@ namespace spades {
                                     ConfigNumberFormatter(1, "x"));
             layouter.AddHeading(_Tr("Preferences", " "));
 
-            layouter.AddHeading(_Tr("Preferences", "AoS 0.75/0.76 Compatibility"));
-            layouter.AddToggleField(_Tr("Preferences", "Allow Unicode"), "cg_unicode");
-            layouter.AddToggleField(_Tr("Preferences", "Server Alert"), "cg_serverAlert");
-            layouter.AddHeading(_Tr("Preferences", " "));
-
             layouter.AddHeading(_Tr("Preferences", "Misc"));
             layouter.AddSliderField(_Tr("Preferences", "Field of View"), "cg_fov", 45, 90, 1,
                                     ConfigNumberFormatter(0, " deg"));
             layouter.AddHeading(_Tr("Preferences", " "));
 
+            layouter.AddHeading(_Tr("Preferences", "AoS 0.75/0.76 Compatibility"));
+            layouter.AddToggleField(_Tr("Preferences", "Allow Unicode"), "cg_unicode");
+            layouter.AddToggleField(_Tr("Preferences", "Server Alert"), "cg_serverAlert");
+            layouter.AddHeading(_Tr("Preferences", " "));
+
+            layouter.FinishLayout();
+        }
+    }
+
+    class HudOptionsPanel : spades::ui::UIElement {
+        HudOptionsPanel(spades::ui::UIManager @manager, PreferenceViewOptions @options,
+                         FontManager @fontManager) {
+            super(manager);
+
+            StandardPreferenceLayouter layouter(this, fontManager);
+
             layouter.AddHeading(_Tr("Preferences", "HUD"));
             layouter.AddToggleField(_Tr("Preferences", "Hide HUD"), "cg_hideHud");
             layouter.AddSliderField(_Tr("Preferences", "HUD transparency"), "cg_hudTransparency", 0, 1, 0.01,
                                     ConfigNumberFormatter(2, "x"));
+            layouter.AddHeading(_Tr("Preferences", " "));
+
             layouter.AddSliderField(_Tr("Preferences", "Minimap transparency"), "cg_minimapTransparency", 0, 1, 0.01,
                                     ConfigNumberFormatter(2, "x"));
             layouter.AddSliderField(_Tr("Preferences", "Minimap size"), "cg_minimapSize", 128, 256,
@@ -743,6 +729,7 @@ namespace spades {
                                                      _Tr("Preferences", "Beneath"),
                                                      _Tr("Preferences", "OFF")},
                                     array<int> = {2, 1, 0});
+            layouter.AddHeading(_Tr("Preferences", " "));
             layouter.AddChoiceField(_Tr("Preferences", "HitTest Debugger"), "cg_debugHitTest",
                                     array<string> = {_Tr("Preferences", "Fade"),
                                                      _Tr("Preferences", "ON"),
@@ -754,6 +741,7 @@ namespace spades {
             layouter.AddSliderField(_Tr("Preferences", "HitTest Size"),
                                     "cg_hitTestSize", 0, 288, 1,
                                     ConfigNumberFormatter(0, "px"));
+            layouter.AddHeading(_Tr("Preferences", " "));
             layouter.AddToggleField(_Tr("Preferences", "Show K/D Acc. Stats"), "cg_playerStats");
             layouter.AddChoiceField(_Tr("Preferences", "Show Network Stats"), "cg_stats",
                                     array<string> = {_Tr("Preferences", "Colored"),
@@ -782,6 +770,48 @@ namespace spades {
             layouter.AddVolumeSlider(_Tr("Preferences", "HitMark Sounds"), "cg_hitMarkSoundGain");
             layouter.AddVolumeSlider(_Tr("Preferences", "Headshot Sounds"), "cg_hitFeedbackSoundGain");
             layouter.AddVolumeSlider(_Tr("Preferences", "Death Sounds"), "cg_deathSoundGain");
+
+            layouter.FinishLayout();
+        }
+    }
+
+    class EffectsOptionsPanel : spades::ui::UIElement {
+        EffectsOptionsPanel(spades::ui::UIManager @manager, PreferenceViewOptions @options,
+                         FontManager @fontManager) {
+            super(manager);
+
+            StandardPreferenceLayouter layouter(this, fontManager);
+
+            layouter.AddHeading(_Tr("Preferences", "Effects"));
+            layouter.AddChoiceField(_Tr("Preferences", "Hide FirstPerson Model"), "cg_hideFirstPersonModel",
+                                    array<string> = {_Tr("Preferences", "Icon"),
+                                                     _Tr("Preferences", "ON"),
+                                                     _Tr("Preferences", "OFF")},
+                                    array<int> = {2, 1, 0});
+            layouter.AddToggleField(_Tr("Preferences", "Glow Blocks"), "cg_glowBlocks");
+            layouter.AddToggleField(_Tr("Preferences", "Damage indicators"), "cg_damageIndicators");
+            layouter.AddToggleField(_Tr("Preferences", "Blood"), "cg_blood");
+            layouter.AddToggleField(_Tr("Preferences", "Falling Blocks"), "cg_fallingBlocks");
+            layouter.AddToggleField(_Tr("Preferences", "Tracers"), "cg_tracers");
+            layouter.AddToggleField(_Tr("Preferences", "FirstPerson Tracers"), "cg_tracersFirstPerson");
+            layouter.AddToggleField(_Tr("Preferences", "Ejecting Brass"), "cg_ejectBrass");
+            layouter.AddChoiceField(_Tr("Preferences", "Dead Player Model"), "cg_corpse",
+                                    array<string> = {_Tr("Preferences", "Ragdoll"),
+                                                     _Tr("Preferences", "ON"),
+                                                     _Tr("Preferences", "OFF")},
+                                    array<int> = {2, 1, 0});
+            layouter.AddToggleField(_Tr("Preferences", "Animations"), "cg_animations");
+            layouter.AddChoiceField(_Tr("Preferences", "Camera Shake"), "cg_shake",
+                                    array<string> = {_Tr("Preferences", "MORE"),
+                                                     _Tr("Preferences", "NORMAL"),
+                                                     _Tr("Preferences", "OFF")},
+                                    array<int> = {2, 1, 0});
+            layouter.AddChoiceField(_Tr("Preferences", "Particles"), "cg_particles",
+                                    array<string> = {_Tr("Preferences", "NORMAL"),
+                                                     _Tr("Preferences", "LESS"),
+                                                     _Tr("Preferences", "OFF")},
+                                    array<int> = {2, 1, 0});
+            layouter.AddHeading(_Tr("Preferences", " "));
 
             layouter.FinishLayout();
         }
