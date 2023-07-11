@@ -691,6 +691,11 @@ namespace spades {
 			layouter.AddHeading(_Tr("Preferences", " "));
 			
 			layouter.AddHeading(_Tr("Preferences", "Skin"));
+			layouter.AddChoiceField(_Tr("Preferences", "Hide FirstPerson Model"), "cg_hideFirstPersonModel",
+									array<string> = {_Tr("Preferences", "Icon"),
+													 _Tr("Preferences", "ON"),
+													 _Tr("Preferences", "OFF")},
+									array<int> = {2, 1, 0});
 			layouter.AddSliderField(_Tr("Preferences", "View Weapon X"),
 									"cg_viewWeaponX", -1.5, 1.5, 0.01,
 									ConfigNumberFormatter(2, ""));
@@ -829,11 +834,6 @@ namespace spades {
 
 			layouter.AddHeading(_Tr("Preferences", "Effects"));
 			layouter.AddToggleField(_Tr("Preferences", "KillFeed Images"), "cg_killFeedImg");
-			layouter.AddChoiceField(_Tr("Preferences", "Hide FirstPerson Model"), "cg_hideFirstPersonModel",
-									array<string> = {_Tr("Preferences", "Icon"),
-													 _Tr("Preferences", "ON"),
-													 _Tr("Preferences", "OFF")},
-									array<int> = {2, 1, 0});
 			layouter.AddToggleField(_Tr("Preferences", "Glow Blocks"), "cg_glowBlocks");
 			layouter.AddToggleField(_Tr("Preferences", "Damage indicators"), "cg_damageIndicators");
 			layouter.AddToggleField(_Tr("Preferences", "Blood"), "cg_blood");
@@ -862,7 +862,7 @@ namespace spades {
 			layouter.AddToggleField(_Tr("Preferences", "Manual Focus"), "cg_manualFocus");
 			layouter.AddControl(_Tr("Preferences", "Key enable Auto Focus"), "cg_keyAutoFocus");
 			layouter.AddSliderField(_Tr("Preferences", "Auto Focus Speed"),
-									"cg_autoFocusSpeed", 0.1, 10.0, 0.01,
+									"cg_autoFocusSpeed", 0.1, 2.0, 0.01,
 									ConfigNumberFormatter(2, "s"));
 			layouter.AddHeading(_Tr("Preferences", " "));
 
