@@ -696,6 +696,11 @@ namespace spades {
             layouter.AddHeading(_Tr("Preferences", "Misc"));
             layouter.AddSliderField(_Tr("Preferences", "Field of View"), "cg_fov", 45, 90, 1,
                                     ConfigNumberFormatter(0, " deg"));
+            layouter.AddChoiceField(_Tr("Preferences", "Screenshot Format"), "cg_screenshotFormat",
+                                    array<string> = {_Tr("Preferences", "png"),
+                                                     _Tr("Preferences", "targa"),
+                                                     _Tr("Preferences", "jpeg")},
+                                    array<int> = {2, 1, 0});
             layouter.AddHeading(_Tr("Preferences", " "));
 
             layouter.AddHeading(_Tr("Preferences", "AoS 0.75/0.76 Compatibility"));

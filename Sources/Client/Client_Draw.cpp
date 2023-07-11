@@ -71,7 +71,7 @@ SPADES_SETTING(cg_keyJump);
 SPADES_SETTING(cg_keyAttack);
 SPADES_SETTING(cg_keyAltAttack);
 SPADES_SETTING(cg_keyCrouch);
-DEFINE_SPADES_SETTING(cg_screenshotFormat, "jpeg");
+DEFINE_SPADES_SETTING(cg_screenshotFormat, "png");
 DEFINE_SPADES_SETTING(cg_stats, "0");
 DEFINE_SPADES_SETTING(cg_hideHud, "0");
 DEFINE_SPADES_SETTING(cg_playerNames, "2");
@@ -83,7 +83,7 @@ DEFINE_SPADES_SETTING(cg_hudTransparency, "1");
 SPADES_SETTING(cg_debugHitTest);
 DEFINE_SPADES_SETTING(cg_hitTestSize, "210");
 DEFINE_SPADES_SETTING(cg_hitTestTransparency, "1");
-DEFINE_SPADES_SETTING(cg_playerStats, "1");
+DEFINE_SPADES_SETTING(cg_playerStats, "0");
 DEFINE_SPADES_SETTING(cg_damageIndicators, "1");
 SPADES_SETTING(cg_hideFirstPersonModel);
 
@@ -104,7 +104,11 @@ namespace spades {
 				} else if (EqualsIgnoringCase(cg_screenshotFormat, "png")) {
 					return ScreenshotFormat::Png;
 				} else {
-					SPRaise("Invalid screenshot format: %s", cg_screenshotFormat.CString());
+					if (0 <= (int)cg_screenshotFormat <= 2) {
+						return ScreenshotFormat((int)cg_screenshotFormat);
+					} else {
+						SPRaise("Invalid screenshot format: %s", cg_screenshotFormat.CString());
+					}
 				}
 			}
 
