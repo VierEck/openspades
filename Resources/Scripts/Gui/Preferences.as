@@ -701,6 +701,7 @@ namespace spades {
             layouter.AddHeading(_Tr("Preferences", "Misc"));
             layouter.AddSliderField(_Tr("Preferences", "Field of View"), "cg_fov", 45, 90, 1,
                                     ConfigNumberFormatter(0, " deg"));
+            layouter.AddToggleField(_Tr("Preferences", "Skip Corpses in DeadSpec"), "cg_skipDeadPlayersWhenDead");
             layouter.AddChoiceField(_Tr("Preferences", "Screenshot Format"), "cg_screenshotFormat",
                                     array<string> = {_Tr("Preferences", "png"),
                                                      _Tr("Preferences", "targa"),
@@ -729,6 +730,10 @@ namespace spades {
             layouter.AddToggleField(_Tr("Preferences", "Hide HUD"), "cg_hideHud");
             layouter.AddSliderField(_Tr("Preferences", "HUD transparency"), "cg_hudTransparency", 0, 1, 0.01,
                                     ConfigNumberFormatter(2, "x"));
+            layouter.AddSliderField(_Tr("Preferences", "Chat Height"), "cg_chatHeight", 0, 100, 1,
+                                    ConfigNumberFormatter(0, "px"));
+            layouter.AddSliderField(_Tr("Preferences", "KillFeed Height"), "cg_killfeedHeight", 0, 100, 1,
+                                    ConfigNumberFormatter(0, "px"));
             layouter.AddHeading(_Tr("Preferences", " "));
 
             layouter.AddSliderField(_Tr("Preferences", "Minimap transparency"), "cg_minimapTransparency", 0, 1, 0.01,
