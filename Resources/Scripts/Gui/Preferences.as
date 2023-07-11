@@ -717,7 +717,7 @@ namespace spades {
 
 			layouter.AddHeading(_Tr("Preferences", "Misc"));
 			ConfigField @FpsField = layouter.AddInputField(_Tr("Preferences", "FPS (0 = uncap)"), "cl_fps");
-			layouter.AddSliderField(_Tr("Preferences", "Field of View"), "cg_fov", 45, 90, 1,
+			layouter.AddSliderField(_Tr("Preferences", "Field of View"), "cg_fov", 1, 179, 1,
 									ConfigNumberFormatter(0, " deg"));
 			layouter.AddToggleField(_Tr("Preferences", "Third Person"), "cg_thirdperson");
 			layouter.AddToggleField(_Tr("Preferences", "Skip Corpses in DeadSpec"), "cg_skipDeadPlayersWhenDead");
