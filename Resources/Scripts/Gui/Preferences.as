@@ -669,7 +669,11 @@ namespace spades {
                                                      _Tr("Preferences", "Players"),
                                                      _Tr("Preferences", "OFF")},
                                     array<int> = {2, 1, 0});
-            layouter.AddToggleField(_Tr("Preferences", "KillFeed Images"), "cg_killFeedImg");
+            layouter.AddChoiceField(_Tr("Preferences", "Center Message"), "cg_centerMessage",
+                                    array<string> = {_Tr("Preferences", "Kill-msg"),
+                                                     _Tr("Preferences", "ON"),
+                                                     _Tr("Preferences", "OFF")},
+                                    array<int> = {2, 1, 0});
             layouter.AddChoiceField(_Tr("Preferences", "Hottracked Names"), "cg_playerNames",
                                     array<string> = {_Tr("Preferences", "enhanced"),
                                                      _Tr("Preferences", "ON"),
@@ -689,18 +693,19 @@ namespace spades {
             layouter.AddHeading(_Tr("Preferences", "Spectator Fly Speed"));
             layouter.AddSliderField(_Tr("Preferences", "Flying Speed Walk"),
                                     "cg_specSpeedWalk", 0.1, 20.0, 0.1,
-                                    ConfigNumberFormatter(1, "x"));
+                                    ConfigNumberFormatter(1, ""));
             layouter.AddSliderField(_Tr("Preferences", "Flying Speed Sprint"),
                                     "cg_specSpeedSprint", 0.1, 20.0, 0.1,
-                                    ConfigNumberFormatter(1, "x"));
+                                    ConfigNumberFormatter(1, ""));
             layouter.AddSliderField(_Tr("Preferences", "Flying Speed Sneak"),
                                     "cg_specSpeedSneak", 0.1, 20.0, 0.1,
-                                    ConfigNumberFormatter(1, "x"));
+                                    ConfigNumberFormatter(1, ""));
             layouter.AddHeading(_Tr("Preferences", " "));
 
             layouter.AddHeading(_Tr("Preferences", "Misc"));
             layouter.AddSliderField(_Tr("Preferences", "Field of View"), "cg_fov", 45, 90, 1,
                                     ConfigNumberFormatter(0, " deg"));
+            layouter.AddToggleField(_Tr("Preferences", "Third Person"), "cg_thirdperson");
             layouter.AddToggleField(_Tr("Preferences", "Skip Corpses in DeadSpec"), "cg_skipDeadPlayersWhenDead");
             layouter.AddChoiceField(_Tr("Preferences", "Screenshot Format"), "cg_screenshotFormat",
                                     array<string> = {_Tr("Preferences", "png"),
@@ -708,6 +713,7 @@ namespace spades {
                                                      _Tr("Preferences", "jpeg")},
                                     array<int> = {2, 1, 0});
             layouter.AddToggleField(_Tr("Preferences", "Debug Aim Spread"), "cg_debugAim");
+            layouter.AddToggleField(_Tr("Preferences", "Debug Corpse"), "cg_debugCorpse");
             layouter.AddHeading(_Tr("Preferences", " "));
 
             layouter.AddHeading(_Tr("Preferences", "AoS 0.75/0.76 Compatibility"));
@@ -729,7 +735,7 @@ namespace spades {
             layouter.AddHeading(_Tr("Preferences", "HUD"));
             layouter.AddToggleField(_Tr("Preferences", "Hide HUD"), "cg_hideHud");
             layouter.AddSliderField(_Tr("Preferences", "HUD transparency"), "cg_hudTransparency", 0, 1, 0.01,
-                                    ConfigNumberFormatter(2, "x"));
+                                    ConfigNumberFormatter(2, ""));
             layouter.AddSliderField(_Tr("Preferences", "Chat Height"), "cg_chatHeight", 0, 100, 1,
                                     ConfigNumberFormatter(0, "px"));
             layouter.AddSliderField(_Tr("Preferences", "KillFeed Height"), "cg_killfeedHeight", 0, 100, 1,
@@ -737,7 +743,7 @@ namespace spades {
             layouter.AddHeading(_Tr("Preferences", " "));
 
             layouter.AddSliderField(_Tr("Preferences", "Minimap transparency"), "cg_minimapTransparency", 0, 1, 0.01,
-                                    ConfigNumberFormatter(2, "x"));
+                                    ConfigNumberFormatter(2, ""));
             layouter.AddSliderField(_Tr("Preferences", "Minimap size"), "cg_minimapSize", 128, 256,
                                     8, ConfigNumberFormatter(0, " px"));
             layouter.AddChoiceField(_Tr("Preferences", "Show Current Map Sector"), "cg_minimapCoords",
@@ -753,7 +759,7 @@ namespace spades {
                                     array<int> = {2, 1, 0});
             layouter.AddSliderField(_Tr("Preferences", "HitTest Transparency"),
                                     "cg_hitTestTransparency", 0, 1.0, 0.01,
-                                    ConfigNumberFormatter(2, "x"));
+                                    ConfigNumberFormatter(2, ""));
             layouter.AddSliderField(_Tr("Preferences", "HitTest Size"),
                                     "cg_hitTestSize", 0, 288, 1,
                                     ConfigNumberFormatter(0, "px"));
@@ -799,6 +805,7 @@ namespace spades {
             StandardPreferenceLayouter layouter(this, fontManager);
 
             layouter.AddHeading(_Tr("Preferences", "Effects"));
+            layouter.AddToggleField(_Tr("Preferences", "KillFeed Images"), "cg_killFeedImg");
             layouter.AddChoiceField(_Tr("Preferences", "Hide FirstPerson Model"), "cg_hideFirstPersonModel",
                                     array<string> = {_Tr("Preferences", "Icon"),
                                                      _Tr("Preferences", "ON"),
@@ -827,6 +834,12 @@ namespace spades {
                                                      _Tr("Preferences", "LESS"),
                                                      _Tr("Preferences", "OFF")},
                                     array<int> = {2, 1, 0});
+            layouter.AddToggleField(_Tr("Preferences", "Water Impact (particles)"), "cg_waterImpact");
+            layouter.AddToggleField(_Tr("Preferences", "Manual Focus"), "cg_manualFocus");
+            layouter.AddControl(_Tr("Preferences", "Key enable Auto Focus"), "cg_keyAutoFocus");
+            layouter.AddSliderField(_Tr("Preferences", "Auto Focus Speed"),
+                                    "cg_autoFocusSpeed", 0.1, 10.0, 0.01,
+                                    ConfigNumberFormatter(2, "s"));
             layouter.AddHeading(_Tr("Preferences", " "));
 
             layouter.FinishLayout();
@@ -860,6 +873,8 @@ namespace spades {
 
             layouter.AddHeading(_Tr("Preferences", "Post-processing"));
             layouter.AddToggleField(_Tr("Preferences", "Depth Of Field"), "r_depthOfField");
+            layouter.AddSliderField(_Tr("Preferences", "Depth of Field Amount"), "cg_depthOfFieldAmount",
+            0.1, 10, 0.1, ConfigNumberFormatter(1, ""));
             layouter.AddToggleField(_Tr("Preferences", "Camera Blur"), "r_cameraBlur");
             layouter.AddToggleField(_Tr("Preferences", "FXAA Anti-Aliasing"), "r_fxaa");
             layouter.AddToggleField(_Tr("Preferences", "Lens Flares"), "r_lensFlare");
@@ -1017,13 +1032,13 @@ namespace spades {
             layouter.AddHeading(_Tr("Preferences", "MapEditor Fly Speed"));
             layouter.AddSliderField(_Tr("Preferences", "Flying Speed Walk"),
                                     "cg_FlySpeedWalk", 0.1, 20.0, 0.1,
-                                    ConfigNumberFormatter(1, "x"));
+                                    ConfigNumberFormatter(1, ""));
             layouter.AddSliderField(_Tr("Preferences", "Flying Speed Sprint"),
                                     "cg_FlySpeedSprint", 0.1, 20.0, 0.1,
-                                    ConfigNumberFormatter(1, "x"));
+                                    ConfigNumberFormatter(1, ""));
             layouter.AddSliderField(_Tr("Preferences", "Flying Speed Sneak"),
                                     "cg_FlySpeedSneak", 0.1, 20.0, 0.1,
-                                    ConfigNumberFormatter(1, "x"));
+                                    ConfigNumberFormatter(1, ""));
 
             layouter.FinishLayout();
         }
