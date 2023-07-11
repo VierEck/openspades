@@ -689,6 +689,19 @@ namespace spades {
 			layouter.AddToggleField(_Tr("Preferences", "Hit Indicator"), "cg_hitIndicator");
 			layouter.AddToggleField(_Tr("Preferences", "Show Alerts"), "cg_alerts");
 			layouter.AddHeading(_Tr("Preferences", " "));
+			
+			layouter.AddHeading(_Tr("Preferences", "Skin"));
+			layouter.AddSliderField(_Tr("Preferences", "View Weapon X"),
+									"cg_viewWeaponX", -1.5, 1.5, 0.01,
+									ConfigNumberFormatter(2, ""));
+			layouter.AddSliderField(_Tr("Preferences", "View Weapon Y"),
+									"cg_viewWeaponY", -1.5, 1.5, 0.01,
+									ConfigNumberFormatter(2, ""));
+			layouter.AddSliderField(_Tr("Preferences", "View Weapon Z"),
+									"cg_viewWeaponZ", -1.5, 1.5, 0.01,
+									ConfigNumberFormatter(2, ""));
+			layouter.AddToggleField(_Tr("Preferences", "Debug Skin Anchors"), "cg_debugToolSkinAnchors");
+			layouter.AddHeading(_Tr("Preferences", " "));
 
 			layouter.AddHeading(_Tr("Preferences", "Spectator Fly Speed"));
 			layouter.AddSliderField(_Tr("Preferences", "Flying Speed Walk"),
@@ -703,6 +716,7 @@ namespace spades {
 			layouter.AddHeading(_Tr("Preferences", " "));
 
 			layouter.AddHeading(_Tr("Preferences", "Misc"));
+			ConfigField @FpsField = layouter.AddInputField(_Tr("Preferences", "FPS (0 = uncap)"), "cl_fps");
 			layouter.AddSliderField(_Tr("Preferences", "Field of View"), "cg_fov", 45, 90, 1,
 									ConfigNumberFormatter(0, " deg"));
 			layouter.AddToggleField(_Tr("Preferences", "Third Person"), "cg_thirdperson");
@@ -712,6 +726,8 @@ namespace spades {
 													 _Tr("Preferences", "targa"),
 													 _Tr("Preferences", "jpeg")},
 									array<int> = {2, 1, 0});
+			layouter.AddSliderField(_Tr("Preferences", "Jpeg Quality"), "core_jpegQuality", 1, 100, 1,
+									ConfigNumberFormatter(0, " %"));
 			layouter.AddToggleField(_Tr("Preferences", "Debug Aim Spread"), "cg_debugAim");
 			layouter.AddToggleField(_Tr("Preferences", "Debug Corpse"), "cg_debugCorpse");
 			layouter.AddHeading(_Tr("Preferences", " "));
@@ -751,7 +767,13 @@ namespace spades {
 													 _Tr("Preferences", "Beneath"),
 													 _Tr("Preferences", "OFF")},
 									array<int> = {2, 1, 0});
+			layouter.AddChoiceField(_Tr("Preferences", "Minimap Player Colors"), "cg_minimapPlayerColor",
+									array<string> = {_Tr("Preferences", "Random"),
+													 _Tr("Preferences", "Team")},
+									array<int> = {1, 0});
+			layouter.AddToggleField(_Tr("Preferences", "WeaponBased PlayerIcon"), "cg_minimapPlayerIcon");
 			layouter.AddHeading(_Tr("Preferences", " "));
+			
 			layouter.AddChoiceField(_Tr("Preferences", "HitTest Debugger"), "cg_debugHitTest",
 									array<string> = {_Tr("Preferences", "Fade"),
 													 _Tr("Preferences", "ON"),
@@ -764,6 +786,7 @@ namespace spades {
 									"cg_hitTestSize", 0, 288, 1,
 									ConfigNumberFormatter(0, "px"));
 			layouter.AddHeading(_Tr("Preferences", " "));
+			
 			layouter.AddToggleField(_Tr("Preferences", "Show K/D Acc. Stats"), "cg_playerStats");
 			layouter.AddChoiceField(_Tr("Preferences", "Show Network Stats"), "cg_stats",
 									array<string> = {_Tr("Preferences", "Colored"),
@@ -823,6 +846,7 @@ namespace spades {
 													 _Tr("Preferences", "ON"),
 													 _Tr("Preferences", "OFF")},
 									array<int> = {2, 1, 0});
+			layouter.AddToggleField(_Tr("Preferences", "Corpse Line Collision"), "r_corpseLineCollision");
 			layouter.AddToggleField(_Tr("Preferences", "Animations"), "cg_animations");
 			layouter.AddChoiceField(_Tr("Preferences", "Camera Shake"), "cg_shake",
 									array<string> = {_Tr("Preferences", "MORE"),
@@ -951,6 +975,14 @@ namespace spades {
 			layouter.AddControl(_Tr("Preferences", "Save Map"), "cg_keySaveMap");
 			layouter.AddControl(_Tr("Preferences", "Save Sceneshot"), "cg_keySceneshot");
 			layouter.AddControl(_Tr("Preferences", "Save Screenshot"), "cg_keyScreenshot");
+			layouter.AddHeading(_Tr("Preferences", " "));
+			
+			layouter.AddHeading(_Tr("Preferences", "Color Palette"));
+			layouter.AddControl(_Tr("Preferences", "Navigate Left"), "cg_keyPaletteLeft");
+			layouter.AddControl(_Tr("Preferences", "Navigate Right"), "cg_keyPaletteRight");
+			layouter.AddControl(_Tr("Preferences", "Navigate Up"), "cg_keyPaletteUp");
+			layouter.AddControl(_Tr("Preferences", "Navigate Down"), "cg_keyPaletteDown");
+			layouter.AddHeading(_Tr("Preferences", " "));
 
 			layouter.FinishLayout();
 		}
@@ -971,7 +1003,7 @@ namespace spades {
 			layouter.AddToggleField(_Tr("Preferences", "Show Progressbar only in UI"), "cg_DemoProgressBarOnlyInUi");
 			layouter.AddHeading(_Tr("Preferences", " "));
 
-			layouter.AddHeading(_Tr("Preferences", "Replay Keys"));
+			layouter.AddHeading(_Tr("Preferences", "Replay Controls"));
 			layouter.AddControl(_Tr("Preferences", "Toggle UI"), "cg_KeyProgressUi");
 			layouter.AddControl(_Tr("Preferences", "Pause"), "cg_keyPause");
 			layouter.AddControl(_Tr("Preferences", "FastForward"), "cg_keySkipForward");
