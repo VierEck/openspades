@@ -734,23 +734,23 @@ namespace spades {
 			layouter.AddSliderField(_Tr("Preferences", "Dynamic Lines Multiplier"), "n_TargetLinesDynamicMultiplier", 1, 100, 1,
 			ConfigNumberFormatter(1, "x"));
 
-			layouter.AddSliderField(_Tr("Preferences", "Dot Transparency"), "n_TargetDotTransparency", 0, 1., 0.1,
-			ConfigNumberFormatter(1, "x"));
+			layouter.AddSliderField(_Tr("Preferences", "Dot Transparency"), "n_TargetDotTransparency", 0, 1, 0.01,
+									ConfigNumberFormatter(0, " %", "", 100));
 			layouter.AddSliderField(_Tr("Preferences", "Dot Red"), "n_TargetDotColorRed", 0, 255, 1,
-			ConfigNumberFormatter(0, ""));
+			ConfigNumberFormatter(0, " r"));
 			layouter.AddSliderField(_Tr("Preferences", "Dot Green"), "n_TargetDotColorGreen", 0, 255, 1,
-			ConfigNumberFormatter(0, ""));
+			ConfigNumberFormatter(0, " g"));
 			layouter.AddSliderField(_Tr("Preferences", "Dot Blue"), "n_TargetDotColorBlue", 0, 255, 1,
-			ConfigNumberFormatter(0, ""));
+			ConfigNumberFormatter(0, " b"));
 
-			layouter.AddSliderField(_Tr("Preferences", "Line Transparency"), "n_TargetLineTransparency", 0, 1., 0.1,
-			ConfigNumberFormatter(1, "x"));
+			layouter.AddSliderField(_Tr("Preferences", "Line Transparency"), "n_TargetLineTransparency", 0, 1, 0.01,
+									ConfigNumberFormatter(0, " %", "", 100));
 			layouter.AddSliderField(_Tr("Preferences", "Line Red"), "n_TargetLineColorRed", 0, 255, 1,
-			ConfigNumberFormatter(0, ""));
+			ConfigNumberFormatter(0, " r"));
 			layouter.AddSliderField(_Tr("Preferences", "Line Green"), "n_TargetLineColorGreen", 0, 255, 1,
-			ConfigNumberFormatter(0, ""));
+			ConfigNumberFormatter(0, " g"));
 			layouter.AddSliderField(_Tr("Preferences", "Line Blue"), "n_TargetLineColorBlue", 0, 255, 1,
-			ConfigNumberFormatter(0, ""));
+			ConfigNumberFormatter(0, " b"));
 			layouter.AddHeading(_Tr("Preferences", " "));
 
 			layouter.AddHeading(_Tr("Preferences", "Spectator Fly Speed"));
@@ -777,7 +777,7 @@ namespace spades {
 													 _Tr("Preferences", "jpeg")},
 									array<int> = {2, 1, 0});
 			layouter.AddSliderField(_Tr("Preferences", "Jpeg Quality"), "core_jpegQuality", 1, 100, 1,
-									ConfigNumberFormatter(0, " %"));
+									ConfigNumberFormatter(0, " %", "", 100));
 			layouter.AddToggleField(_Tr("Preferences", "Debug Aim Spread"), "cg_debugAim");
 			layouter.AddToggleField(_Tr("Preferences", "Debug Corpse"), "cg_debugCorpse");
 			layouter.AddHeading(_Tr("Preferences", " "));
@@ -801,15 +801,16 @@ namespace spades {
 			layouter.AddHeading(_Tr("Preferences", "HUD"));
 			layouter.AddToggleField(_Tr("Preferences", "Hide HUD"), "cg_hideHud");
 			layouter.AddSliderField(_Tr("Preferences", "HUD transparency"), "cg_hudTransparency", 0, 1, 0.01,
-									ConfigNumberFormatter(2, ""));
+									ConfigNumberFormatter(0, " %", "", 100));
 			layouter.AddSliderField(_Tr("Preferences", "Chat Height"), "cg_chatHeight", 0, 100, 1,
 									ConfigNumberFormatter(0, "px"));
 			layouter.AddSliderField(_Tr("Preferences", "KillFeed Height"), "cg_killfeedHeight", 0, 100, 1,
 									ConfigNumberFormatter(0, "px"));
 			layouter.AddHeading(_Tr("Preferences", " "));
 
+			layouter.AddHeading(_Tr("Preferences", "MiniMap"));
 			layouter.AddSliderField(_Tr("Preferences", "Minimap transparency"), "cg_minimapTransparency", 0, 1, 0.01,
-									ConfigNumberFormatter(2, ""));
+									ConfigNumberFormatter(0, " %", "", 100));
 			layouter.AddSliderField(_Tr("Preferences", "Minimap size"), "cg_minimapSize", 128, 256,
 									8, ConfigNumberFormatter(0, " px"));
 			layouter.AddChoiceField(_Tr("Preferences", "Show Current Map Sector"), "cg_minimapCoords",
@@ -824,25 +825,27 @@ namespace spades {
 			layouter.AddToggleField(_Tr("Preferences", "WeaponBased PlayerIcon"), "cg_minimapPlayerIcon");
 			layouter.AddHeading(_Tr("Preferences", " "));
 			
+			layouter.AddHeading(_Tr("Preferences", "HitTest Debug"));
 			layouter.AddChoiceField(_Tr("Preferences", "HitTest Debugger"), "cg_debugHitTest",
 									array<string> = {_Tr("Preferences", "Fade"),
 													 _Tr("Preferences", "ON"),
 													 _Tr("Preferences", "OFF")},
 									array<int> = {2, 1, 0});
-			layouter.AddSliderField(_Tr("Preferences", "HitTest Transparency"),
-									"cg_hitTestTransparency", 0, 1.0, 0.01,
-									ConfigNumberFormatter(2, ""));
+			layouter.AddSliderField(_Tr("Preferences", "HitTest Transparency"), "cg_hitTestTransparency", 0, 1, 0.01,
+									ConfigNumberFormatter(0, " %", "", 100));
 			layouter.AddSliderField(_Tr("Preferences", "HitTest Size"),
 									"cg_hitTestSize", 0, 288, 1,
 									ConfigNumberFormatter(0, "px"));
 			layouter.AddHeading(_Tr("Preferences", " "));
 			
+			layouter.AddHeading(_Tr("Preferences", "Statistics"));
 			layouter.AddToggleField(_Tr("Preferences", "Show K/D Acc. Stats"), "cg_playerStats");
 			layouter.AddChoiceField(_Tr("Preferences", "Show Network Stats"), "cg_stats",
 									array<string> = {_Tr("Preferences", "Colored"),
 													 _Tr("Preferences", "ON"),
 													 _Tr("Preferences", "OFF")},
 									array<int> = {2, 1, 0});
+			layouter.AddHeading(_Tr("Preferences", " "));
 
 			layouter.FinishLayout();
 		}
@@ -856,7 +859,7 @@ namespace spades {
 			StandardPreferenceLayouter layouter(this, fontManager);
 
 			layouter.AddHeading(_Tr("Preferences", "Sounds"));
-			layouter.AddSliderField(_Tr("Preferences", "Master Gain/'Volume'"), "s_gain", 0.0, 4.0, 0.01, ConfigNumberFormatter(2, " gain"));
+			layouter.AddSliderField(_Tr("Preferences", "Master Volume"), "s_gain", 0.0, 2.0, 0.01, ConfigNumberFormatter(0, " %", "", 100));
 			layouter.AddToggleField(_Tr("Preferences", "Environmental Audio"), "cg_environmentalAudio");
 			layouter.AddHeading(_Tr("Preferences", " "));
 
@@ -1027,6 +1030,8 @@ namespace spades {
 			layouter.AddControl(_Tr("Preferences", "Navigate Right"), "cg_keyPaletteRight");
 			layouter.AddControl(_Tr("Preferences", "Navigate Up"), "cg_keyPaletteUp");
 			layouter.AddControl(_Tr("Preferences", "Navigate Down"), "cg_keyPaletteDown");
+			layouter.AddControl(_Tr("Preferences", "Key Mix Held Color"), "cg_keyPaletteMix");
+			layouter.AddControl(_Tr("Preferences", "Key Invert Held Color"), "cg_keyPaletteInvert");
 			layouter.AddHeading(_Tr("Preferences", " "));
 
 			layouter.FinishLayout();
@@ -1088,10 +1093,6 @@ namespace spades {
 			layouter.AddControl(_Tr("Preferences", "Open Color Palette Setting"), "cg_keyEditColor");
 			layouter.AddControl(_Tr("Preferences", "Open map.TXT Editor"), "cg_keyMapTxt");
 			ConfigField @hotkeyField = layouter.AddInputField(_Tr("Preferences", "UI HotKey keyboard layout"), "cg_UIHotKeyLayout");
-			layouter.AddHeading(_Tr("Preferences", " "));
-
-			layouter.AddControl(_Tr("Preferences", "Key Mix Held Color"), "cg_keyPaletteMix");
-			layouter.AddControl(_Tr("Preferences", "Key Invert Held Color"), "cg_keyPaletteInvert");
 			layouter.AddHeading(_Tr("Preferences", " "));
 
 			layouter.AddControl(_Tr("Preferences", "Toggle Build Distance"), "cg_keyScaleBuildDistance");
