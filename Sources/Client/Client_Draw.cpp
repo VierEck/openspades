@@ -92,11 +92,15 @@ DEFINE_SPADES_SETTING(cg_DrawDragCursorPos, "1");
 
 DEFINE_SPADES_SETTING(n_Target, "0");
 DEFINE_SPADES_SETTING(n_TargetOnScope, "0");
-DEFINE_SPADES_SETTING(n_TargetTransparency, "1");
+DEFINE_SPADES_SETTING(n_TargetLineTransparency, "1");
+DEFINE_SPADES_SETTING(n_TargetDotTransparency, "1");
 DEFINE_SPADES_SETTING(n_TargetSize, "2");
-DEFINE_SPADES_SETTING(n_TargetColorRed, "0");
-DEFINE_SPADES_SETTING(n_TargetColorGreen, "1");
-DEFINE_SPADES_SETTING(n_TargetColorBlue, "0");
+DEFINE_SPADES_SETTING(n_TargetLineColorRed, "0");
+DEFINE_SPADES_SETTING(n_TargetLineColorGreen, "1");
+DEFINE_SPADES_SETTING(n_TargetLineColorBlue, "0");
+DEFINE_SPADES_SETTING(n_TargetDotColorRed, "0");
+DEFINE_SPADES_SETTING(n_TargetDotColorGreen, "1");
+DEFINE_SPADES_SETTING(n_TargetDotColorBlue, "0");
 DEFINE_SPADES_SETTING(n_TargetDot, "1");
 DEFINE_SPADES_SETTING(n_TargetLines, "1");
 DEFINE_SPADES_SETTING(n_TargetLinesPos, "0");
@@ -448,14 +452,14 @@ namespace spades {
 			Handle<IImage> img = renderer->RegisterImage("Gfx/White.tga");
 			
 			if(n_TargetDot){
-				renderer->SetColorAlphaPremultiplied(MakeVector4((float)n_TargetColorRed / 255.f, 
-				(float)n_TargetColorGreen / 255.f, (float)n_TargetColorBlue / 255.f, (float)n_TargetTransparency));
+				renderer->SetColorAlphaPremultiplied(MakeVector4((float)n_TargetDotColorRed / 255.f, 
+				(float)n_TargetDotColorGreen / 255.f, (float)n_TargetDotColorBlue / 255.f, (float)n_TargetDotTransparency));
 				renderer->DrawImage(img, AABB2(x - 2/size, y - (2/ size), 4/ size, 4/ size));
 			}
 			
 			if(n_TargetLines){
-				renderer->SetColorAlphaPremultiplied(MakeVector4((float)n_TargetColorRed / 255.f, 
-				(float)n_TargetColorGreen / 255.f, (float)n_TargetColorBlue / 255.f, (float)n_TargetTransparency));
+				renderer->SetColorAlphaPremultiplied(MakeVector4((float)n_TargetLineColorRed / 255.f, 
+				(float)n_TargetLineColorGreen / 255.f, (float)n_TargetLineColorBlue / 255.f, (float)n_TargetLineTransparency));
 				renderer->DrawImage(img, AABB2(x - (2/ size), y - (7/ size)+linepos, 4/ size, -lineh/ size));
 				renderer->DrawImage(img, AABB2(x - (2/ size), y + (7/ size)-linepos, 4/ size, lineh/ size));
 			

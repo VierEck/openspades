@@ -729,13 +729,22 @@ namespace spades {
 			layouter.AddSliderField(_Tr("Preferences", "Dynamic Lines Multiplier"), "n_TargetLinesDynamicMultiplier", 1, 100, 1,
 			ConfigNumberFormatter(1, "x"));
 
-			layouter.AddSliderField(_Tr("Preferences", "Transparency"), "n_TargetTransparency", 0, 1., 0.1,
+			layouter.AddSliderField(_Tr("Preferences", "Dot Transparency"), "n_TargetDotTransparency", 0, 1., 0.1,
 			ConfigNumberFormatter(1, "x"));
-			layouter.AddSliderField(_Tr("Preferences", "Red"), "n_TargetColorRed", 0, 255, 1,
+			layouter.AddSliderField(_Tr("Preferences", "Dot Red"), "n_TargetDotColorRed", 0, 255, 1,
 			ConfigNumberFormatter(0, ""));
-			layouter.AddSliderField(_Tr("Preferences", "Green"), "n_TargetColorGreen", 0, 255, 1,
+			layouter.AddSliderField(_Tr("Preferences", "Dot Green"), "n_TargetDotColorGreen", 0, 255, 1,
 			ConfigNumberFormatter(0, ""));
-			layouter.AddSliderField(_Tr("Preferences", "Blue"), "n_TargetColorBlue", 0, 255, 1,
+			layouter.AddSliderField(_Tr("Preferences", "Dot Blue"), "n_TargetDotColorBlue", 0, 255, 1,
+			ConfigNumberFormatter(0, ""));
+
+			layouter.AddSliderField(_Tr("Preferences", "Line Transparency"), "n_TargetLineTransparency", 0, 1., 0.1,
+			ConfigNumberFormatter(1, "x"));
+			layouter.AddSliderField(_Tr("Preferences", "Line Red"), "n_TargetLineColorRed", 0, 255, 1,
+			ConfigNumberFormatter(0, ""));
+			layouter.AddSliderField(_Tr("Preferences", "Line Green"), "n_TargetLineColorGreen", 0, 255, 1,
+			ConfigNumberFormatter(0, ""));
+			layouter.AddSliderField(_Tr("Preferences", "Line Blue"), "n_TargetLineColorBlue", 0, 255, 1,
 			ConfigNumberFormatter(0, ""));
 			layouter.AddHeading(_Tr("Preferences", " "));
 
