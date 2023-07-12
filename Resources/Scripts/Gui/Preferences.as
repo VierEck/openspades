@@ -691,6 +691,11 @@ namespace spades {
 			layouter.AddHeading(_Tr("Preferences", " "));
 			
 			layouter.AddHeading(_Tr("Preferences", "Skin"));
+			layouter.AddChoiceField(_Tr("Preferences", "Scope"), "cg_pngScope",
+									array<string> = {_Tr("Preferences", "dotsight"),
+													 _Tr("Preferences", "png"),
+													 _Tr("Preferences", "model")},
+									array<int> = {2, 1, 0});
 			layouter.AddChoiceField(_Tr("Preferences", "Hide FirstPerson Model"), "cg_hideFirstPersonModel",
 									array<string> = {_Tr("Preferences", "Icon"),
 													 _Tr("Preferences", "ON"),

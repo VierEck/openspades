@@ -32,6 +32,7 @@ namespace spades {
         protected Vector3 teamColor;
         protected bool muted;
         protected ConfigItem n_hideDefaultTarget("n_hideDefaultTarget", "0");
+        protected ConfigItem cg_pngScope("cg_pngScope", "0");
 
         float SprintState {
             set { sprintState = value; }
@@ -149,11 +150,13 @@ namespace spades {
 
         protected Renderer @renderer;
         protected Image @sightImage;
+        protected Image @dotSightImage;
 
         BasicViewWeapon(Renderer @renderer) {
             @this.renderer = renderer;
             localFireVibration = 0.f;
             @sightImage = renderer.RegisterImage("Gfx/Sight.tga");
+            @dotSightImage = renderer.RegisterImage("Gfx/DotSight.tga");
         }
 
         float GetLocalFireVibration() { return localFireVibration; }
@@ -223,6 +226,18 @@ namespace spades {
         void Draw2D() {
             if (n_hideDefaultTarget.IntValue == 1)
                 return;
+
+            if (AimDownSightState > 0.99f) {
+                if (cg_pngScope.IntValue > 1) {
+                    renderer.ColorNP = Vector4(1.0F, 0.0F, 1.0F, 1.0F);
+                    renderer.DrawImage(
+                        dotSightImage,
+                    Vector2((renderer.ScreenWidth - dotSightImage.Width) * 0.5F,
+                        (renderer.ScreenHeight - dotSightImage.Height) * 0.5F)
+                    );
+                }
+                return;
+            }
 
             renderer.ColorNP = (Vector4(1.f, 1.f, 1.f, 1.f));
             renderer.DrawImage(sightImage,

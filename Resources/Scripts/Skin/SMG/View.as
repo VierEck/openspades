@@ -41,6 +41,7 @@ namespace spades {
         private AudioChunk @[] fireSmallReverbSounds(4);
         private AudioChunk @[] fireLargeReverbSounds(4);
         private AudioChunk @reloadSound;
+        protected Image @scopeImage;
 
         ViewSMGSkin(Renderer @r, AudioDevice @dev) {
             super(r);
@@ -76,6 +77,8 @@ namespace spades {
             @fireFarSound = dev.RegisterSound("Sounds/Weapons/SMG/FireFar.opus");
             @fireStereoSound = dev.RegisterSound("Sounds/Weapons/SMG/FireStereo.opus");
             @reloadSound = dev.RegisterSound("Sounds/Weapons/SMG/ReloadLocal.opus");
+
+            @scopeImage = renderer.RegisterImage("Gfx/SMG.png");
         }
 
         void Update(float dt) { BasicViewWeapon::Update(dt); }
@@ -132,12 +135,27 @@ namespace spades {
         }
 
         void Draw2D() {
-            if (AimDownSightState > 0.6)
+            if (AimDownSightState > 0.99f && cg_pngScope.IntValue == 1) {
+                Vector2 imgSize = Vector2(scopeImage.Width, scopeImage.Height);
+                imgSize *= Max(1.0F, renderer.ScreenWidth / scopeImage.Width);
+                imgSize *= Min(1.0F, renderer.ScreenHeight / scopeImage.Height);
+                imgSize *= Max(0.25F * (1.0F - readyState) + 1.0F, 1.0F);
+
+                Vector2 scrCenter = (Vector2(renderer.ScreenWidth, renderer.ScreenHeight) - imgSize) * 0.5F;
+
+                renderer.ColorNP = Vector4(1.0F, 1.0F, 1.0F, 1.0F);
+                renderer.DrawImage(scopeImage, AABB2(scrCenter.x, scrCenter.y, imgSize.x, imgSize.y));
                 return;
+            }
             BasicViewWeapon::Draw2D();
         }
 
         void AddToScene() {
+            if (cg_pngScope.IntValue > 0 and AimDownSightStateSmooth > 0.99f) {
+                LeftHandPosition = Vector3(0.0f, 0.0f, 0.0f);
+                RightHandPosition = Vector3(0.0f, 0.0f, 0.0f);
+                return;
+            }
             Matrix4 mat = CreateScaleMatrix(0.033f);
             mat = GetViewWeaponMatrix() * mat;
 
