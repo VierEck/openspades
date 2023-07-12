@@ -229,6 +229,7 @@ namespace spades {
 
 			float hitFeedbackIconState;
 			bool hitFeedbackFriendly;
+			float targetfirestate;
 
 			// manual focus
 			float focalLength;
@@ -425,6 +426,7 @@ namespace spades {
 			void DrawAlert();
 			void DrawDebugAim();
 			void DrawStats();
+			void DrawTarget();
 			void DrawHitTestDebugger();
 			void DrawPlayerStats();
 			void DrawAllPlayerNames();

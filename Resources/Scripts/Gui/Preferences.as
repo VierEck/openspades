@@ -709,6 +709,36 @@ namespace spades {
 			layouter.AddToggleField(_Tr("Preferences", "Debug Skin Anchors"), "cg_debugToolSkinAnchors");
 			layouter.AddHeading(_Tr("Preferences", " "));
 
+			layouter.AddHeading(_Tr("Preferences", "Nuceto's Target Mod"));
+			layouter.AddToggleField(_Tr("Preferences", "Hide Default Target"), "n_hideDefaultTarget");
+			layouter.AddToggleField(_Tr("Preferences", "Target"), "n_Target");
+			layouter.AddToggleField(_Tr("Preferences", "Target in scope"), "n_TargetOnScope");
+			layouter.AddSliderField(_Tr("Preferences", "Size"), "n_TargetSize", 1, 4, 0.1,
+			ConfigNumberFormatter(1, "x"));
+
+			layouter.AddToggleField(_Tr("Preferences", "Dot"), "n_TargetDot");
+			layouter.AddToggleField(_Tr("Preferences", "Lines"), "n_TargetLines");
+			layouter.AddSliderField(_Tr("Preferences", "Linespos"), "n_TargetLinesPos", -64, 16, 1,
+			ConfigNumberFormatter(1, "x"));
+
+			layouter.AddSliderField(_Tr("Preferences", "LinesHeight"), "n_TargetLinesHeight", 0, 500, 1,
+			ConfigNumberFormatter(1, "x"));	
+
+			layouter.AddToggleField(_Tr("Preferences", "Dynamic Lines Fire"), "n_TargetLinesDynamicFire");
+			layouter.AddToggleField(_Tr("Preferences", "Dynamic Lines Sprint"), "n_TargetLinesDynamicSprint");
+			layouter.AddSliderField(_Tr("Preferences", "Dynamic Lines Multiplier"), "n_TargetLinesDynamicMultiplier", 1, 100, 1,
+			ConfigNumberFormatter(1, "x"));
+
+			layouter.AddSliderField(_Tr("Preferences", "Transparency"), "n_TargetTransparency", 0, 1., 0.1,
+			ConfigNumberFormatter(1, "x"));
+			layouter.AddSliderField(_Tr("Preferences", "Red"), "n_TargetColorRed", 0, 255, 1,
+			ConfigNumberFormatter(0, ""));
+			layouter.AddSliderField(_Tr("Preferences", "Green"), "n_TargetColorGreen", 0, 255, 1,
+			ConfigNumberFormatter(0, ""));
+			layouter.AddSliderField(_Tr("Preferences", "Blue"), "n_TargetColorBlue", 0, 255, 1,
+			ConfigNumberFormatter(0, ""));
+			layouter.AddHeading(_Tr("Preferences", " "));
+
 			layouter.AddHeading(_Tr("Preferences", "Spectator Fly Speed"));
 			layouter.AddSliderField(_Tr("Preferences", "Flying Speed Walk"),
 									"cg_specSpeedWalk", 0.1, 20.0, 0.1,

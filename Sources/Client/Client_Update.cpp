@@ -282,6 +282,12 @@ namespace spades {
 					hitFeedbackIconState = 0.f;
 			}
 
+			if (targetfirestate > 0.f) {
+				targetfirestate -= dt * 4.f;
+				if (targetfirestate < 0.f)
+					targetfirestate = 0.f;
+			}
+
 			if (time > lastPosSentTime + 1.f && world->GetLocalPlayer()) {
 				stmp::optional<Player &> p = world->GetLocalPlayer();
 				if (p->IsAlive() && p->GetTeamId() < 2) {
@@ -756,6 +762,7 @@ namespace spades {
 			if (&p == world->GetLocalPlayer()) {
 				localFireVibrationTime = time;
 				lastShotTime = time;
+				targetfirestate = 1.f;
 				shotsCount++;
 			}
 

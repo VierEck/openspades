@@ -31,6 +31,7 @@ namespace spades {
         protected float raiseState;
         protected Vector3 teamColor;
         protected bool muted;
+        protected ConfigItem n_hideDefaultTarget("n_hideDefaultTarget", "0");
 
         float SprintState {
             set { sprintState = value; }
@@ -220,6 +221,9 @@ namespace spades {
         void ReloadedWeapon() {}
 
         void Draw2D() {
+            if (n_hideDefaultTarget.IntValue == 1)
+                return;
+
             renderer.ColorNP = (Vector4(1.f, 1.f, 1.f, 1.f));
             renderer.DrawImage(sightImage,
                                Vector2((renderer.ScreenWidth - sightImage.Width) * 0.5f,
