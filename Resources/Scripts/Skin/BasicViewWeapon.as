@@ -151,12 +151,14 @@ namespace spades {
         protected Renderer @renderer;
         protected Image @sightImage;
         protected Image @dotSightImage;
+        protected Image @scopeImage;
 
         BasicViewWeapon(Renderer @renderer) {
             @this.renderer = renderer;
             localFireVibration = 0.f;
             @sightImage = renderer.RegisterImage("Gfx/Sight.tga");
             @dotSightImage = renderer.RegisterImage("Gfx/DotSight.tga");
+            @scopeImage = renderer.RegisterImage("Gfx/Rifle.png");
         }
 
         float GetLocalFireVibration() { return localFireVibration; }
@@ -235,6 +237,16 @@ namespace spades {
                     Vector2((renderer.ScreenWidth - dotSightImage.Width) * 0.5F,
                         (renderer.ScreenHeight - dotSightImage.Height) * 0.5F)
                     );
+                } else if (cg_pngScope.IntValue == 1) {
+                    Vector2 imgSize = Vector2(scopeImage.Width, scopeImage.Height);
+                    imgSize *= Max(1.0F, renderer.ScreenWidth / scopeImage.Width);
+                    imgSize *= Min(1.0F, renderer.ScreenHeight / scopeImage.Height);
+                    imgSize *= Max(0.25F * (1.0F - readyState) + 1.0F, 1.0F);
+
+                    Vector2 scrCenter = (Vector2(renderer.ScreenWidth, renderer.ScreenHeight) - imgSize) * 0.5F;
+
+                    renderer.ColorNP = Vector4(1.0F, 1.0F, 1.0F, 1.0F);
+                    renderer.DrawImage(scopeImage, AABB2(scrCenter.x, scrCenter.y, imgSize.x, imgSize.y));
                 }
                 return;
             }
