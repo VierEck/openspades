@@ -748,6 +748,7 @@ namespace spades {
 								} while (!world->GetLocalPlayer()->IsToolSelectable(t));
 								SetSelectedTool(t);
 							}
+							return;
 						} else if (name == (rev ? "WheelUp" : "WheelDown")) {
 							if ((int)cg_manualFocus) {
 								// When DoF control is enabled,
@@ -771,7 +772,12 @@ namespace spades {
 								} while (!world->GetLocalPlayer()->IsToolSelectable(t));
 								SetSelectedTool(t);
 							}
+							return;
 						}
+						//only iterate through all macro settings after all other keys checked
+						std::string msg = Settings::GetInstance()->GetMacroItemMsgViaKey(name);
+						if (msg.size() > 0)
+							net->SendChat(msg, false);
 					}
 				} else {
 					// limbo

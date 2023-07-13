@@ -25,7 +25,7 @@ namespace spades {
 	}
 
 	class PreferenceView : spades::ui::UIElement {
-		private spades::ui::UIElement @owner;
+		spades::ui::UIElement @owner;
 
 		private PreferenceTab @[] tabs;
 		float ContentsLeft, ContentsWidth;
@@ -70,6 +70,8 @@ namespace spades {
 				   _Tr("Preferences", "Graphics"));
 			AddTab(ControlOptionsPanel(Manager, options, fontManager),
 				   _Tr("Preferences", "Controls"));
+			AddTab(MacroOptionsPanel(Manager, options, fontManager, this),
+				   _Tr("Preferences", "Chat Macros"));
 			AddTab(DemoOptionsPanel(Manager, options, fontManager),
 				   _Tr("Preferences", "Demo"));
 			AddTab(MapEditorOptionsPanel(Manager, options, fontManager),
@@ -114,7 +116,7 @@ namespace spades {
 			}
 		}
 
-		private void UpdateTabs() {
+		void UpdateTabs() {
 			for (uint i = 0; i < tabs.length; i++) {
 				PreferenceTab @tab = tabs[i];
 				bool selected = SelectedTabIndex == int(i);
@@ -487,6 +489,125 @@ namespace spades {
 		}
 	}
 
+	class MacroHotKeyField : spades::ui::UIElement {
+		MacroItem @macro;
+		private bool hover;
+		spades::ui::EventHandler @KeyBound;
+
+		MacroHotKeyField(spades::ui::UIManager manager, string name) {
+			super(manager);
+			@macro = MacroItem(name);
+			IsMouseInteractive = true;
+		}
+
+		string BoundKey {
+			get { return macro.key; }
+			set { macro.key = value; }
+		}
+
+		void KeyDown(string key) {
+			if (IsFocused) {
+				if (key != "Escape") {
+					if (key == " ") {
+						key = "Space";
+					} else if (key == "BackSpace" or key == "Delete") {
+						key = ""; // unbind
+					}
+					macro.key = key;
+					KeyBound(this);
+				}
+				@Manager.ActiveElement = null;
+				AcceptsFocus = false;
+			} else {
+				UIElement::KeyDown(key);
+			}
+		}
+
+		void MouseDown(spades::ui::MouseButton button, Vector2 clientPosition) {
+			if (not AcceptsFocus) {
+				AcceptsFocus = true;
+				@Manager.ActiveElement = this;
+				return;
+			}
+		}
+
+		void MouseEnter() { hover = true; }
+		void MouseLeave() { hover = false; }
+
+		void Render() {
+			// render background
+			Renderer @renderer = Manager.Renderer;
+			Vector2 pos = ScreenPosition;
+			Vector2 size = Size;
+			Image @img = renderer.RegisterImage("Gfx/White.tga");
+			renderer.ColorNP = Vector4(0.f, 0.f, 0.f, IsFocused ? 0.3f : 0.1f);
+			renderer.DrawImage(img, AABB2(pos.x, pos.y, size.x, size.y));
+
+			if (IsFocused) {
+				renderer.ColorNP = Vector4(1.f, 1.f, 1.f, 0.2f);
+			} else if (hover) {
+				renderer.ColorNP = Vector4(1.f, 1.f, 1.f, 0.1f);
+			} else {
+				renderer.ColorNP = Vector4(1.f, 1.f, 1.f, 0.06f);
+			}
+			renderer.DrawImage(img, AABB2(pos.x, pos.y, size.x, 1.f));
+			renderer.DrawImage(img, AABB2(pos.x, pos.y + size.y - 1.f, size.x, 1.f));
+			renderer.DrawImage(img, AABB2(pos.x, pos.y + 1.f, 1.f, size.y - 2.f));
+			renderer.DrawImage(img, AABB2(pos.x + size.x - 1.f, pos.y + 1.f, 1.f, size.y - 2.f));
+
+			Font @font = this.Font;
+			string text = IsFocused
+							  ? _Tr("Preferences", "Press Key to Bind or [Escape] to Cancel...")
+							  : macro.key;
+
+			Vector4 color(1, 1, 1, 1);
+
+			if (IsFocused) {
+				color.w = abs(sin(Manager.Time * 2.f));
+			} else {
+				AcceptsFocus = false;
+			}
+
+			if (text == " " or text == "Space") {
+				text = _Tr("Preferences", "Space");
+			} else if (text.length == 0) {
+				text = _Tr("Preferences", "Unbound");
+				color.w *= 0.3f;
+			} else if (text == "Shift") {
+				text = _Tr("Preferences", "Shift");
+			} else if (text == "Control") {
+				text = _Tr("Preferences", "Control");
+			} else if (text == "Meta") {
+				text = _Tr("Preferences", "Meta");
+			} else if (text == "Alt") {
+				text = _Tr("Preferences", "Alt");
+			} else {
+				for (uint i = 0, len = text.length; i < len; i++)
+					text[i] = ToUpper(text[i]);
+			}
+
+			Vector2 txtSize = font.Measure(text);
+			Vector2 txtPos;
+			txtPos = pos + (size - txtSize) * 0.5f;
+
+			font.Draw(text, txtPos, 1.f, color);
+		}
+	}
+
+	class MacroField : spades::ui::Field {
+		MacroItem @macro;
+		MacroField(spades::ui::UIManager manager, string name) {
+			super(manager);
+			@macro = MacroItem(name);
+			this.Text = macro.msg;
+		}
+
+		void OnChanged() {
+			Field::OnChanged();
+			macro.msg = this.Text;
+		}
+	}
+
 	class StandardPreferenceLayouterModel : spades::ui::ListViewModel {
 		private spades::ui::UIElement @[] @items;
 		StandardPreferenceLayouterModel(spades::ui::UIElement @[] @items) { @this.items = items; }
@@ -502,7 +623,11 @@ namespace spades {
 		private float FieldWidth = 310.f;
 		private spades::ui::UIElement @[] items;
 		private ConfigHotKeyField @[] hotkeyItems;
+		private MacroHotKeyField @[] hotkeyItemsMacro;
 		private FontManager @fontManager;
+		spades::ui::Button @AddMacroButton;
+		spades::ui::Button @RemoveMacroButton;
+		PreferenceView@ pViewer;
 
 		StandardPreferenceLayouter(spades::ui::UIElement @parent, FontManager @fontManager) {
 			@Parent = parent;
@@ -522,6 +647,20 @@ namespace spades {
 			string key = bindField.BoundKey;
 			for (uint i = 0; i < hotkeyItems.length; i++) {
 				ConfigHotKeyField @f = hotkeyItems[i];
+				if (f !is bindField) {
+					if (f.BoundKey == key) {
+						f.BoundKey = "";
+					}
+				}
+			}
+		}
+		
+		private void OnKeyBoundMacro(spades::ui::UIElement @sender) {
+			// unbind already bound key
+			MacroHotKeyField @bindField = cast<MacroHotKeyField>(sender);
+			string key = bindField.BoundKey;
+			for (uint i = 0; i < hotkeyItemsMacro.length; i++) {
+				MacroHotKeyField @f = hotkeyItemsMacro[i];
 				if (f !is bindField) {
 					if (f.BoundKey == key) {
 						f.BoundKey = "";
@@ -639,6 +778,86 @@ namespace spades {
 			list.Bounds = AABB2(0.f, 0.f, 580.f, 530.f);
 			Parent.AddChild(list);
 		}
+
+		void OnAddMacroButton(spades::ui::UIElement @) {
+			string[] @no = AddMacroItem();//fixme make this a void
+			PreferenceView al(pViewer.owner, PreferenceViewOptions(), fontManager);
+			al.Run();
+			al.SelectedTabIndex = 6;
+			al.UpdateTabs();
+			pViewer.Close();
+		}
+		void OnRemoveMacroButton(spades::ui::UIElement @) {
+			string[] @names = GetAllMacroNames();
+			if (int(names.length) <= 0)
+				return;
+			string last = names[int(names.length) - 1];
+			string[] @no = RemoveMacroItem(last);//fixme make this a void
+			PreferenceView al(pViewer.owner, PreferenceViewOptions(), fontManager);
+			al.Run();
+			al.SelectedTabIndex = 6;
+			al.UpdateTabs();
+			pViewer.Close();
+		}
+		void AddMacroSetting(PreferenceView@ pV) {
+			@pViewer = pV;
+			string[] @names = GetAllMacroNames();
+			for (uint i = 0, len = names.length; i < len; i++) {
+				AddMacroControl(names[i], names[i]);
+				AddMacroField(" ", names[i]);
+			}
+			{
+				spades::ui::UIElement @container = CreateItem();
+				spades::ui::Button e(Parent.Manager);
+				e.Bounds = AABB2(10.f, 0.f, 550.f, 30.f);
+				e.Caption = _Tr("Preferences", "Add New Chat Macro");
+				@e.Activated = spades::ui::EventHandler(this.OnAddMacroButton);
+				container.AddChild(e);
+				@AddMacroButton = e;
+			}
+			{
+				spades::ui::UIElement @container = CreateItem();
+				spades::ui::Button e(Parent.Manager);
+				e.Bounds = AABB2(10.f, 0.f, 550.f, 30.f);
+				e.Caption = _Tr("Preferences", "Remove Last Chat Macro");
+				@e.Activated = spades::ui::EventHandler(this.OnRemoveMacroButton);
+				container.AddChild(e);
+				@RemoveMacroButton = e;
+			}
+		}
+		void AddMacroControl(string caption, string name) {
+			spades::ui::UIElement @container = CreateItem();
+
+			spades::ui::Label label(Parent.Manager);
+			label.Text = caption;
+			label.Alignment = Vector2(0.f, 0.5f);
+			label.Bounds = AABB2(10.f, 0.f, 300.f, 32.f);
+			container.AddChild(label);
+
+			MacroHotKeyField field(Parent.Manager, name);
+			field.Bounds = AABB2(FieldX, 1.f, FieldWidth, 30.f);
+			//field.Enable = enabled;
+			container.AddChild(field);
+
+			@field.KeyBound = spades::ui::EventHandler(OnKeyBoundMacro);
+			hotkeyItemsMacro.insertLast(field);
+		}
+		MacroField @AddMacroField(string caption, string name) {
+			spades::ui::UIElement @container = CreateItem();
+
+			spades::ui::Label label(Parent.Manager);
+			label.Text = caption;
+			label.Alignment = Vector2(0.f, 0.5f);
+			label.Bounds = AABB2(10.f, 0.f, 300.f, 32.f);
+			container.AddChild(label);
+
+			MacroField field(Parent.Manager, name);
+			field.Bounds = AABB2(FieldX, 1.f, FieldWidth, 30.f);
+			//field.Enable = enabled;
+			container.AddChild(field);
+
+			return field;
+		}		
 	}
 
 	class GameOptionsPanel : spades::ui::UIElement {
@@ -1034,6 +1253,20 @@ namespace spades {
 			layouter.AddControl(_Tr("Preferences", "Key Invert Held Color"), "cg_keyPaletteInvert");
 			layouter.AddHeading(_Tr("Preferences", " "));
 
+			layouter.FinishLayout();
+		}
+	}
+
+	class MacroOptionsPanel : spades::ui::UIElement {
+		MacroOptionsPanel(spades::ui::UIManager @manager, PreferenceViewOptions @options,
+						 FontManager @fontManager, PreferenceView &pViewer) {
+			super(manager);
+
+			StandardPreferenceLayouter layouter(this, fontManager);
+
+			layouter.AddHeading(_Tr("Preferences", "Chat Macros"));
+			layouter.AddMacroSetting(pViewer);
+			
 			layouter.FinishLayout();
 		}
 	}

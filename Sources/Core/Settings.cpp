@@ -155,9 +155,20 @@ namespace spades {
 					}
 					linePos++;
 
-					std::string val = readString(false);
-					auto *item = GetItem(key, nullptr);
-					item->Set(val);
+					if (key.find("4SpadesMacro") == 0) {
+						std::string vals = readString(false);
+						std::string button, message;
+						size_t find = vals.find(" |: ");
+						if (find != std::string::npos) {
+							auto *itemMacro = GetMacroItem(key);
+							itemMacro->key = vals.substr(0, find);
+							itemMacro->msg = vals.substr(find + 4);
+						}
+					} else {
+						std::string val = readString(false);
+						auto *item = GetItem(key, nullptr);
+						item->Set(val);
+					}
 
 					line++;
 				}
@@ -264,6 +275,23 @@ namespace spades {
 				column = 0;
 			}
 
+			for (const auto &item : itemsMacro) {
+				ItemMacro *itm = item.second;
+
+				emitString(itm->name, true);
+				buffer += ": ";
+				column += 2;
+
+				emitString(itm->key, false);
+				buffer += " |: ";
+				column += 4;
+
+				emitString(itm->msg, false);
+
+				buffer += "\n";
+				column = 0;
+			}
+
 			std::unique_ptr<IStream> s(FileManager::OpenForWriting(CONFIGFILE));
 			s->Write(buffer);
 
@@ -327,6 +355,66 @@ namespace spades {
 		}
 
 		return item;
+	}
+
+	void Settings::AddMacroItem() {
+		SPADES_MARK_FUNCTION();
+		std::vector<std::string> allNames = GetAllMacroNames();
+		char buf[24];
+		for (int i = 0; i < 99; i++) {
+			sprintf(buf, "4SpadesMacro_%02d", i);
+			if (allNames.size() <= i) {
+				GetMacroItem(buf);
+				SPLog("New Macro Setting added: %s", buf);
+				return;
+			}
+			if (buf != allNames[i]) {
+				GetMacroItem(buf);
+				SPLog("New Macro Setting added: %s", buf);
+				return;
+			}
+		}
+		SPLog("Too many Macros. maximum is 100");
+	}
+
+	void Settings::RemoveMacroItem(const std::string &name) {
+		SPADES_MARK_FUNCTION();
+		itemsMacro.erase(name);
+	}
+
+	Settings::ItemMacro *Settings::GetMacroItem(const std::string &name) {
+		SPADES_MARK_FUNCTION();
+		std::map<std::string, ItemMacro *>::iterator it = itemsMacro.find(name);
+		ItemMacro *item;
+		if (it == itemsMacro.end()) {
+			item = new ItemMacro();
+			item->name = name;
+			item->key = "replace me";
+			item->msg = "replace me";
+
+			itemsMacro[name] = item;
+		} else {
+			item = it->second;
+		}
+		return item;
+	}
+
+	std::string Settings::GetMacroItemMsgViaKey(const std::string &key){
+		SPADES_MARK_FUNCTION();
+		for (auto item : itemsMacro)
+			if (EqualsIgnoringCase(item.second->key, key))
+				return item.second->msg;
+		return "";
+	}
+
+	std::vector<std::string> Settings::GetAllMacroNames() {
+		SPADES_MARK_FUNCTION();
+		std::vector<std::string> names;
+		std::map<std::string, ItemMacro *>::iterator it;
+		for (it = itemsMacro.begin(); it != itemsMacro.end(); it++) {
+			names.push_back(it->second->name);
+		}
+		return names;
 	}
 
 	void Settings::Item::Load() {

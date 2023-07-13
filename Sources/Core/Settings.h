@@ -126,6 +126,21 @@ namespace spades {
 		void Flush();
 		/** Return a list of all config variables, sorted by name. */
 		std::vector<std::string> GetAllItemNames();
+
+		struct ItemMacro {
+			std::string name;
+			std::string key;
+			std::string msg;
+		};
+		std::map<std::string, ItemMacro *> itemsMacro;
+
+		void AddMacroItem();
+		void RemoveMacroItem(const std::string &);
+
+		ItemMacro *GetMacroItem(const std::string&);
+		std::string GetMacroItemMsgViaKey(const std::string&);
+
+		std::vector<std::string> GetAllMacroNames();
 	};
 	/*
 	template<const char *name, const char *def>
