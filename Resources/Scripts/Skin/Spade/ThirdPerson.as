@@ -19,80 +19,80 @@
  */
 
 namespace spades {
-    class ThirdPersonSpadeSkin : IToolSkin, IThirdPersonToolSkin, ISpadeSkin {
-        private float sprintState;
-        private float raiseState;
-        private Vector3 teamColor;
-        private Matrix4 originMatrix;
-        private SpadeActionType actionType;
-        private float actionProgress;
+	class ThirdPersonSpadeSkin : IToolSkin, IThirdPersonToolSkin, ISpadeSkin {
+		private float sprintState;
+		private float raiseState;
+		private Vector3 teamColor;
+		private Matrix4 originMatrix;
+		private SpadeActionType actionType;
+		private float actionProgress;
 
-        float SprintState {
-            set { sprintState = value; }
-        }
+		float SprintState {
+			set { sprintState = value; }
+		}
 
-        float RaiseState {
-            set { raiseState = value; }
-        }
+		float RaiseState {
+			set { raiseState = value; }
+		}
 
-        Vector3 TeamColor {
-            set { teamColor = value; }
-        }
+		Vector3 TeamColor {
+			set { teamColor = value; }
+		}
 
-        bool IsMuted {
-            set {
-                // nothing to do
-            }
-        }
+		bool IsMuted {
+			set {
+				// nothing to do
+			}
+		}
 
-        Matrix4 OriginMatrix {
-            set { originMatrix = value; }
-        }
+		Matrix4 OriginMatrix {
+			set { originMatrix = value; }
+		}
 
-        float PitchBias {
-            get {
-                float pitch = 0.f;
-                if (actionType == spades::SpadeActionType::Bash) {
-                    float per = 1.f - actionProgress;
-                    pitch -= per * 0.7f;
-                }
-                return pitch;
-            }
-        }
+		float PitchBias {
+			get {
+				float pitch = 0.f;
+				if (actionType == spades::SpadeActionType::Bash) {
+					float per = 1.f - actionProgress;
+					pitch -= per * 0.7f;
+				}
+				return pitch;
+			}
+		}
 
-        SpadeActionType ActionType {
-            set { actionType = value; }
-        }
+		SpadeActionType ActionType {
+			set { actionType = value; }
+		}
 
-        float ActionProgress {
-            set { actionProgress = value; }
-        }
+		float ActionProgress {
+			set { actionProgress = value; }
+		}
 
-        private Renderer @renderer;
-        private AudioDevice @audioDevice;
-        private Model @model;
+		private Renderer @renderer;
+		private AudioDevice @audioDevice;
+		private Model @model;
 
-        ThirdPersonSpadeSkin(Renderer @r, AudioDevice @dev) {
-            @renderer = r;
-            @audioDevice = dev;
-            @model = renderer.RegisterModel("Models/Weapons/Spade/Spade.kv6");
-        }
+		ThirdPersonSpadeSkin(Renderer @r, AudioDevice @dev) {
+			@renderer = r;
+			@audioDevice = dev;
+			@model = renderer.RegisterModel("Models/Weapons/Spade/Spade.kv6");
+		}
 
-        void Update(float dt) {}
+		void Update(float dt) {}
 
-        void AddToScene() {
-            Matrix4 mat = CreateScaleMatrix(0.05f);
+		void AddToScene() {
+			Matrix4 mat = CreateScaleMatrix(0.05f);
 
-            mat = CreateRotateMatrix(Vector3(0.f, 0.f, 1.f), Pi) * mat;
-            mat = CreateTranslateMatrix(0.35f, -1.f, 0.f) * mat;
+			mat = CreateRotateMatrix(Vector3(0.f, 0.f, 1.f), Pi) * mat;
+			mat = CreateTranslateMatrix(0.35f, -1.f, 0.f) * mat;
 
-            ModelRenderParam param;
-            param.matrix = originMatrix * mat;
-            renderer.AddModel(model, param);
-        }
-    }
+			ModelRenderParam param;
+			param.matrix = originMatrix * mat;
+			renderer.AddModel(model, param);
+		}
+	}
 
-    ISpadeSkin @CreateThirdPersonSpadeSkin(Renderer @r, AudioDevice @dev) {
-        return ThirdPersonSpadeSkin(r, dev);
-    }
+	ISpadeSkin @CreateThirdPersonSpadeSkin(Renderer @r, AudioDevice @dev) {
+		return ThirdPersonSpadeSkin(r, dev);
+	}
 }

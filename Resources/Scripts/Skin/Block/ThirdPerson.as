@@ -19,73 +19,73 @@
  */
 
 namespace spades {
-    class ThirdPersonBlockSkin : IToolSkin, IThirdPersonToolSkin, IBlockSkin {
-        private float sprintState;
-        private float raiseState;
-        private Vector3 teamColor;
-        private Matrix4 originMatrix;
-        private Vector3 blockColor;
-        private float readyState;
+	class ThirdPersonBlockSkin : IToolSkin, IThirdPersonToolSkin, IBlockSkin {
+		private float sprintState;
+		private float raiseState;
+		private Vector3 teamColor;
+		private Matrix4 originMatrix;
+		private Vector3 blockColor;
+		private float readyState;
 
-        float SprintState {
-            set { sprintState = value; }
-        }
+		float SprintState {
+			set { sprintState = value; }
+		}
 
-        float RaiseState {
-            set { raiseState = value; }
-        }
+		float RaiseState {
+			set { raiseState = value; }
+		}
 
-        bool IsMuted {
-            set {
-                // nothing to do; building sound is not related to skin.
-            }
-        }
+		bool IsMuted {
+			set {
+				// nothing to do; building sound is not related to skin.
+			}
+		}
 
-        Vector3 TeamColor {
-            set { teamColor = value; }
-        }
+		Vector3 TeamColor {
+			set { teamColor = value; }
+		}
 
-        Matrix4 OriginMatrix {
-            set { originMatrix = value; }
-        }
+		Matrix4 OriginMatrix {
+			set { originMatrix = value; }
+		}
 
-        float PitchBias {
-            get { return 0.f; }
-        }
+		float PitchBias {
+			get { return 0.f; }
+		}
 
-        Vector3 BlockColor {
-            set { blockColor = value; }
-        }
+		Vector3 BlockColor {
+			set { blockColor = value; }
+		}
 
-        float ReadyState {
-            set { readyState = value; }
-        }
+		float ReadyState {
+			set { readyState = value; }
+		}
 
-        private Renderer @renderer;
-        private AudioDevice @audioDevice;
-        private Model @model;
+		private Renderer @renderer;
+		private AudioDevice @audioDevice;
+		private Model @model;
 
-        ThirdPersonBlockSkin(Renderer @r, AudioDevice @dev) {
-            @renderer = r;
-            @audioDevice = dev;
-            @model = renderer.RegisterModel("Models/Weapons/Block/Block2.kv6");
-        }
+		ThirdPersonBlockSkin(Renderer @r, AudioDevice @dev) {
+			@renderer = r;
+			@audioDevice = dev;
+			@model = renderer.RegisterModel("Models/Weapons/Block/Block2.kv6");
+		}
 
-        void Update(float dt) {}
+		void Update(float dt) {}
 
-        void AddToScene() {
-            Matrix4 mat = CreateScaleMatrix(0.05f);
+		void AddToScene() {
+			Matrix4 mat = CreateScaleMatrix(0.05f);
 
-            mat = CreateTranslateMatrix(0.35f, -1.f, 0.0f) * mat;
+			mat = CreateTranslateMatrix(0.35f, -1.f, 0.0f) * mat;
 
-            ModelRenderParam param;
-            param.matrix = originMatrix * mat;
-            param.customColor = blockColor;
-            renderer.AddModel(model, param);
-        }
-    }
+			ModelRenderParam param;
+			param.matrix = originMatrix * mat;
+			param.customColor = blockColor;
+			renderer.AddModel(model, param);
+		}
+	}
 
-    IBlockSkin @CreateThirdPersonBlockSkin(Renderer @r, AudioDevice @dev) {
-        return ThirdPersonBlockSkin(r, dev);
-    }
+	IBlockSkin @CreateThirdPersonBlockSkin(Renderer @r, AudioDevice @dev) {
+		return ThirdPersonBlockSkin(r, dev);
+	}
 }
