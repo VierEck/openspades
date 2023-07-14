@@ -35,7 +35,7 @@ And many others which weren't mentioned here.
 "VierEck.":
 MapEditor, Demo Replay/Recording based on aos_replay, Chat Macros
 "Nuceto":
-Killfeed image feature, Specific word message highlight, Colored chat message, Colored stats, HUD and Minimap transparency, Teammate map sector in chat message, HitTest Debug display transparency and size, Target Mod
+Killfeed image feature, Specific word message highlight, Colored chat message, Colored stats, HUD and Minimap transparency, Teammate map sector in chat message, HitTest Debug display transparency and size, Target Mod, Default Fade Weapon Models
 "ZeroGrey":
 PM message highlight, Show map sector, Ignore chat, Hitfeedback sound, Hit analyze message, HitTest Debug improvements, k/d and streak display, damage indicators, Respawn Sound, Intro Sound, Screenshot Sound, Death Sound, Score Messages
 "nonperforming":

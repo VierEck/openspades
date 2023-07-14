@@ -171,37 +171,39 @@ namespace spades {
 			Vector3 leftHand4 = mat * Vector3(1.f, 9.f, -6.f);
 
 			if (AimDownSightStateSmooth > 0.8f) {
-				mat = AdjustToAlignSight(mat, Vector3(0.f, 5.f, -4.9f),
-										 (AimDownSightStateSmooth - 0.8f) / 0.2f);
+				mat = AdjustToAlignSight(mat, Vector3(0.f, 5.f, -4.4f), 
+					(AimDownSightStateSmooth - 0.8f) / 0.2f);
 			}
 
 			ModelRenderParam param;
 			Matrix4 weapMatrix = eyeMatrix * mat;
+			weapMatrix *= CreateScaleMatrix(0.25f);
+			weapMatrix *= CreateTranslateMatrix(-0.5f, 5.5f, -1.f);
 			param.matrix = weapMatrix;
 			param.depthHack = true;
 			renderer.AddModel(gunModel, param);
 
 			// draw sights
 			Matrix4 sightMat = weapMatrix;
-			sightMat *= CreateTranslateMatrix(0.05f, 5.f, -4.85f);
-			sightMat *= CreateScaleMatrix(0.1f);
+			sightMat *= CreateTranslateMatrix(0.68f, 22.f, -16.2);
+			sightMat *= CreateScaleMatrix(.3f);
 			param.matrix = sightMat;
 			renderer.AddModel(sightModel1, param); // front
 
 			sightMat = weapMatrix;
-			sightMat *= CreateTranslateMatrix(0.025f, 5.f, -4.875f);
-			sightMat *= CreateScaleMatrix(0.05f);
+			sightMat *= CreateTranslateMatrix(0.68f, 22.f, -16.2f);
+			sightMat *= CreateScaleMatrix(.3f);
 			param.matrix = sightMat;
 			renderer.AddModel(sightModel3, param); // front pin
 
 			sightMat = weapMatrix;
-			sightMat *= CreateTranslateMatrix(0.04f, -9.f, -4.9f);
-			sightMat *= CreateScaleMatrix(0.08f);
+			sightMat *= CreateTranslateMatrix(.68f, -37.f, -17.3f);
+			sightMat *= CreateScaleMatrix(.335f);
 			param.matrix = sightMat;
 			renderer.AddModel(sightModel2, param); // rear
 
 			// magazine/reload action
-			mat *= CreateTranslateMatrix(0.f, 3.f, 1.f);
+			mat *= CreateTranslateMatrix(1.f, 2.f, 2.2f);
 			reload *= 2.5f;
 			if (reloading) {
 				if (reload < 0.7f) {

@@ -158,20 +158,19 @@ namespace spades {
 
 			ModelRenderParam param;
 			Matrix4 weapMatrix = eyeMatrix * mat;
-			param.matrix =
-				weapMatrix * CreateScaleMatrix(0.5f) * CreateTranslateMatrix(-0.5f, 0.f, 0.f);
+			param.matrix = weapMatrix * CreateScaleMatrix(0.23f) * CreateTranslateMatrix(0.5f, -3.f, 7.f);
 			param.depthHack = true;
 			renderer.AddModel(gunModel, param);
 
 			// draw sights
 			Matrix4 sightMat = weapMatrix;
-			sightMat *= CreateTranslateMatrix(0.0125f, -8.f, -4.5f);
+			sightMat *= CreateTranslateMatrix(0.0125f, -8.3f, -4.5f);
 			sightMat *= CreateScaleMatrix(0.025f);
 			param.matrix = sightMat;
 			renderer.AddModel(sightModel1, param); // rear
 
 			sightMat = weapMatrix;
-			sightMat *= CreateTranslateMatrix(0.025f, 16.f, -4.575f);
+			sightMat *= CreateTranslateMatrix(0.025f, 18.2f, -4.575f);
 			sightMat *= CreateScaleMatrix(0.05f);
 			param.matrix = sightMat;
 			renderer.AddModel(sightModel2, param); // front pin
