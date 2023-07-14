@@ -192,7 +192,7 @@ namespace spades {
 
 			sightMat = weapMatrix;
 			sightMat *= CreateTranslateMatrix(0.68f, 22.f, -16.2f);
-			sightMat *= CreateScaleMatrix(.3f);
+			sightMat *= CreateScaleMatrix(.2f);
 			param.matrix = sightMat;
 			renderer.AddModel(sightModel3, param); // front pin
 
