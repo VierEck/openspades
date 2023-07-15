@@ -18,7 +18,7 @@
 
  */
 
-namespace spades {
+ namespace spades {
 	class ThirdPersonGrenadeSkin : IToolSkin, IThirdPersonToolSkin, IGrenadeSkin {
 		private float sprintState;
 		private float raiseState;
@@ -27,45 +27,29 @@ namespace spades {
 		private float cookTime;
 		private float readyState;
 
-		float SprintState {
-			set { sprintState = value; }
-		}
+		float SprintState { set { sprintState = value; } }
+		float RaiseState { set { raiseState = value; } }
+		bool IsMuted { set {} } // nothing to do
+		Vector3 TeamColor { set { teamColor = value; } }
+		Matrix4 OriginMatrix { set { originMatrix = value; } }
 
-		float RaiseState {
-			set { raiseState = value; }
-		}
-
-		bool IsMuted {
-			set {
-				// nothing to do
+		float PitchBias {
+			get {
+				float pitch = 0.0F;
+				if (readyState > 1.0F)
+					pitch += cookTime * 0.5F;
+				return pitch;
 			}
 		}
 
-		Vector3 TeamColor {
-			set { teamColor = value; }
-		}
+		float CookTime { set { cookTime = value; } }
+		float ReadyState { set { readyState = value; } }
 
-		Matrix4 OriginMatrix {
-			set { originMatrix = value; }
-		}
+		private Renderer@ renderer;
+		private AudioDevice@ audioDevice;
+		private Model@ model;
 
-		float PitchBias {
-			get { return 0.f; }
-		}
-
-		float CookTime {
-			set { cookTime = value; }
-		}
-
-		float ReadyState {
-			set { readyState = value; }
-		}
-
-		private Renderer @renderer;
-		private AudioDevice @audioDevice;
-		private Model @model;
-
-		ThirdPersonGrenadeSkin(Renderer @r, AudioDevice @dev) {
+		ThirdPersonGrenadeSkin(Renderer@ r, AudioDevice@ dev) {
 			@renderer = r;
 			@audioDevice = dev;
 			@model = renderer.RegisterModel("Models/Weapons/Grenade/Grenade.kv6");
@@ -74,9 +58,9 @@ namespace spades {
 		void Update(float dt) {}
 
 		void AddToScene() {
-			Matrix4 mat = CreateScaleMatrix(0.05f);
-
-			mat = CreateTranslateMatrix(0.35f, -1.f, 0.0f) * mat;
+			Matrix4 mat = CreateScaleMatrix(0.05F);
+			mat = mat * CreateScaleMatrix(-1, -1, 1);
+			mat = CreateTranslateMatrix(0.45F, -0.9F, -0.05F) * mat;
 
 			ModelRenderParam param;
 			param.matrix = originMatrix * mat;
@@ -84,7 +68,7 @@ namespace spades {
 		}
 	}
 
-	IGrenadeSkin @CreateThirdPersonGrenadeSkin(Renderer @r, AudioDevice @dev) {
+	IGrenadeSkin@ CreateThirdPersonGrenadeSkin(Renderer@ r, AudioDevice@ dev) {
 		return ThirdPersonGrenadeSkin(r, dev);
 	}
 }
