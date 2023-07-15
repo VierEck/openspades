@@ -38,7 +38,7 @@
 #include <Core/IStream.h>
 #include <Core/Settings.h>
 
-DEFINE_SPADES_SETTING(cg_debugHitTest, "0");
+DEFINE_SPADES_SETTING(cg_debugHitTest, "2");
 
 namespace spades {
 	namespace client {

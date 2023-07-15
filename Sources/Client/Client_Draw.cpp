@@ -81,9 +81,9 @@ DEFINE_SPADES_SETTING(cg_specNames, "1");
 
 DEFINE_SPADES_SETTING(cg_hudTransparency, "1");
 SPADES_SETTING(cg_debugHitTest);
-DEFINE_SPADES_SETTING(cg_hitTestSize, "210");
+DEFINE_SPADES_SETTING(cg_hitTestSize, "128");
 DEFINE_SPADES_SETTING(cg_hitTestTransparency, "1");
-DEFINE_SPADES_SETTING(cg_playerStats, "0");
+DEFINE_SPADES_SETTING(cg_playerStats, "1");
 DEFINE_SPADES_SETTING(cg_damageIndicators, "1");
 SPADES_SETTING(cg_hideFirstPersonModel);
 

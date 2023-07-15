@@ -574,8 +574,6 @@ namespace spades {
 					interface.SetActionProgress(0.f);
 				}
 			} else if (currentTool == Player::ToolBlock) {
-
-				// TODO: smooth ready state
 				ScriptIBlockSkin interface(skin);
 				interface.SetReadyState(1.f - (p.GetNextBlockTime() - client.GetWorld()->GetTime()) * 2.f);
 				interface.SetBlockColor(MakeVector3(p.GetBlockColor()) / 255.f);
