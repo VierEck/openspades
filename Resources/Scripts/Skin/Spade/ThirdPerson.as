@@ -18,7 +18,7 @@
 
  */
 
-namespace spades {
+ namespace spades {
 	class ThirdPersonSpadeSkin : IToolSkin, IThirdPersonToolSkin, ISpadeSkin {
 		private float sprintState;
 		private float raiseState;
@@ -27,64 +27,49 @@ namespace spades {
 		private SpadeActionType actionType;
 		private float actionProgress;
 
-		float SprintState {
-			set { sprintState = value; }
-		}
-
-		float RaiseState {
-			set { raiseState = value; }
-		}
-
-		Vector3 TeamColor {
-			set { teamColor = value; }
-		}
-
-		bool IsMuted {
-			set {
-				// nothing to do
-			}
-		}
-
-		Matrix4 OriginMatrix {
-			set { originMatrix = value; }
-		}
+		float SprintState { set { sprintState = value; } }
+		float RaiseState { set { raiseState = value; } }
+		Vector3 TeamColor { set { teamColor = value; } }
+		bool IsMuted { set {} } // nothing to do
+		Matrix4 OriginMatrix { set { originMatrix = value; } }
 
 		float PitchBias {
 			get {
-				float pitch = 0.f;
+				float pitch = 0.0F;
 				if (actionType == spades::SpadeActionType::Bash) {
-					float per = 1.f - actionProgress;
-					pitch -= per * 0.7f;
+					@model = @pickaxeModel;
+					pitch -= (1.0F - actionProgress);
+				} else if (actionType == spades::SpadeActionType::DigStart or actionType == spades::SpadeActionType::Dig) {
+					@model = @spadeModel;
+					pitch -= actionProgress;
 				}
 				return pitch;
 			}
 		}
 
-		SpadeActionType ActionType {
-			set { actionType = value; }
-		}
+		SpadeActionType ActionType { set { actionType = value; } }
+		float ActionProgress { set { actionProgress = value; } }
 
-		float ActionProgress {
-			set { actionProgress = value; }
-		}
+		private Renderer@ renderer;
+		private AudioDevice@ audioDevice;
+		private Model@ spadeModel;
+		private Model@ pickaxeModel;
+		private Model@ model;
 
-		private Renderer @renderer;
-		private AudioDevice @audioDevice;
-		private Model @model;
-
-		ThirdPersonSpadeSkin(Renderer @r, AudioDevice @dev) {
+		ThirdPersonSpadeSkin(Renderer@ r, AudioDevice@ dev) {
 			@renderer = r;
 			@audioDevice = dev;
-			@model = renderer.RegisterModel("Models/Weapons/Spade/Spade.kv6");
+			@spadeModel	= renderer.RegisterModel("Models/Weapons/Spade/Spade.kv6");
+			@pickaxeModel = renderer.RegisterModel("Models/Weapons/Spade/Pickaxe.kv6");
+			@model = @spadeModel;
 		}
 
 		void Update(float dt) {}
 
 		void AddToScene() {
-			Matrix4 mat = CreateScaleMatrix(0.05f);
-
-			mat = CreateRotateMatrix(Vector3(0.f, 0.f, 1.f), Pi) * mat;
-			mat = CreateTranslateMatrix(0.35f, -1.f, 0.f) * mat;
+			Matrix4 mat = CreateScaleMatrix(0.05F);
+			mat = mat * CreateScaleMatrix(-1, -1, 1);
+			mat = CreateTranslateMatrix(0.45F, -0.9F, -0.05F) * mat;
 
 			ModelRenderParam param;
 			param.matrix = originMatrix * mat;
@@ -92,7 +77,7 @@ namespace spades {
 		}
 	}
 
-	ISpadeSkin @CreateThirdPersonSpadeSkin(Renderer @r, AudioDevice @dev) {
+	ISpadeSkin@ CreateThirdPersonSpadeSkin(Renderer@ r, AudioDevice@ dev) {
 		return ThirdPersonSpadeSkin(r, dev);
 	}
 }
