@@ -61,6 +61,8 @@ DEFINE_SPADES_SETTING(cg_debugToolSkinAnchors, "0");
 DEFINE_SPADES_SETTING(cg_hideFirstPersonModel, "0");
 DEFINE_SPADES_SETTING(cg_hideArms, "0");
 
+DEFINE_SPADES_SETTING(cg_PlayerModelsViaWeapon, "1");
+
 namespace spades {
 	namespace client {
 
@@ -915,6 +917,10 @@ namespace spades {
 
 			PlayerInput inp = p.GetInput();
 
+			std::string path = "Models/Player";
+			if (cg_PlayerModelsViaWeapon)
+				path +=  "/" + p.GetWeapon().GetName();
+
 			// lower
 			Matrix4 torso, head, arms;
 			if (inp.crouch) {
@@ -933,7 +939,7 @@ namespace spades {
 				leg1 = lower * leg1;
 				leg2 = lower * leg2;
 
-				model = renderer.RegisterModel("Models/Player/LegCrouch.kv6");
+				model = renderer.RegisterModel((path + "/LegCrouch.kv6").c_str());
 				param.matrix = leg1 * scaler;
 				renderer.RenderModel(*model, param);
 				param.matrix = leg2 * scaler;
@@ -942,7 +948,7 @@ namespace spades {
 				torso = Matrix4::Translate(0.f, 0.f, -0.55f);
 				torso = lower * torso;
 
-				model = renderer.RegisterModel("Models/Player/TorsoCrouch.kv6");
+				model = renderer.RegisterModel((path + "/TorsoCrouch.kv6").c_str());
 				param.matrix = torso * scaler;
 				renderer.RenderModel(*model, param);
 
@@ -967,7 +973,7 @@ namespace spades {
 				leg1 = lower * leg1;
 				leg2 = lower * leg2;
 
-				model = renderer.RegisterModel("Models/Player/Leg.kv6");
+				model = renderer.RegisterModel((path + "/Leg.kv6").c_str());
 				param.matrix = leg1 * scaler;
 				renderer.RenderModel(*model, param);
 				param.matrix = leg2 * scaler;
@@ -976,7 +982,7 @@ namespace spades {
 				torso = Matrix4::Translate(0.f, 0.f, -1.0f);
 				torso = lower * torso;
 
-				model = renderer.RegisterModel("Models/Player/Torso.kv6");
+				model = renderer.RegisterModel((path + "/Torso.kv6").c_str());
 				param.matrix = torso * scaler;
 				renderer.RenderModel(*model, param);
 
@@ -999,13 +1005,13 @@ namespace spades {
 
 			arms = arms * Matrix4::Rotate(MakeVector3(1, 0, 0), armPitch);
 
-			model = renderer.RegisterModel("Models/Player/Arms.kv6");
+			model = renderer.RegisterModel((path + "/Arms.kv6").c_str());
 			param.matrix = arms * scaler;
 			renderer.RenderModel(*model, param);
 
 			head = head * Matrix4::Rotate(MakeVector3(1, 0, 0), pitch);
 
-			model = renderer.RegisterModel("Models/Player/Head.kv6");
+			model = renderer.RegisterModel((path + "/Head.kv6").c_str());
 			param.matrix = head * scaler;
 			renderer.RenderModel(*model, param);
 

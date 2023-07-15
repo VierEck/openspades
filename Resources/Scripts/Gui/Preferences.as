@@ -915,6 +915,10 @@ namespace spades {
 													 _Tr("Preferences", "png"),
 													 _Tr("Preferences", "model")},
 									array<int> = {2, 1, 0});
+			layouter.AddChoiceField(_Tr("Preferences", "Different PlayerModels"), "cg_PlayerModelsViaWeapon",
+									array<string> = {_Tr("Preferences", "via Weapon"),
+													 _Tr("Preferences", "OFF")},
+									array<int> = {1, 0});
 			layouter.AddChoiceField(_Tr("Preferences", "Hide FirstPerson Model"), "cg_hideFirstPersonModel",
 									array<string> = {_Tr("Preferences", "Icon"),
 													 _Tr("Preferences", "ON"),
