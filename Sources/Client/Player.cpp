@@ -228,6 +228,9 @@ namespace spades {
 
 						blockCursorDragging = false;
 						blockCursorActive = false;
+
+						if (!IsLocalPlayer() && world.GetTime() > nextBlockTime)
+							nextBlockTime = world.GetTime() + GetToolPrimaryDelay();
 					}
 				}
 				if (newInput.primary != weapInput.primary || newInput.primary) {
@@ -253,6 +256,9 @@ namespace spades {
 
 						blockCursorDragging = false;
 						blockCursorActive = false;
+
+						if (!IsLocalPlayer() && world.GetTime() > nextBlockTime)
+							nextBlockTime = world.GetTime() + GetToolPrimaryDelay();
 					} else {
 						if (!lastSingleBlockBuildSeqDone) {
 							// cannot build; invalid position.
