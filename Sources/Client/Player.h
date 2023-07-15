@@ -313,6 +313,8 @@ namespace spades {
 			bool GetEditBrushSize() { return editBrushSize; }
 
 			void ShootMapObject() { FireWeapon(); }
+
+			float GetNextBlockTime() { return nextBlockTime; }
 		};
 	} // namespace client
 } // namespace spades

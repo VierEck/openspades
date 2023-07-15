@@ -577,16 +577,7 @@ namespace spades {
 
 				// TODO: smooth ready state
 				ScriptIBlockSkin interface(skin);
-				if (p.GetTool() != Player::ToolBlock) {
-					// FIXME: use block's IsReadyToUseTool
-					// for smoother transition
-					interface.SetReadyState(0.f);
-				} else if (p.IsReadyToUseTool()) {
-					interface.SetReadyState(1.f);
-				} else {
-					interface.SetReadyState(0.f);
-				}
-
+				interface.SetReadyState(1.f - (p.GetNextBlockTime() - client.GetWorld()->GetTime()) * 2.f);
 				interface.SetBlockColor(MakeVector3(p.GetBlockColor()) / 255.f);
 			} else if (currentTool == Player::ToolGrenade) {
 

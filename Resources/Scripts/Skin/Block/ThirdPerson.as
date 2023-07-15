@@ -18,7 +18,7 @@
 
  */
 
-namespace spades {
+ namespace spades {
 	class ThirdPersonBlockSkin : IToolSkin, IThirdPersonToolSkin, IBlockSkin {
 		private float sprintState;
 		private float raiseState;
@@ -27,56 +27,40 @@ namespace spades {
 		private Vector3 blockColor;
 		private float readyState;
 
-		float SprintState {
-			set { sprintState = value; }
-		}
+		float SprintState { set { sprintState = value; } }
+		float RaiseState { set { raiseState = value; } }
+		bool IsMuted { set {} } // nothing to do;
+		Vector3 TeamColor { set { teamColor = value; } }
+		Matrix4 OriginMatrix { set { originMatrix = value; } }
 
-		float RaiseState {
-			set { raiseState = value; }
-		}
-
-		bool IsMuted {
-			set {
-				// nothing to do; building sound is not related to skin.
+		float PitchBias {
+			get {
+				float pitch = 0.0F;
+				if (readyState < 1.0F)
+					pitch -= (1.0F - readyState);
+				return pitch;
 			}
 		}
 
-		Vector3 TeamColor {
-			set { teamColor = value; }
-		}
+		Vector3 BlockColor { set { blockColor = value; } }
+		float ReadyState { set { readyState = value; } }
 
-		Matrix4 OriginMatrix {
-			set { originMatrix = value; }
-		}
+		private Renderer@ renderer;
+		private AudioDevice@ audioDevice;
+		private Model@ model;
 
-		float PitchBias {
-			get { return 0.f; }
-		}
-
-		Vector3 BlockColor {
-			set { blockColor = value; }
-		}
-
-		float ReadyState {
-			set { readyState = value; }
-		}
-
-		private Renderer @renderer;
-		private AudioDevice @audioDevice;
-		private Model @model;
-
-		ThirdPersonBlockSkin(Renderer @r, AudioDevice @dev) {
+		ThirdPersonBlockSkin(Renderer@ r, AudioDevice@ dev) {
 			@renderer = r;
 			@audioDevice = dev;
-			@model = renderer.RegisterModel("Models/Weapons/Block/Block2.kv6");
+			@model = renderer.RegisterModel("Models/Weapons/Block/Block.kv6");
 		}
 
 		void Update(float dt) {}
 
 		void AddToScene() {
-			Matrix4 mat = CreateScaleMatrix(0.05f);
-
-			mat = CreateTranslateMatrix(0.35f, -1.f, 0.0f) * mat;
+			Matrix4 mat = CreateScaleMatrix(0.05F);
+			mat = mat * CreateScaleMatrix(-1, -1, 1);
+			mat = CreateTranslateMatrix(0.35F, -1.0F, 0.0F) * mat;
 
 			ModelRenderParam param;
 			param.matrix = originMatrix * mat;
@@ -85,7 +69,7 @@ namespace spades {
 		}
 	}
 
-	IBlockSkin @CreateThirdPersonBlockSkin(Renderer @r, AudioDevice @dev) {
+	IBlockSkin@ CreateThirdPersonBlockSkin(Renderer@ r, AudioDevice@ dev) {
 		return ThirdPersonBlockSkin(r, dev);
 	}
 }
