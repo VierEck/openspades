@@ -44,8 +44,18 @@
 
 using namespace std;
 
+DEFINE_SPADES_SETTING(cg_weapMouseSensitivity, "0");
 DEFINE_SPADES_SETTING(cg_mouseSensitivity, "1");
+DEFINE_SPADES_SETTING(cg_mouseSensitivityRifle, "1");
+DEFINE_SPADES_SETTING(cg_mouseSensitivitySMG, "1");
+DEFINE_SPADES_SETTING(cg_mouseSensitivityShotgun, "1");
+
+DEFINE_SPADES_SETTING(cg_weapZoomedMouseSens, "0");
 DEFINE_SPADES_SETTING(cg_zoomedMouseSensScale, "1");
+DEFINE_SPADES_SETTING(cg_zoomedMouseSensScaleRifle, "1");
+DEFINE_SPADES_SETTING(cg_zoomedMouseSensScaleSMG, "1");
+DEFINE_SPADES_SETTING(cg_zoomedMouseSensScaleShotgun, "1");
+
 DEFINE_SPADES_SETTING(cg_mouseAccel, "1");
 DEFINE_SPADES_SETTING(cg_mouseExpPower, "1");
 DEFINE_SPADES_SETTING(cg_invertMouseY, "0");
@@ -231,14 +241,53 @@ namespace spades {
 						}
 
 						if (aimDownState > 0.f) {
-							float scale = cg_zoomedMouseSensScale;
+							float scale;
+							if (!cg_weapZoomedMouseSens) {
+								scale = cg_zoomedMouseSensScale;
+							} else {
+								switch (world->GetLocalPlayer()->GetWeaponType()) {
+									case RIFLE_WEAPON:
+										scale = cg_zoomedMouseSensScaleRifle;
+										break;
+									case SMG_WEAPON:
+										scale = cg_zoomedMouseSensScaleSMG;
+										break;
+									case SHOTGUN_WEAPON:
+										scale = cg_zoomedMouseSensScaleShotgun;
+										break;
+									default:
+										scale = cg_zoomedMouseSensScale;
+										break;
+								}
+							}
 							scale = powf(scale, aimDownState);
 							x *= scale;
 							y *= scale;
 						}
 
-						x *= (float)cg_mouseSensitivity;
-						y *= (float)cg_mouseSensitivity;
+						if (!cg_weapMouseSensitivity) {
+							x *= (float)cg_mouseSensitivity;
+							y *= (float)cg_mouseSensitivity;
+						} else {
+							switch (world->GetLocalPlayer()->GetWeaponType()) {
+								case RIFLE_WEAPON:
+									x *= (float)cg_mouseSensitivityRifle;
+									y *= (float)cg_mouseSensitivityRifle;
+									break;
+								case SMG_WEAPON:
+									x *= (float)cg_mouseSensitivitySMG;
+									y *= (float)cg_mouseSensitivitySMG;
+									break;
+								case SHOTGUN_WEAPON:
+									x *= (float)cg_mouseSensitivityShotgun;
+									y *= (float)cg_mouseSensitivityShotgun;
+									break;
+								default:
+									x *= (float)cg_mouseSensitivity;
+									y *= (float)cg_mouseSensitivity;
+									break;
+							}
+						}
 
 						if (cg_invertMouseY)
 							y = -y;

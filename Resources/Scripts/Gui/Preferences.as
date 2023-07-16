@@ -60,6 +60,8 @@ namespace spades {
 
 			AddTab(GameOptionsPanel(Manager, options, fontManager),
 				   _Tr("Preferences", "Game Options"));
+			AddTab(ControlOptionsPanel(Manager, options, fontManager),
+				   _Tr("Preferences", "Controls"));
 			AddTab(HudOptionsPanel(Manager, options, fontManager),
 				   _Tr("Preferences", "HUD"));
 			AddTab(SoundsOptionsPanel(Manager, options, fontManager),
@@ -68,8 +70,6 @@ namespace spades {
 				   _Tr("Preferences", "Effects & Skins"));
 			AddTab(GraphicsOptionsPanel(Manager, options, fontManager),
 				   _Tr("Preferences", "Graphics"));
-			AddTab(ControlOptionsPanel(Manager, options, fontManager),
-				   _Tr("Preferences", "Controls"));
 			AddTab(MacroOptionsPanel(Manager, options, fontManager, this),
 				   _Tr("Preferences", "Chat Macros"));
 			AddTab(DemoOptionsPanel(Manager, options, fontManager),
@@ -1198,21 +1198,52 @@ namespace spades {
 			super(manager);
 
 			StandardPreferenceLayouter layouter(this, fontManager);
-			layouter.AddHeading(_Tr("Preferences", "Weapons/Tools"));
-			layouter.AddControl(_Tr("Preferences", "Attack"), "cg_keyAttack");
-			layouter.AddControl(_Tr("Preferences", "Alt. Attack"), "cg_keyAltAttack");
-			layouter.AddToggleField(_Tr("Preferences", "Hold Aim Down Sight"),
-									"cg_holdAimDownSight");
-			layouter.AddSliderField(_Tr("Preferences", "Mouse Sensitivity"), "cg_mouseSensitivity",
+			
+			layouter.AddHeading(_Tr("Preferences", "Mouse/Aim"));
+			layouter.AddSliderField(_Tr("Preferences", "Mouse Sensitivity Global"), "cg_mouseSensitivity",
 									0.1, 10, 0.1, ConfigNumberFormatter(1, "x"));
-			layouter.AddSliderField(_Tr("Preferences", "ADS Mouse Sens. Scale"),
+			layouter.AddChoiceField(_Tr("Preferences", "Apply Mouse Sens"), "cg_weapMouseSensitivity",
+									array<string> = {_Tr("Preferences", "Weapon"),
+													 _Tr("Preferences", "Globally")},
+									array<int> = {1, 0});
+			layouter.AddSliderField(_Tr("Preferences", "Mouse Sensitivity Rifle"), "cg_mouseSensitivityRifle",
+									0.1, 10, 0.1, ConfigNumberFormatter(1, "x"));
+			layouter.AddSliderField(_Tr("Preferences", "Mouse Sensitivity SMG"), "cg_mouseSensitivitySMG",
+									0.1, 10, 0.1, ConfigNumberFormatter(1, "x"));
+			layouter.AddSliderField(_Tr("Preferences", "Mouse Sensitivity Shotgun"), "cg_mouseSensitivityShotgun",
+									0.1, 10, 0.1, ConfigNumberFormatter(1, "x"));
+			layouter.AddHeading(_Tr("Preferences", " "));
+								
+			layouter.AddSliderField(_Tr("Preferences", "ADS Sens. Scale Global"),
 									"cg_zoomedMouseSensScale", 0.05, 3, 0.05,
 									ConfigNumberFormatter(2, "x"));
+			layouter.AddChoiceField(_Tr("Preferences", "Apply ADS Sens Scale"), "cg_weapZoomedMouseSens",
+									array<string> = {_Tr("Preferences", "Weapon"),
+													 _Tr("Preferences", "Globally")},
+									array<int> = {1, 0});
+			layouter.AddSliderField(_Tr("Preferences", "ADS Sens Scale Rifle"),
+									"cg_zoomedMouseSensScaleRifle", 0.05, 3, 0.05,
+									ConfigNumberFormatter(2, "x"));
+			layouter.AddSliderField(_Tr("Preferences", "ADS Sens Scale SMG"),
+									"cg_zoomedMouseSensScaleSMG", 0.05, 3, 0.05,
+									ConfigNumberFormatter(2, "x"));
+			layouter.AddSliderField(_Tr("Preferences", "ADS Sens Scale Shotgun"),
+									"cg_zoomedMouseSensScaleShotgun", 0.05, 3, 0.05,
+									ConfigNumberFormatter(2, "x"));
+			layouter.AddHeading(_Tr("Preferences", " "));
+									
 			layouter.AddToggleField(_Tr("Preferences", "Enable Mouse Accel"), "cg_mouseAccel");
 			layouter.AddSliderField(_Tr("Preferences", "Exponential Power"), "cg_mouseExpPower",
 									0.5, 1.5, 0.02, ConfigNumberFormatter(2, "", "^"));
 			layouter.AddToggleField(_Tr("Preferences", "Invert Y-axis Mouse Input"),
 									"cg_invertMouseY");
+			layouter.AddHeading(_Tr("Preferences", " "));
+			
+			layouter.AddHeading(_Tr("Preferences", "Weapons/Tools"));
+			layouter.AddControl(_Tr("Preferences", "Attack"), "cg_keyAttack");
+			layouter.AddControl(_Tr("Preferences", "Alt. Attack"), "cg_keyAltAttack");
+			layouter.AddToggleField(_Tr("Preferences", "Hold Aim Down Sight"),
+									"cg_holdAimDownSight");
 			layouter.AddControl(_Tr("Preferences", "Reload"), "cg_keyReloadWeapon");
 			layouter.AddControl(_Tr("Preferences", "Capture Color"), "cg_keyCaptureColor");
 			layouter.AddControl(_Tr("Preferences", "Equip Spade"), "cg_keyToolSpade");
