@@ -28,7 +28,10 @@
 #include "World.h"
 #include <Core/Debug.h>
 #include <Core/Exception.h>
+#include <Core/Settings.h>
 #include <limits.h>
+
+SPADES_SETTING(cg_particles);
 
 namespace spades {
 	namespace client {
@@ -183,22 +186,24 @@ namespace spades {
 								client->AddLocalEntity(std::move(ent));
 							}
 
-							col.w = 1.f;
-							for (int i = 0; i < 6; i++) {
-								auto ent = stmp::make_unique<ParticleSpriteEntity>(
-								  *client, img.GetPointerOrNull(), col);
-								ent->SetTrajectory(p3,
-								                   MakeVector3(getRandom() - getRandom(),
-								                               getRandom() - getRandom(),
-								                               getRandom() - getRandom()) *
-								                     13.f,
-								                   1.f, .6f);
-								ent->SetRotation(getRandom() * (float)M_PI * 2.f);
-								ent->SetRadius(0.35f + getRandom() * getRandom() * 0.1f);
-								ent->SetLifeTime(2.f, 0.f, 1.f);
-								if (usePrecisePhysics)
-									ent->SetBlockHitAction(BlockHitAction::BounceWeak);
-								client->AddLocalEntity(std::move(ent));
+							if (cg_particles) {
+								col.w = 1.f;
+								for (int i = 0; i < 6; i++) {
+									auto ent = stmp::make_unique<ParticleSpriteEntity>(
+									  *client, img.GetPointerOrNull(), col);
+									ent->SetTrajectory(p3,
+													   MakeVector3(getRandom() - getRandom(),
+																   getRandom() - getRandom(),
+																   getRandom() - getRandom()) *
+														 13.f,
+													   1.f, .6f);
+									ent->SetRotation(getRandom() * (float)M_PI * 2.f);
+									ent->SetRadius(0.35f + getRandom() * getRandom() * 0.1f);
+									ent->SetLifeTime(2.f, 0.f, 1.f);
+									if (usePrecisePhysics)
+										ent->SetBlockHitAction(BlockHitAction::BounceWeak);
+									client->AddLocalEntity(std::move(ent));
+								}
 							}
 						}
 					}
