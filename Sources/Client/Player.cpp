@@ -33,6 +33,8 @@
 #include <Core/Exception.h>
 #include <Core/Settings.h>
 
+DEFINE_SPADES_SETTING(cg_corpseBounce, "1");
+
 DEFINE_SPADES_SETTING(cg_BuildDelayInSec, "0.2");
 DEFINE_SPADES_SETTING(cg_MaxBuildDistance, "1088");
 
@@ -1379,6 +1381,11 @@ namespace spades {
 		}
 
 		void Player::MovePlayer(float fsynctics) {
+			if (!IsAlive() && cg_corpseBounce) {
+				MoveCorpse(fsynctics);
+				return;
+			}
+
 			if (input.jump && (!lastJump) && IsOnGroundOrWade()) {
 				velocity.z = -0.36f;
 				lastJump = true;
@@ -1481,6 +1488,45 @@ namespace spades {
 					}
 				}
 			}
+		}
+
+		void Player::MoveCorpse(float fsynctics) {
+			Vector3 oldPos = position; // old position
+
+			// do velocity & gravity (friction is negligible)
+			float f = fsynctics * 32.0f;
+			velocity.z += fsynctics * 0.5f;
+			position += velocity * f;
+
+			const Handle<GameMap>& map = world.GetMap();
+			SPAssert(map);
+
+			// Collision
+			IntVector3 lp = position.Floor();
+			lp.z += 3.f;
+
+			if (map->ClipWorld(lp.x, lp.y, lp.z)) {
+				IntVector3 lp2 = oldPos.Floor();
+				if (lp.z != lp2.z && ((lp.x == lp2.x && lp.y == lp2.y)
+					|| !map->ClipWorld(lp.x, lp.y, lp2.z)))
+					velocity.z = -velocity.z;
+				else if (lp.x != lp2.x && ((lp.y == lp2.y && lp.z == lp2.z)
+					|| !map->ClipWorld(lp2.x, lp.y, lp.z)))
+					velocity.x = -velocity.x;
+				else if (lp.y != lp2.y && ((lp.x == lp2.x && lp.z == lp2.z)
+					|| !map->ClipWorld(lp.x, lp2.y, lp.z)))
+					velocity.y = -velocity.y;
+
+				position = oldPos; // set back to old position
+				velocity *= 0.36f; // lose some velocity due to friction
+			}
+
+			if (map->ClipBox(position.x, position.y, position.z)) {
+				velocity.z -= fsynctics * 6.0f;
+				position += velocity * f;
+			}
+
+			SetPosition(position);
 		}
 
 		void Player::MoveBuilder(float fsynctics) {
