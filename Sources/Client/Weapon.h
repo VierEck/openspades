@@ -94,6 +94,7 @@ namespace spades {
 			float TimeToNextFire();
 
 			bool IsReadyToShoot();
+			float GetNextShotTime() { return nextShotTime; }
 		};
 	} // namespace client
 } // namespace spades

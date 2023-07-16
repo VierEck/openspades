@@ -316,6 +316,8 @@ namespace spades {
 			void ShootMapObject() { FireWeapon(); }
 
 			float GetNextBlockTime() { return nextBlockTime; }
+			float GetNextSpadeTime() { return nextSpadeTime; }
+			float GetNextDigTime() { return nextDigTime; }
 		};
 	} // namespace client
 } // namespace spades

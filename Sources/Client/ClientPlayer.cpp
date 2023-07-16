@@ -63,6 +63,7 @@ DEFINE_SPADES_SETTING(cg_hideBody, "0");
 DEFINE_SPADES_SETTING(cg_hideArms, "0");
 
 DEFINE_SPADES_SETTING(cg_PlayerModelsViaWeapon, "1");
+DEFINE_SPADES_SETTING(cg_classicViewWeapon, "0");
 
 namespace spades {
 	namespace client {
@@ -445,49 +446,60 @@ namespace spades {
 				Vector3 right = player.GetRight();
 				Vector3 up = player.GetUp();
 
-				// Offset the view weapon according to the player movement
-				viewWeaponOffset.x += Vector3::Dot(vel, right) * scale;
-				viewWeaponOffset.y -= Vector3::Dot(vel, front) * scale;
-				viewWeaponOffset.z += Vector3::Dot(vel, up) * scale;
+				if (cg_classicViewWeapon) {
+					// Offset the view weapon according to the camera movement
+					Vector3 diff = front - lastFront;
+					viewWeaponOffset.x += Vector3::Dot(diff, right);
+					viewWeaponOffset.z += Vector3::Dot(diff, up);
+					lastFront = front;
 
-				// Offset the view weapon according to the camera movement
-				Vector3 diff = front - lastFront;
-				viewWeaponOffset.x += Vector3::Dot(diff, right) * 0.05f;
-				viewWeaponOffset.z += Vector3::Dot(diff, up) * 0.05f;
+					if (dt > 0.0F)
+						viewWeaponOffset *= powf(1.0E-6F, dt);
+				} else {
+					// Offset the view weapon according to the player movement
+					viewWeaponOffset.x += Vector3::Dot(vel, right) * scale;
+					viewWeaponOffset.y -= Vector3::Dot(vel, front) * scale;
+					viewWeaponOffset.z += Vector3::Dot(vel, up) * scale;
 
-				lastFront = front;
+					// Offset the view weapon according to the camera movement
+					Vector3 diff = front - lastFront;
+					viewWeaponOffset.x += Vector3::Dot(diff, right) * 0.05f;
+					viewWeaponOffset.z += Vector3::Dot(diff, up) * 0.05f;
 
-				if (dt > 0.f)
-					viewWeaponOffset *= powf(.02f, dt);
-
-				// Limit the movement
-				auto softLimitFunc = [&](float &v, float minLimit, float maxLimit) {
-					float transition = (maxLimit - minLimit) * 0.5f;
-					if (v < minLimit) {
-						float strength = std::min(1.f, (minLimit - v) / transition);
-						v = Mix(v, minLimit, strength);
-					}
-					if (v > maxLimit) {
-						float strength = std::min(1.f, (v - maxLimit) / transition);
-						v = Mix(v, maxLimit, strength);
-					}
-				};
-				softLimitFunc(viewWeaponOffset.x, -0.06f, 0.06f);
-				softLimitFunc(viewWeaponOffset.y, -0.06f, 0.06f);
-				softLimitFunc(viewWeaponOffset.z, -0.06f, 0.06f);
-
-				// When the player is aiming down the sight, the weapon's movement
-				// must be restricted so that other parts of the weapon don't
-				// cover the ironsight.
-				if (currentTool == Player::ToolWeapon && player.GetWeaponInput().secondary) {
+					lastFront = front;
 
 					if (dt > 0.f)
-						viewWeaponOffset *= powf(.01f, dt);
+						viewWeaponOffset *= powf(.02f, dt);
 
-					const float limitX = .003f;
-					const float limitY = .003f;
-					softLimitFunc(viewWeaponOffset.x, -limitX, limitX);
-					softLimitFunc(viewWeaponOffset.z, 0, limitY);
+					// Limit the movement
+					auto softLimitFunc = [&](float &v, float minLimit, float maxLimit) {
+						float transition = (maxLimit - minLimit) * 0.5f;
+						if (v < minLimit) {
+							float strength = std::min(1.f, (minLimit - v) / transition);
+							v = Mix(v, minLimit, strength);
+						}
+						if (v > maxLimit) {
+							float strength = std::min(1.f, (v - maxLimit) / transition);
+							v = Mix(v, maxLimit, strength);
+						}
+					};
+					softLimitFunc(viewWeaponOffset.x, -0.06f, 0.06f);
+					softLimitFunc(viewWeaponOffset.y, -0.06f, 0.06f);
+					softLimitFunc(viewWeaponOffset.z, -0.06f, 0.06f);
+
+					// When the player is aiming down the sight, the weapon's movement
+					// must be restricted so that other parts of the weapon don't
+					// cover the ironsight.
+					if (currentTool == Player::ToolWeapon && player.GetWeaponInput().secondary) {
+
+						if (dt > 0.f)
+							viewWeaponOffset *= powf(.01f, dt);
+
+						const float limitX = .003f;
+						const float limitY = .003f;
+						softLimitFunc(viewWeaponOffset.x, -limitX, limitX);
+						softLimitFunc(viewWeaponOffset.z, 0, limitY);
+					}
 				}
 			}
 
@@ -698,6 +710,138 @@ namespace spades {
 			// view weapon
 
 			Vector3 viewWeaponOffset = this->viewWeaponOffset;
+
+			if (cg_classicViewWeapon) {
+				Matrix4 mat = Matrix4::Scale(0.033F);
+				Vector3 trans(0.0F, 0.0F, 0.0F);
+
+				Vector3 v = player.GetVelocity();
+				float bob = std::max(fabsf(v.x), fabsf(v.y)) / 1000;
+				int timer = (int)(time * 1000);
+				bob *= (timer % 1024 < 512)
+					? (timer % 512) - 255.5F
+					: 255.5F - (timer % 512);
+				trans.y += bob;
+
+				if (!p.IsOnGroundOrWade())
+					trans.z -= v.z * 0.2F;
+
+				if (sprintState > 0.0F || toolRaiseState < 1.0F) {
+					float per = std::max(sprintState, 1.0F - toolRaiseState) * 5;
+					trans.x -= per;
+					trans.z += per;
+				}
+
+				Weapon& w = p.GetWeapon();
+
+				Handle<IModel> model;
+				ModelRenderParam param;
+				param.depthHack = true;
+				IntVector3 col = p.GetColor();
+				param.customColor = MakeVector3(col.x / 255.f, col.y / 255.f, col.z / 255.f);
+
+				const float nextSpadeTime = p.GetNextSpadeTime() - client.GetWorld()->GetTime();
+				const float nextDigTime = p.GetNextDigTime() - client.GetWorld()->GetTime();
+				const float nextBlockTime = p.GetNextBlockTime() - client.GetWorld()->GetTime();
+				const float nextFireTime = w.GetNextShotTime() - client.GetWorld()->GetTime();
+
+				const float spadeProgress = 1.0f - (nextSpadeTime / 0.2f);
+				const float spadeDigProgress = 1.0f - nextDigTime;
+				const float cookGrenadeTime = p.GetGrenadeCookTime();
+				const float reloadProgress = 1.0f - w.GetReloadProgress();
+
+				WeaponInput actualWeapInput = p.GetWeaponInput();
+
+				switch (currentTool) {
+					case Player::ToolSpade:
+						model = renderer.RegisterModel("Models/Weapons/Spade/Spade.kv6");
+						if (actualWeapInput.primary && nextSpadeTime > 0.0f) {
+							float f = 1.0F - spadeProgress;
+							mat = Matrix4::Rotate(MakeVector3(1, 0, 0), f * 1.25f) * mat;
+							mat = Matrix4::Translate(0.0f, f * 0.5f, f * 0.25f) * mat;
+						} else if (actualWeapInput.secondary && nextDigTime > 0.0f) {
+							float f = 1.0f - spadeDigProgress;
+							float f2;
+							if (f >= 0.6f) {
+								f2 = 0.0f;
+								f = 1.0f - f;
+							} else if (f >= 0.3f) {
+								f2 = 0.6f - f;
+								f = 0.4f;
+							} else if (f >= 0.1f) {
+								f2 = 0.3f;
+								f = 0.4f;
+							} else {
+								f2 = f * 3;
+								f *= 4;
+							}
+
+							mat = Matrix4::Translate(MakeVector3(f2 * 0.5f, f * 0.25f, -f2 * 1.25f)) * mat;
+							mat = Matrix4::Rotate(MakeVector3(1, 0, 0), f / 0.32f) * mat;
+							mat = Matrix4::Rotate(MakeVector3(0, -1, 0), f) * mat;
+						}
+						break;
+					case Player::ToolBlock:
+						IntVector3 col = p.GetColor();
+						param.customColor = MakeVector3(col.x / 255.f, col.y / 255.f, col.z / 255.f);
+						model = renderer.RegisterModel("Models/Weapons/Block/Block2.kv6");
+						if (nextBlockTime > 0.0f) {
+							float f = nextBlockTime * 8;
+							trans.x -= f;
+							trans.z += f;
+						}
+						break;
+					case Player::ToolGrenade:
+						model = renderer.RegisterModel("Models/Weapons/Grenade/Grenade.kv6");
+						if (actualWeapInput.primary) {
+							float f = cookGrenadeTime;
+							trans.x -= f;
+							trans.z -= f;
+						}
+						break;
+					case Player::ToolWeapon: {
+						// don't draw model when aiming
+						if (aimDownState > 0.99f)
+							return;
+
+						switch (w.GetWeaponType()) {
+							case RIFLE_WEAPON:
+								model = renderer.RegisterModel("Models/Weapons/Rifle/Weapon.kv6");
+								break;
+							case SMG_WEAPON:
+								model = renderer.RegisterModel("Models/Weapons/SMG/Weapon.kv6");
+								break;
+							case SHOTGUN_WEAPON:
+								model = renderer.RegisterModel("Models/Weapons/Shotgun/Weapon.kv6");
+								break;
+						}
+
+						if (reloadProgress > 0.0F && !w.IsReloadSlow()) {
+							float f = reloadProgress * 8;
+							trans.x -= f;
+							trans.z += f;
+						}
+
+						if (nextFireTime > 0.0F) {
+							float f = nextFireTime / 32;
+							float f2 = f * 10;
+							trans.x -= f2;
+							trans.z += f2;
+							mat = Matrix4::Rotate(MakeVector3(-1, 0, 0), ((f * 280)* M_PI / 180.0)) * mat;
+						}
+					} break;
+				}
+
+				trans += Vector3(-0.33f, 0.66f, 0.4f);
+				trans += 0.015F; // adjust to match voxlap
+				trans += viewWeaponOffset;
+
+				param.matrix = Matrix4::Translate(trans) * mat;
+				param.matrix = eyeMatrix * param.matrix;
+				renderer.RenderModel(*model, param);
+
+				return;
+			}
 
 			// bobbing
 			{

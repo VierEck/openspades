@@ -1072,6 +1072,7 @@ namespace spades {
 													 _Tr("Preferences", "png"),
 													 _Tr("Preferences", "model")},
 									array<int> = {2, 1, 0});
+			layouter.AddToggleField(_Tr("Preferences", "Classic View WeaponModels"), "cg_classicViewWeapon");
 			layouter.AddToggleField(_Tr("Preferences", "Weap-based PlayerModels"), "cg_PlayerModelsViaWeapon");
 			layouter.AddChoiceField(_Tr("Preferences", "Hide FirstPerson Model"), "cg_hideFirstPersonModel",
 									array<string> = {_Tr("Preferences", "Icon"),
