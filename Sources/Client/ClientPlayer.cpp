@@ -761,14 +761,18 @@ namespace spades {
 			if (cg_hideArms)
 				return;
 
+			std::string path = "Models/Player";
+			if (cg_PlayerModelsViaWeapon)
+				path +=  "/" + p.GetWeapon().GetName();
+
 			// view hands
 			if (leftHand.GetPoweredLength() > 0.001f && rightHand.GetPoweredLength() > 0.001f) {
 
 				ModelRenderParam param;
 				param.depthHack = true;
 
-				Handle<IModel> model = renderer.RegisterModel("Models/Player/Arm.kv6");
-				Handle<IModel> model2 = renderer.RegisterModel("Models/Player/UpperArm.kv6");
+				Handle<IModel> model = renderer.RegisterModel((path + "/Arm.kv6").c_str());
+				Handle<IModel> model2 = renderer.RegisterModel((path + "/UpperArm.kv6").c_str());
 
 				IntVector3 col = p.GetColor();
 				param.customColor = MakeVector3(col.x / 255.f, col.y / 255.f, col.z / 255.f);
