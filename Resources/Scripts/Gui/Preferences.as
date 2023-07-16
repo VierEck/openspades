@@ -624,6 +624,7 @@ namespace spades {
 		private spades::ui::UIElement @[] items;
 		private ConfigHotKeyField @[] hotkeyItems;
 		private MacroHotKeyField @[] hotkeyItemsMacro;
+		private spades::ui::Button @[] MacroRemoveButtons;
 		private FontManager @fontManager;
 		spades::ui::Button @AddMacroButton;
 		spades::ui::Button @RemoveMacroButton;
@@ -787,12 +788,19 @@ namespace spades {
 			al.UpdateTabs();
 			pViewer.Close();
 		}
-		void OnRemoveMacroButton(spades::ui::UIElement @) {
+		void OnRemoveMacroButton(spades::ui::UIElement @sender) {
+			int MacroRemoveIndex = 0;
+			for (uint i = 0; i < MacroRemoveButtons.length; i++) {
+				if (cast<spades::ui::UIElement>(MacroRemoveButtons[i]) is sender) {
+					MacroRemoveIndex = i;
+				}
+			}
+			
 			string[] @names = GetAllMacroNames();
 			if (int(names.length) <= 0)
 				return;
-			string last = names[int(names.length) - 1];
-			string[] @no = RemoveMacroItem(last);//fixme make this a void
+			string name = names[MacroRemoveIndex];
+			string[] @no = RemoveMacroItem(name);//fixme make this a void
 			PreferenceView al(pViewer.owner, PreferenceViewOptions(), fontManager);
 			al.Run();
 			al.SelectedTabIndex = 6;
@@ -815,15 +823,6 @@ namespace spades {
 				container.AddChild(e);
 				@AddMacroButton = e;
 			}
-			{
-				spades::ui::UIElement @container = CreateItem();
-				spades::ui::Button e(Parent.Manager);
-				e.Bounds = AABB2(10.f, 0.f, 550.f, 30.f);
-				e.Caption = _Tr("Preferences", "Remove Last Chat Macro");
-				@e.Activated = spades::ui::EventHandler(this.OnRemoveMacroButton);
-				container.AddChild(e);
-				@RemoveMacroButton = e;
-			}
 		}
 		void AddMacroControl(string caption, string name) {
 			spades::ui::UIElement @container = CreateItem();
@@ -836,7 +835,6 @@ namespace spades {
 
 			MacroHotKeyField field(Parent.Manager, name);
 			field.Bounds = AABB2(FieldX, 1.f, FieldWidth, 30.f);
-			//field.Enable = enabled;
 			container.AddChild(field);
 
 			@field.KeyBound = spades::ui::EventHandler(OnKeyBoundMacro);
@@ -853,8 +851,14 @@ namespace spades {
 
 			MacroField field(Parent.Manager, name);
 			field.Bounds = AABB2(FieldX, 1.f, FieldWidth, 30.f);
-			//field.Enable = enabled;
 			container.AddChild(field);
+			
+			spades::ui::Button e(Parent.Manager);
+			e.Bounds = AABB2(10.f, 1.f, 60.f, 30.f);
+			e.Caption = _Tr("Preferences", "Remove");
+			@e.Activated = spades::ui::EventHandler(this.OnRemoveMacroButton);
+			container.AddChild(e);
+			MacroRemoveButtons.insertLast(e);
 
 			return field;
 		}		
