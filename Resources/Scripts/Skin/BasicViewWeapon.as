@@ -156,7 +156,7 @@ namespace spades {
 		BasicViewWeapon(Renderer @renderer) {
 			@this.renderer = renderer;
 			localFireVibration = 0.f;
-			@sightImage = renderer.RegisterImage("Gfx/Sight.tga");
+			@sightImage = renderer.RegisterImage("Gfx/Target.png");
 			@dotSightImage = renderer.RegisterImage("Gfx/DotSight.tga");
 			@scopeImageAlt = renderer.RegisterImage("Gfx/Rifle.png");
 		}
