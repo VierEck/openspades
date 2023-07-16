@@ -46,6 +46,7 @@ using namespace std;
 
 DEFINE_SPADES_SETTING(cg_mouseSensitivity, "1");
 DEFINE_SPADES_SETTING(cg_zoomedMouseSensScale, "1");
+DEFINE_SPADES_SETTING(cg_mouseAccel, "1");
 DEFINE_SPADES_SETTING(cg_mouseExpPower, "1");
 DEFINE_SPADES_SETTING(cg_invertMouseY, "0");
 
@@ -207,24 +208,26 @@ namespace spades {
 						x /= GetAimDownZoomScale();
 						y /= GetAimDownZoomScale();
 
-						float rad = x * x + y * y;
-						if (rad > 0.f) {
-							if ((float)cg_mouseExpPower < 0.001f ||
-							    isnan((float)cg_mouseExpPower)) {
-								SPLog("Invalid cg_mouseExpPower value, resetting to 1.0");
-								cg_mouseExpPower = 1.f;
+						if (cg_mouseAccel) {
+							float rad = x * x + y * y;
+							if (rad > 0.f) {
+								if ((float)cg_mouseExpPower < 0.001f ||
+									isnan((float)cg_mouseExpPower)) {
+									SPLog("Invalid cg_mouseExpPower value, resetting to 1.0");
+									cg_mouseExpPower = 1.f;
+								}
+								float factor = renderer->ScreenWidth() * .1f;
+								factor *= factor;
+								rad /= factor;
+								rad = powf(rad, (float)cg_mouseExpPower * 0.5f - 0.5f);
+
+								// shouldn't happen...
+								if (isnan(rad))
+									rad = 1.f;
+
+								x *= rad;
+								y *= rad;
 							}
-							float factor = renderer->ScreenWidth() * .1f;
-							factor *= factor;
-							rad /= factor;
-							rad = powf(rad, (float)cg_mouseExpPower * 0.5f - 0.5f);
-
-							// shouldn't happen...
-							if (isnan(rad))
-								rad = 1.f;
-
-							x *= rad;
-							y *= rad;
 						}
 
 						if (aimDownState > 0.f) {

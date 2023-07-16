@@ -1208,6 +1208,7 @@ namespace spades {
 			layouter.AddSliderField(_Tr("Preferences", "ADS Mouse Sens. Scale"),
 									"cg_zoomedMouseSensScale", 0.05, 3, 0.05,
 									ConfigNumberFormatter(2, "x"));
+			layouter.AddToggleField(_Tr("Preferences", "Enable Mouse Accel"), "cg_mouseAccel");
 			layouter.AddSliderField(_Tr("Preferences", "Exponential Power"), "cg_mouseExpPower",
 									0.5, 1.5, 0.02, ConfigNumberFormatter(2, "", "^"));
 			layouter.AddToggleField(_Tr("Preferences", "Invert Y-axis Mouse Input"),
