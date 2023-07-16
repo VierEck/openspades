@@ -65,7 +65,7 @@ namespace spades {
 			AddTab(SoundsOptionsPanel(Manager, options, fontManager),
 				   _Tr("Preferences", "Sounds"));
 			AddTab(EffectsOptionsPanel(Manager, options, fontManager),
-				   _Tr("Preferences", "Effects"));
+				   _Tr("Preferences", "Effects & Skins"));
 			AddTab(GraphicsOptionsPanel(Manager, options, fontManager),
 				   _Tr("Preferences", "Graphics"));
 			AddTab(ControlOptionsPanel(Manager, options, fontManager),
@@ -908,71 +908,6 @@ namespace spades {
 			layouter.AddToggleField(_Tr("Preferences", "Hit Indicator"), "cg_hitIndicator");
 			layouter.AddToggleField(_Tr("Preferences", "Show Alerts"), "cg_alerts");
 			layouter.AddHeading(_Tr("Preferences", " "));
-			
-			layouter.AddHeading(_Tr("Preferences", "Skin"));
-			layouter.AddChoiceField(_Tr("Preferences", "Scope"), "cg_pngScope",
-									array<string> = {_Tr("Preferences", "dotsight"),
-													 _Tr("Preferences", "png"),
-													 _Tr("Preferences", "model")},
-									array<int> = {2, 1, 0});
-			layouter.AddToggleField(_Tr("Preferences", "Weap-based PlayerModels"), "cg_PlayerModelsViaWeapon");
-			layouter.AddChoiceField(_Tr("Preferences", "Hide FirstPerson Model"), "cg_hideFirstPersonModel",
-									array<string> = {_Tr("Preferences", "Icon"),
-													 _Tr("Preferences", "ON"),
-													 _Tr("Preferences", "OFF")},
-									array<int> = {2, 1, 0});
-			layouter.AddToggleField(_Tr("Preferences", "Hide FirstPerson Lower Body"), "cg_hideBody");
-			layouter.AddToggleField(_Tr("Preferences", "Hide FirstPerson Arms"), "cg_hideArms");
-			layouter.AddSliderField(_Tr("Preferences", "View Weapon X"),
-									"cg_viewWeaponX", -1.5, 1.5, 0.01,
-									ConfigNumberFormatter(2, ""));
-			layouter.AddSliderField(_Tr("Preferences", "View Weapon Y"),
-									"cg_viewWeaponY", -1.5, 1.5, 0.01,
-									ConfigNumberFormatter(2, ""));
-			layouter.AddSliderField(_Tr("Preferences", "View Weapon Z"),
-									"cg_viewWeaponZ", -1.5, 1.5, 0.01,
-									ConfigNumberFormatter(2, ""));
-			layouter.AddToggleField(_Tr("Preferences", "Debug Skin Anchors"), "cg_debugToolSkinAnchors");
-			layouter.AddHeading(_Tr("Preferences", " "));
-
-			layouter.AddHeading(_Tr("Preferences", "Nuceto's Target Mod"));
-			layouter.AddToggleField(_Tr("Preferences", "Hide Default Target"), "n_hideDefaultTarget");
-			layouter.AddToggleField(_Tr("Preferences", "Target"), "n_Target");
-			layouter.AddToggleField(_Tr("Preferences", "Target in scope"), "n_TargetOnScope");
-			layouter.AddSliderField(_Tr("Preferences", "Size"), "n_TargetSize", 1, 4, 0.1,
-			ConfigNumberFormatter(1, "x"));
-
-			layouter.AddToggleField(_Tr("Preferences", "Dot"), "n_TargetDot");
-			layouter.AddToggleField(_Tr("Preferences", "Lines"), "n_TargetLines");
-			layouter.AddSliderField(_Tr("Preferences", "Linespos"), "n_TargetLinesPos", -64, 16, 1,
-			ConfigNumberFormatter(1, "x"));
-
-			layouter.AddSliderField(_Tr("Preferences", "LinesHeight"), "n_TargetLinesHeight", 0, 500, 1,
-			ConfigNumberFormatter(1, "x"));	
-
-			layouter.AddToggleField(_Tr("Preferences", "Dynamic Lines Fire"), "n_TargetLinesDynamicFire");
-			layouter.AddToggleField(_Tr("Preferences", "Dynamic Lines Sprint"), "n_TargetLinesDynamicSprint");
-			layouter.AddSliderField(_Tr("Preferences", "Dynamic Lines Multiplier"), "n_TargetLinesDynamicMultiplier", 1, 100, 1,
-			ConfigNumberFormatter(1, "x"));
-
-			layouter.AddSliderField(_Tr("Preferences", "Dot Transparency"), "n_TargetDotTransparency", 0, 1, 0.01,
-									ConfigNumberFormatter(0, " %", "", 100));
-			layouter.AddSliderField(_Tr("Preferences", "Dot Red"), "n_TargetDotColorRed", 0, 255, 1,
-			ConfigNumberFormatter(0, " r"));
-			layouter.AddSliderField(_Tr("Preferences", "Dot Green"), "n_TargetDotColorGreen", 0, 255, 1,
-			ConfigNumberFormatter(0, " g"));
-			layouter.AddSliderField(_Tr("Preferences", "Dot Blue"), "n_TargetDotColorBlue", 0, 255, 1,
-			ConfigNumberFormatter(0, " b"));
-
-			layouter.AddSliderField(_Tr("Preferences", "Line Transparency"), "n_TargetLineTransparency", 0, 1, 0.01,
-									ConfigNumberFormatter(0, " %", "", 100));
-			layouter.AddSliderField(_Tr("Preferences", "Line Red"), "n_TargetLineColorRed", 0, 255, 1,
-			ConfigNumberFormatter(0, " r"));
-			layouter.AddSliderField(_Tr("Preferences", "Line Green"), "n_TargetLineColorGreen", 0, 255, 1,
-			ConfigNumberFormatter(0, " g"));
-			layouter.AddSliderField(_Tr("Preferences", "Line Blue"), "n_TargetLineColorBlue", 0, 255, 1,
-			ConfigNumberFormatter(0, " b"));
-			layouter.AddHeading(_Tr("Preferences", " "));
 
 			layouter.AddHeading(_Tr("Preferences", "Spectator Fly Speed"));
 			layouter.AddSliderField(_Tr("Preferences", "Flying Speed Walk"),
@@ -998,7 +933,7 @@ namespace spades {
 													 _Tr("Preferences", "jpeg")},
 									array<int> = {2, 1, 0});
 			layouter.AddSliderField(_Tr("Preferences", "Jpeg Quality"), "core_jpegQuality", 1, 100, 1,
-									ConfigNumberFormatter(0, " %", "", 100));
+									ConfigNumberFormatter(0, " %"));
 			layouter.AddToggleField(_Tr("Preferences", "Debug Aim Spread"), "cg_debugAim");
 			layouter.AddToggleField(_Tr("Preferences", "Debug Corpse"), "cg_debugCorpse");
 			layouter.AddHeading(_Tr("Preferences", " "));
@@ -1110,11 +1045,6 @@ namespace spades {
 			layouter.AddToggleField(_Tr("Preferences", "Tracers"), "cg_tracers");
 			layouter.AddToggleField(_Tr("Preferences", "FirstPerson Tracers"), "cg_tracersFirstPerson");
 			layouter.AddToggleField(_Tr("Preferences", "Ejecting Brass"), "cg_ejectBrass");
-			layouter.AddChoiceField(_Tr("Preferences", "Dead Player Model"), "cg_corpse",
-									array<string> = {_Tr("Preferences", "Ragdoll"),
-													 _Tr("Preferences", "ON"),
-													 _Tr("Preferences", "OFF")},
-									array<int> = {2, 1, 0});
 			layouter.AddToggleField(_Tr("Preferences", "Corpse Line Collision"), "r_corpseLineCollision");
 			layouter.AddToggleField(_Tr("Preferences", "Animations"), "cg_animations");
 			layouter.AddChoiceField(_Tr("Preferences", "Camera Shake"), "cg_shake",
@@ -1133,6 +1063,76 @@ namespace spades {
 			layouter.AddSliderField(_Tr("Preferences", "Auto Focus Speed"),
 									"cg_autoFocusSpeed", 0.1, 2.0, 0.01,
 									ConfigNumberFormatter(2, "s"));
+			layouter.AddHeading(_Tr("Preferences", " "));
+			
+			layouter.AddHeading(_Tr("Preferences", "Skin"));
+			layouter.AddChoiceField(_Tr("Preferences", "Scope"), "cg_pngScope",
+									array<string> = {_Tr("Preferences", "dotsight"),
+													 _Tr("Preferences", "png"),
+													 _Tr("Preferences", "model")},
+									array<int> = {2, 1, 0});
+			layouter.AddToggleField(_Tr("Preferences", "Weap-based PlayerModels"), "cg_PlayerModelsViaWeapon");
+			layouter.AddChoiceField(_Tr("Preferences", "Hide FirstPerson Model"), "cg_hideFirstPersonModel",
+									array<string> = {_Tr("Preferences", "Icon"),
+													 _Tr("Preferences", "ON"),
+													 _Tr("Preferences", "OFF")},
+									array<int> = {2, 1, 0});
+			layouter.AddToggleField(_Tr("Preferences", "Hide FirstPerson Lower Body"), "cg_hideBody");
+			layouter.AddToggleField(_Tr("Preferences", "Hide FirstPerson Arms"), "cg_hideArms");
+			layouter.AddChoiceField(_Tr("Preferences", "Dead Player Model"), "cg_corpse",
+									array<string> = {_Tr("Preferences", "Ragdoll"),
+													 _Tr("Preferences", "ON"),
+													 _Tr("Preferences", "OFF")},
+									array<int> = {2, 1, 0});
+			layouter.AddSliderField(_Tr("Preferences", "View Weapon X"),
+									"cg_viewWeaponX", -1.5, 1.5, 0.01,
+									ConfigNumberFormatter(2, ""));
+			layouter.AddSliderField(_Tr("Preferences", "View Weapon Y"),
+									"cg_viewWeaponY", -1.5, 1.5, 0.01,
+									ConfigNumberFormatter(2, ""));
+			layouter.AddSliderField(_Tr("Preferences", "View Weapon Z"),
+									"cg_viewWeaponZ", -1.5, 1.5, 0.01,
+									ConfigNumberFormatter(2, ""));
+			layouter.AddToggleField(_Tr("Preferences", "Debug Skin Anchors"), "cg_debugToolSkinAnchors");
+			layouter.AddHeading(_Tr("Preferences", " "));
+
+			layouter.AddHeading(_Tr("Preferences", "Nuceto's Target Mod"));
+			layouter.AddToggleField(_Tr("Preferences", "Hide Default Target"), "n_hideDefaultTarget");
+			layouter.AddToggleField(_Tr("Preferences", "Target"), "n_Target");
+			layouter.AddToggleField(_Tr("Preferences", "Target in scope"), "n_TargetOnScope");
+			layouter.AddSliderField(_Tr("Preferences", "Size"), "n_TargetSize", 1, 4, 0.1,
+			ConfigNumberFormatter(1, "x"));
+
+			layouter.AddToggleField(_Tr("Preferences", "Dot"), "n_TargetDot");
+			layouter.AddToggleField(_Tr("Preferences", "Lines"), "n_TargetLines");
+			layouter.AddSliderField(_Tr("Preferences", "Linespos"), "n_TargetLinesPos", -64, 16, 1,
+			ConfigNumberFormatter(1, "x"));
+
+			layouter.AddSliderField(_Tr("Preferences", "LinesHeight"), "n_TargetLinesHeight", 0, 500, 1,
+			ConfigNumberFormatter(1, "x"));	
+
+			layouter.AddToggleField(_Tr("Preferences", "Dynamic Lines Fire"), "n_TargetLinesDynamicFire");
+			layouter.AddToggleField(_Tr("Preferences", "Dynamic Lines Sprint"), "n_TargetLinesDynamicSprint");
+			layouter.AddSliderField(_Tr("Preferences", "Dynamic Lines Multiplier"), "n_TargetLinesDynamicMultiplier", 1, 100, 1,
+			ConfigNumberFormatter(1, "x"));
+
+			layouter.AddSliderField(_Tr("Preferences", "Dot Transparency"), "n_TargetDotTransparency", 0, 1, 0.01,
+									ConfigNumberFormatter(0, " %", "", 100));
+			layouter.AddSliderField(_Tr("Preferences", "Dot Red"), "n_TargetDotColorRed", 0, 255, 1,
+			ConfigNumberFormatter(0, " r"));
+			layouter.AddSliderField(_Tr("Preferences", "Dot Green"), "n_TargetDotColorGreen", 0, 255, 1,
+			ConfigNumberFormatter(0, " g"));
+			layouter.AddSliderField(_Tr("Preferences", "Dot Blue"), "n_TargetDotColorBlue", 0, 255, 1,
+			ConfigNumberFormatter(0, " b"));
+
+			layouter.AddSliderField(_Tr("Preferences", "Line Transparency"), "n_TargetLineTransparency", 0, 1, 0.01,
+									ConfigNumberFormatter(0, " %", "", 100));
+			layouter.AddSliderField(_Tr("Preferences", "Line Red"), "n_TargetLineColorRed", 0, 255, 1,
+			ConfigNumberFormatter(0, " r"));
+			layouter.AddSliderField(_Tr("Preferences", "Line Green"), "n_TargetLineColorGreen", 0, 255, 1,
+			ConfigNumberFormatter(0, " g"));
+			layouter.AddSliderField(_Tr("Preferences", "Line Blue"), "n_TargetLineColorBlue", 0, 255, 1,
+			ConfigNumberFormatter(0, " b"));
 			layouter.AddHeading(_Tr("Preferences", " "));
 
 			layouter.FinishLayout();
