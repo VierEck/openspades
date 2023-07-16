@@ -74,10 +74,6 @@ DEFINE_SPADES_SETTING(cg_showTeamMateLocation, "1");
 DEFINE_SPADES_SETTING(cg_demoFileNameFormat, "year month day time");
 DEFINE_SPADES_SETTING(cg_demoRecord, "1");
 
-SPADES_SETTING(cg_FlySpeedWalk);
-SPADES_SETTING(cg_FlySpeedSprint);
-SPADES_SETTING(cg_FlySpeedSneak);
-
 namespace spades {
 	namespace client {
 		Client::Client(
