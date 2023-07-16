@@ -1056,14 +1056,12 @@ namespace spades {
 			}
 
 			float armPitch = pitch;
-			if (inp.sprint) {
-				armPitch -= .5f;
-			}
+			if (inp.sprint)
+				armPitch -= 0.9f * sprintState;
+
 			armPitch += pitchBias;
-			if (armPitch < 0.f) {
-				armPitch = std::max(armPitch, -(float)M_PI * .5f);
-				armPitch *= .9f;
-			}
+			if (armPitch < 0.0f)
+				armPitch = std::max(armPitch, float(-M_PI * 0.5f)) * 0.9f;
 
 			arms = arms * Matrix4::Rotate(MakeVector3(1, 0, 0), armPitch);
 
