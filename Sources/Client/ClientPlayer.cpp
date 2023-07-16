@@ -59,6 +59,7 @@ DEFINE_SPADES_SETTING(cg_viewWeaponZ, "0");
 DEFINE_SPADES_SETTING(cg_debugToolSkinAnchors, "0");
 
 DEFINE_SPADES_SETTING(cg_hideFirstPersonModel, "0");
+DEFINE_SPADES_SETTING(cg_hideBody, "0");
 DEFINE_SPADES_SETTING(cg_hideArms, "0");
 
 DEFINE_SPADES_SETTING(cg_PlayerModelsViaWeapon, "1");
@@ -758,12 +759,80 @@ namespace spades {
 				rightHand = interface.GetRightHandPosition();
 			}
 
-			if (cg_hideArms)
-				return;
-
 			std::string path = "Models/Player";
 			if (cg_PlayerModelsViaWeapon)
 				path +=  "/" + p.GetWeapon().GetName();
+
+			// Legs and Torso
+			if (!cg_hideBody) {
+				ModelRenderParam param;
+				param.depthHack = true;
+				IntVector3 col = p.GetColor();
+				param.customColor = MakeVector3(col.x / 255.f, col.y / 255.f, col.z / 255.f);
+
+				Handle<IModel> legModel;
+				Handle<IModel> torsoModel;
+
+				Vector3 o = p.GetFront();
+
+				float yaw = atan2f(o.y, o.x) + M_PI * 0.5f;
+
+				// lower axis
+				Matrix4 const lower = Matrix4::Translate(p.GetOrigin())
+					* Matrix4::Rotate(MakeVector3(0, 0, 1), yaw);
+
+				Matrix4 const scaler = Matrix4::Scale(0.1f)
+					* Matrix4::Scale(-1, -1, 1);
+
+				PlayerInput const inp = p.GetInput();
+
+				float const legsPosY = inp.crouch ? 1.25f : 1.0f;
+				float const legsPosZ = inp.crouch ? 0.05f : 0.1f;
+				float const torsoPosZ = inp.crouch ? 0.55f : 1.0f;
+
+				Vector3 v = p.GetVelocity();
+				Vector2 legsRot;
+				legsRot.x = Vector3::Dot(v, p.GetFront2D());
+				legsRot.y = Vector3::Dot(v, p.GetRight());
+				legsRot *= sinf(p.GetWalkAnimationProgress() * M_PI * 2.0f) * 3.0f;
+
+				Matrix4 const leg1 = lower
+					* Matrix4::Translate(0.25f, legsPosY, -legsPosZ)
+					* Matrix4::Rotate(MakeVector3(1, 0, 0), legsRot.x)
+					* Matrix4::Rotate(MakeVector3(0, 1, 0), legsRot.y);
+
+				Matrix4 const leg2 = lower
+					* Matrix4::Translate(-0.25f, legsPosY, -legsPosZ)
+					* Matrix4::Rotate(MakeVector3(1, 0, 0), -legsRot.x)
+					* Matrix4::Rotate(MakeVector3(0, 1, 0), -legsRot.y);
+
+				Matrix4 const torso = lower
+					* Matrix4::Translate(0.0f, 1.0f, -torsoPosZ);
+
+				if (inp.crouch) {
+					legModel = renderer.RegisterModel((path + "/LegCrouch.kv6").c_str());
+					torsoModel = renderer.RegisterModel((path + "/TorsoCrouch.kv6").c_str());
+				} else {
+					legModel = renderer.RegisterModel((path + "/Leg.kv6").c_str());
+					torsoModel = renderer.RegisterModel((path + "/Torso.kv6").c_str());
+				}
+
+				{
+					param.matrix = leg1 * scaler;
+					renderer.RenderModel(*legModel, param);
+
+					param.matrix = leg2 * scaler;
+					renderer.RenderModel(*legModel, param);
+				}
+
+				{
+					param.matrix = torso * scaler;
+					renderer.RenderModel(*torsoModel, param);
+				}
+			}
+
+			if (cg_hideArms)
+				return;
 
 			// view hands
 			if (leftHand.GetPoweredLength() > 0.001f && rightHand.GetPoweredLength() > 0.001f) {

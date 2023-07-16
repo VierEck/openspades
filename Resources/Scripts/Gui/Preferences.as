@@ -915,15 +915,13 @@ namespace spades {
 													 _Tr("Preferences", "png"),
 													 _Tr("Preferences", "model")},
 									array<int> = {2, 1, 0});
-			layouter.AddChoiceField(_Tr("Preferences", "Different PlayerModels"), "cg_PlayerModelsViaWeapon",
-									array<string> = {_Tr("Preferences", "via Weapon"),
-													 _Tr("Preferences", "OFF")},
-									array<int> = {1, 0});
+			layouter.AddToggleField(_Tr("Preferences", "Weap-based PlayerModels"), "cg_PlayerModelsViaWeapon");
 			layouter.AddChoiceField(_Tr("Preferences", "Hide FirstPerson Model"), "cg_hideFirstPersonModel",
 									array<string> = {_Tr("Preferences", "Icon"),
 													 _Tr("Preferences", "ON"),
 													 _Tr("Preferences", "OFF")},
 									array<int> = {2, 1, 0});
+			layouter.AddToggleField(_Tr("Preferences", "Hide FirstPerson Lower Body"), "cg_hideBody");
 			layouter.AddToggleField(_Tr("Preferences", "Hide FirstPerson Arms"), "cg_hideArms");
 			layouter.AddSliderField(_Tr("Preferences", "View Weapon X"),
 									"cg_viewWeaponX", -1.5, 1.5, 0.01,
