@@ -531,146 +531,145 @@ namespace spades {
 
 		void Client::DrawJoinedAlivePlayerHUD() {
 			SPADES_MARK_FUNCTION();
+			if (cg_hideHud)
+				return;
 
 			float scrWidth = renderer->ScreenWidth();
 			float scrHeight = renderer->ScreenHeight();
 			Player &p = GetWorld()->GetLocalPlayer().value();
 
 			// Draw damage rings
-			if (!cg_hideHud)
-				hurtRingView->Draw();
+			hurtRingView->Draw();
 
-			if (!cg_hideHud) {
-				// Draw ammo amount
-				// (Note: this cannot be displayed for a spectated player --- the server
-				//        does not submit sufficient information)
-				Weapon &weap = p.GetWeapon();
-				Handle<IImage> ammoIcon;
-				float iconWidth, iconHeight;
-				float spacing = 2.f;
-				int stockNum;
-				int warnLevel;
+			// Draw ammo amount
+			// (Note: this cannot be displayed for a spectated player --- the server
+			//        does not submit sufficient information)
+			Weapon &weap = p.GetWeapon();
+			Handle<IImage> ammoIcon;
+			float iconWidth, iconHeight;
+			float spacing = 2.f;
+			int stockNum;
+			int warnLevel;
 
-				if (p.IsToolWeapon()) {
-					switch (weap.GetWeaponType()) {
-						case RIFLE_WEAPON:
-							ammoIcon = renderer->RegisterImage("Gfx/Bullet/7.62mm.png");
-							iconWidth = 6.f;
-							iconHeight = iconWidth * 4.f;
-							break;
-						case SMG_WEAPON:
-							ammoIcon = renderer->RegisterImage("Gfx/Bullet/9mm.png");
-							iconWidth = 4.f;
-							iconHeight = iconWidth * 4.f;
-							break;
-						case SHOTGUN_WEAPON:
-							ammoIcon = renderer->RegisterImage("Gfx/Bullet/12gauge.png");
-							iconWidth = 30.f;
-							iconHeight = iconWidth / 4.f;
-							spacing = -6.f;
-							break;
-						default: SPInvalidEnum("weap->GetWeaponType()", weap.GetWeaponType());
-					}
-
-					int clipSize = weap.GetClipSize();
-					int clip = weap.GetAmmo();
-
-					clipSize = std::max(clipSize, clip);
-
-					for (int i = 0; i < clipSize; i++) {
-						float x = scrWidth - 16.f - (float)(i + 1) * (iconWidth + spacing);
-						float y = scrHeight - 16.f - iconHeight;
-
-						if (clip >= i + 1) {
-							renderer->SetColorAlphaPremultiplied(MakeVector4(1, 1, 1, (float)cg_hudTransparency));
-						} else {
-							renderer->SetColorAlphaPremultiplied(MakeVector4(0.4, 0.4, 0.4, (float)cg_hudTransparency));
-						}
-
-						renderer->DrawImage(ammoIcon, AABB2(x, y, iconWidth, iconHeight));
-					}
-
-					stockNum = weap.GetStock();
-					warnLevel = weap.GetMaxStock() / 3;
-				} else {
-					iconHeight = 0.f;
-					warnLevel = 0;
-
-					switch (p.GetTool()) {
-						case Player::ToolSpade:
-						case Player::ToolBlock: stockNum = p.GetNumBlocks(); break;
-						case Player::ToolGrenade: stockNum = p.GetNumGrenades(); break;
-						default: SPInvalidEnum("p->GetTool()", p.GetTool());
-					}
+			if (p.IsToolWeapon()) {
+				switch (weap.GetWeaponType()) {
+					case RIFLE_WEAPON:
+						ammoIcon = renderer->RegisterImage("Gfx/Bullet/7.62mm.png");
+						iconWidth = 6.f;
+						iconHeight = iconWidth * 4.f;
+						break;
+					case SMG_WEAPON:
+						ammoIcon = renderer->RegisterImage("Gfx/Bullet/9mm.png");
+						iconWidth = 4.f;
+						iconHeight = iconWidth * 4.f;
+						break;
+					case SHOTGUN_WEAPON:
+						ammoIcon = renderer->RegisterImage("Gfx/Bullet/12gauge.png");
+						iconWidth = 30.f;
+						iconHeight = iconWidth / 4.f;
+						spacing = -6.f;
+						break;
+					default: SPInvalidEnum("weap->GetWeaponType()", weap.GetWeaponType());
 				}
 
-				Vector4 numberColor = {1, 1, 1, (float)cg_hudTransparency};
+				int clipSize = weap.GetClipSize();
+				int clip = weap.GetAmmo();
 
-				if (stockNum == 0) {
-					numberColor.y = 0.3f;
-					numberColor.z = 0.3f;
-				} else if (stockNum <= warnLevel) {
-					numberColor.z = 0.3f;
-				}
+				clipSize = std::max(clipSize, clip);
 
-				char buf[64];
-				sprintf(buf, "%d", stockNum);
-				IFont &font = fontManager->GetSquareDesignFont();
-				std::string stockStr = buf;
-				Vector2 size = font.Measure(stockStr);
-				Vector2 pos = MakeVector2(scrWidth - 16.f, scrHeight - 16.f - iconHeight);
-				pos -= size;
-				font.DrawShadow(stockStr, pos, 1.f, numberColor, MakeVector4(0, 0, 0, 0.5 * (float)cg_hudTransparency));
+				for (int i = 0; i < clipSize; i++) {
+					float x = scrWidth - 16.f - (float)(i + 1) * (iconWidth + spacing);
+					float y = scrHeight - 16.f - iconHeight;
 
-				// draw "press ... to reload"
-				{
-					std::string msg = "";
-
-					switch (p.GetTool()) {
-						case Player::ToolBlock:
-							if (p.GetNumBlocks() == 0) {
-								msg = _Tr("Client", "Out of Block");
-							}
-							break;
-						case Player::ToolGrenade:
-							if (p.GetNumGrenades() == 0) {
-								msg = _Tr("Client", "Out of Grenade");
-							}
-							break;
-						case Player::ToolWeapon: {
-							Weapon &weap = p.GetWeapon();
-							if (weap.IsReloading() || p.IsAwaitingReloadCompletion()) {
-								msg = _Tr("Client", "Reloading");
-							} else if (weap.GetAmmo() == 0 && weap.GetStock() == 0) {
-								msg = _Tr("Client", "Out of Ammo");
-							} else if (weap.GetStock() > 0 &&
-							           weap.GetAmmo() < weap.GetClipSize() / 4) {
-								msg = _Tr("Client", "Press [{0}] to Reload",
-								          TranslateKeyName(cg_keyReloadWeapon));
-							}
-						} break;
-						default:;
-							// no message
+					if (clip >= i + 1) {
+						renderer->SetColorAlphaPremultiplied(MakeVector4(1, 1, 1, (float)cg_hudTransparency));
+					} else {
+						renderer->SetColorAlphaPremultiplied(MakeVector4(0.4, 0.4, 0.4, (float)cg_hudTransparency));
 					}
 
-					if (!msg.empty()) {
-						IFont &font = fontManager->GetGuiFont();
-						Vector2 size = font.Measure(msg);
-						Vector2 pos = MakeVector2((scrWidth - size.x) * .5f, scrHeight * 2.f / 3.f);
-						font.DrawShadow(msg, pos, 1.f, MakeVector4(1, 1, 1, 1),
-						                MakeVector4(0, 0, 0, 0.5));
-					}
+					renderer->DrawImage(ammoIcon, AABB2(x, y, iconWidth, iconHeight));
 				}
 
-				if (p.GetTool() == Player::ToolBlock) {
-					paletteView->Draw();
+				stockNum = weap.GetStock();
+				warnLevel = weap.GetMaxStock() / 3;
+			} else {
+				iconHeight = 0.f;
+				warnLevel = 0;
+
+				switch (p.GetTool()) {
+					case Player::ToolSpade:
+					case Player::ToolBlock: stockNum = p.GetNumBlocks(); break;
+					case Player::ToolGrenade: stockNum = p.GetNumGrenades(); break;
+					default: SPInvalidEnum("p->GetTool()", p.GetTool());
 				}
-
-				// draw map
-				mapView->Draw();
-
-				DrawHealth();
 			}
+
+			Vector4 numberColor = {1, 1, 1, (float)cg_hudTransparency};
+
+			if (stockNum == 0) {
+				numberColor.y = 0.3f;
+				numberColor.z = 0.3f;
+			} else if (stockNum <= warnLevel) {
+				numberColor.z = 0.3f;
+			}
+
+			char buf[64];
+			sprintf(buf, "%d", stockNum);
+			IFont &font = fontManager->GetSquareDesignFont();
+			std::string stockStr = buf;
+			Vector2 size = font.Measure(stockStr);
+			Vector2 pos = MakeVector2(scrWidth - 16.f, scrHeight - 16.f - iconHeight);
+			pos -= size;
+			font.DrawShadow(stockStr, pos, 1.f, numberColor, MakeVector4(0, 0, 0, 0.5 * (float)cg_hudTransparency));
+
+			// draw "press ... to reload"
+			{
+				std::string msg = "";
+
+				switch (p.GetTool()) {
+					case Player::ToolBlock:
+						if (p.GetNumBlocks() == 0) {
+							msg = _Tr("Client", "Out of Block");
+						}
+						break;
+					case Player::ToolGrenade:
+						if (p.GetNumGrenades() == 0) {
+							msg = _Tr("Client", "Out of Grenade");
+						}
+						break;
+					case Player::ToolWeapon: {
+						Weapon &weap = p.GetWeapon();
+						if (weap.IsReloading() || p.IsAwaitingReloadCompletion()) {
+							msg = _Tr("Client", "Reloading");
+						} else if (weap.GetAmmo() == 0 && weap.GetStock() == 0) {
+							msg = _Tr("Client", "Out of Ammo");
+						} else if (weap.GetStock() > 0 &&
+							        weap.GetAmmo() < weap.GetClipSize() / 4) {
+							msg = _Tr("Client", "Press [{0}] to Reload",
+								        TranslateKeyName(cg_keyReloadWeapon));
+						}
+					} break;
+					default:;
+						// no message
+				}
+
+				if (!msg.empty()) {
+					IFont &font = fontManager->GetGuiFont();
+					Vector2 size = font.Measure(msg);
+					Vector2 pos = MakeVector2((scrWidth - size.x) * .5f, scrHeight * 2.f / 3.f);
+					font.DrawShadow(msg, pos, 1.f, MakeVector4(1, 1, 1, 1),
+						            MakeVector4(0, 0, 0, 0.5));
+				}
+			}
+
+			if (p.GetTool() == Player::ToolBlock) {
+				paletteView->Draw();
+			}
+
+			// draw map
+			mapView->Draw();
+
+			DrawHealth();
 		}
 
 		void Client::DrawCurrentToolIcon(Player &p) {
