@@ -782,6 +782,7 @@ namespace spades {
 						}
 						break;
 					case Player::ToolBlock:
+						param.customColor = MakeVector3(p.GetBlockColor()) / 255.f;
 						model = renderer.RegisterModel("Models/Weapons/Block/Block2.kv6");
 						if (nextBlockTime > 0.0f) {
 							float f = nextBlockTime * 8;

@@ -50,7 +50,7 @@
 		ViewBlockSkin(Renderer@ r, AudioDevice@ dev) {
 			@renderer = r;
 			@audioDevice = dev;
-			@model = renderer.RegisterModel("Models/Weapons/Block/Block.kv6");
+			@model = renderer.RegisterModel("Models/Weapons/Block/Block2.kv6");
 			@sightImage = renderer.RegisterImage ("Gfx/Sight.tga");
 		}
 
