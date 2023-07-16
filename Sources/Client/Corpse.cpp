@@ -23,6 +23,7 @@
 #include "IModel.h"
 #include "IRenderer.h"
 #include "Player.h"
+#include "Weapon.h"
 #include "World.h"
 #include <Core/Debug.h>
 #include <Core/Settings.h>
@@ -30,6 +31,7 @@
 using namespace std;
 
 DEFINE_SPADES_SETTING(r_corpseLineCollision, "1");
+SPADES_SETTING(cg_PlayerModelsViaWeapon);
 
 namespace spades {
 	namespace client {
@@ -38,6 +40,7 @@ namespace spades {
 			SPADES_MARK_FUNCTION();
 
 			playerId = p.GetId();
+			weaponName = p.GetWeapon().GetName();
 
 			IntVector3 col = p.GetWorld().GetTeam(p.GetTeamId()).color;
 			color = MakeVector3(col.x / 255.f, col.y / 255.f, col.z / 255.f);
@@ -618,6 +621,10 @@ namespace spades {
 			ModelRenderParam param;
 			param.customColor = color;
 
+			std::string path = "Models/Player";
+			if (cg_PlayerModelsViaWeapon)
+				path +=  "/" + weaponName;
+
 			Handle<IModel> model;
 			Matrix4 scaler = Matrix4::Scale(.1f);
 
@@ -638,14 +645,14 @@ namespace spades {
 
 				param.matrix = torso * scaler;
 
-				model = renderer.RegisterModel("Models/Player/Torso.kv6");
+				model = renderer.RegisterModel((path + "/Torso.kv6").c_str());
 				renderer.RenderModel(*model, param);
 			}
 			// draw Head
 			{
 				Vector3 headBase = (torso * MakeVector3(0.0f, 0.f, 0.f)).GetXYZ();
 
-				model = renderer.RegisterModel("Models/Player/Head.kv6");
+				model = renderer.RegisterModel((path + "/Head.kv6").c_str());
 
 				Vector3 aX, aY, aZ;
 				Vector3 center = (nodes[Torso1].pos + nodes[Torso2].pos) * .5f;
@@ -666,7 +673,7 @@ namespace spades {
 				Vector3 arm1Base = (torso * MakeVector3(0.4f, 0.f, 0.2f)).GetXYZ();
 				Vector3 arm2Base = (torso * MakeVector3(-0.4f, 0.f, 0.2f)).GetXYZ();
 
-				model = renderer.RegisterModel("Models/Player/Arm.kv6");
+				model = renderer.RegisterModel((path + "/Arm.kv6").c_str());
 
 				Vector3 aX, aY, aZ;
 
@@ -694,7 +701,7 @@ namespace spades {
 				Vector3 leg1Base = (torso * MakeVector3(0.25f, 0.f, 0.9f)).GetXYZ();
 				Vector3 leg2Base = (torso * MakeVector3(-0.25f, 0.f, 0.9f)).GetXYZ();
 
-				model = renderer.RegisterModel("Models/Player/Leg.kv6");
+				model = renderer.RegisterModel((path + "/Leg.kv6").c_str());
 
 				Vector3 aX, aY, aZ;
 

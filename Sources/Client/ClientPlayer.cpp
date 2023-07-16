@@ -909,6 +909,10 @@ namespace spades {
 			IRenderer &renderer = client.GetRenderer();
 			World *world = client.GetWorld();
 
+			std::string path = "Models/Player";
+			if (cg_PlayerModelsViaWeapon)
+				path +=  "/" + p.GetWeapon().GetName();
+
 			if (!p.IsAlive()) {
 				if ((int)cg_corpse == 1) {
 					ModelRenderParam param;
@@ -917,7 +921,7 @@ namespace spades {
 					IntVector3 col = p.GetColor();
 					param.customColor = MakeVector3(col.x / 255.f, col.y / 255.f, col.z / 255.f);
 
-					Handle<IModel> model = renderer.RegisterModel("Models/Player/Dead.kv6");
+					Handle<IModel> model = renderer.RegisterModel((path + "/Dead.kv6").c_str());
 					renderer.RenderModel(*model, param);
 				}
 				return;
@@ -978,10 +982,6 @@ namespace spades {
 			scaler = scaler * Matrix4::Scale(-1, -1, 1);
 
 			PlayerInput inp = p.GetInput();
-
-			std::string path = "Models/Player";
-			if (cg_PlayerModelsViaWeapon)
-				path +=  "/" + p.GetWeapon().GetName();
 
 			// lower
 			Matrix4 torso, head, arms;

@@ -65,6 +65,7 @@ namespace spades {
 			GameMap &map;
 			Vector3 color;
 			int playerId;
+			std::string weaponName;
 
 			Node nodes[NodeCount];
 			Edge edges[8];
