@@ -41,6 +41,7 @@
 #include "NetClient.h"
 
 DEFINE_SPADES_SETTING(cg_fov, "68");
+DEFINE_SPADES_SETTING(cg_classicZoom, "0");
 DEFINE_SPADES_SETTING(cg_thirdperson, "0");
 DEFINE_SPADES_SETTING(cg_manualFocus, "0");
 DEFINE_SPADES_SETTING(cg_depthOfFieldAmount, "1");
@@ -125,10 +126,14 @@ namespace spades {
 			ClientPlayer &clientPlayer = *clientPlayers[player.GetId()];
 
 			float delta = .8f;
-			switch (player.GetWeapon().GetWeaponType()) {
-				case SMG_WEAPON: delta = .8f; break;
-				case RIFLE_WEAPON: delta = 1.4f; break;
-				case SHOTGUN_WEAPON: delta = .4f; break;
+			if (!cg_classicZoom) {
+				switch (player.GetWeapon().GetWeaponType()) {
+					case SMG_WEAPON: delta = .8f; break;
+					case RIFLE_WEAPON: delta = 1.4f; break;
+					case SHOTGUN_WEAPON: delta = .4f; break;
+				}
+			} else {
+				delta = 1.0f;
 			}
 
 			float aimDownState = clientPlayer.GetAimDownState();
