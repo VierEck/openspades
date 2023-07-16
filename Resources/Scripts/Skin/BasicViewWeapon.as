@@ -19,6 +19,64 @@
  */
 
 namespace spades {
+
+	class ViewWeaponSpring {
+		double position = 0;
+		double desired = 0;
+		double velocity = 0;
+		double frequency = 1;
+		double damping = 1;
+
+		ViewWeaponSpring() {}
+
+		ViewWeaponSpring(double f, double d) {
+			frequency = f;
+			damping = d;
+		}
+
+		ViewWeaponSpring(double f, double d, double des) {
+			frequency = f;
+			damping = d;
+			desired = des;
+		}
+
+		void Update(double updateLength) {
+			double timeStep = 1.0 / 240.0;
+
+			// Forces updates into at least 240 fps.
+			for (double timeLeft = updateLength; timeLeft > 0; timeLeft -= timeStep) {
+				double dt = Min(timeStep, timeLeft);
+				double acceleration = (desired - position) * frequency;
+				velocity = velocity + acceleration * dt;
+				velocity -= velocity * damping * dt;
+				position = position + velocity * dt;
+			}
+		}
+	}
+
+	class ViewWeaponEvent {
+		bool activated = false;
+		bool acknowledged = false;
+
+		void Activate() {
+			if (!acknowledged)
+				activated = true;
+		}
+
+		bool WasActivated() {
+			return acknowledged ? false : activated;
+		}
+
+		void Acknowledge() {
+			acknowledged = true;
+		}
+
+		void Reset() {
+			activated = false;
+			acknowledged = false;
+		}
+	}
+	
 	class BasicViewWeapon :
 		IToolSkin,
 		IViewToolSkin,
@@ -151,14 +209,14 @@ namespace spades {
 		protected Renderer @renderer;
 		protected Image @sightImage;
 		protected Image @dotSightImage;
-		protected Image @scopeImageAlt;
+		protected Image @scopeImage;
 
 		BasicViewWeapon(Renderer @renderer) {
 			@this.renderer = renderer;
 			localFireVibration = 0.f;
 			@sightImage = renderer.RegisterImage("Gfx/Target.png");
 			@dotSightImage = renderer.RegisterImage("Gfx/DotSight.tga");
-			@scopeImageAlt = renderer.RegisterImage("Gfx/Rifle.png");
+			@scopeImage = renderer.RegisterImage("Gfx/Rifle.png");
 		}
 
 		float GetLocalFireVibration() { return localFireVibration; }
@@ -175,6 +233,22 @@ namespace spades {
 						vib * (1.f - vib) * 0.03f * motion);
 			Vector3 ads = Vector3(0.f, vib * (vib - 1.f) * vib * 0.3f * motion, 0.f);
 			return Mix(hip, ads, AimDownSightStateSmooth);
+		}
+		
+		// Creates a rotation matrix from euler angles (in the form of a Vector3) x-y-z
+		Matrix4 CreateEulerAnglesMatrix(Vector3 angles) {
+			Matrix4 mat = CreateRotateMatrix(Vector3(1, 0, 0), angles.x);
+			mat = CreateRotateMatrix(Vector3(0, 1, 0), angles.y) * mat;
+			mat = CreateRotateMatrix(Vector3(0, 0, 1), angles.z) * mat;
+			return mat;
+		}
+
+		// rotates gun matrix to ensure the sight is in the center of screen (0, ?, 0)
+		Matrix4 AdjustToAlignSight(Matrix4 mat, Vector3 sightPos, float fade) {
+			Vector3 p = mat * sightPos;
+			mat = CreateRotateMatrix(Vector3(0, 1, 1), atan(p.x / p.y) * fade) * mat;
+			mat = CreateRotateMatrix(Vector3(-1, 0, 0), atan(p.z / p.y) * fade) * mat;
+			return mat;
 		}
 
 		Matrix4 GetViewWeaponMatrix() {
@@ -193,11 +267,18 @@ namespace spades {
 				mat = CreateRotateMatrix(Vector3(0.f, 1.f, 0.f), putdown * 0.2f) * mat;
 				mat = CreateTranslateMatrix(Vector3(0.1f, -0.3f, 0.1f) * putdown) * mat;
 			}
+			
+			float sp = 1.0F - AimDownSightStateSmooth;
 
-			Vector3 trans(0.f, 0.f, 0.f);
-			trans += Vector3(-0.13f * (1.f - AimDownSightStateSmooth), 0.5f, GetZPos());
+			if (readyState < 1.0F) {
+				float per = SmoothStep(1.0F - readyState);
+				mat = CreateTranslateMatrix(Vector3(-0.25F * sp, -0.5F, 0.25F * sp) * per * 0.1F) * mat;
+				mat = CreateRotateMatrix(Vector3(-1, 0, 0), per * 0.05F * sp) * mat;
+			}
+
+			Vector3 trans(0.0F, 0.0F, 0.0F);
+			trans += Vector3(-0.13F * sp, 0.5F, GetZPos());
 			trans += swing * GetMotionGain();
-			trans += GetLocalFireVibrationOffset();
 			mat = CreateTranslateMatrix(trans) * mat;
 
 			return mat;
@@ -238,15 +319,15 @@ namespace spades {
 						(renderer.ScreenHeight - dotSightImage.Height) * 0.5F)
 					);
 				} else if (cg_pngScope.IntValue == 1) {
-					Vector2 imgSize = Vector2(scopeImageAlt.Width, scopeImageAlt.Height);
-					imgSize *= Max(1.0F, renderer.ScreenWidth / scopeImageAlt.Width);
-					imgSize *= Min(1.0F, renderer.ScreenHeight / scopeImageAlt.Height);
+					Vector2 imgSize = Vector2(scopeImage.Width, scopeImage.Height);
+					imgSize *= Max(1.0F, renderer.ScreenWidth / scopeImage.Width);
+					imgSize *= Min(1.0F, renderer.ScreenHeight / scopeImage.Height);
 					imgSize *= Max(0.25F * (1.0F - readyState) + 1.0F, 1.0F);
 
 					Vector2 scrCenter = (Vector2(renderer.ScreenWidth, renderer.ScreenHeight) - imgSize) * 0.5F;
 
 					renderer.ColorNP = Vector4(1.0F, 1.0F, 1.0F, 1.0F);
-					renderer.DrawImage(scopeImageAlt, AABB2(scrCenter.x, scrCenter.y, imgSize.x, imgSize.y));
+					renderer.DrawImage(scopeImage, AABB2(scrCenter.x, scrCenter.y, imgSize.x, imgSize.y));
 				}
 				return;
 			}

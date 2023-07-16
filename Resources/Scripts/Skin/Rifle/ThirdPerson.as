@@ -19,13 +19,7 @@
  */
 
 namespace spades {
-	class ThirdPersonRifleSkin :
-		IToolSkin,
-		IThirdPersonToolSkin,
-		IWeaponSkin,
-		IWeaponSkin2,
-		IWeaponSkin3
-	{
+	class ThirdPersonRifleSkin : IToolSkin, IThirdPersonToolSkin, IWeaponSkin, IWeaponSkin2,  IWeaponSkin3 {
 		private float sprintState;
 		private float raiseState;
 		private Vector3 teamColor;
@@ -42,50 +36,19 @@ namespace spades {
 		private float environmentDistance;
 		private Vector3 soundOrigin;
 
-		float SprintState {
-			set { sprintState = value; }
-		}
+		float SprintState { set { sprintState = value; } }
+		float RaiseState { set { raiseState = value; } }
+		bool IsMuted { set { muted = value; } }
+		Vector3 TeamColor { set { teamColor = value; } }
+		Matrix4 OriginMatrix { set { originMatrix = value; } }
+		float PitchBias { get { return 0.0F; } }
+		float AimDownSightState { set { aimDownSightState = value; } }
 
-		float RaiseState {
-			set { raiseState = value; }
-		}
-
-		bool IsMuted {
-			set { muted = value; }
-		}
-
-		Vector3 TeamColor {
-			set { teamColor = value; }
-		}
-
-		Matrix4 OriginMatrix {
-			set { originMatrix = value; }
-		}
-
-		float PitchBias {
-			get { return 0.f; }
-		}
-
-		float AimDownSightState {
-			set { aimDownSightState = value; }
-		}
-
-		bool IsReloading {
-			set { reloading = value; }
-		}
-		float ReloadProgress {
-			set { reloadProgress = value; }
-		}
-		int Ammo {
-			set { ammo = value; }
-		}
-		int ClipSize {
-			set { clipSize = value; }
-		}
-
-		float ReadyState {
-			set { readyState = value; }
-		}
+		bool IsReloading { set { reloading = value; } }
+		float ReloadProgress { set { reloadProgress = value; } }
+		int Ammo { set { ammo = value; } }
+		int ClipSize { set { clipSize = value; } }
+		float ReadyState { set { readyState = value; } }
 
 		// IWeaponSkin2
 		void SetSoundEnvironment(float room, float size, float distance) {
@@ -93,30 +56,23 @@ namespace spades {
 			environmentSize = size;
 			environmentDistance = distance;
 		}
-		Vector3 SoundOrigin {
-			set { soundOrigin = value; }
-		}
+		Vector3 SoundOrigin { set { soundOrigin = value; } }
 
 		// IWeaponSkin3
-		Vector3 MuzzlePosition {
-			get { return originMatrix * Vector3(0.35f, -1.85f, -0.125f); }
-		}
+		Vector3 MuzzlePosition { get { return originMatrix * Vector3(0.35F, -1.85F, -0.125F); } }
+		Vector3 CaseEjectPosition { get { return originMatrix * Vector3(0.35F, -0.7F, -0.125F); } }
 
-		Vector3 CaseEjectPosition {
-			get { return originMatrix * Vector3(0.35f, -0.7f, -0.125f); }
-		}
+		private Renderer@ renderer;
+		private AudioDevice@ audioDevice;
+		private Model@ model;
+		private AudioChunk@[]  fireSounds(3);
+		private AudioChunk@ fireFarSound;
+		private AudioChunk@ fireStereoSound;
+		private AudioChunk@ fireSmallReverbSound;
+		private AudioChunk@ fireLargeReverbSound;
+		private AudioChunk@ reloadSound;
 
-		private Renderer @renderer;
-		private AudioDevice @audioDevice;
-		private Model @model;
-		private AudioChunk @[] fireSounds(3);
-		private AudioChunk @fireFarSound;
-		private AudioChunk @fireStereoSound;
-		private AudioChunk @fireSmallReverbSound;
-		private AudioChunk @fireLargeReverbSound;
-		private AudioChunk @reloadSound;
-
-		ThirdPersonRifleSkin(Renderer @r, AudioDevice @dev) {
+		ThirdPersonRifleSkin(Renderer@ r, AudioDevice@ dev) {
 			@renderer = r;
 			@audioDevice = dev;
 			@model = renderer.RegisterModel("Models/Weapons/Rifle/Weapon.kv6");
@@ -138,21 +94,18 @@ namespace spades {
 			if (!muted) {
 				Vector3 origin = soundOrigin;
 				AudioParam param;
-				param.volume = 20.f;
+				param.volume = 20.0F;
 				audioDevice.Play(fireSounds[GetRandom(fireSounds.length)], origin, param);
 
-				param.volume = 20.f * environmentRoom;
-				if (environmentSize < 0.5f) {
-					audioDevice.Play(fireSmallReverbSound, origin, param);
-				} else {
-					audioDevice.Play(fireLargeReverbSound, origin, param);
-				}
+				param.volume = 20.0F * environmentRoom;
+				audioDevice.Play((environmentSize < 0.5F)
+					? fireSmallReverbSound : fireLargeReverbSound, origin, param);
 
-				param.volume = 1.f;
-				param.referenceDistance = 26.f;
+				param.volume = 1.0F;
+				param.referenceDistance = 26.0F;
 				audioDevice.Play(fireFarSound, origin, param);
-				param.referenceDistance = 4.f;
-				param.volume = 1.f;
+				param.referenceDistance = 4.0F;
+				param.volume = 1.0F;
 				audioDevice.Play(fireStereoSound, origin, param);
 			}
 		}
@@ -161,7 +114,7 @@ namespace spades {
 			if (!muted) {
 				Vector3 origin = soundOrigin;
 				AudioParam param;
-				param.volume = 0.2f;
+				param.volume = 0.2F;
 				audioDevice.Play(reloadSound, origin, param);
 			}
 		}
@@ -169,9 +122,9 @@ namespace spades {
 		void ReloadedWeapon() {}
 
 		void AddToScene() {
-			Matrix4 mat = CreateScaleMatrix(0.05f);
-			mat = mat * CreateScaleMatrix(-1.f, -1.f, 1.f);
-			mat = CreateTranslateMatrix(0.35f, -1.f, 0.0f) * mat;
+			Matrix4 mat = CreateScaleMatrix(0.05F);
+			mat = mat * CreateScaleMatrix(-1, -1, 1);
+			mat = CreateTranslateMatrix(0.35F, -1.0F, 0.0F) * mat;
 
 			ModelRenderParam param;
 			param.matrix = originMatrix * mat;
@@ -179,7 +132,7 @@ namespace spades {
 		}
 	}
 
-	IWeaponSkin @CreateThirdPersonRifleSkin(Renderer @r, AudioDevice @dev) {
+	IWeaponSkin@ CreateThirdPersonRifleSkin(Renderer@ r, AudioDevice@ dev) {
 		return ThirdPersonRifleSkin(r, dev);
 	}
 }
