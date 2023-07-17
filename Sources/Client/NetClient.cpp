@@ -2826,7 +2826,7 @@ namespace spades {
 						client->PlayerDigBlockSound(*p);
 				} break;
 				case VolumeActionBuild: {
-					IntVector3 col = {colors[1], colors[2], colors[3]};
+					IntVector3 col = {colors[0], colors[1], colors[2]};
 					for (auto &c : cells)
 						if (GetWorld()->GetMap()->IsValidBuildCoord(c))
 							GetWorld()->CreateBlock(c, col);
@@ -2834,7 +2834,7 @@ namespace spades {
 						client->PlayerCreatedBlock(*p);
 				} break;
 				case VolumeActionPaint: {
-					IntVector3 col = {colors[1], colors[2], colors[3]};
+					IntVector3 col = {colors[0], colors[1], colors[2]};
 					for (auto &c : cells)
 						if (GetWorld()->GetMap()->IsValidBuildCoord(c) &&
 							GetWorld()->GetMap()->IsSolid(c.x, c.y, c.z)
