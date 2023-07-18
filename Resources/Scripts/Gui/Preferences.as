@@ -58,7 +58,7 @@ namespace spades {
 				AddChild(label);
 			}
 
-			AddTab(GameOptionsPanel(Manager, options, fontManager),
+			AddTab(GameOptionsPanel(Manager, options, fontManager, this),
 				   _Tr("Preferences", "Game Options"));
 			AddTab(ControlOptionsPanel(Manager, options, fontManager),
 				   _Tr("Preferences", "Controls"));
@@ -488,6 +488,42 @@ namespace spades {
 			RadioButton::Render();
 		}
 	}
+	
+	class PerformanceToggleButton : spades::ui::RadioButton {
+		ConfigItem @config;
+		int value;
+		private FontManager @fontManager;
+		PreferenceView@ pViewer;
+		
+		PerformanceToggleButton(spades::ui::UIManager manager, string caption,
+								 int value, PreferenceView@ pV, FontManager @fM) {
+			super(manager);
+			@config = ConfigItem("cg_performanceSetting");
+			this.Caption = caption;
+			this.value = value;
+			this.Toggle = true;
+			this.Toggled = config.IntValue == value;
+			@pViewer = pV;
+			@fontManager = fM;
+		}
+
+		void OnActivated() {
+			RadioButton::OnActivated();
+			this.Toggled = true;
+			config = value;
+			
+			PreferenceView al(pViewer.owner, PreferenceViewOptions(), fontManager);
+			al.Run();
+			al.SelectedTabIndex = 0;
+			al.UpdateTabs();
+			pViewer.Close();
+		}
+
+		void Render() {
+			this.Toggled = config.IntValue == value;
+			RadioButton::Render();
+		}
+	}
 
 	class MacroHotKeyField : spades::ui::UIElement {
 		MacroItem @macro;
@@ -791,6 +827,27 @@ namespace spades {
 			Parent.AddChild(list);
 		}
 
+		void AddPerformanceSetting(string caption, PreferenceView@ pV) {
+			spades::ui::UIElement @container = CreateItem();
+
+			spades::ui::Label label(Parent.Manager);
+			label.Text = caption;
+			label.Alignment = Vector2(0.f, 0.5f);
+			label.Bounds = AABB2(10.f, 0.f, 300.f, 32.f);
+			container.AddChild(label);
+			
+			array<string> labels = array<string> = {_Tr("Preferences", "ON"), _Tr("Preferences", "OFF")};
+			array<int> values = {1, 0};
+
+			for (uint i = 0; i < labels.length; ++i) {
+				PerformanceToggleButton field(Parent.Manager, labels[i], values[i], pV, fontManager);
+				field.Bounds = AABB2(FieldX + FieldWidth / labels.length * i, 1.f,
+									 FieldWidth / labels.length, 30.f);
+				field.Enable = true;
+				container.AddChild(field);
+			}
+		}
+
 		void OnAddMacroButton(spades::ui::UIElement @) {
 			string[] @no = AddMacroItem();//fixme make this a void
 			PreferenceView al(pViewer.owner, PreferenceViewOptions(), fontManager);
@@ -877,11 +934,11 @@ namespace spades {
 
 	class GameOptionsPanel : spades::ui::UIElement {
 		GameOptionsPanel(spades::ui::UIManager @manager, PreferenceViewOptions @options,
-						 FontManager @fontManager) {
+						 FontManager @fontManager, PreferenceView &pViewer) {
 			super(manager);
 
 			StandardPreferenceLayouter layouter(this, fontManager);
-			layouter.AddToggleField(_Tr("Preferences", "Performance Config"), "cg_performanceSetting");
+			layouter.AddPerformanceSetting(_Tr("Preferences", "Performance Config"), pViewer);
 			layouter.AddParagraph(_Tr("Preferences", "Works best if toggled in Startup Window. "));
 			layouter.AddParagraph(_Tr("Preferences", "Some Settings can only be changed there. "));
 			layouter.AddHeading(_Tr("Preferences", " "));
