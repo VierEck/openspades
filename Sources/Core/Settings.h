@@ -43,11 +43,15 @@ namespace spades {
 
 	struct SettingItemDescriptor {
 		const std::string defaultValue;
+		const std::string performanceValue;
 		const SettingItemFlags flags;
 
 		SettingItemDescriptor(const std::string &defaultValue = std::string(),
+		                      const std::string &perfValue = std::string(),
 		                      SettingItemFlags flags = SettingItemFlags::None)
-		    : defaultValue(defaultValue), flags(flags) {}
+		    : defaultValue(defaultValue), 
+			  performanceValue(perfValue.size() > 0 ? perfValue : defaultValue), 
+			  flags(flags) {}
 
 		bool operator==(const SettingItemDescriptor &o) const {
 			return defaultValue == o.defaultValue && flags == o.flags;
@@ -89,7 +93,21 @@ namespace spades {
 
 		Item *GetItem(const std::string &name, const SettingItemDescriptor *descriptor);
 
-		void Save();
+		Item *performanceSetting;
+		bool isPerformanceSettingLoaded;
+		bool allowSwitch;
+		Item *GetPerformanceSetting(const SettingItemDescriptor *descriptor);
+
+		void Save(bool performance = false);
+
+		struct ItemSaved {
+			std::string name;
+			std::string string;
+		};
+		std::map<std::string, ItemSaved *> itemsSaved;
+		std::map<std::string, ItemSaved *> itemsPerformance;
+		bool isPerformance;
+		ItemSaved *GetSavedItem(const std::string&name, const SettingItemDescriptor *descriptor, bool performance = false);
 
 	public:
 		static Settings *GetInstance();
@@ -122,10 +140,14 @@ namespace spades {
 			void RemoveListener(ISettingItemListener *);
 		};
 
-		void Load();
+		void Load(bool performance = false);
 		void Flush();
 		/** Return a list of all config variables, sorted by name. */
 		std::vector<std::string> GetAllItemNames();
+
+		bool IsPerformance() { return isPerformance; }
+		bool AllowSwitch() { return allowSwitch; }
+		void SwitchAllItems();
 
 		struct ItemMacro {
 			std::string name;

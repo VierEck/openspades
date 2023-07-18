@@ -29,8 +29,11 @@
 #include <Core/IStream.h>
 #include <Core/Math.h>
 
+DEFINE_SPADES_SETTING(cg_performanceSetting, "0");
+
 namespace spades {
 
+#define PERFORMANCEFILE "Performance.cfg"
 #define CONFIGFILE "SPConfig.cfg"
 	static Settings *instance = NULL;
 
@@ -43,9 +46,12 @@ namespace spades {
 	Settings::Settings() {
 		SPADES_MARK_FUNCTION();
 		loaded = false;
+		isPerformanceSettingLoaded = false;
+		allowSwitch = false;
+		isPerformance = false;
 	}
 
-	void Settings::Load() {
+	void Settings::Load(bool performance) {
 		SPADES_MARK_FUNCTION();
 
 		// import Fltk preferences
@@ -62,13 +68,16 @@ namespace spades {
 			// FIXME: remove legacy preference?
 		}
 
-		SPLog("Loading preferences from " CONFIGFILE);
-		loaded = false;
-		try {
-			if (FileManager::FileExists(CONFIGFILE)) {
-				SPLog(CONFIGFILE " found.");
+		auto config = performance ? PERFORMANCEFILE : CONFIGFILE;
 
-				std::string text = FileManager::ReadAllBytes(CONFIGFILE);
+		SPLog("Loading preferences from %s", config);
+		loaded = false;
+		bool shouldSwitch = false;
+		try {
+			if (FileManager::FileExists(config)) {
+				SPLog("%s found.", config);
+
+				std::string text = FileManager::ReadAllBytes(config);
 				auto lines = SplitIntoLines(text);
 
 				std::size_t line = 0;
@@ -155,26 +164,35 @@ namespace spades {
 					}
 					linePos++;
 
-					if (key.find("4SpadesMacro") == 0) {
-						std::string vals = readString(false);
-						std::string button, message;
-						size_t find = vals.find(" |: ");
-						if (find != std::string::npos) {
-							auto *itemMacro = GetMacroItem(key);
-							itemMacro->key = vals.substr(0, find);
-							itemMacro->msg = vals.substr(find + 4);
+					if (!performance) {
+						if (key.find("4SpadesMacro") == 0) {
+							std::string vals = readString(false);
+							std::string button, message;
+							size_t find = vals.find(" |: ");
+							if (find != std::string::npos) {
+								auto *itemMacro = GetMacroItem(key);
+								itemMacro->key = vals.substr(0, find);
+								itemMacro->msg = vals.substr(find + 4);
+							}
+						} else {
+							std::string val = readString(false);
+							auto *item = GetItem(key, nullptr);
+							item->Set(val);
+
+							if (key == "cg_performanceSetting" && item->intValue > 0)
+								allowSwitch = true;
 						}
 					} else {
 						std::string val = readString(false);
-						auto *item = GetItem(key, nullptr);
-						item->Set(val);
+						auto *itemSav = GetSavedItem(key, nullptr, true);
+						itemSav->string = val;
 					}
 
 					line++;
 				}
 
 			} else {
-				SPLog(CONFIGFILE " doesn't exist.");
+				SPLog("%s doesn't exist.", config);
 			}
 
 			if (importedPref) {
@@ -188,10 +206,19 @@ namespace spades {
 			SPLog("Failed to load preference: %s", ex.what());
 			SPLog("Disabling saving preference.");
 		}
+
+		if (!performance) {
+			Load(true);
+		} else {
+			allowSwitch = true;
+			if (isPerformanceSettingLoaded && cg_performanceSetting)
+				SwitchAllItems();
+		}
 	}
 
-	void Settings::Save() {
-		SPLog("Saving preferences to " CONFIGFILE);
+	void Settings::Save(bool performance) {
+		auto config = performance ? PERFORMANCEFILE : CONFIGFILE;
+		SPLog("Saving preferences to %s", config);
 		try {
 			std::string buffer;
 			buffer = "# OpenSpades config file\n"
@@ -262,47 +289,81 @@ namespace spades {
 				}
 			};
 
-			for (const auto &item : items) {
-				Item *itm = item.second;
+			if (!performance) {
+				if (performanceSetting) {
+					Item *itm = performanceSetting;
 
-				emitString(itm->name, true);
-				buffer += ": ";
-				column += 2;
+					emitString(itm->name, true);
+					buffer += ": ";
+					column += 2;
 
-				emitString(itm->string, false);
+					emitString(itm->string, false);
 
-				buffer += "\n";
-				column = 0;
+					buffer += "\n";
+					column = 0;
+				}
+
+				if (isPerformance)
+					SwitchAllItems();
+
+				for (const auto &item : items) {
+					Item *itm = item.second;
+
+					emitString(itm->name, true);
+					buffer += ": ";
+					column += 2;
+
+					emitString(itm->string, false);
+
+					buffer += "\n";
+					column = 0;
+				}
+
+				for (const auto &item : itemsMacro) {
+					ItemMacro *itm = item.second;
+
+					emitString(itm->name, true);
+					buffer += ": ";
+					column += 2;
+
+					emitString(itm->key, false);
+					buffer += " |: ";
+					column += 4;
+
+					emitString(itm->msg, false);
+
+					buffer += "\n";
+					column = 0;
+				}
+			} else {
+				for (const auto &item : itemsPerformance) {
+					ItemSaved *itm = item.second;
+
+					emitString(itm->name, true);
+					buffer += ": ";
+					column += 2;
+
+					emitString(itm->string, false);
+
+					buffer += "\n";
+					column = 0;
+				}
 			}
 
-			for (const auto &item : itemsMacro) {
-				ItemMacro *itm = item.second;
-
-				emitString(itm->name, true);
-				buffer += ": ";
-				column += 2;
-
-				emitString(itm->key, false);
-				buffer += " |: ";
-				column += 4;
-
-				emitString(itm->msg, false);
-
-				buffer += "\n";
-				column = 0;
-			}
-
-			std::unique_ptr<IStream> s(FileManager::OpenForWriting(CONFIGFILE));
+			std::unique_ptr<IStream> s(FileManager::OpenForWriting(config));
 			s->Write(buffer);
 
 		} catch (const std::exception &ex) {
 			SPLog("Failed to save preference: %s", ex.what());
 		}
+
+		if (!performance)
+			Save(true);
 	}
 
 	void Settings::Flush() {
 		if (loaded) {
-			SPLog("Saving preference to " CONFIGFILE);
+			SPLog("Saving preference to config files");
 			Save();
 		} else {
 			SPLog("Not saving preferences because loading preferences has failed.");
@@ -322,6 +383,9 @@ namespace spades {
 	Settings::Item *Settings::GetItem(const std::string &name,
 	                                  const SettingItemDescriptor *descriptor) {
 		SPADES_MARK_FUNCTION();
+		if (name == "cg_performanceSetting")
+			return GetPerformanceSetting(descriptor);
+
 		std::map<std::string, Item *>::iterator it;
 		Item *item;
 		it = items.find(name);
@@ -355,6 +419,101 @@ namespace spades {
 		}
 
 		return item;
+	}
+
+	Settings::Item *Settings::GetPerformanceSetting(const SettingItemDescriptor *descriptor) {
+		SPADES_MARK_FUNCTION();
+		Item *item;
+		if (!isPerformanceSettingLoaded) {
+			item = new Item();
+			item->name = "cg_performanceSetting";
+			item->defaults = true;
+			item->descriptor = nullptr;
+			item->intValue = 0;
+			item->value = 0.0f;
+
+			performanceSetting = item;
+		} else {
+			item = performanceSetting;
+		}
+
+		if (descriptor) {
+			if (item->descriptor) {
+				if (*item->descriptor != *descriptor) {
+					SPLog("WARNING: setting 'cg_performanceSetting' has multiple descriptors");
+				}
+			} else {
+				item->descriptor = descriptor;
+				const std::string &defaultValue = descriptor->defaultValue;
+				if (item->defaults) {
+					item->value = static_cast<float>(atof(defaultValue.c_str()));
+					item->intValue = atoi(defaultValue.c_str());
+					item->string = defaultValue;
+				}
+			}
+		}
+
+		isPerformanceSettingLoaded = true;
+		return item;
+	}
+
+	Settings::ItemSaved *Settings::GetSavedItem(const std::string &name, const SettingItemDescriptor *descriptor, bool performance) {
+		SPADES_MARK_FUNCTION();
+		if (name == "cg_performanceSetting")
+			return nullptr;
+		auto &itemList = performance ? itemsPerformance : itemsSaved;
+		std::map<std::string, ItemSaved *>::iterator it;
+		ItemSaved *itemSav;
+		it = itemList.find(name);
+		if (it == itemList.end()) {
+			Item *itm = GetItem(name, nullptr);
+			itemSav = new ItemSaved();
+			itemSav->name = name;
+			if (itm->string.size() > 0)
+				itemSav->string = itm->string;
+
+			itemList[name] = itemSav;
+		} else {
+			itemSav = it->second;
+		}
+
+		if (descriptor)
+			itemSav->string = performance ? descriptor->performanceValue : descriptor->defaultValue;
+
+		return itemSav;
+	}
+
+	namespace {
+		class performanceSettingListener : public ISettingItemListener {
+			Settings::ItemHandle handle;
+		public:
+			performanceSettingListener() : handle("cg_performanceSetting", nullptr) {
+				handle.AddListener(this);
+			}
+			~performanceSettingListener() { handle.RemoveListener(this); }
+			void SettingChanged(const std::string &) override {
+				if (Settings::GetInstance()->IsPerformance() != (bool)handle)
+					Settings::GetInstance()->SwitchAllItems();
+			}
+		};
+
+		performanceSettingListener perfSetListener;
+	}
+
+	void Settings::SwitchAllItems() {
+		SPADES_MARK_FUNCTION();
+		if (!allowSwitch)
+			return;
+
+		auto names = GetAllItemNames();
+		for (auto &name : names) {
+			ItemSaved *itemSav = GetSavedItem(name, nullptr, !isPerformance);
+			ItemSaved *itemSavOpposite = GetSavedItem(name, nullptr, isPerformance);
+			Item *item = GetItem(name, nullptr);
+			itemSavOpposite->string = item->string;
+			item->Set(itemSav->string);
+		}
+		isPerformance = !isPerformance;
 	}
 
 	void Settings::AddMacroItem() {
@@ -465,6 +624,8 @@ namespace spades {
 		SPADES_MARK_FUNCTION();
 
 		item = Settings::GetInstance()->GetItem(name, descriptor);
+		Settings::GetInstance()->GetSavedItem(name, descriptor, false);
+		Settings::GetInstance()->GetSavedItem(name, descriptor, true);
 	}
 
 	void Settings::ItemHandle::operator=(const std::string &value) { item->Set(value); }
@@ -511,7 +672,7 @@ namespace spades {
 	}
 
 	namespace {
-		const SettingItemDescriptor defaultDescriptor{std::string(), SettingItemFlags::None};
+		const SettingItemDescriptor defaultDescriptor{std::string(), std::string(), SettingItemFlags::None};
 	}
 
 	const SettingItemDescriptor &Settings::ItemHandle::GetDescriptor() {

@@ -33,7 +33,7 @@ And many others which weren't mentioned here.
 -------------------
 
 "VierEck.":
-MapEditor, Demo Replay/Recording based on aos_replay, Chat Macros
+MapEditor, Demo Replay/Recording based on aos_replay, Chat Macros, Performance Config
 "Nuceto":
 Killfeed image feature, Specific word message highlight, Colored chat message, Colored stats, HUD and Minimap transparency, Teammate map sector in chat message, HitTest Debug display transparency and size, Target Mod, Default Fade Weapon Models
 "ZeroGrey":

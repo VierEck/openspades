@@ -35,13 +35,13 @@ namespace spades {
 		settingItemDescriptors;
 
 		const SettingItemDescriptor *MakeSettingItemDescriptor
-		(const std::string &name, const std::string &defaultValue)
+		(const std::string &name, const std::string &defaultValue, const std::string &performanceValue)
 		{
 			auto it = settingItemDescriptors.find(name);
 			if (it != settingItemDescriptors.end()) {
 				return it->second;
 			}
-			auto *descriptor = new SettingItemDescriptor(defaultValue, SettingItemFlags::None);
+			auto *descriptor = new SettingItemDescriptor(defaultValue, performanceValue, SettingItemFlags::None);
 			settingItemDescriptors.insert(make_pair(name, descriptor));
 			return descriptor;
 		}
@@ -66,13 +66,19 @@ namespace spades {
 		class ConfigItem: public RefCountedObject {
 			Settings::ItemHandle handle;
 		public:
+			ConfigItem(const std::string& name, const std::string& defaultValue, const std::string& performanceValue):
+			handle(name, MakeSettingItemDescriptor(name, defaultValue, performanceValue)){
+			}
 			ConfigItem(const std::string& name, const std::string& defaultValue):
-			handle(name, MakeSettingItemDescriptor(name, defaultValue)){
+			handle(name, MakeSettingItemDescriptor(name, defaultValue, defaultValue)){
 			}
 			ConfigItem(const std::string& name):
 			handle(name, nullptr){
 			}
 
+			static ConfigItem *Construct(const std::string& name, const std::string& defaultValue, const std::string& performanceValue) {
+				return new ConfigItem(name, defaultValue, performanceValue);
+			}
 			static ConfigItem *Construct(const std::string& name, const std::string& defaultValue) {
 				return new ConfigItem(name, defaultValue);
 			}
@@ -181,6 +187,12 @@ namespace spades {
 													 asBEHAVE_FACTORY,
 													 "ConfigItem @f(const string& in, const string& in)",
 													 asFUNCTIONPR(ConfigItem::Construct, (const std::string&, const std::string&), ConfigItem *),
+													 asCALL_CDECL);
+					manager->CheckError(r);
+					r = eng->RegisterObjectBehaviour("ConfigItem",
+													 asBEHAVE_FACTORY,
+													 "ConfigItem @f(const string& in, const string& in, const string& in)",
+													 asFUNCTIONPR(ConfigItem::Construct, (const std::string&, const std::string&, const std::string&), ConfigItem *),
 													 asCALL_CDECL);
 					manager->CheckError(r);
 					r = eng->RegisterObjectMethod("ConfigItem",

@@ -113,6 +113,11 @@ namespace spades {
             {
                 StartupScreenConfigView cfg(Manager);
 
+                cfg.AddRow(StartupScreenConfigSelectItemEditor(
+                    ui, StartupScreenConfig(ui, "cg_performanceSetting"), "0|1",
+                    _Tr("StartupScreen",
+                        "Performance Config:Toggle wether the Client uses Settings from Performance.cfg or SPConfig.cfg|" "Off|" "On")));
+
                 // TODO: Add r_temporalAA when it's more complete
                 cfg.AddRow(StartupScreenConfigSelectItemEditor(
                     ui, StartupScreenGraphicsAntialiasConfig(ui), "0|2|4|fxaa",

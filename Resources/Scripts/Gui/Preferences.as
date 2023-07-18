@@ -680,6 +680,17 @@ namespace spades {
 			label.Bounds = AABB2(10.f, 0.f, 300.f, 32.f);
 			container.AddChild(label);
 		}
+		
+		void AddParagraph(string text) {
+			spades::ui::UIElement @container = CreateItem();
+
+			spades::ui::Label label(Parent.Manager);
+			label.Text = text;
+			label.Alignment = Vector2(0.f, 0.5f);
+			@label.Font = fontManager.GuiFont;
+			label.Bounds = AABB2(10.f, 0.f, 300.f, 32.f);
+			container.AddChild(label);
+		}
 
 		ConfigField @AddInputField(string caption, string configName, bool enabled = true) {
 			spades::ui::UIElement @container = CreateItem();
@@ -870,6 +881,11 @@ namespace spades {
 			super(manager);
 
 			StandardPreferenceLayouter layouter(this, fontManager);
+			layouter.AddToggleField(_Tr("Preferences", "Performance Config"), "cg_performanceSetting");
+			layouter.AddParagraph(_Tr("Preferences", "Works best if toggled in Startup Window. "));
+			layouter.AddParagraph(_Tr("Preferences", "Some Settings can only be changed there. "));
+			layouter.AddHeading(_Tr("Preferences", " "));
+
 			layouter.AddHeading(_Tr("Preferences", "Player Information"));
 			ConfigField @nameField = layouter.AddInputField(
 				_Tr("Preferences", "Player Name"), "cg_playerName", not options.GameActive);
