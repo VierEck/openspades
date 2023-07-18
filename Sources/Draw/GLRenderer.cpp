@@ -201,9 +201,7 @@ namespace spades {
 				GLFogFilter(*this);
 			}
 
-			if (settings.r_bloom) {
-				lensDustFilter = new GLLensDustFilter(*this);
-			}
+			lensDustFilter = new GLLensDustFilter(*this);
 
 			if (settings.r_hdr) {
 				autoExposureFilter = new GLAutoExposureFilter(*this);
