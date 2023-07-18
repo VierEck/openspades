@@ -30,7 +30,7 @@
 
 using namespace std;
 
-DEFINE_SPADES_SETTING(r_corpseLineCollision, "1");
+DEFINE_SPADES_SETTING(r_corpseLineCollision, "1", "0");
 SPADES_SETTING(cg_PlayerModelsViaWeapon);
 
 namespace spades {

@@ -49,7 +49,7 @@
 
 SPADES_SETTING(cg_corpse);
 SPADES_SETTING(cg_ejectBrass);
-DEFINE_SPADES_SETTING(cg_animations, "1");
+DEFINE_SPADES_SETTING(cg_animations, "1", "0");
 SPADES_SETTING(cg_shake);
 SPADES_SETTING(r_hdr);
 DEFINE_SPADES_SETTING(cg_environmentalAudio, "1");
@@ -58,11 +58,11 @@ DEFINE_SPADES_SETTING(cg_viewWeaponY, "0");
 DEFINE_SPADES_SETTING(cg_viewWeaponZ, "0");
 DEFINE_SPADES_SETTING(cg_debugToolSkinAnchors, "0");
 
-DEFINE_SPADES_SETTING(cg_hideFirstPersonModel, "0");
-DEFINE_SPADES_SETTING(cg_hideBody, "0");
-DEFINE_SPADES_SETTING(cg_hideArms, "0");
+DEFINE_SPADES_SETTING(cg_hideFirstPersonModel, "0", "2");
+DEFINE_SPADES_SETTING(cg_hideBody, "0", "1");
+DEFINE_SPADES_SETTING(cg_hideArms, "0", "1");
 
-DEFINE_SPADES_SETTING(cg_PlayerModelsViaWeapon, "1");
+DEFINE_SPADES_SETTING(cg_PlayerModelsViaWeapon, "1", "0");
 DEFINE_SPADES_SETTING(cg_classicViewWeapon, "0");
 
 namespace spades {

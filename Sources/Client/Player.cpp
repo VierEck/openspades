@@ -33,7 +33,7 @@
 #include <Core/Exception.h>
 #include <Core/Settings.h>
 
-DEFINE_SPADES_SETTING(cg_corpseBounce, "1");
+DEFINE_SPADES_SETTING(cg_corpseBounce, "1", "0");
 
 DEFINE_SPADES_SETTING(cg_BuildDelayInSec, "0.2");
 DEFINE_SPADES_SETTING(cg_MaxBuildDistance, "1088");

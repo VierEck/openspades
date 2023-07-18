@@ -71,20 +71,20 @@ SPADES_SETTING(cg_keyJump);
 SPADES_SETTING(cg_keyAttack);
 SPADES_SETTING(cg_keyAltAttack);
 SPADES_SETTING(cg_keyCrouch);
-DEFINE_SPADES_SETTING(cg_screenshotFormat, "png");
-DEFINE_SPADES_SETTING(cg_stats, "0");
+DEFINE_SPADES_SETTING(cg_screenshotFormat, "2");
+DEFINE_SPADES_SETTING(cg_stats, "0", "1");
 DEFINE_SPADES_SETTING(cg_hideHud, "0");
 DEFINE_SPADES_SETTING(cg_playerNames, "2");
 DEFINE_SPADES_SETTING(cg_playerNameX, "0");
 DEFINE_SPADES_SETTING(cg_playerNameY, "0");
 DEFINE_SPADES_SETTING(cg_specNames, "1");
 
-DEFINE_SPADES_SETTING(cg_hudTransparency, "1");
+DEFINE_SPADES_SETTING(cg_hudTransparency, "1", "0.8");
 SPADES_SETTING(cg_debugHitTest);
 DEFINE_SPADES_SETTING(cg_hitTestSize, "128");
-DEFINE_SPADES_SETTING(cg_hitTestTransparency, "1");
+DEFINE_SPADES_SETTING(cg_hitTestTransparency, "1", "0.8");
 DEFINE_SPADES_SETTING(cg_playerStats, "1");
-DEFINE_SPADES_SETTING(cg_damageIndicators, "1");
+DEFINE_SPADES_SETTING(cg_damageIndicators, "1", "0");
 SPADES_SETTING(cg_hideFirstPersonModel);
 
 DEFINE_SPADES_SETTING(cg_DemoProgressBarOnlyInUi, "0");

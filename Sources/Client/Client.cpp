@@ -72,7 +72,7 @@ DEFINE_SPADES_SETTING(cg_ignoreChatMessages, "0");
 DEFINE_SPADES_SETTING(cg_showTeamMateLocation, "1");
 
 DEFINE_SPADES_SETTING(cg_demoFileNameFormat, "year month day time");
-DEFINE_SPADES_SETTING(cg_demoRecord, "1");
+DEFINE_SPADES_SETTING(cg_demoRecord, "1", "0");
 
 namespace spades {
 	namespace client {

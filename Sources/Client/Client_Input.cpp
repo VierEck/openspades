@@ -56,7 +56,7 @@ DEFINE_SPADES_SETTING(cg_zoomedMouseSensScaleRifle, "1");
 DEFINE_SPADES_SETTING(cg_zoomedMouseSensScaleSMG, "1");
 DEFINE_SPADES_SETTING(cg_zoomedMouseSensScaleShotgun, "1");
 
-DEFINE_SPADES_SETTING(cg_mouseAccel, "1");
+DEFINE_SPADES_SETTING(cg_mouseAccel, "1", "0");
 DEFINE_SPADES_SETTING(cg_mouseExpPower, "1");
 DEFINE_SPADES_SETTING(cg_invertMouseY, "0");
 

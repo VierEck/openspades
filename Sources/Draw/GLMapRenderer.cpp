@@ -34,7 +34,7 @@
 #include <Core/Debug.h>
 #include <Core/Settings.h>
 
-DEFINE_SPADES_SETTING(cg_glowBlocks, "1");
+DEFINE_SPADES_SETTING(cg_glowBlocks, "1", "0");
 
 namespace spades {
 	namespace draw {

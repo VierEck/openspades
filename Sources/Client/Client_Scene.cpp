@@ -45,7 +45,7 @@ DEFINE_SPADES_SETTING(cg_classicZoom, "0");
 DEFINE_SPADES_SETTING(cg_thirdperson, "0");
 DEFINE_SPADES_SETTING(cg_manualFocus, "0");
 DEFINE_SPADES_SETTING(cg_depthOfFieldAmount, "1");
-DEFINE_SPADES_SETTING(cg_shake, "1");
+DEFINE_SPADES_SETTING(cg_shake, "1", "0");
 DEFINE_SPADES_SETTING(cg_specEsp, "1");
 
 namespace spades {

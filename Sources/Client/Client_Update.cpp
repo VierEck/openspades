@@ -51,11 +51,11 @@
 #include "IGameMode.h"
 #include "TCGameMode.h"
 
-DEFINE_SPADES_SETTING(cg_corpse, "1");
+DEFINE_SPADES_SETTING(cg_corpse, "1", "0");
 SPADES_SETTING(cg_blood);
-DEFINE_SPADES_SETTING(cg_ejectBrass, "1");
+DEFINE_SPADES_SETTING(cg_ejectBrass, "1", "0");
 DEFINE_SPADES_SETTING(cg_hitFeedbackSoundGain, "0.2");
-DEFINE_SPADES_SETTING(cg_tracersFirstPerson, "1");
+DEFINE_SPADES_SETTING(cg_tracersFirstPerson, "1", "0");
 DEFINE_SPADES_SETTING(cg_tracers, "1");
 
 SPADES_SETTING(cg_alerts);
@@ -65,7 +65,7 @@ SPADES_SETTING(cg_shake);
 
 SPADES_SETTING(cg_holdAimDownSight);
 
-DEFINE_SPADES_SETTING(cg_killFeedImg, "1");
+DEFINE_SPADES_SETTING(cg_killFeedImg, "1", "0");
 DEFINE_SPADES_SETTING(cg_hitMarkSoundGain, "0.5");
 DEFINE_SPADES_SETTING(cg_hitAnalyze, "1");
 DEFINE_SPADES_SETTING(cg_deathSoundGain, "0.2");
@@ -75,7 +75,7 @@ DEFINE_SPADES_SETTING(cg_specSpeedWalk, "1");
 DEFINE_SPADES_SETTING(cg_specSpeedSprint, "3");
 DEFINE_SPADES_SETTING(cg_specSpeedSneak, "0.3");
 
-DEFINE_SPADES_SETTING(cg_fallingBlocks, "1");
+DEFINE_SPADES_SETTING(cg_fallingBlocks, "1", "0");
 
 namespace spades {
 	namespace client {

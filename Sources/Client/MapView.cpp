@@ -36,11 +36,11 @@
 #include <Core/TMPUtils.h>
 
 DEFINE_SPADES_SETTING(cg_minimapSize, "128");
-DEFINE_SPADES_SETTING(cg_minimapPlayerColor, "1");
+DEFINE_SPADES_SETTING(cg_minimapPlayerColor, "1", "0");
 DEFINE_SPADES_SETTING(cg_minimapPlayerIcon, "1");
 
 DEFINE_SPADES_SETTING(cg_minimapCoords, "1");
-DEFINE_SPADES_SETTING(cg_minimapTransparency, "1");
+DEFINE_SPADES_SETTING(cg_minimapTransparency, "1", "0.8");
 
 using std::pair;
 using stmp::optional;
