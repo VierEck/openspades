@@ -343,10 +343,12 @@ namespace spades {
 		}
 
 		void AddToScene() {
-			if (cg_pngScope.IntValue > 0 and AimDownSightStateSmooth > 0.99F) {
-				LeftHandPosition = Vector3(0.0F, 0.0F, 0.0F);
-				RightHandPosition = Vector3(0.0F, 0.0F, 0.0F);
-				return;
+			if (AimDownSightStateSmooth > 0.99F) {
+				if (n_hideDefaultScope.IntValue > 0 or cg_pngScope.IntValue > 0) {
+					LeftHandPosition = Vector3(0.0F, 0.0F, 0.0F);
+					RightHandPosition = Vector3(0.0F, 0.0F, 0.0F);
+					return;
+				}
 			}
 
 			Matrix4 mat = GetViewWeaponMatrix()

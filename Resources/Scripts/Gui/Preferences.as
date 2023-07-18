@@ -1176,8 +1176,9 @@ namespace spades {
 			layouter.AddHeading(_Tr("Preferences", " "));
 
 			layouter.AddHeading(_Tr("Preferences", "Nuceto's Target Mod"));
-			layouter.AddToggleField(_Tr("Preferences", "Hide Default Target"), "n_hideDefaultTarget");
 			layouter.AddToggleField(_Tr("Preferences", "Target"), "n_Target");
+			layouter.AddToggleField(_Tr("Preferences", "Hide Default Target"), "n_hideDefaultTarget");
+			layouter.AddToggleField(_Tr("Preferences", "Hide Default Scope"), "n_hideDefaultScope");
 			layouter.AddToggleField(_Tr("Preferences", "Target in scope"), "n_TargetOnScope");
 			layouter.AddSliderField(_Tr("Preferences", "Size"), "n_TargetSize", 1, 4, 0.1,
 			ConfigNumberFormatter(1, "x"));

@@ -90,6 +90,7 @@ namespace spades {
 		protected Vector3 teamColor;
 		protected bool muted;
 		protected ConfigItem n_hideDefaultTarget("n_hideDefaultTarget", "0");
+		protected ConfigItem n_hideDefaultScope("n_hideDefaultScope", "0");
 		protected ConfigItem cg_pngScope("cg_pngScope", "0");
 
 		float SprintState {
@@ -307,10 +308,10 @@ namespace spades {
 		void ReloadedWeapon() {}
 
 		void Draw2D() {
-			if (n_hideDefaultTarget.IntValue == 1)
-				return;
-
 			if (AimDownSightState > 0.99f) {
+				if (n_hideDefaultScope.IntValue > 0)
+					return;
+				
 				if (cg_pngScope.IntValue > 1) {
 					renderer.ColorNP = Vector4(1.0F, 0.0F, 1.0F, 1.0F);
 					renderer.DrawImage(
@@ -331,6 +332,9 @@ namespace spades {
 				}
 				return;
 			}
+			
+			if (n_hideDefaultTarget.IntValue > 0)
+				return;
 
 			renderer.ColorNP = (Vector4(1.f, 1.f, 1.f, 1.f));
 			renderer.DrawImage(sightImage,
