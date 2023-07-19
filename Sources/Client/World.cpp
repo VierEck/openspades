@@ -542,12 +542,17 @@ namespace spades {
 			int x = d.x * (1 - 2 * (d.x < 0));
 			int y = d.y * (1 - 2 * (d.y < 0));
 			int z = d.z * (1 - 2 * (d.z < 0));
-			if (x < 3 && y < 3 ||
-				y < 3 && z < 3 ||
-				z < 3 && x < 3 ||
-				x < 3 && y < 3 && z < 3) {
+			if ((x < 3 && y < 3) ||
+				(y < 3 && z < 3) ||
+				(z < 3 && x < 3)) {
 				return CubeBox(c, v2);
 			}
+			if (x < 3)
+				axis = VolumeCylinderX;
+			if (y < 3)
+				axis = VolumeCylinderY;
+			if (z < 3)
+				axis = VolumeCylinderZ;
 
 			long ixi, iyi, izi, cx, cy;
 
