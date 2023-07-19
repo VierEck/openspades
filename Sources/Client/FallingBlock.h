@@ -36,9 +36,16 @@ namespace spades {
 			IModel *model;
 			VoxelModel *vmodel;
 			Matrix4 matrix;
+			Vector3 velocity;
 			Matrix4 lastMatrix;
+			int rotation;
 			float time;
+			float divIfBounce;
+			bool isBounce;
 			int numBlocks;
+
+			/** @return non-zero if bounced, 2 when sound should be played. */
+			int MoveBlock(float fsynctics);
 
 		public:
 			FallingBlock(Client *, std::vector<IntVector3> blocks);

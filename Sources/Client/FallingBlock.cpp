@@ -22,6 +22,8 @@
 #include "Client.h"
 #include "GameMap.h"
 #include "IModel.h"
+#include "IAudioChunk.h"
+#include "IAudioDevice.h"
 #include "IRenderer.h"
 #include "ParticleSpriteEntity.h"
 #include "SmokeSpriteEntity.h"
@@ -32,6 +34,7 @@
 #include <limits.h>
 
 SPADES_SETTING(cg_particles);
+DEFINE_SPADES_SETTING(cg_fallingBlocksBounce, "1", "0");
 
 namespace spades {
 	namespace client {
@@ -95,6 +98,14 @@ namespace spades {
 			model = client->GetRenderer().CreateModel(*vmodel).Unmanage();
 
 			time = 0.f;
+			isBounce = cg_fallingBlocksBounce;
+			if (isBounce) {
+				velocity = {0.0F, 0.0F, 0.0F};
+				rotation = SampleRandom() & 3;
+				divIfBounce = 0.2f;
+			} else {
+				divIfBounce = 1.0f;
+			}
 		}
 
 		FallingBlock::~FallingBlock() {
@@ -103,14 +114,14 @@ namespace spades {
 		}
 
 		bool FallingBlock::Update(float dt) {
-			time += dt;
+			time += dt * divIfBounce;
 
 			const Handle<GameMap> &map = client->GetWorld()->GetMap();
 			Vector3 orig = matrix.GetOrigin();
 
 			SPAssert(map);
 
-			if (time > 1.f || map->ClipBox(orig.x, orig.y, orig.z)) {
+			if (time > 1.f) {
 				// destroy
 				int w = vmodel->GetWidth();
 				int h = vmodel->GetHeight();
@@ -172,6 +183,7 @@ namespace spades {
 							Vector3 p3 = p2 + vmAxis3 * (float)z;
 
 							{
+								SPLog("spawning dust");
 								auto ent = stmp::make_unique<SmokeSpriteEntity>(*client, col, 70.f);
 								ent->SetTrajectory(
 								  p3,
@@ -204,11 +216,35 @@ namespace spades {
 										ent->SetBlockHitAction(BlockHitAction::BounceWeak);
 									client->AddLocalEntity(std::move(ent));
 								}
+
+								if ((int)cg_particles >= 2) {
+									auto ent = stmp::make_unique<SmokeSpriteEntity>(*client, col, 70.0f);
+									ent->SetTrajectory(p3,
+													   MakeVector3(getRandom() - getRandom(),
+																   getRandom() - getRandom(),
+																   getRandom() - getRandom()) *
+														 13.f,
+													   1.f, .6f);
+									ent->SetRotation(getRandom() * (float)M_PI * 2.0f);
+									ent->SetRadius(1.0f, 0.5f);
+									ent->SetBlockHitAction(BlockHitAction::Ignore);
+									ent->SetLifeTime(1.0f + getRandom() * 0.5f, 0.0f, 1.0f);
+									client->AddLocalEntity(std::move(ent));
+								}
 							}
 						}
 					}
 				}
 				return false;
+			}
+
+			if (isBounce) {
+				if (MoveBlock(dt) == 2 && !client->IsMuted()) {
+					IAudioDevice& dev = client->GetAudioDevice();
+					Handle<IAudioChunk> c = dev.RegisterSound("Sounds/Player/Bounce.opus");
+					dev.Play(c.GetPointerOrNull(), orig, AudioParam());
+				}
+				return true;
 			}
 
 			lastMatrix = matrix;
@@ -224,8 +260,60 @@ namespace spades {
 			return true;
 		}
 
+		int FallingBlock::MoveBlock(float fsynctics) {
+			SPADES_MARK_FUNCTION();
+
+			lastMatrix = matrix;
+
+			matrix = matrix * Matrix4::Rotate(MakeVector3(1, 0, 0),
+				((rotation & 1) ? 1 : -1) * fsynctics * 0.785f);
+			matrix = matrix * Matrix4::Rotate(MakeVector3(0, 1, 0),
+				((rotation & 2) ? 1 : -1) * fsynctics * 0.785f);
+			matrix = Matrix4::Translate(velocity * fsynctics) * matrix;
+			velocity.z += fsynctics * 32.0f;
+
+			// Collision
+			IntVector3 lp = matrix.GetOrigin().Floor();
+
+			const Handle<GameMap>& map = client->GetWorld()->GetMap();
+			SPAssert(map);
+
+			int ret = 0;
+			if (map->ClipWorld(lp.x, lp.y, lp.z)) {
+				ret = 1; // hit a wall
+				if (fabsf(velocity.x) > BOUNCE_SOUND_THRESHOLD ||
+				    fabsf(velocity.y) > BOUNCE_SOUND_THRESHOLD ||
+				    fabsf(velocity.z) > BOUNCE_SOUND_THRESHOLD)
+					ret = 2; // play sound
+
+				IntVector3 lp2 = lastMatrix.GetOrigin().Floor();
+				if (lp.z != lp2.z && ((lp.x == lp2.x && lp.y == lp2.y)
+					|| !map->ClipWorld(lp.x, lp.y, lp2.z)))
+					velocity.z = -velocity.z;
+				else if (lp.x != lp2.x && ((lp.y == lp2.y && lp.z == lp2.z)
+					|| !map->ClipWorld(lp2.x, lp.y, lp.z)))
+					velocity.x = -velocity.x;
+				else if (lp.y != lp2.y && ((lp.x == lp2.x && lp.z == lp2.z)
+					|| !map->ClipWorld(lp.x, lp2.y, lp.z)))
+					velocity.y = -velocity.y;
+
+				matrix = lastMatrix; // set back to old position
+				velocity *= 0.46f; // lose some velocity due to friction
+				rotation++;
+				rotation &= 3;
+				time += 0.36f;
+			}
+
+			if (time <= 0.0f)
+				ret = 2; // play sound
+
+			return ret;
+		}
+
 		void FallingBlock::Render3D() {
 			ModelRenderParam param;
+			param.ghost = true;
+			param.opacity = std::max(0.25f, 1.f - time);
 			param.matrix = matrix;
 			client->GetRenderer().RenderModel(*model, param);
 		}

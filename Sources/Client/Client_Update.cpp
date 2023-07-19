@@ -1394,13 +1394,12 @@ namespace spades {
 		void Client::BlocksFell(std::vector<IntVector3> blocks) {
 			SPADES_MARK_FUNCTION();
 
+			IntVector3 v = blocks[0];
+			Vector3 o;
+			o.x = v.x;
+			o.y = v.y;
+			o.z = v.z;
 			if (!IsMuted()) {
-
-				IntVector3 v = blocks[0];
-				Vector3 o;
-				o.x = v.x;
-				o.y = v.y;
-				o.z = v.z;
 				o += .5f;
 
 				Handle<IAudioChunk> c = audioDevice->RegisterSound("Sounds/Misc/BlockFall.opus");
@@ -1409,9 +1408,12 @@ namespace spades {
 
 			if (!cg_fallingBlocks)
 				return;
-
 			if (blocks.empty())
 				return;
+			Vector3 dist = GetLastSceneDef().viewOrigin - o;
+			if (sqrtf(dist.x * dist.x + dist.y * dist.y) > 128)
+				return;
+
 			AddLocalEntity(stmp::make_unique<FallingBlock>(this, blocks));
 		}
 
