@@ -2356,6 +2356,7 @@ namespace spades {
 #pragma mark - Demo
 
 		void NetClient::StartDemo(std::string fileName, const ServerAddress &hostname, bool replay) {
+			SPADES_MARK_FUNCTION();
 			if (replay) {
 				demo.stream = FileManager::OpenForReading(fileName.c_str());
 				demo.stream->SetPosition(2); //version check should happen at mainmenu demolist
@@ -2398,11 +2399,13 @@ namespace spades {
 		}
 
 		void NetClient::StopDemo() {
+			SPADES_MARK_FUNCTION();
 			demo.recording = false;
 			demo.stream.reset();
 		}
 
 		void NetClient::ScanDemo() {
+			SPADES_MARK_FUNCTION();
 			demo.endUps = demo.countUps = 0;
 			uint64_t pos = demo.stream->GetPosition();
 			unsigned char type;
@@ -2490,6 +2493,7 @@ namespace spades {
 		}
 
 		void NetClient::DemoJoinGame() {
+			SPADES_MARK_FUNCTION();
 			if (!GetLocalPlayerOrNull()) {
 				GetWorld()->SetLocalPlayerIndex(33);
 				auto p = stmp::make_unique<Player>(*GetWorld(), 33, RIFLE_WEAPON, 2, MakeVector3(255, 255, 255),GetWorld()->GetTeam(2).color);
@@ -2503,6 +2507,7 @@ namespace spades {
 		}
 
 		void NetClient::DemoSetSkimOfs(float sec_ups, float skipToTime) {
+			SPADES_MARK_FUNCTION();
 			if (sec_ups < 0)
 				demo.deltaTime = demo.countUps = 0;
 
@@ -2520,6 +2525,7 @@ namespace spades {
 		}
 
 		void NetClient::DemoSkimEnd() {
+			SPADES_MARK_FUNCTION();
 			if (status == NetClientStatusReceivingMap) {
 				DemoSkipMap();
 				return;
@@ -2603,6 +2609,7 @@ namespace spades {
 		}
 
 		void NetClient::DemoSkip(float sec) {
+			SPADES_MARK_FUNCTION();
 			if (sec == 0)
 				return;
 
@@ -2648,6 +2655,7 @@ namespace spades {
 		}
 
 		void NetClient::DemoUps(int ups) {
+			SPADES_MARK_FUNCTION();
 			if (ups == 0 || !demo.paused)
 				return;
 
@@ -2693,6 +2701,7 @@ namespace spades {
 		}
 
 		void NetClient::DemoPause(bool unpause) {
+			SPADES_MARK_FUNCTION();
 			demo.paused = !unpause;
 			if (unpause)
 				DemoNormalizeTime();
@@ -2701,6 +2710,7 @@ namespace spades {
 #pragma mark - MapEditor
 
 		void NetClient::MapEditorCommands(std::string &text) {
+			SPADES_MARK_FUNCTION();
 			if ((int)text.find("/r", 0) == 0) {
 				CommandSetRespawn(text);
 			}
@@ -2727,6 +2737,7 @@ namespace spades {
 		}
 
 		void NetClient::CommandSetRespawn(std::string &text) {
+			SPADES_MARK_FUNCTION();
 			if (text.length() > 4) {
 				std::string numString;
 				int count = 3;
@@ -2764,11 +2775,13 @@ namespace spades {
 		}
 
 		void NetClient::CommandRespawn() {
+			SPADES_MARK_FUNCTION();
 			GetLocalPlayer().SetPosition(localRespawnPos);
 			GetLocalPlayer().SetVelocity(MakeVector3(0,0,0));
 		}
 
 		void NetClient::CommandSwitchTeam(std::string &text) {
+			SPADES_MARK_FUNCTION();
 			if (text.length() > 3) {
 				if ((int)text.find("1") >= 0) {
 					switchModeTeam = 0;
@@ -2785,6 +2798,7 @@ namespace spades {
 		}
 
 		void NetClient::CommandSwitchGameMode() {
+			SPADES_MARK_FUNCTION();
 			GetWorld()->SwitchMode();
 			stmp::optional<IGameMode &> mode = GetWorld()->GetMode();
 			if (mode && IGameMode::m_TC == mode->ModeType()) {
@@ -2800,6 +2814,7 @@ namespace spades {
 		}
 
 		void NetClient::BlockVolumeUndoRedo(bool redo) {
+			SPADES_MARK_FUNCTION();
 			int id = BlockVolHistoryIdx;
 			if (redo) {
 				if (BlockVolHistoryIdx >= BlockVolHistory.size() || !GetWorld()->IsMapEditor())
