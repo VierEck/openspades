@@ -43,7 +43,7 @@ QWE to select team, turn off falling blocks, turn off corpses
 "Doctor Dank":
 PubOVL
 "BR":
-aos_replay, throttle send orientatian time, HitTest Debug display
+aos_replay, throttle send orientatian time, HitTest Debug display, pickaxe when single digging
 "Liza":
 Block color Inverting and Mixing
 "ptrstr":
