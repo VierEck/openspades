@@ -205,7 +205,13 @@ namespace spades {
 
 	void DirectoryFileSystem::RemoveFile(const char *fn) {
 		SPADES_MARK_FUNCTION();
-		if (remove(PathToPhysical(fn).c_str()) != 0)
-			SPLog("Couldnt delete file: %s", fn);
+		if (std::remove(PathToPhysical(fn).c_str()) != 0)
+			SPLog("Failed to delete file: %s", fn);
+	}
+
+	void DirectoryFileSystem::RenameFile(const char *oldN, const char *newN) {
+		SPADES_MARK_FUNCTION();
+		if (std::rename(PathToPhysical(oldN).c_str(), PathToPhysical(newN).c_str()) != 0)
+			SPLog("Failed to rename file: %s", oldN);
 	}
 } // namespace spades

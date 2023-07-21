@@ -35,5 +35,6 @@ namespace spades {
 		virtual bool FileExists(const char *) = 0;
 
 		virtual void RemoveFile(const char *) = 0;
+		virtual void RenameFile(const char *, const char *) = 0;
 	};
 } // namespace spades

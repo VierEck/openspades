@@ -466,4 +466,9 @@ namespace spades {
 		SPADES_MARK_FUNCTION();
 		SPRaise("ZIP file system doesn't support removing");
 	}
+
+	void ZipFileSystem::RenameFile(const char *oldN, const char *newN) {
+		SPADES_MARK_FUNCTION();
+		SPRaise("ZIP file system doesn't support renaming");
+	}
 }

@@ -72,5 +72,6 @@ namespace spades {
 		bool FileExists(const char *) override;
 
 		void RemoveFile(const char *) override;
+		void RenameFile(const char *, const char *) override;
 	};
 }

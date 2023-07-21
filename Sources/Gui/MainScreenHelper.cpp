@@ -574,6 +574,11 @@ namespace spades {
 			FileManager::RemoveFile(fileName.c_str());
 		}
 
+		void MainScreenHelper::RenameFile(const std::string &oldName, const std::string &newName) {
+			SPADES_MARK_FUNCTION();
+			FileManager::RenameFile(oldName.c_str(), newName.c_str());
+		}
+
 		PackageUpdateManager &MainScreenHelper::GetPackageUpdateManager() {
 			return PackageUpdateManager::GetInstance();
 		}

@@ -108,6 +108,21 @@ namespace spades {
 		}
 	}
 
+	void FileManager::RenameFile(const char *oldN, const char *newN) {
+		SPADES_MARK_FUNCTION();
+		if (!oldN)
+			SPInvalidArgument("oldN");
+		if (!newN)
+			SPInvalidArgument("newN");
+		if (oldN[0] == 0)
+			SPFileNotFound(oldN);
+
+		for (auto *fs : g_fileSystems) {
+			if (fs->FileExists(oldN))
+				fs->RenameFile(oldN, newN);
+		}
+	}
+
 	void FileManager::AddFileSystem(spades::IFileSystem *fs) {
 		SPADES_MARK_FUNCTION();
 		AppendFileSystem(fs);

@@ -75,8 +75,15 @@ namespace spades {
 		
 		spades::ui::Label @contextMenuLabel;
 		spades::ui::Button @delButton;
+		spades::ui::Button @renameButton;
+		spades::ui::Button @renameDoneButton;
+		spades::ui::Label @renameLabel;
+		spades::ui::Field @renameField;
 		bool isContextMenuActive = false;
-		string currentFileName;
+		bool isRenameFieldActive = false;
+		string currentFileName, newCurrentFileName;
+		float xPos;
+		float yPos;
 
 		spades::ui::ListView @serverList;
 		MainScreenServerListLoadingView @loadingView;
@@ -305,6 +312,7 @@ namespace spades {
 			loadingView.Visible = true;
 			helper.StartQuery(mode, canvasList);
 			canvasList = false;
+			RightClickContextMenuClose();
 		}
 
 		void ServerListItemActivated(ServerListModel @sender, MainScreenServerItem @item) {
@@ -346,13 +354,13 @@ namespace spades {
 		}
 		
 		void RightClickContextMenuOpen(MainScreenServerItem @item) {
-			float xPos = ui.manager.MouseCursorPosition.x;
-			float yPos = ui.manager.MouseCursorPosition.y;
+			xPos = ui.manager.MouseCursorPosition.x;
+			yPos = ui.manager.MouseCursorPosition.y;
 			currentFileName = item.Name;
 			{
 				spades::ui::Label label(Manager);
 				label.BackgroundColor = Vector4(0, 0, 0, 0.8f);
-				label.Bounds = AABB2(xPos, yPos, 70.f, 45.f);
+				label.Bounds = AABB2(xPos, yPos, 70.f, 85.f);
 				@contextMenuLabel = label;
 				AddChild(contextMenuLabel);
 			}
@@ -365,15 +373,26 @@ namespace spades {
 				@delButton = button;
 				AddChild(delButton);
 			}
+			{
+				spades::ui::Button button(Manager);
+				button.Caption = _Tr("MainScreen", "Rename");
+				button.Bounds = AABB2(xPos + 5, yPos + 45.f, 60.f, 35.f);
+				button.Toggled = false;
+				@button.Activated = spades::ui::EventHandler(this.OnRename);
+				@renameButton = button;
+				AddChild(renameButton);
+			}
 		}
 		
 		void MouseDown(spades::ui::MouseButton button, Vector2 clientPosition) {
-			if (button == spades::ui::MouseButton::LeftMouseButton && isContextMenuActive) {
+			if (isContextMenuActive) {
 				RightClickContextMenuClose();
 			}
 		}
 		
 		void OnDelete(spades::ui::UIElement @sender) {
+			if (mode == isOnline)
+				return;
 			if (mode == isDemo)
 				ui.helper.RemoveFile("Demos/" + currentFileName);
 			if (mode == isMap) {
@@ -385,13 +404,82 @@ namespace spades {
 			RightClickContextMenuClose();
 		}
 		
+		void OnRename(spades::ui::UIElement @sender) {
+			isRenameFieldActive = true;
+			{
+				spades::ui::Label label(Manager);
+				label.BackgroundColor = Vector4(0, 0, 0, 0.8f);
+				label.Bounds = AABB2(xPos + 75, yPos + 40.f, 370.f, 45.f);
+				@renameLabel = label;
+				AddChild(renameLabel);
+			}
+			{
+				@renameField = spades::ui::Field(Manager);
+				renameField.Bounds = AABB2(xPos + 80, yPos + 47.5f, 315.f, 30.f);
+				renameField.Placeholder = _Tr("MainScreen", currentFileName);
+				renameField.Text = currentFileName;
+				newCurrentFileName = currentFileName;
+				@renameField.Changed = spades::ui::EventHandler(this.OnFileNameChanged);
+				AddChild(renameField);
+				@Manager.ActiveElement = renameField;
+				renameField.Select(0, currentFileName.length - 5);
+			}
+			{
+				spades::ui::Button button(Manager);
+				button.Caption = _Tr("MainScreen", "Done");
+				button.Bounds = AABB2(xPos + 400, yPos + 45.f, 40.f, 35.f);
+				button.Toggled = false;
+				@button.Activated = spades::ui::EventHandler(this.OnRenameDoneSender);
+				@renameDoneButton = button;
+				AddChild(renameDoneButton);
+			}
+		}
+		
+		void OnFileNameChanged(spades::ui::UIElement @sender) {
+			newCurrentFileName = renameField.Text;
+		}
+		
+		void OnRenameDoneSender(spades::ui::UIElement @sender) { OnRenameDone(); }
+		
+		void OnRenameDone() {
+			if (mode == isOnline)
+				return;
+			if (newCurrentFileName.length <= 0)
+				return;
+			if (newCurrentFileName == currentFileName)
+				return;
+			if (mode == isDemo) {
+				if (newCurrentFileName.substr(newCurrentFileName.length - 5, 5) != ".demo")
+					return;
+				ui.helper.RenameFile("Demos/" + currentFileName, "Demos/" + newCurrentFileName);
+			}
+			if (mode == isMap) {
+				if (newCurrentFileName.substr(newCurrentFileName.length - 4, 4) != ".vxl")
+					return;
+				ui.helper.RenameFile("MapEditor/Maps/" + currentFileName, "MapEditor/Maps/" + newCurrentFileName);
+				currentFileName = currentFileName.substr(0, currentFileName.length - 4) + ".txt";
+				newCurrentFileName = newCurrentFileName.substr(0, newCurrentFileName.length - 4) + ".txt";
+				ui.helper.RenameFile("MapEditor/Maps/" + currentFileName, "MapEditor/Maps/" + newCurrentFileName);
+			}
+			ui.helper.RenameFile(currentFileName, newCurrentFileName);
+			LoadServerList();
+			RightClickContextMenuClose();
+		}
+		
 		void RightClickContextMenuClose() {
 			if (!isContextMenuActive)
 				return;
-				
 			RemoveChild(contextMenuLabel);
 			RemoveChild(delButton);
+			RemoveChild(renameButton);
 			isContextMenuActive = false;
+			
+			if (!isRenameFieldActive)
+				return;
+			RemoveChild(renameDoneButton);
+			RemoveChild(renameField);
+			RemoveChild(renameLabel);
+			isRenameFieldActive = false;
 		}
 
 		private void SortServerListByPing(spades::ui::UIElement @sender) { SortServerList(0); }
@@ -418,7 +506,7 @@ namespace spades {
 			UpdateServerList();
 		}
 
-		void UpdateServerList() {
+		private void UpdateServerList() {
 			string key = "";
 			switch (cg_serverlistSort.IntValue & 0xfff) {
 				case 0: key = "Ping"; break;
@@ -478,6 +566,7 @@ namespace spades {
 			@model.ItemDoubleClicked = ServerListItemEventHandler(this.ServerListItemDoubleClicked);
 			@model.ItemRightClicked = ServerListItemEventHandler(this.ServerListItemRightClicked);
 			serverList.ScrollToTop();
+			RightClickContextMenuClose();
 		}
 
 		private void CheckServerList() {
@@ -506,12 +595,14 @@ namespace spades {
 				return;
 			}
 			cg_lastQuickConnectHost = addressField.Text;
+			RightClickContextMenuClose();
 		}
 
 		private void SetProtocolVersion(int ver) {
 			protocol3Button.Toggled = (ver == 3);
 			protocol4Button.Toggled = (ver == 4);
 			cg_protocolVersion = ver;
+			RightClickContextMenuClose();
 		}
 
 		private void OnProtocol3Pressed(spades::ui::UIElement @sender) { SetProtocolVersion(3); }
@@ -544,11 +635,13 @@ namespace spades {
 			AlertScreen al(this, ui.helper.Credits,
 						   Min(500.f, Manager.Renderer.ScreenHeight - 100.f));
 			al.Run();
+			RightClickContextMenuClose();
 		}
 
 		private void OnSetupPressed(spades::ui::UIElement @sender) {
 			PreferenceView al(this, PreferenceViewOptions(), ui.fontManager);
 			al.Run();
+			RightClickContextMenuClose();
 		}
 
 		private void Connect() {
@@ -660,7 +753,6 @@ namespace spades {
 		}
 
 		private void ChangeList(int whichMode) {
-			RightClickContextMenuClose();
 			mode = whichMode;
 			canvasList = false;
 			if (mode != isOnline) {
@@ -673,7 +765,11 @@ namespace spades {
 
 		void HotKey(string key) {
 			if (IsEnabled and key == "Enter") {
-				Connect();
+				if (isRenameFieldActive) {
+					OnRenameDone();
+				} else {
+					Connect();
+				}
 			} else if (IsEnabled and key == "Escape") {
 				ui.shouldExit = true;
 			} else if (IsEnabled and key == "S" and Manager.IsControlPressed) {
@@ -699,6 +795,14 @@ namespace spades {
 				}
 				savedlistIdx--;
 				ServerListItemActivatedPass(savedlist[savedlistIdx]);
+			} else if (IsEnabled and key == "End" and isRenameFieldActive) {
+				renameField.CursorPosition = newCurrentFileName.length - 5;
+				if (!Manager.IsShiftPressed)
+					renameField.MarkPosition = newCurrentFileName.length - 5;
+			} else if (IsEnabled and key == "Home" and isRenameFieldActive) {
+				renameField.CursorPosition = 0;
+				if (!Manager.IsShiftPressed)
+					renameField.MarkPosition = 0;
 			} else {
 				UIElement::HotKey(key);
 			}
