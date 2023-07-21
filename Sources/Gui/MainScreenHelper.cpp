@@ -564,6 +564,11 @@ namespace spades {
 			return s;
 		}
 
+		void MainScreenHelper::RemoveFile(const std::string &fileName) {
+			SPADES_MARK_FUNCTION();
+			FileManager::RemoveFile(fileName.c_str());
+		}
+
 		PackageUpdateManager &MainScreenHelper::GetPackageUpdateManager() {
 			return PackageUpdateManager::GetInstance();
 		}

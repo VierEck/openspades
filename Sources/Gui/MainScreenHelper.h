@@ -110,6 +110,8 @@ namespace spades {
 			std::string GetCredits();
 
 			PackageUpdateManager& GetPackageUpdateManager();
+
+			void RemoveFile(const std::string &);
 		};
 	}
 }
