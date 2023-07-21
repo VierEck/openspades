@@ -33,5 +33,7 @@ namespace spades {
 		virtual std::unique_ptr<IStream> OpenForReading(const char *) = 0;
 		virtual std::unique_ptr<IStream> OpenForWriting(const char *) = 0;
 		virtual bool FileExists(const char *) = 0;
+
+		virtual void RemoveFile(const char *) = 0;
 	};
 } // namespace spades

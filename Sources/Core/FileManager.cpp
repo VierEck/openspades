@@ -26,6 +26,7 @@
 #include "FileManager.h"
 #include "IFileSystem.h"
 #include "IStream.h"
+#include "DirectoryFileSystem.h"
 
 namespace spades {
 	static std::list<IFileSystem *> g_fileSystems;
@@ -92,6 +93,19 @@ namespace spades {
 		}
 
 		return false;
+	}
+
+	void FileManager::RemoveFile(const char *fn) {
+		SPADES_MARK_FUNCTION();
+		if (!fn)
+			SPInvalidArgument("fn");
+		if (fn[0] == 0)
+			SPFileNotFound(fn);
+
+		for (auto *fs : g_fileSystems) {
+			if (fs->FileExists(fn))
+				fs->RemoveFile(fn);
+		}
 	}
 
 	void FileManager::AddFileSystem(spades::IFileSystem *fs) {

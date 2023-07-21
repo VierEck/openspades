@@ -202,4 +202,10 @@ namespace spades {
 		}
 		return false;
 	}
+
+	void DirectoryFileSystem::RemoveFile(const char *fn) {
+		SPADES_MARK_FUNCTION();
+		if (remove(PathToPhysical(fn).c_str()) != 0)
+			SPLog("Couldnt delete file: %s", fn);
+	}
 } // namespace spades

@@ -461,4 +461,9 @@ namespace spades {
 
 		return files.find(f) != files.end();
 	}
+
+	void ZipFileSystem::RemoveFile(const char *fn) {
+		SPADES_MARK_FUNCTION();
+		SPRaise("ZIP file system doesn't support removing");
+	}
 }

@@ -71,7 +71,6 @@ DEFINE_SPADES_SETTING(cg_mentionWord);
 DEFINE_SPADES_SETTING(cg_ignoreChatMessages, "0");
 DEFINE_SPADES_SETTING(cg_showTeamMateLocation, "1");
 
-DEFINE_SPADES_SETTING(cg_demoFileNameFormat, "year month day time");
 DEFINE_SPADES_SETTING(cg_demoRecord, "1", "0");
 
 namespace spades {
@@ -414,7 +413,6 @@ namespace spades {
 			std::string fn = hostname.ToString(false);
 			std::string fn2;
 			std::string demoName = "Demos/";
-			std::string demoNameFormat = (std::string)cg_demoFileNameFormat;
 			{
 				time_t t;
 				struct tm tm;
@@ -426,37 +424,11 @@ namespace spades {
 				fn2 = buf;
 
 				if ((bool)cg_demoRecord) {
-					int yearIdx = demoNameFormat.find("year");
-					int monthIdx = demoNameFormat.find("month");
-					int dayIdx = demoNameFormat.find("day");
-					int timeIdx = demoNameFormat.find("time");
-
-					int count = 0;
-					for (int i = 0; i < demoNameFormat.size(); i++) {
-						if (i == timeIdx) {
-							sprintf(buf, "%02d_%02d_%02d_", tm.tm_hour, tm.tm_min, tm.tm_sec);
-							demoName += buf;
-							count++;
-						}
-						if (i == dayIdx) {
-							sprintf(buf, "%02d_", tm.tm_mday);
-							demoName += buf;
-							count++;
-						}
-						if (i == monthIdx) {
-							sprintf(buf, "%02d_", tm.tm_mon + 1);
-							demoName += buf;
-							count++;
-						}
-						if (i == yearIdx) {
-							sprintf(buf, "%04d_", tm.tm_year + 1900);
-							demoName += buf;
-							count++;
-						}
-					}
-					if (count != 4) {
-						demoNameFormat = "log";
-					}
+					sprintf(
+						buf, "%04d-%02d-%02d_%02d-%02d-%02d_", tm.tm_year + 1900,
+						tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec
+					);
+					demoName += buf;
 				}
 			}
 
@@ -472,13 +444,7 @@ namespace spades {
 			fn2 += hostName;
 
 			if ((bool)cg_demoRecord) {
-				if (demoNameFormat == "log") {
-					demoName = "Demos/" + fn2;
-				} else {
-					demoName += hostName;
-				}
-
-				demoName += ".demo";
+				demoName += hostName + ".demo";
 				try {
 					net->StartDemo(demoName, hostname);
 					SPLog("Demo Recording Started at '%s'", demoName.c_str());

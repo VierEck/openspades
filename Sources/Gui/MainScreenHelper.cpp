@@ -39,6 +39,10 @@
 
 DEFINE_SPADES_SETTING(cl_serverListUrl, "http://services.buildandshoot.com/serverlist.json");
 
+DEFINE_SPADES_SETTING(cg_demoFileDeleteRule, "2");
+DEFINE_SPADES_SETTING(cg_demoFileDeleteMaxFiles, "20");
+DEFINE_SPADES_SETTING(cg_demoFileDeleteMaxDays, "7");
+
 namespace spades {
 	namespace {
 		struct CURLEasyDeleter {
@@ -197,18 +201,60 @@ namespace spades {
 
 			void GetDemoList() {
 				std::unique_ptr<MainScreenServerList> resp{new MainScreenServerList()};
+				std::vector<std::string> fileList = FileManager::EnumFiles("Demos/");
 
-				std::vector<std::string> FileNames = FileManager::EnumFiles("Demos/");
-				for (auto file : FileNames) {
+				std::deque<std::string> defaultFiles;
+				for (auto &file : fileList) {
 					if (file.size() > 5 && file.substr(file.size() - 5, 5) != ".demo")
 						continue;
 
-					std::unique_ptr<ServerItem> srv{ServerItem::CreateDemoItem(file)};
+					if (file.size() == 41 && file[4] == '-') {
+						defaultFiles.push_back(file);
+						continue;
+					}
 
-					if (srv) {
+					std::unique_ptr<ServerItem> srv{ServerItem::CreateDemoItem(file)};
+					if (srv)
 						resp->list.emplace_back(new MainScreenServerItem(srv.get(), owner->favorites.count(srv->GetAddress()) >= 1),false);
+				}
+
+				//renamed files r completely excluded from the auto delete process, not
+				//like this method would work for them anyways.
+				//maybe the user liked a particular demo, renamed it, and wants to keep it
+				if ((int)cg_demoFileDeleteRule == 1) {
+					//delete by maximum age
+					time_t t;
+					struct tm tm;
+					::time(&t);
+					t -= (int)cg_demoFileDeleteMaxDays * 86400;
+					tm = *localtime(&t);
+					char buf[256];
+					sprintf(
+						buf, "%04d-%02d-%02d_%02d-%02d-%02d", tm.tm_year + 1900, tm.tm_mon + 1,
+						tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec
+					);
+					SPLog("date generated: %s", buf);
+					while (strncmp(buf, defaultFiles.front().c_str(), 19) > 0) {
+						FileManager::RemoveFile(("Demos/" + defaultFiles.front()).c_str());
+						defaultFiles.pop_front();
+					}
+				} else if ((int)cg_demoFileDeleteRule > 1) {
+					//delete by maximum amount of demo files with "default" names starting with the oldest
+					while (defaultFiles.size() > (int)cg_demoFileDeleteMaxFiles) {
+						FileManager::RemoveFile(("Demos/" + defaultFiles.front()).c_str());
+						defaultFiles.pop_front();
 					}
 				}
+				//put "default" named files always at end of list
+				//renamed files should remain on top, they prob have greater significance
+				//to the user judging by the fact they were renamed in the first place.
+				for (auto &file : defaultFiles) {
+					std::unique_ptr<ServerItem> srv{ServerItem::CreateDemoItem(file)};
+
+					if (srv)
+						resp->list.emplace_back(new MainScreenServerItem(srv.get(), owner->favorites.count(srv->GetAddress()) >= 1),false);
+				}
+
 				ReturnResult(std::move(resp));
 			}
 
@@ -260,11 +306,7 @@ namespace spades {
 						GetDemoList();
 						return;
 					} else if (Mode == isMap) {
-						if (Canvas) {
-							GetMapList(true);
-						} else {
-							GetMapList(false);
-						}
+						GetMapList(Canvas);
 						return;
 					}
 					std::unique_ptr<CURL, CURLEasyDeleter> cHandle{curl_easy_init()};

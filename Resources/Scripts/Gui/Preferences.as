@@ -1394,7 +1394,6 @@ namespace spades {
 			StandardPreferenceLayouter layouter(this, fontManager);
 			layouter.AddHeading(_Tr("Preferences", "Demo Recording"));
 			layouter.AddToggleField(_Tr("Preferences", "Enable Demo Recording"), "cg_demoRecord");
-			ConfigField @dateField = layouter.AddInputField(_Tr("Preferences", "Demo Filename Date Format"), "cg_demoFileNameFormat");
 			layouter.AddHeading(_Tr("Preferences", " "));
 
 			layouter.AddHeading(_Tr("Preferences", "Demo Replaying"));
@@ -1413,6 +1412,17 @@ namespace spades {
 			layouter.AddControl(_Tr("Preferences", "decrease Speed"), "cg_keySpeedDown");
 			layouter.AddControl(_Tr("Preferences", "normalize Speed"), "cg_keySpeedNormalize");
 			layouter.AddSliderField(_Tr("Preferences", "increase/decrease Speed value"), "cg_SpeedChangeValue", 0.1, 1, 0.1, ConfigNumberFormatter(1, "sec"));
+			layouter.AddHeading(_Tr("Preferences", " "));
+			
+			layouter.AddHeading(_Tr("Preferences", "Demo File Auto Delete"));
+			layouter.AddChoiceField(_Tr("Preferences", "Auto Delete Mode"), "cg_demoFileDeleteRule",
+									array<string> = {_Tr("Preferences", "Size"),
+													 _Tr("Preferences", "Age"),
+													 _Tr("Preferences", "OFF")},
+									array<int> = {2, 1, 0});
+			ConfigField @AgeField = layouter.AddInputField(_Tr("Preferences", "Max File Age (days)"), "cg_demoFileDeleteMaxDays");
+			ConfigField @SizeField = layouter.AddInputField(_Tr("Preferences", "Max Files Amount"), "cg_demoFileDeleteMaxFiles");
+			layouter.AddHeading(_Tr("Preferences", " "));
 			
 			layouter.FinishLayout();
 		}

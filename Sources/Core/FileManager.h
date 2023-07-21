@@ -34,6 +34,7 @@ namespace spades {
 		static std::unique_ptr<IStream> OpenForReading(const char *);
 		static std::unique_ptr<IStream> OpenForWriting(const char *);
 		static bool FileExists(const char *);
+		static void RemoveFile(const char *);
 		static void AddFileSystem(IFileSystem *);
 		static void AppendFileSystem(IFileSystem *);
 		static void PrependFileSystem(IFileSystem *);
