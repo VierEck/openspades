@@ -218,6 +218,11 @@ namespace spades {
 						resp->list.emplace_back(new MainScreenServerItem(srv.get(), owner->favorites.count(srv->GetAddress()) >= 1),false);
 				}
 
+				if (defaultFiles.size() <= 0) {
+					ReturnResult(std::move(resp));
+					return;
+				}
+
 				//renamed files r completely excluded from the auto delete process, not
 				//like this method would work for them anyways.
 				//maybe the user liked a particular demo, renamed it, and wants to keep it
