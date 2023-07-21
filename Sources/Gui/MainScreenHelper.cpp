@@ -233,7 +233,6 @@ namespace spades {
 						buf, "%04d-%02d-%02d_%02d-%02d-%02d", tm.tm_year + 1900, tm.tm_mon + 1,
 						tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec
 					);
-					SPLog("date generated: %s", buf);
 					while (strncmp(buf, defaultFiles.front().c_str(), 19) > 0) {
 						FileManager::RemoveFile(("Demos/" + defaultFiles.front()).c_str());
 						defaultFiles.pop_front();
