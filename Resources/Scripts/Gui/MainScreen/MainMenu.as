@@ -422,7 +422,10 @@ namespace spades {
 				@renameField.Changed = spades::ui::EventHandler(this.OnFileNameChanged);
 				AddChild(renameField);
 				@Manager.ActiveElement = renameField;
-				renameField.Select(0, currentFileName.length - 5);
+				if (mode == isDemo)
+					renameField.Select(0, currentFileName.length - 5);
+				if (mode == isMap)
+					renameField.Select(0, currentFileName.length - 4);
 			}
 			{
 				spades::ui::Button button(Manager);
@@ -771,7 +774,11 @@ namespace spades {
 					Connect();
 				}
 			} else if (IsEnabled and key == "Escape") {
-				ui.shouldExit = true;
+				if (isContextMenuActive) {
+					RightClickContextMenuClose();
+				} else {
+					ui.shouldExit = true;
+				}
 			} else if (IsEnabled and key == "S" and Manager.IsControlPressed) {
 				ChangeList(isOnline);
 			} else if (IsEnabled and key == "D" and Manager.IsControlPressed) {
