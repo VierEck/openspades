@@ -47,8 +47,6 @@
 		private AudioDevice@ audioDevice;
 		private Model@ model;
 		private Image@ sightImage;
-		
-		protected ConfigItem n_hideDefaultTarget("n_hideDefaultTarget");
 
 		ViewGrenadeSkin(Renderer@ r, AudioDevice@ dev) {
 			@renderer = r;
@@ -87,21 +85,37 @@
 				}
 
 				if (sprintStateSmooth > 0.0F) {
-					mat = CreateRotateMatrix(Vector3(0.0F, 0.0F, 1.0F), sprintStateSmooth * -0.3F) * mat;
-					mat = CreateTranslateMatrix(Vector3(0.1F, -0.2F, -0.05F) * sprintStateSmooth) * mat;
+					mat = CreateRotateMatrix(Vector3(1, 0, 0), sprintStateSmooth * -0.3F) * mat;
+					mat = CreateRotateMatrix(Vector3(0, 1, 0), sprintStateSmooth * -0.1F) * mat;
+					mat = CreateRotateMatrix(Vector3(0, 0, 1), sprintStateSmooth * -0.2F) * mat;
+					mat = CreateTranslateMatrix(Vector3(0.1F, -0.2F, 0.05F) * sprintStateSmooth) * mat;
 				}
 
-				mat = CreateTranslateMatrix(Vector3(-0.1F, -0.3F, 0.1F) * (1.0F - raiseState)) * mat;
-				mat = CreateTranslateMatrix(swing) * mat;
+				if (raiseState < 1.0F) {
+					float putdown = 1.0F - raiseState;
+					mat = CreateRotateMatrix(Vector3(1, 0, 0), putdown * -0.5F) * mat;
+					mat = CreateRotateMatrix(Vector3(0, 1, 0), putdown * -0.2F) * mat;
+					mat = CreateTranslateMatrix(Vector3(0.3F, -0.5F, 0.1F) * putdown) * mat;
+				}
+
+				Vector3 trans(0.0F, 0.0F, 0.0F);
+				trans += Vector3(-0.3F, 0.7F, 0.2F);
+				trans += swing;
+				mat = CreateTranslateMatrix(trans) * mat;
 
 				Matrix4 leftHandMat = mat;
-				leftHandMat = CreateTranslateMatrix(-0.3F + side * 0.5F, 0.7F - bring * 0.05F, 0.3F - bring * 0.05F) * leftHandMat;
-				leftHand = leftHandMat * Vector3(12.0F, -1.0F, 8.0F);
 
-				mat = CreateTranslateMatrix(-0.3F - side * 0.8F, 0.7F - bring * 0.1F, 0.3F - bring * 0.15F) * mat;
-				rightHand = mat * Vector3(-3.0F, 1.0F, 5.0F);
+				if (bring < 1.0F) {
+					float per = 1.0F - bring;
+					leftHandMat = CreateTranslateMatrix(side * 0.5F, per * 0.1F, per * 0.1F) * mat;
+					mat = CreateTranslateMatrix(side * -0.5F, per * -0.2F, 0.0F) * mat;
+				}
 
-				Vector3 pinOffset = leftHandMat * Vector3(1.0F, 2.0F, 0.0F);
+				leftHand = leftHandMat * Vector3(10.0F, 0.0F, 8.0F);
+				rightHand = mat * Vector3(-2.0F, -1.0F, 1.0F);
+
+				// move left hand to grenade pin and then move it to the throwing position
+				Vector3 pinOffset = leftHandMat * Vector3(2.5F, -0.2F, 0.0F);
 				Vector3 throwPos = leftHandMat * Vector3(-0.3F, 0.0F, 4.0F);
 
 				if (pin < 1.0F)
@@ -111,25 +125,21 @@
 
 				ModelRenderParam param;
 				param.depthHack = true;
-				param.matrix = eyeMatrix * CreateTranslateMatrix(-0.05F, 0.1F, 0.08F) * mat;
+				param.matrix = eyeMatrix * mat;
 				renderer.AddModel(model, param);
 			} else { // throwing
-                float per = readyState;
-                per = Min(per * 3.0F, 1.0F);
+				float per = Min(readyState * 3.0F, 1.0F);
 
-                // left hand shouldn't be visible
+				// left hand shouldn't be visible
 				leftHand = Mix(leftHand, Vector3(0.5F, 0.5F, 0.6F), per);
 
-                float p2 = per - 0.6F;
-                p2 = 0.9F - p2 * p2 * 2.5F;
-                rightHand = Vector3(-0.2F, p2, -0.9F + per * 1.8F);
-            }
+				float p2 = per - 0.6F;
+				p2 = 0.9F - p2 * p2 * 2.5F;
+				rightHand = Vector3(-0.2F, p2, -0.9F + per * 1.8F);
+			}
 		}
 
 		void Draw2D() {
-		if (n_hideDefaultTarget.IntValue > 0)
-				return;
-				
 			renderer.ColorNP = Vector4(1.0F, 1.0F, 1.0F, 1.0F);
 			renderer.DrawImage(sightImage,
 				Vector2((renderer.ScreenWidth - sightImage.Width) * 0.5F,
