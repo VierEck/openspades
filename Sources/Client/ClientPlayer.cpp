@@ -1364,7 +1364,10 @@ namespace spades {
 				return interface.GetMuzzlePosition();
 			}
 
-			return (GetEyeMatrix() * MakeVector3(-0.13f, 1.5f, 0.2f)).GetXYZ();
+			Vector3 cg_viewWeaponOffset
+				= MakeVector3((float)cg_viewWeaponX, (float)cg_viewWeaponY, (float)cg_viewWeaponZ);
+
+			return (GetEyeMatrix() * (MakeVector3(-0.13f, 1.5f, 0.2f) + cg_viewWeaponOffset)).GetXYZ();
 		}
 
 		Vector3 ClientPlayer::GetCaseEjectPosition() {
@@ -1390,7 +1393,10 @@ namespace spades {
 				return interface.GetCaseEjectPosition();
 			}
 
-			return (GetEyeMatrix() * MakeVector3(-0.13f, .5f, 0.2f)).GetXYZ();
+			Vector3 cg_viewWeaponOffset
+				= MakeVector3((float)cg_viewWeaponX, (float)cg_viewWeaponY, (float)cg_viewWeaponZ);
+
+			return (GetEyeMatrix() * (MakeVector3(-0.13f, .5f, 0.2f) + cg_viewWeaponOffset)).GetXYZ();
 		}
 
 		struct ClientPlayer::AmbienceInfo {

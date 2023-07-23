@@ -92,6 +92,11 @@ namespace spades {
 		protected ConfigItem n_hideDefaultTarget("n_hideDefaultTarget", "0");
 		protected ConfigItem n_hideDefaultScope("n_hideDefaultScope", "0");
 		protected ConfigItem cg_pngScope("cg_pngScope", "0");
+		protected ConfigItem cg_viewWeaponX("cg_viewWeaponX");
+		protected ConfigItem cg_viewWeaponY("cg_viewWeaponY");
+		protected ConfigItem cg_viewWeaponZ("cg_viewWeaponZ");
+		Vector3 cg_viewWeaponOffset 
+			= Vector3(cg_viewWeaponX.FloatValue, cg_viewWeaponY.FloatValue, cg_viewWeaponZ.FloatValue);
 
 		float SprintState {
 			set { sprintState = value; }
