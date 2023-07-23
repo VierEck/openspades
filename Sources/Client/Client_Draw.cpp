@@ -87,6 +87,7 @@ DEFINE_SPADES_SETTING(cg_playerStats, "1");
 DEFINE_SPADES_SETTING(cg_damageIndicators, "1", "0");
 SPADES_SETTING(cg_hideFirstPersonModel);
 DEFINE_SPADES_SETTING(cg_playerStatsHeight, "84");
+DEFINE_SPADES_SETTING(cg_respawnSoundGain, "1");
 
 DEFINE_SPADES_SETTING(cg_DemoProgressBarOnlyInUi, "0");
 DEFINE_SPADES_SETTING(cg_DrawDragCursorPos, "1");
@@ -867,7 +868,9 @@ namespace spades {
 							Handle<IAudioChunk> c = (secs == 1)
 								? audioDevice->RegisterSound("Sounds/Feedback/Beep1.opus")
 								: audioDevice->RegisterSound("Sounds/Feedback/Beep2.opus");
-							audioDevice->PlayLocal(c.GetPointerOrNull(), AudioParam());
+							AudioParam param;
+							param.volume = cg_respawnSoundGain;
+							audioDevice->PlayLocal(c.GetPointerOrNull(), param);
 						}
 						lastCount = secs;
 					}

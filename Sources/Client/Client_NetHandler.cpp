@@ -44,6 +44,7 @@
 
 DEFINE_SPADES_SETTING(cg_centerMessage, "2");
 DEFINE_SPADES_SETTING(cg_scoreMessages, "0");
+DEFINE_SPADES_SETTING(cg_introSoundGain, "1");
 
 namespace spades {
 	namespace client {
@@ -68,7 +69,9 @@ namespace spades {
 				return;
 
 			Handle<IAudioChunk> c = audioDevice->RegisterSound("Sounds/Feedback/Intro.opus");
-			audioDevice->PlayLocal(c.GetPointerOrNull(), AudioParam());
+			AudioParam param;
+			param.volume = cg_introSoundGain;
+			audioDevice->PlayLocal(c.GetPointerOrNull(), param);
 
 			// Prepare the spectate mode
 			followCameraState.enabled = false;

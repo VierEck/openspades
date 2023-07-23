@@ -1098,11 +1098,13 @@ namespace spades {
 			layouter.AddToggleField(_Tr("Preferences", "Environmental Audio"), "cg_environmentalAudio");
 			layouter.AddHeading(_Tr("Preferences", " "));
 
-			layouter.AddVolumeSlider(_Tr("Preferences", "Chat Notify Sounds"), "cg_chatBeep");
-			layouter.AddVolumeSlider(_Tr("Preferences", "Alert Sounds"), "cg_alertSounds");
-			layouter.AddVolumeSlider(_Tr("Preferences", "HitMark Sounds"), "cg_hitMarkSoundGain");
-			layouter.AddVolumeSlider(_Tr("Preferences", "Headshot Sounds"), "cg_hitFeedbackSoundGain");
-			layouter.AddVolumeSlider(_Tr("Preferences", "Death Sounds"), "cg_deathSoundGain");
+			layouter.AddVolumeSlider(_Tr("Preferences", "Intro Riff Sound"), "cg_introSoundGain");
+			layouter.AddVolumeSlider(_Tr("Preferences", "Chat Beep Sound"), "cg_chatBeep");
+			layouter.AddVolumeSlider(_Tr("Preferences", "Alert Sound"), "cg_alertSounds");
+			layouter.AddVolumeSlider(_Tr("Preferences", "HitMark Sound"), "cg_hitMarkSoundGain");
+			layouter.AddVolumeSlider(_Tr("Preferences", "Headshot Sound"), "cg_hitFeedbackSoundGain");
+			layouter.AddVolumeSlider(_Tr("Preferences", "Death Moan Sound"), "cg_deathSoundGain");
+			layouter.AddVolumeSlider(_Tr("Preferences", "Respawn Beep Sound"), "cg_respawnSoundGain");
 
 			layouter.FinishLayout();
 		}
