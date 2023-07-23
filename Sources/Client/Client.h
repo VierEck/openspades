@@ -162,15 +162,19 @@ namespace spades {
 			float worldSetTime;
 			bool hasDelayedReload;
 			int shotsCount;
+
 			int clicksPlayer;
 			float hitsPlayer;
 			int clicksHead;
 			float hitsHead;
 			int curKills;
+			int meleeKills;
+			int nadeKills;
 			int curDeaths;
 			int curStreak;
-			int lastStreak;
 			int bestStreak;
+			int placedBlocks;
+
 			struct HurtSprite {
 				float angle;
 				float horzShift;
@@ -530,6 +534,7 @@ namespace spades {
 			void PlayerSentChatMessage(Player &, bool global, const std::string &);
 			void ServerSentMessage(const std::string &);
 
+			void RegisterPlacedBlocks(int c) { placedBlocks += c; };
 			void PlayerCapturedIntel(Player &);
 			void PlayerCreatedBlock(Player &);
 			void PlayerPickedIntel(Player &);

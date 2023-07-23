@@ -915,11 +915,14 @@ namespace spades {
 			if (killer.IsLocalPlayer() && &killer != &victim) {
 				curKills++;
 				curStreak++;
+				if (kt == KillTypeMelee)
+					meleeKills++;
+				else if (kt == KillTypeGrenade)
+					nadeKills++;
 			}
 
 			if (victim.IsLocalPlayer()) {
 				curDeaths++;
-				lastStreak = curStreak;
 				if (curStreak > bestStreak)
 					bestStreak = curStreak;
 				curStreak = 0;

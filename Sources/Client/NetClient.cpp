@@ -1244,6 +1244,8 @@ namespace spades {
 							client->PlayerCreatedBlock(*p);
 							if (!replace) {
 								p->UsedBlocks(1);
+								if (p->IsLocalPlayer())
+									client->RegisterPlacedBlocks(1);
 							}
 						}
 					} else if (action == 1) {
@@ -1292,8 +1294,11 @@ namespace spades {
 					}
 
 					if (p) {
-						p->UsedBlocks(static_cast<int>(cells.size()));
+						int blocks = static_cast<int>(cells.size());
+						p->UsedBlocks(blocks);
 						client->PlayerCreatedBlock(*p);
+						if (p->IsLocalPlayer())
+									client->RegisterPlacedBlocks(blocks);
 					}
 				} break;
 				case PacketTypeStateData:
@@ -1673,7 +1678,9 @@ namespace spades {
 					pos2.z = transSign.GetSignedShort(reader.ReadShort());
 
 					std::vector<IntVector3> cells = GetWorld()->GetCubeVolume(pos1, pos2, VolumeType(vol));
-					if (cells.size() == 0)
+
+					int blocks = static_cast<int>(cells.size());
+					if (blocks == 0)
 						SPRaise("Received invalid block volume type: %d", vol);
 
 					std::vector<uint8_t> oldColors;
@@ -1693,8 +1700,11 @@ namespace spades {
 							for (auto &c : cells)
 								if (GetWorld()->GetMap()->IsValidBuildCoord(c))
 									GetWorld()->CreateBlock(c, col);
-							if (p)
+							if (p) {
 								client->PlayerCreatedBlock(*p);
+								if (p->IsLocalPlayer())
+									client->RegisterPlacedBlocks(blocks);
+							}
 							if (client->IsLocalMapEditor())
 								newColors = {(uint8_t)col.x, (uint8_t)col.y, (uint8_t)col.z};
 						} break;
@@ -1705,8 +1715,11 @@ namespace spades {
 									GetWorld()->GetMap()->IsSolid(c.x, c.y, c.z)
 									)
 									GetWorld()->CreateBlock(c, col);
-							if (p)
+							if (p) {
 								client->PlayerCreatedBlock(*p);
+								if (p->IsLocalPlayer())
+									client->RegisterPlacedBlocks(blocks);
+							}
 							if (client->IsLocalMapEditor())
 								newColors = {(uint8_t)col.x, (uint8_t)col.y, (uint8_t)col.z};
 						} break;
@@ -1741,8 +1754,11 @@ namespace spades {
 										GetWorld()->CreateBlock(cells[j], col);
 								}
 							}
-							if (p)
+							if (p) {
 								client->PlayerCreatedBlock(*p);
+								if (p->IsLocalPlayer())
+									client->RegisterPlacedBlocks(blocks);
+							}
 						} break;
 						break;
 						default: SPRaise("Received invalid Maptool action: %d", volAct);

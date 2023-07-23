@@ -761,7 +761,7 @@ namespace spades {
 
 			float x = 8.0f;
 			float y = sh * 0.5f;
-			y -= 74.0f;
+			y -= 84.0f;
 
 			auto addLine = [&](const char* format, ...) {
 				char buf[256];
@@ -787,8 +787,10 @@ namespace spades {
 
 			addLine(" K/D Ratio:  %.3g", curKills / float(std::max(1, curDeaths)));
 			addLine(" Kill Streak:  %d", curStreak);
-			addLine(" Last Streak:  %d", lastStreak);
 			addLine(" Best Streak:  %d", bestStreak);
+			addLine(" Spade Kills:  %d", meleeKills);
+			addLine(" Nade Kills:  %d", nadeKills);
+			addLine(" Blocks Placed:  %d", placedBlocks);
 			addLine(" Total True Acc:  %.2f", (100 * clicksPlayer) / float(std::max(1, shotsCount)));
 			addLine(" Total Spread Acc:  %.2f", (100 * hitsPlayer) / float(std::max(1, shotsCount)));
 			addLine(" Head True Acc:  %.2f", (100 * clicksHead) / float(std::max(1, shotsCount)));
