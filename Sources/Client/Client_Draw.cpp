@@ -958,8 +958,8 @@ namespace spades {
 				Vector4 color;
 				if (p->IsAlive()) {
 					Vector3 pToLocalDiff = p->GetEye() - lastSceneDef.viewOrigin;
-					float dist2d = sqrt(pToLocalDiff.x * pToLocalDiff.x + pToLocalDiff.y * pToLocalDiff.y);
-					if (dist2d <= 128.f) {
+					float dist2dsqr = pToLocalDiff.x * pToLocalDiff.x + pToLocalDiff.y * pToLocalDiff.y;
+					if (dist2dsqr <= 128 * 128) {
 						color = MakeVector4(1, 1, 1, (float)cg_hudTransparency);
 					} else {
 						color = MakeVector4(1, 1, 0, (float)cg_hudTransparency);

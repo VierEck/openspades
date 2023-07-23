@@ -1361,6 +1361,13 @@ namespace spades {
 			if (!cg_tracers)
 				return;
 
+			Vector3 diff = muzzlePos - lastSceneDef.viewOrigin;
+			if (diff.x * diff.x + diff.y * diff.y > 141 * 141)
+				//when u exchange fire with an enemy at fogline
+				//seeing incoming tracers coming ur way is helpful
+				//so we extend the max 2d distance here to 141
+				return;
+
 			bool isFirstPerson =
 			  IsFirstPerson(GetCameraMode()) && GetCameraTargetPlayerId() == player.GetId();
 
@@ -1414,7 +1421,7 @@ namespace spades {
 			if (blocks.empty())
 				return;
 			Vector3 dist = GetLastSceneDef().viewOrigin - o;
-			if (sqrtf(dist.x * dist.x + dist.y * dist.y) > 128)
+			if (dist.x * dist.x + dist.y * dist.y > 128 * 128)
 				return;
 
 			AddLocalEntity(stmp::make_unique<FallingBlock>(this, blocks));
