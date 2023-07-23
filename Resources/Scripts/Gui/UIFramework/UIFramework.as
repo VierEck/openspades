@@ -323,9 +323,11 @@ namespace spades {
                 }
             }
 
-            void PlaySound(string filename) {
+            void PlaySound(string filename, float v = 1) {
                 if (audioDevice !is null) {
-                    audioDevice.PlayLocal(audioDevice.RegisterSound(filename), AudioParam());
+                    AudioParam param;
+                    param.volume = v;
+                    audioDevice.PlayLocal(audioDevice.RegisterSound(filename), param);
                 }
             }
 

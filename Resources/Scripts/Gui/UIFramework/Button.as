@@ -51,9 +51,15 @@ namespace spades {
                 @repeatTimer.Tick = TimerTickEventHandler(this.RepeatTimerFired);
             }
 
-            void PlayMouseEnterSound() { Manager.PlaySound("Sounds/Feedback/Limbo/Hover.opus"); }
+            protected ConfigItem cg_buttonHoverSoundGain("cg_buttonHoverSoundGain");
+            void PlayMouseEnterSound() { 
+                Manager.PlaySound("Sounds/Feedback/Limbo/Hover.opus", cg_buttonHoverSoundGain.FloatValue); 
+            }
 
-            void PlayActivateSound() { Manager.PlaySound("Sounds/Feedback/Limbo/Select.opus"); }
+            protected ConfigItem cg_buttonSelectSoundGain("cg_buttonSelectSoundGain");
+            void PlayActivateSound() { 
+                Manager.PlaySound("Sounds/Feedback/Limbo/Select.opus", cg_buttonSelectSoundGain.FloatValue); 
+            }
 
             void OnActivated() {
                 if (Activated !is null) {

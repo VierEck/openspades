@@ -64,6 +64,7 @@ DEFINE_SPADES_SETTING(cg_hideArms, "0", "1");
 
 DEFINE_SPADES_SETTING(cg_PlayerModelsViaWeapon, "1", "0");
 DEFINE_SPADES_SETTING(cg_classicViewWeapon, "0");
+DEFINE_SPADES_SETTING(cg_raiseToolSoundGain, "1");
 
 namespace spades {
 	namespace client {
@@ -431,8 +432,9 @@ namespace spades {
 								  "Sounds/Weapons/Grenade/RaiseLocal.opus");
 								break;
 						}
-						audioDevice.PlayLocal(c.GetPointerOrNull(), MakeVector3(.4f, -.3f, .5f),
-						                      AudioParam());
+						AudioParam param;
+						param.volume = cg_raiseToolSoundGain;
+						audioDevice.PlayLocal(c.GetPointerOrNull(), MakeVector3(.4f, -.3f, .5f), param);
 					}
 				} else if (toolRaiseState > 1.f) {
 					toolRaiseState = 1.f;

@@ -91,6 +91,12 @@ DEFINE_SPADES_SETTING(cg_keyToggleMapZoom, "n");
 DEFINE_SPADES_SETTING(cg_keyScoreboard, "Tab");
 DEFINE_SPADES_SETTING(cg_keyLimbo, "l");
 
+DEFINE_SPADES_SETTING(cg_flashlightSoundGain, "1");
+DEFINE_SPADES_SETTING(cg_mapSoundGain, "1");
+DEFINE_SPADES_SETTING(cg_zoomMapSoundGain, "1");
+DEFINE_SPADES_SETTING(cg_AimDownSightSoundGain, "0.08");
+DEFINE_SPADES_SETTING(cg_mapEditorFeedbackSoundGain, "1");
+
 DEFINE_SPADES_SETTING(cg_keyScreenshot, "0");
 DEFINE_SPADES_SETTING(cg_keySceneshot, "9");
 DEFINE_SPADES_SETTING(cg_keySaveMap, "8");
@@ -638,7 +644,7 @@ namespace spades {
 						    !world->GetLocalPlayer()->GetWeapon().IsReloading() &&
 						    GetSprintState() == 0.0f) {
 							AudioParam params;
-							params.volume = 0.08f;
+							params.volume = cg_AimDownSightSoundGain;
 							Handle<IAudioChunk> chunk =
 							  audioDevice->RegisterSound("Sounds/Weapons/AimDownSightLocal.opus");
 							audioDevice->PlayLocal(chunk.GetPointerOrNull(),
@@ -735,21 +741,27 @@ namespace spades {
 						CheckKey(cg_keyEditColor, name) && down && p.GetTool() == Player::ToolBlock) {
 						scriptedUI->EnterPaletteWindow();
 						Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
-						audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+						AudioParam param;
+						param.volume = cg_mapEditorFeedbackSoundGain;
+						audioDevice->PlayLocal(chunk.GetPointerOrNull(), param);
 					} else if (CheckKey(cg_keyChangeMapScale, name) && down) {
 						mapView->SwitchScale();
 						Handle<IAudioChunk> chunk =
 						  audioDevice->RegisterSound("Sounds/Misc/SwitchMapZoom.opus");
-						audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+						AudioParam param;
+						param.volume = cg_zoomMapSoundGain;
+						audioDevice->PlayLocal(chunk.GetPointerOrNull(), param);
 					} else if (CheckKey(cg_keyToggleMapZoom, name) && down) {
+						AudioParam param;
+						param.volume = cg_mapSoundGain;
 						if (largeMapView->ToggleZoom()) {
 							Handle<IAudioChunk> chunk =
 							  audioDevice->RegisterSound("Sounds/Misc/OpenMap.opus");
-							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+							audioDevice->PlayLocal(chunk.GetPointerOrNull(), param);
 						} else {
 							Handle<IAudioChunk> chunk =
 							  audioDevice->RegisterSound("Sounds/Misc/CloseMap.opus");
-							audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+							audioDevice->PlayLocal(chunk.GetPointerOrNull(), param);
 						}
 					} else if (CheckKey(cg_keyScoreboard, name)) {
 						scoreboardVisible = down;
@@ -766,7 +778,9 @@ namespace spades {
 						TakeMapShot();
 					} else if (CheckKey(cg_hitTestKey, name) && down) {
 						Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Misc/OpenMap.opus");
-						audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+						AudioParam param;
+						param.volume = cg_mapSoundGain;
+						audioDevice->PlayLocal(chunk.GetPointerOrNull(), param);
 						hitTestSizeToggle = !hitTestSizeToggle;		
 					} else if (CheckKey(cg_keyFlashlight, name) && down) {
 						// spectators and dead players should not be able to toggle the flashlight
@@ -777,7 +791,9 @@ namespace spades {
 						flashlightOnTime = time;
 						Handle<IAudioChunk> chunk =
 						  audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
-						audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+						AudioParam param;
+						param.volume = cg_flashlightSoundGain;
+						audioDevice->PlayLocal(chunk.GetPointerOrNull(), param);
 					} else if (CheckKey(cg_keyAutoFocus, name) && down && (int)cg_manualFocus) {
 						autoFocusEnabled = true;
 					} else if (down) {
@@ -1024,7 +1040,9 @@ namespace spades {
 
 			if (ret) {
 				Handle<IAudioChunk> chunk = audioDevice->RegisterSound("Sounds/Player/Flashlight.opus");
-				audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+				AudioParam param;
+				param.volume = cg_mapEditorFeedbackSoundGain;
+				audioDevice->PlayLocal(chunk.GetPointerOrNull(), param);
 			}
 			return ret;
 		}

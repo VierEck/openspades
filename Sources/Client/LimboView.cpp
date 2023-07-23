@@ -30,6 +30,10 @@
 #include "LimboView.h"
 #include "World.h"
 #include <Core/Strings.h>
+#include <Core/Settings.h>
+
+DEFINE_SPADES_SETTING(cg_buttonHoverSoundGain, "1");
+DEFINE_SPADES_SETTING(cg_buttonSelectSoundGain, "1");
 
 namespace spades {
 	namespace client {
@@ -112,7 +116,9 @@ namespace spades {
 						IAudioDevice &dev = *client->audioDevice;
 						Handle<IAudioChunk> chunk =
 						  dev.RegisterSound("Sounds/Feedback/Limbo/Select.opus");
-						dev.PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+						AudioParam param;
+						param.volume = cg_buttonSelectSoundGain;
+						dev.PlayLocal(chunk.GetPointerOrNull(), param);
 						switch (item.type) {
 							case MenuTeam1: selectedTeam = 0; break;
 							case MenuTeam2: selectedTeam = 1; break;
@@ -179,7 +185,9 @@ namespace spades {
 					IAudioDevice &dev = *client->audioDevice;
 					Handle<IAudioChunk> chunk =
 					  dev.RegisterSound("Sounds/Feedback/Limbo/Hover.opus");
-					dev.PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+					AudioParam param;
+					param.volume = cg_buttonHoverSoundGain;
+					dev.PlayLocal(chunk.GetPointerOrNull(), param);
 				}
 				item.hover = newHover;
 			}

@@ -88,6 +88,7 @@ DEFINE_SPADES_SETTING(cg_damageIndicators, "1", "0");
 SPADES_SETTING(cg_hideFirstPersonModel);
 DEFINE_SPADES_SETTING(cg_playerStatsHeight, "84");
 DEFINE_SPADES_SETTING(cg_respawnSoundGain, "1");
+DEFINE_SPADES_SETTING(cg_screenShotSoundGain, "1");
 
 DEFINE_SPADES_SETTING(cg_DemoProgressBarOnlyInUi, "0");
 DEFINE_SPADES_SETTING(cg_DrawDragCursorPos, "1");
@@ -182,7 +183,9 @@ namespace spades {
 				ShowAlert(msg, AlertType::Notice);
 
 				Handle<IAudioChunk> c = audioDevice->RegisterSound("Sounds/Feedback/Screenshot.opus");
-				audioDevice->PlayLocal(c.GetPointerOrNull(), AudioParam());
+				AudioParam param;
+				param.volume = cg_screenShotSoundGain;
+				audioDevice->PlayLocal(c.GetPointerOrNull(), param);
 			} catch (const Exception &ex) {
 				std::string msg;
 				msg = _Tr("Client", "Screenshot failed: ");

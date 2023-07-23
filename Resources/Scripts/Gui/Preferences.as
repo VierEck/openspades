@@ -1098,13 +1098,43 @@ namespace spades {
 			layouter.AddToggleField(_Tr("Preferences", "Environmental Audio"), "cg_environmentalAudio");
 			layouter.AddHeading(_Tr("Preferences", " "));
 
-			layouter.AddVolumeSlider(_Tr("Preferences", "Intro Riff Sound"), "cg_introSoundGain");
+			layouter.AddHeading(_Tr("Preferences", "Feedback"));
 			layouter.AddVolumeSlider(_Tr("Preferences", "Chat Beep Sound"), "cg_chatBeep");
 			layouter.AddVolumeSlider(_Tr("Preferences", "Alert Sound"), "cg_alertSounds");
+			layouter.AddVolumeSlider(_Tr("Preferences", "UI Button Hover Sound"), "cg_buttonHoverSoundGain");
+			layouter.AddVolumeSlider(_Tr("Preferences", "UI Button Select Sound"), "cg_buttonSelectSoundGain");
+			layouter.AddVolumeSlider(_Tr("Preferences", "Screenshot Sound"), "cg_screenShotSoundGain");
+			layouter.AddVolumeSlider(_Tr("Preferences", "MapEditor Feedback Sound"), "cg_mapEditorFeedbackSoundGain");
+			layouter.AddHeading(_Tr("Preferences", " "));
+			
+			layouter.AddHeading(_Tr("Preferences", "InGame"));
+			layouter.AddVolumeSlider(_Tr("Preferences", "Intro Riff Sound"), "cg_introSoundGain");
+			layouter.AddVolumeSlider(_Tr("Preferences", "Win Sound"), "cg_winSoundGain");
+			layouter.AddVolumeSlider(_Tr("Preferences", "Lose Sound"), "cg_loseSoundGain");
+			layouter.AddVolumeSlider(_Tr("Preferences", "Team Capture Sound"), "cg_teamCaptureSoundGain");
+			layouter.AddVolumeSlider(_Tr("Preferences", "Enemy Capture Sound"), "cg_intelPickUpSoundGain");
+			layouter.AddVolumeSlider(_Tr("Preferences", "Intel PickUp Sound"), "cg_enemyCaptureSoundGain");
+			layouter.AddVolumeSlider(_Tr("Preferences", "Death Sound"), "cg_deathSoundGain");
+			layouter.AddVolumeSlider(_Tr("Preferences", "Hurt Sound"), "cg_localFleshSoundGain");
+			layouter.AddVolumeSlider(_Tr("Preferences", "Respawn Sound"), "cg_respawnSoundGain");
+			layouter.AddVolumeSlider(_Tr("Preferences", "Restock Sound"), "cg_restockSoundGain");
+			layouter.AddHeading(_Tr("Preferences", " "));
+			
+			layouter.AddHeading(_Tr("Preferences", "Weapon/Tool"));
+			layouter.AddVolumeSlider(_Tr("Preferences", "AimDownSight Sound"), "cg_AimDownSightSoundGain");
 			layouter.AddVolumeSlider(_Tr("Preferences", "HitMark Sound"), "cg_hitMarkSoundGain");
 			layouter.AddVolumeSlider(_Tr("Preferences", "Headshot Sound"), "cg_hitFeedbackSoundGain");
-			layouter.AddVolumeSlider(_Tr("Preferences", "Death Moan Sound"), "cg_deathSoundGain");
-			layouter.AddVolumeSlider(_Tr("Preferences", "Respawn Beep Sound"), "cg_respawnSoundGain");
+			layouter.AddVolumeSlider(_Tr("Preferences", "Dry Fire Sound"), "cg_localDryFireSoundGain");
+			layouter.AddVolumeSlider(_Tr("Preferences", "Nade Throw Sound"), "cg_throwNadeSoundGain");
+			layouter.AddVolumeSlider(_Tr("Preferences", "Nade Pin Sound"), "cg_nadePinSoundGain");
+			layouter.AddVolumeSlider(_Tr("Preferences", "Spade Miss Sound"), "cg_spadeMissSoundGain");
+			layouter.AddVolumeSlider(_Tr("Preferences", "Hit Block Sound"), "cg_blockHitSoundGain");
+			layouter.AddVolumeSlider(_Tr("Preferences", "Raise Tool Sound"), "cg_raiseToolSoundGain");
+			layouter.AddVolumeSlider(_Tr("Preferences", "Switch Tool Sound"), "cg_switchToolSoundGain");
+			layouter.AddVolumeSlider(_Tr("Preferences", "Flashlight Sound"), "cg_flashlightSoundGain");
+			layouter.AddVolumeSlider(_Tr("Preferences", "Map Sound"), "cg_mapSoundGain");
+			layouter.AddVolumeSlider(_Tr("Preferences", "Map Zoom Sound"), "cg_zoomMapSoundGain");
+			layouter.AddHeading(_Tr("Preferences", " "));
 
 			layouter.FinishLayout();
 		}

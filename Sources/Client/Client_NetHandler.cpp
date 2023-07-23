@@ -44,7 +44,13 @@
 
 DEFINE_SPADES_SETTING(cg_centerMessage, "2");
 DEFINE_SPADES_SETTING(cg_scoreMessages, "0");
+
 DEFINE_SPADES_SETTING(cg_introSoundGain, "1");
+DEFINE_SPADES_SETTING(cg_teamCaptureSoundGain, "1");
+DEFINE_SPADES_SETTING(cg_enemyCaptureSoundGain, "1");
+DEFINE_SPADES_SETTING(cg_intelPickUpSoundGain, "1");
+DEFINE_SPADES_SETTING(cg_winSoundGain, "1");
+DEFINE_SPADES_SETTING(cg_loseSoundGain, "1");
 
 namespace spades {
 	namespace client {
@@ -131,11 +137,15 @@ namespace spades {
 				if (teamId == world->GetLocalPlayer()->GetTeamId()) {
 					Handle<IAudioChunk> chunk =
 					  audioDevice->RegisterSound("Sounds/Feedback/TC/YourTeamCaptured.opus");
-					audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+					AudioParam param;
+					param.volume = cg_teamCaptureSoundGain;
+					audioDevice->PlayLocal(chunk.GetPointerOrNull(), param);
 				} else {
 					Handle<IAudioChunk> chunk =
 					  audioDevice->RegisterSound("Sounds/Feedback/TC/EnemyCaptured.opus");
-					audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+					AudioParam param;
+					param.volume = cg_enemyCaptureSoundGain;
+					audioDevice->PlayLocal(chunk.GetPointerOrNull(), param);
 				}
 			}
 		}
@@ -163,11 +173,15 @@ namespace spades {
 				if (p.GetTeamId() == world->GetLocalPlayer()->GetTeamId()) {
 					Handle<IAudioChunk> chunk =
 					  audioDevice->RegisterSound("Sounds/Feedback/CTF/YourTeamCaptured.opus");
-					audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+					AudioParam param;
+					param.volume = cg_teamCaptureSoundGain;
+					audioDevice->PlayLocal(chunk.GetPointerOrNull(), param);
 				} else {
 					Handle<IAudioChunk> chunk =
 					  audioDevice->RegisterSound("Sounds/Feedback/CTF/EnemyCaptured.opus");
-					audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+					AudioParam param;
+					param.volume = cg_enemyCaptureSoundGain;
+					audioDevice->PlayLocal(chunk.GetPointerOrNull(), param);
 				}
 
 				if (p.IsLocalPlayer() && cg_scoreMessages) {
@@ -200,7 +214,9 @@ namespace spades {
 			if (!IsMuted()) {
 				Handle<IAudioChunk> chunk =
 				  audioDevice->RegisterSound("Sounds/Feedback/CTF/PickedUp.opus");
-				audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+				AudioParam param;
+				param.volume = cg_intelPickUpSoundGain;
+				audioDevice->PlayLocal(chunk.GetPointerOrNull(), param);
 			}
 		}
 
@@ -363,11 +379,15 @@ namespace spades {
 				if (teamId == world->GetLocalPlayer()->GetTeamId()) {
 					Handle<IAudioChunk> chunk =
 					  audioDevice->RegisterSound("Sounds/Feedback/Win.opus");
-					audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+					AudioParam param;
+					param.volume = cg_winSoundGain;
+					audioDevice->PlayLocal(chunk.GetPointerOrNull(), param);
 				} else {
 					Handle<IAudioChunk> chunk =
 					  audioDevice->RegisterSound("Sounds/Feedback/Lose.opus");
-					audioDevice->PlayLocal(chunk.GetPointerOrNull(), AudioParam());
+					AudioParam param;
+					param.volume = cg_loseSoundGain;
+					audioDevice->PlayLocal(chunk.GetPointerOrNull(), param);
 				}
 			}
 		}
