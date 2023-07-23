@@ -11,7 +11,7 @@
 
 #include "VersionInfo.h"
 
-std::string VersionInfo::GetVersionInfo() {
+std::string VersionInfo::GetOperatingSystem() {
 #if defined(OS_PLATFORM_LINUX)
 	return std::string("Linux");
 #elif defined(TARGET_OS_MAC)
