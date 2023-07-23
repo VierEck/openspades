@@ -127,7 +127,6 @@ namespace spades {
 
 			float respawnTime;
 
-			void RepositionPlayer(const Vector3 &);
 			void MovePlayer(float fsynctics);
 			void MoveCorpse(float fsynctics);
 			void BoxClipMove(float fsynctics);
@@ -196,6 +195,7 @@ namespace spades {
 			bool IsToolSelectable(ToolType);
 			bool IsAwaitingReloadCompletion() { return reloadingServerSide; }
 
+			void RepositionPlayer(const Vector3 &);
 			void SetPosition(const Vector3 &);
 			void SetOrientation(const Vector3 &);
 			void SetVelocity(const Vector3 &);

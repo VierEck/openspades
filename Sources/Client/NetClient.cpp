@@ -879,7 +879,7 @@ namespace spades {
 					pos.x = reader.ReadFloat();
 					pos.y = reader.ReadFloat();
 					pos.z = reader.ReadFloat();
-					p.SetPosition(pos);
+					p.RepositionPlayer(pos);
 				} break;
 				case PacketTypeOrientationData: {
 					Player &p = GetLocalPlayer();
@@ -929,7 +929,7 @@ namespace spades {
 								auto p = GetWorld()->GetPlayer(idx);
 								if (p) {
 									if (p != GetWorld()->GetLocalPlayer()) {
-										p->SetPosition(pos);
+										p->RepositionPlayer(pos);
 										p->SetOrientation(front);
 									}
 								}
