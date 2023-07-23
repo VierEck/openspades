@@ -1109,7 +1109,7 @@ namespace spades {
 			if (client.GetLastSceneDef().allowEsp) {
 				param.playerID = GetPlayer().GetId();
 				Vector3 diff = origin - client.GetLastSceneDef().viewOrigin;
-				if (sqrtf(diff.x * diff.x + diff.y * diff.y) > 128.0f) {
+				if (diff.x * diff.x + diff.y * diff.y > 128 * 128) {
 					param.occludedByFog = true;
 				}
 			}
