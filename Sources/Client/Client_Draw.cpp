@@ -86,6 +86,7 @@ DEFINE_SPADES_SETTING(cg_hitTestTransparency, "1", "0.8");
 DEFINE_SPADES_SETTING(cg_playerStats, "1");
 DEFINE_SPADES_SETTING(cg_damageIndicators, "1", "0");
 SPADES_SETTING(cg_hideFirstPersonModel);
+DEFINE_SPADES_SETTING(cg_playerStatsHeight, "84");
 
 DEFINE_SPADES_SETTING(cg_DemoProgressBarOnlyInUi, "0");
 DEFINE_SPADES_SETTING(cg_DrawDragCursorPos, "1");
@@ -761,7 +762,7 @@ namespace spades {
 
 			float x = 8.0f;
 			float y = sh * 0.5f;
-			y -= 84.0f;
+			y -= (float)cg_playerStatsHeight;
 
 			auto addLine = [&](const char* format, ...) {
 				char buf[256];
