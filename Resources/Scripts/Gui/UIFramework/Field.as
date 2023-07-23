@@ -228,12 +228,10 @@ namespace spades {
                 if (SelectionLength > 0) {
                     SelectedText = "";
                 } else if (Manager.IsControlPressed) {
-                    while (CursorPosition > 0 and Text.substr(CursorPosition, 1) != " ") {
+                    while (CursorPosition > 0 and Text.substr(CursorPosition - 1, 1) != " ") {
                         CursorPosition--;
                     }
                     if (SelectionLength > 0) {
-                        if (CursorPosition > 0)
-                            CursorPosition++;
                         SelectedText = "";
                     }
                 } else {
@@ -250,12 +248,10 @@ namespace spades {
                 if (SelectionLength > 0) {
                     SelectedText = "";
                 } else if (Manager.IsControlPressed) {
-                    while (CursorPosition > 0 and Text.substr(CursorPosition, 1) != " ") {
-                        CursorPosition--;
+                    while (CursorPosition < int(Text.length) and Text.substr(CursorPosition, 1) != " ") {
+                        CursorPosition++;
                     }
                     if (SelectionLength > 0) {
-                        if (CursorPosition > 0)
-                            CursorPosition++;
                         SelectedText = "";
                     }
                 } else if (CursorPosition < int(Text.length)) {
@@ -291,6 +287,12 @@ namespace spades {
                 } else if (key == "Delete") {
                     Delete();
                 } else if (key == "Left") {
+                    if (Manager.IsControlPressed) {
+                        while (CursorPosition > 0 and Text.substr(CursorPosition - 1, 1) != " ") {
+                            CursorPosition--;
+                        }
+                        return;
+                    }
                     if (Manager.IsShiftPressed) {
                         int cIdx = GetCharIndexForString(Text, CursorPosition);
                         CursorPosition = ClampCursorPosition(GetByteIndexForString(Text, cIdx - 1));
@@ -304,6 +306,12 @@ namespace spades {
                     }
                     return;
                 } else if (key == "Right") {
+                    if (Manager.IsControlPressed) {
+                        while (CursorPosition < int(Text.length) and Text.substr(CursorPosition, 1) != " ") {
+                            CursorPosition++;
+                        }
+                        return;
+                    }
                     if (Manager.IsShiftPressed) {
                         int cIdx = GetCharIndexForString(Text, CursorPosition);
                         CursorPosition = ClampCursorPosition(GetByteIndexForString(Text, cIdx + 1));
@@ -316,6 +324,18 @@ namespace spades {
                         }
                     }
                     return;
+                } else if (key == "Home") {
+                    if(Manager.IsShiftPressed) {
+                        CursorPosition = 0;
+                    }else {
+                        Select(0);
+                    }
+                } else if (key == "End") {
+                    if (Manager.IsShiftPressed) {
+                        Select(MarkPosition, 99999);
+                    }else {
+                        Select(99999);
+                    }
                 }
                 if (Manager.IsControlPressed or Manager.IsMetaPressed /* for OSX; Cmd + [a-z] */) {
                     if (key == "A") {

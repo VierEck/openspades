@@ -557,6 +557,14 @@ namespace spades {
 			void KeyAction(string key) {
 				if (key == "Right") {
 					if (this.selection.CursorPosition < int(Text.length)) {
+						if (Manager.IsControlPressed) {
+							int cursor = this.selection.CursorPosition;
+							while (cursor < int(Text.length) and Text.substr(cursor, 1) != " " and Text.substr(cursor, 1) != "\n") {
+								cursor++;
+							}
+							this.selection.CursorPosition = cursor;
+							return;
+						}
 						this.selection.CursorPosition++;
 						
 						if (Text.substr(this.selection.CursorPosition, 1) == '\r') {
@@ -570,6 +578,14 @@ namespace spades {
 				}
 				if (key == "Left") {
 					if (this.selection.CursorPosition > 0) {
+						if (Manager.IsControlPressed) {
+							int cursor = this.selection.CursorPosition;
+							while (cursor > 0 and Text.substr(cursor - 1, 1) != " " and Text.substr(cursor - 1, 1) != "\n") {
+								cursor--;
+							}
+							this.selection.CursorPosition = cursor;
+							return;
+						}
 						this.selection.CursorPosition--;
 						
 						if (Text.substr(this.selection.CursorPosition, 1) == '\r') {
@@ -782,12 +798,23 @@ namespace spades {
 			
 			void Delete() {
 				int cursor = this.selection.CursorPosition;
-				if (cursor != this.selection.MarkPosition) {
+				int mark = this.selection.MarkPosition;
+				if (cursor != mark) {
 					BackSpace();
 					return;
 				}
-				
-				Insert(cursor, cursor + 1, "");
+				if (Manager.IsControlPressed) {
+					if (cursor > int(Text.length)) {
+						return;
+					}
+					while (cursor < int(Text.length) and Text.substr(cursor, 1) != " " and Text.substr(cursor, 1) != "\n") {
+						cursor++;
+					}
+					Insert(mark, cursor, "");
+					return;
+				} else {
+					Insert(cursor, cursor + 1, "");
+				}
 				this.selection.CursorPosition = this.selection.MarkPosition = cursor;
 			}
 			
