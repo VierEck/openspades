@@ -86,6 +86,7 @@ namespace spades {
 			void EnterGlobalChatWindow();
 			void EnterTeamChatWindow();
 			void EnterCommandWindow();
+			void EnterChatLogWindow();
 			void CloseUI();
 
 			// lm: so the chat does not have the initial chat key
