@@ -760,6 +760,15 @@ namespace spades {
 				} else if (cursor > mark) {
 					Insert(mark, cursor, "");
 					deleteLength = cursor - mark;
+				} else if (Manager.IsControlPressed) {
+					if (cursor <= 0) {
+						return;
+					}
+					while (cursor > 0 and Text.substr(cursor - 1, 1) != " " and Text.substr(cursor - 1, 1) != "\n") {
+						cursor--;
+					}
+					Insert(cursor, mark, "");
+					deleteLength = 0;
 				} else {
 					if (cursor <= 0) {
 						return;

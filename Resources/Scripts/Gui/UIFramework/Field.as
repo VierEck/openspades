@@ -227,6 +227,15 @@ namespace spades {
             void BackSpace() {
                 if (SelectionLength > 0) {
                     SelectedText = "";
+                } else if (Manager.IsControlPressed) {
+                    while (CursorPosition > 0 and Text.substr(CursorPosition, 1) != " ") {
+                        CursorPosition--;
+                    }
+                    if (SelectionLength > 0) {
+                        if (CursorPosition > 0)
+                            CursorPosition++;
+                        SelectedText = "";
+                    }
                 } else {
                     int pos = CursorPosition;
                     int cIdx = GetCharIndexForString(Text, CursorPosition);
@@ -240,6 +249,15 @@ namespace spades {
             void Delete() {
                 if (SelectionLength > 0) {
                     SelectedText = "";
+                } else if (Manager.IsControlPressed) {
+                    while (CursorPosition > 0 and Text.substr(CursorPosition, 1) != " ") {
+                        CursorPosition--;
+                    }
+                    if (SelectionLength > 0) {
+                        if (CursorPosition > 0)
+                            CursorPosition++;
+                        SelectedText = "";
+                    }
                 } else if (CursorPosition < int(Text.length)) {
                     int pos = CursorPosition;
                     int cIdx = GetCharIndexForString(Text, CursorPosition);
