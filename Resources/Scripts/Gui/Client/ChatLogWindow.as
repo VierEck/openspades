@@ -166,7 +166,13 @@ namespace spades {
             }
         }
 
-        void Record(string text, Vector4 color) { viewer.AddLine(text, this.IsVisible, color); }
+        void Record(string text, Vector4 color) { 
+            color.x = color.x + (1 - color.x) * 0.5;
+            color.y = color.y + (1 - color.y) * 0.5;
+            color.z = color.z + (1 - color.z) * 0.5;
+            color.w = 1;
+            viewer.AddLine(text, this.IsVisible, color); 
+        }
 
         void Render() {
             Vector2 pos = ScreenPosition;
