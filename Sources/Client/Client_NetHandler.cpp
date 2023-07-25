@@ -317,7 +317,12 @@ namespace spades {
 			std::string teamName = world->GetTeam(p.GetTeamId()).name;
 
 			if (p.GetTeamId() >= 2) {
-				teamName = _Tr("Client", "Spectator");
+				if (p.IsSpectator()) {
+					teamName = _Tr("Client", "Spectator");
+				} else if (p.IsBuilder()) {
+					teamName = _Tr("Client", "Builder");
+					p.SetTool(Player::ToolBlock);
+				}
 			}
 
 			{

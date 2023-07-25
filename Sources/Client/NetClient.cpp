@@ -2810,6 +2810,7 @@ namespace spades {
 				} else {
 					GetLocalPlayer().SetTeam(2);
 				}
+				client->PlayerJoinedTeam(GetWorld()->GetLocalPlayer().value());
 			}
 		}
 
