@@ -124,6 +124,7 @@ namespace spades {
 		      targetFocalLength(20.f),
 		      autoFocusEnabled(true),
 			  hitTestSizeToggle(false),
+			  followedPlayerId(0),
 
 		      inGameLimbo(false),
 		      fontManager(fontManager),
@@ -1104,6 +1105,26 @@ namespace spades {
 			} else {
 				followCameraState.enabled = true;
 			}
+		}
+
+		void Client::FollowSamePlayer() {
+			SPADES_MARK_FUNCTION();
+			//follow the same player u unfollowed.
+
+			if (GetWorld()->GetNumPlayers() < 2)
+				return;
+
+			stmp::optional<Player &> p = GetWorld()->GetPlayer(followedPlayerId);
+			if (!p) {
+				FollowNextPlayer(false);
+				return;
+			}
+			if (p->IsLocalPlayer() || p->IsSpectator()) {
+				FollowNextPlayer(false);
+				return;
+			}
+
+			followCameraState.enabled = true;
 		}
 	} // namespace client
 } // namespace spades

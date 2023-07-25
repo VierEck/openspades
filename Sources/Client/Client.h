@@ -290,6 +290,7 @@ namespace spades {
 			 * If the next player is the local player, disables the follow cam.
 			 */
 			void FollowNextPlayer(bool reverse);
+			void FollowSamePlayer();
 
 			/**
 			 * Retrieves the current camera mode.

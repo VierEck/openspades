@@ -556,7 +556,7 @@ namespace spades {
 									//unfollow
 									followCameraState.enabled = false;
 								} else {
-									FollowNextPlayer(false);
+									FollowSamePlayer();
 								}
 							}
 							return;
