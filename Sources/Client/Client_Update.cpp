@@ -67,7 +67,8 @@ SPADES_SETTING(cg_holdAimDownSight);
 
 DEFINE_SPADES_SETTING(cg_killFeedImg, "1", "0");
 DEFINE_SPADES_SETTING(cg_hitMarkSoundGain, "0.5");
-DEFINE_SPADES_SETTING(cg_hitAnalyze, "1");
+DEFINE_SPADES_SETTING(cg_hitAnalyze, "2");
+DEFINE_SPADES_SETTING(cg_killDistAnalyze, "2");
 DEFINE_SPADES_SETTING(cg_deathSoundGain, "0.2");
 SPADES_SETTING(cg_scoreMessages);
 DEFINE_SPADES_SETTING(cg_switchToolSoundGain, "1");
@@ -1120,6 +1121,23 @@ namespace spades {
 			WeaponInput inp = killer.GetWeaponInput();
 			if(!inp.secondary && !cg_killFeedImg && killer.IsToolWeapon() && killer.IsAlive()){
 				s += "[NoScope] ";
+			}
+
+			if (cg_killDistAnalyze) {
+				if(killer.IsAlive() && killer.IsToolWeapon()){
+					char buff[16];
+					float dist;
+					Vector3 diff = killer.GetEye() - victim.GetEye();
+					if ((int)cg_killDistAnalyze == 1) {
+						dist = diff.GetLength();
+						sprintf(buff, "[%.02f 3D] ", dist);
+						s += ChatWindow::ColoredMessage(buff, dist > 128 ? MsgColorRed : MsgColorTeam3);
+					} else {
+						dist = sqrtf(diff.x * diff.x + diff.y * diff.y);
+						sprintf(buff, "[%.02f 2D] ", dist);
+						s += ChatWindow::ColoredMessage(buff, dist > 144 ? MsgColorRed : MsgColorTeam3);
+					}
+				}
 			}
 
 			if (&killer != &victim) {

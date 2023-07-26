@@ -982,6 +982,11 @@ namespace spades {
 													 _Tr("Preferences", "3D"),
 													 _Tr("Preferences", "OFF")},
 									array<int> = {2, 1, 0});
+			layouter.AddChoiceField(_Tr("Preferences", "KillFeed Distance Analyze"), "cg_killDistAnalyze",
+									array<string> = {_Tr("Preferences", "2D"),
+													 _Tr("Preferences", "3D"),
+													 _Tr("Preferences", "OFF")},
+									array<int> = {2, 1, 0});
 			layouter.AddToggleField(_Tr("Preferences", "Hit Indicator"), "cg_hitIndicator");
 			layouter.AddToggleField(_Tr("Preferences", "Show Alerts"), "cg_alerts");
 			layouter.AddHeading(_Tr("Preferences", " "));
