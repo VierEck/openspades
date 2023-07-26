@@ -582,7 +582,7 @@ namespace spades {
 		void MainScreenHelper::MainScreenCopyFile(const std::string &oldName) {
 			SPADES_MARK_FUNCTION();
 			if (!FileManager::FileExists(oldName.c_str())) {
-				SPLog("Copying file failed. file not found: %s", oldName);
+				SPLog("Copying file failed. file not found: %s", oldName.c_str());
 				return;
 			}
 
@@ -594,7 +594,7 @@ namespace spades {
 					break;
 				}
 				if (i == 0) {
-					SPLog("Copying file failed. filename string does not contain directory: %s", oldName);
+					SPLog("Copying file failed. filename string does not contain directory: %s", oldName.c_str());
 					return;
 				}
 			}
@@ -602,7 +602,7 @@ namespace spades {
 
 			while (lastPos-- > 0) {
 				if (lastPos == 0) {
-					SPLog("Copying file failed. file does not contain extension: %s", oldName);
+					SPLog("Copying file failed. file does not contain extension: %s", oldName.c_str());
 					return;
 				}
 				if (oldName[lastPos] == '.')
