@@ -60,16 +60,16 @@ namespace spades {
             else if (item.NumPlayers == 0)
                 col = Vector4(0.7f, 0.7f, 1, 1);
             Font.Draw(playersStr,
-                      ScreenPosition + Vector2(340.f - Font.Measure(playersStr).x * 0.5f, 2.f), 1.f,
+                      ScreenPosition + Vector2(405.f - Font.Measure(playersStr).x * 0.5f, 2.f), 1.f,
                       col);
-            Font.Draw(item.MapName, ScreenPosition + Vector2(400.f, 2.f), 1.f, Vector4(1, 1, 1, 1));
-            Font.Draw(item.GameMode, ScreenPosition + Vector2(550.f, 2.f), 1.f,
+            Font.Draw(item.MapName, ScreenPosition + Vector2(430.f, 2.f), 1.f, Vector4(1, 1, 1, 1));
+            Font.Draw(item.GameMode, ScreenPosition + Vector2(580.f, 2.f), 1.f,
                       Vector4(1, 1, 1, 1));
-            Font.Draw(item.Protocol, ScreenPosition + Vector2(630.f, 2.f), 1.f,
+            Font.Draw(item.Protocol, ScreenPosition + Vector2(665.f, 2.f), 1.f,
                       Vector4(1, 1, 1, 1));
             if (not flagIconRenderer.DrawIcon(item.Country,
-                                              ScreenPosition + Vector2(700.f, size.y * 0.5f))) {
-                Font.Draw(item.Country, ScreenPosition + Vector2(680.f, 2.f), 1.f,
+                                              ScreenPosition + Vector2(715.f, size.y * 0.5f))) {
+                Font.Draw(item.Country, ScreenPosition + Vector2(715.f, 2.f), 1.f,
                           Vector4(1, 1, 1, 1));
             }
         }

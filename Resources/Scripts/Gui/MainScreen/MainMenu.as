@@ -247,42 +247,42 @@ namespace spades {
 			}
 			{
 				ServerListHeader header(Manager);
-				header.Bounds = AABB2(contentsLeft + 2.f, 240.f, 300.f - 2.f, 30.f);
-				header.Text = _Tr("MainScreen", "Server Name");
+				header.Bounds = AABB2(contentsLeft + 2.f, 240.f, 375.f - 2.f, 30.f);
+				header.Text = _Tr("MainScreen", "ServerName");
 				@header.Activated = spades::ui::EventHandler(this.SortServerListByName);
 				AddChild(header);
 			}
 			{
 				ServerListHeader header(Manager);
-				header.Bounds = AABB2(contentsLeft + 300.f, 240.f, 100.f, 30.f);
+				header.Bounds = AABB2(contentsLeft + 375.f, 240.f, 55.f, 30.f);
 				header.Text = _Tr("MainScreen", "Players");
 				@header.Activated = spades::ui::EventHandler(this.SortServerListByNumPlayers);
 				AddChild(header);
 			}
 			{
 				ServerListHeader header(Manager);
-				header.Bounds = AABB2(contentsLeft + 400.f, 240.f, 150.f, 30.f);
-				header.Text = _Tr("MainScreen", "Map Name");
+				header.Bounds = AABB2(contentsLeft + 430.f, 240.f, 150.f, 30.f);
+				header.Text = _Tr("MainScreen", "MapName");
 				@header.Activated = spades::ui::EventHandler(this.SortServerListByMapName);
 				AddChild(header);
 			}
 			{
 				ServerListHeader header(Manager);
-				header.Bounds = AABB2(contentsLeft + 550.f, 240.f, 80.f, 30.f);
-				header.Text = _Tr("MainScreen", "Game Mode");
+				header.Bounds = AABB2(contentsLeft + 580.f, 240.f, 85.f, 30.f);
+				header.Text = _Tr("MainScreen", "GameMode");
 				@header.Activated = spades::ui::EventHandler(this.SortServerListByGameMode);
 				AddChild(header);
 			}
 			{
 				ServerListHeader header(Manager);
-				header.Bounds = AABB2(contentsLeft + 630.f, 240.f, 50.f, 30.f);
+				header.Bounds = AABB2(contentsLeft + 665.f, 240.f, 35.f, 30.f);
 				header.Text = _Tr("MainScreen", "Ver.");
 				@header.Activated = spades::ui::EventHandler(this.SortServerListByProtocol);
 				AddChild(header);
 			}
 			{
 				ServerListHeader header(Manager);
-				header.Bounds = AABB2(contentsLeft + 680.f, 240.f, 50.f, 30.f);
+				header.Bounds = AABB2(contentsLeft + 700.f, 240.f, 35.f, 30.f);
 				header.Text = _Tr("MainScreen", "Loc.");
 				@header.Activated = spades::ui::EventHandler(this.SortServerListByCountry);
 				AddChild(header);
