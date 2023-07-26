@@ -579,6 +579,50 @@ namespace spades {
 			FileManager::RenameFile(oldName.c_str(), newName.c_str());
 		}
 
+		void MainScreenHelper::MainScreenCopyFile(const std::string &oldName) {
+			SPADES_MARK_FUNCTION();
+			if (!FileManager::FileExists(oldName.c_str())) {
+				SPLog("Copying file failed. file not found: %s", oldName);
+				return;
+			}
+
+			std::string dir;
+			int lastPos = oldName.size() - 1;
+			for (int i = lastPos; i > 0; i--) {
+				if (oldName[i] == '/') {
+					dir = oldName.substr(0, i + 1);
+					break;
+				}
+				if (i == 0) {
+					SPLog("Copying file failed. filename string does not contain directory: %s", oldName);
+					return;
+				}
+			}
+			std::vector<std::string> fileNames = FileManager::EnumFiles(dir.c_str());
+
+			while (lastPos-- > 0) {
+				if (lastPos == 0) {
+					SPLog("Copying file failed. file does not contain extension: %s", oldName);
+					return;
+				}
+				if (oldName[lastPos] == '.')
+					break;
+			}
+			std::string extension = oldName.substr(lastPos, oldName.size() - lastPos);
+
+			std::string newName = oldName.substr(0, lastPos) + " - Copy" + extension;
+			int count = 1;
+			char bufCopy[16];
+			while (FileManager::FileExists(newName.c_str())) {
+				sprintf(bufCopy, " - Copy (%d)", count++);
+				newName = oldName.substr(0, lastPos) + bufCopy + extension;
+			}
+
+			auto oldStream = FileManager::OpenForReading(oldName.c_str());
+			auto newStream = FileManager::OpenForWriting(newName.c_str());
+			newStream->Write(oldStream->ReadAllBytes());
+		}
+
 		PackageUpdateManager &MainScreenHelper::GetPackageUpdateManager() {
 			return PackageUpdateManager::GetInstance();
 		}

@@ -75,6 +75,7 @@ namespace spades {
 		
 		spades::ui::Label @contextMenuLabel;
 		spades::ui::Button @delButton;
+		spades::ui::Button @copyButton;
 		spades::ui::Button @renameButton;
 		spades::ui::Button @renameDoneButton;
 		spades::ui::Label @renameLabel;
@@ -360,14 +361,23 @@ namespace spades {
 			{
 				spades::ui::Label label(Manager);
 				label.BackgroundColor = Vector4(0, 0, 0, 0.8f);
-				label.Bounds = AABB2(xPos, yPos, 70.f, 85.f);
+				label.Bounds = AABB2(xPos, yPos, 70.f, 125.f);
 				@contextMenuLabel = label;
 				AddChild(contextMenuLabel);
 			}
 			{
 				spades::ui::Button button(Manager);
-				button.Caption = _Tr("MainScreen", "Delete");
+				button.Caption = _Tr("MainScreen", "Copy");
 				button.Bounds = AABB2(xPos + 5, yPos + 5, 60.f, 35.f);
+				button.Toggled = false;
+				@button.Activated = spades::ui::EventHandler(this.OnCopy);
+				@copyButton = button;
+				AddChild(copyButton);
+			}
+			{
+				spades::ui::Button button(Manager);
+				button.Caption = _Tr("MainScreen", "Delete");
+				button.Bounds = AABB2(xPos + 5, yPos + 45.f, 60.f, 35.f);
 				button.Toggled = false;
 				@button.Activated = spades::ui::EventHandler(this.OnDelete);
 				@delButton = button;
@@ -376,7 +386,7 @@ namespace spades {
 			{
 				spades::ui::Button button(Manager);
 				button.Caption = _Tr("MainScreen", "Rename");
-				button.Bounds = AABB2(xPos + 5, yPos + 45.f, 60.f, 35.f);
+				button.Bounds = AABB2(xPos + 5, yPos + 85.f, 60.f, 35.f);
 				button.Toggled = false;
 				@button.Activated = spades::ui::EventHandler(this.OnRename);
 				@renameButton = button;
@@ -388,6 +398,15 @@ namespace spades {
 			if (isContextMenuActive) {
 				RightClickContextMenuClose();
 			}
+		}
+		
+		void OnCopy(spades::ui::UIElement @sender) {
+			if (mode == isDemo)
+				ui.helper.MainScreenCopyFile("Demos/" + currentFileName);
+			if (mode == isMap)
+				ui.helper.MainScreenCopyFile("MapEditor/Maps/" + currentFileName);
+			LoadServerList();
+			RightClickContextMenuClose();
 		}
 		
 		void OnDelete(spades::ui::UIElement @sender) {
@@ -409,13 +428,13 @@ namespace spades {
 			{
 				spades::ui::Label label(Manager);
 				label.BackgroundColor = Vector4(0, 0, 0, 0.8f);
-				label.Bounds = AABB2(xPos + 75, yPos + 40.f, 370.f, 45.f);
+				label.Bounds = AABB2(xPos + 75, yPos + 80.f, 370.f, 45.f);
 				@renameLabel = label;
 				AddChild(renameLabel);
 			}
 			{
 				@renameField = spades::ui::Field(Manager);
-				renameField.Bounds = AABB2(xPos + 80, yPos + 47.5f, 315.f, 30.f);
+				renameField.Bounds = AABB2(xPos + 80, yPos + 87.5f, 315.f, 30.f);
 				renameField.Placeholder = _Tr("MainScreen", currentFileName);
 				renameField.Text = currentFileName;
 				newCurrentFileName = currentFileName;
@@ -430,7 +449,7 @@ namespace spades {
 			{
 				spades::ui::Button button(Manager);
 				button.Caption = _Tr("MainScreen", "Done");
-				button.Bounds = AABB2(xPos + 400, yPos + 45.f, 40.f, 35.f);
+				button.Bounds = AABB2(xPos + 400, yPos + 85.f, 40.f, 35.f);
 				button.Toggled = false;
 				@button.Activated = spades::ui::EventHandler(this.OnRenameDoneSender);
 				@renameDoneButton = button;
@@ -473,6 +492,7 @@ namespace spades {
 			if (!isContextMenuActive)
 				return;
 			RemoveChild(contextMenuLabel);
+			RemoveChild(copyButton);
 			RemoveChild(delButton);
 			RemoveChild(renameButton);
 			isContextMenuActive = false;

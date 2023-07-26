@@ -113,6 +113,7 @@ namespace spades {
 
 			void RemoveFile(const std::string &);
 			void RenameFile(const std::string &, const std::string &);
+			void MainScreenCopyFile(const std::string &);
 		};
 	}
 }
