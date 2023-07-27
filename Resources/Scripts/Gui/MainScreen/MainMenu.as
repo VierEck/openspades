@@ -428,13 +428,13 @@ namespace spades {
 			{
 				spades::ui::Label label(Manager);
 				label.BackgroundColor = Vector4(0, 0, 0, 0.8f);
-				label.Bounds = AABB2(xPos + 75, yPos + 80.f, 370.f, 45.f);
+				label.Bounds = AABB2(xPos + 75, yPos + 80.f, 455.f, 45.f);
 				@renameLabel = label;
 				AddChild(renameLabel);
 			}
 			{
 				@renameField = spades::ui::Field(Manager);
-				renameField.Bounds = AABB2(xPos + 80, yPos + 87.5f, 315.f, 30.f);
+				renameField.Bounds = AABB2(xPos + 80, yPos + 87.5f, 400.f, 30.f);
 				renameField.Placeholder = _Tr("MainScreen", currentFileName);
 				renameField.Text = currentFileName;
 				newCurrentFileName = currentFileName;
@@ -449,7 +449,7 @@ namespace spades {
 			{
 				spades::ui::Button button(Manager);
 				button.Caption = _Tr("MainScreen", "Done");
-				button.Bounds = AABB2(xPos + 400, yPos + 85.f, 40.f, 35.f);
+				button.Bounds = AABB2(xPos + 485, yPos + 85.f, 40.f, 35.f);
 				button.Toggled = false;
 				@button.Activated = spades::ui::EventHandler(this.OnRenameDoneSender);
 				@renameDoneButton = button;
