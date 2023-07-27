@@ -80,6 +80,7 @@ DEFINE_SPADES_SETTING(cg_playerNameY, "0");
 DEFINE_SPADES_SETTING(cg_specNames, "1");
 DEFINE_SPADES_SETTING(cg_enemyNames, "0");
 
+SPADES_SETTING(cg_distCalculation);
 DEFINE_SPADES_SETTING(cg_hudTransparency, "1", "0.8");
 SPADES_SETTING(cg_debugHitTest);
 DEFINE_SPADES_SETTING(cg_hitTestSize, "128");
@@ -345,10 +346,19 @@ namespace spades {
 			auto hottracked = HotTrackedPlayer();
 			if (hottracked) {
 				Player &hottrackedPlayer = std::get<0>(*hottracked);
-				float dist = (hottrackedPlayer.GetEye() - p.GetEye()).GetLength();
 
-				if ((!cg_enemyNames || dist > 128) && hottrackedPlayer.GetTeamId() != p.GetTeamId())
+				Vector3 diff = hottrackedPlayer.GetEye() - p.GetEye();
+				float dist2d = sqrtf(diff.x * diff.x + diff.y * diff.y);
+
+				if ((!cg_enemyNames || dist2d > 128) && hottrackedPlayer.GetTeamId() != p.GetTeamId())
 					return;
+
+				float dist;
+				if (!cg_distCalculation) {
+					dist = (hottrackedPlayer.GetEye() - p.GetEye()).GetLength();
+				} else {
+					dist = dist2d;
+				}
 
 				Vector3 posxyz = Project(hottrackedPlayer.GetEye());
 				Vector2 pos = {posxyz.x, posxyz.y};
@@ -359,7 +369,7 @@ namespace spades {
 				if ((int)cg_playerNames > 1) {
 					if ((int)cg_playerNames != 3) {
 						int idist = (int)floorf(dist + .5f);
-						sprintf(buf, " [%d%s]", idist, (idist == 1) ? "block" : "blocks");
+						sprintf(buf, " [%d %s]", idist, cg_distCalculation ? "2D" : "3D");
 						plName += buf;
 					}
 					if ((int)cg_playerNames > 2) {
