@@ -245,7 +245,7 @@ namespace spades {
 				}
 			}
 			Vector3 GetRecoil() override {
-				return MakeVector3(0.00005f, 0.0125f, 0.f);
+				return MakeVector3(0.00005f, 0.0120f, 0.f);
 			}
 			float GetSpread() override { return 0.012f; }
 			int GetPelletSize() override { return 1; }
