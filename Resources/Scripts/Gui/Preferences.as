@@ -976,6 +976,8 @@ namespace spades {
 									array<string> = {_Tr("Preferences", "2D"),
 													 _Tr("Preferences", "3D")},
 									array<int> = {1, 0});
+			layouter.AddToggleField(_Tr("Preferences", "Hit Analyze Messages"), "cg_hitAnalyze");
+			layouter.AddToggleField(_Tr("Preferences", "KillFeed Distance Analyze"), "cg_killDistAnalyze");
 			layouter.AddChoiceField(_Tr("Preferences", "Hottracked Names"), "cg_playerNames",
 									array<string> = {_Tr("Preferences", "B + D"),
 													 _Tr("Preferences", "Bod"),
@@ -984,8 +986,10 @@ namespace spades {
 													 _Tr("Preferences", "OFF")},
 									array<int> = {4, 3, 2, 1, 0});
 			layouter.AddToggleField(_Tr("Preferences", "Hottrack Enemies"), "cg_enemyNames");
-			layouter.AddToggleField(_Tr("Preferences", "Hit Analyze Messages"), "cg_hitAnalyze");
-			layouter.AddToggleField(_Tr("Preferences", "KillFeed Distance Analyze"), "cg_killDistAnalyze");
+			layouter.AddSliderField(_Tr("Preferences", "Hottracked X Height"), "cg_playerNameX", -20, 20, 0.1,
+									ConfigNumberFormatter(1, "px"));
+			layouter.AddSliderField(_Tr("Preferences", "Hottracked Y Height"), "cg_playerNameY", -20, 20, 0.1,
+									ConfigNumberFormatter(1, "px"));
 			
 			layouter.AddToggleField(_Tr("Preferences", "Show TeamMate Map Sector"), "cg_showTeamMateLocation");
 			layouter.AddToggleField(_Tr("Preferences", "Score Messages"), "cg_scoreMessages");
