@@ -74,10 +74,11 @@ SPADES_SETTING(cg_keyCrouch);
 DEFINE_SPADES_SETTING(cg_screenshotFormat, "2");
 DEFINE_SPADES_SETTING(cg_stats, "0", "1");
 DEFINE_SPADES_SETTING(cg_hideHud, "0");
-DEFINE_SPADES_SETTING(cg_playerNames, "2");
+DEFINE_SPADES_SETTING(cg_playerNames, "4");
 DEFINE_SPADES_SETTING(cg_playerNameX, "0");
 DEFINE_SPADES_SETTING(cg_playerNameY, "0");
 DEFINE_SPADES_SETTING(cg_specNames, "1");
+DEFINE_SPADES_SETTING(cg_enemyNames, "0");
 
 DEFINE_SPADES_SETTING(cg_hudTransparency, "1", "0.8");
 SPADES_SETTING(cg_debugHitTest);
@@ -344,26 +345,42 @@ namespace spades {
 			auto hottracked = HotTrackedPlayer();
 			if (hottracked) {
 				Player &hottrackedPlayer = std::get<0>(*hottracked);
+				float dist = (hottrackedPlayer.GetEye() - p.GetEye()).GetLength();
+
+				if ((!cg_enemyNames || dist > 128) && hottrackedPlayer.GetTeamId() != p.GetTeamId())
+					return;
 
 				Vector3 posxyz = Project(hottrackedPlayer.GetEye());
 				Vector2 pos = {posxyz.x, posxyz.y};
 				char buf[64];
-				if ((int)cg_playerNames == 1) {
-					float dist = (hottrackedPlayer.GetEye() - p.GetEye()).GetLength();
-					int idist = (int)floorf(dist + .5f);
-					sprintf(buf, "%s [%d%s]", hottrackedPlayer.GetName().c_str(), idist,
-					        (idist == 1) ? "block" : "blocks");
-				} else
-					sprintf(buf, "%s", hottrackedPlayer.GetName().c_str());
+				std::string plName;
+				sprintf(buf, "%s", hottrackedPlayer.GetName().c_str());
+				plName = buf;
+				if ((int)cg_playerNames > 1) {
+					if ((int)cg_playerNames != 3) {
+						int idist = (int)floorf(dist + .5f);
+						sprintf(buf, " [%d%s]", idist, (idist == 1) ? "block" : "blocks");
+						plName += buf;
+					}
+					if ((int)cg_playerNames > 2) {
+						switch (std::get<1>(*hottracked)) {
+							case hit_Head: sprintf(buf, "[Head]"); break;
+							case hit_Arms: sprintf(buf, "[Arms]"); break;
+							case hit_Legs: sprintf(buf, "[Legs]"); break;
+							default: sprintf(buf, " [Torso]"); //for some reason we get hit_None when aiming at torso aswell
+						}
+						plName += buf;
+					}
+				}
 
 				pos.y += (int)cg_playerNameY;
 				pos.x += (int)cg_playerNameX;
 
 				IFont &font = fontManager->GetGuiFont();
-				Vector2 size = font.Measure(buf);
+				Vector2 size = font.Measure(plName);
 				pos.x -= size.x * .5f;
 				pos.y -= size.y;
-				font.DrawShadow(buf, pos, 1.f, MakeVector4(1, 1, 1, 1), MakeVector4(0, 0, 0, 0.5));
+				font.DrawShadow(plName, pos, 1.f, MakeVector4(1, 1, 1, 1), MakeVector4(0, 0, 0, 0.5));
 			}
 		}
 
