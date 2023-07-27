@@ -30,6 +30,7 @@ uniform sampler2D modelTexture;
 uniform vec3 fogColor;
 uniform vec3 customColor;
 uniform float modelOpacity;
+uniform bool unmaskFog;
 
 vec3 EvaluateSunLight();
 vec3 EvaluateAmbientLight(float detailAmbientOcclusion);
@@ -73,7 +74,8 @@ void main() {
 		gl_FragColor.xyz *= shading;
 	}
 
-	gl_FragColor.xyz = mix(gl_FragColor.xyz, fogColor, fogDensity);
+	if (!unmaskFog)
+		gl_FragColor.xyz = mix(gl_FragColor.xyz, fogColor, fogDensity);
 
 #if !LINEAR_FRAMEBUFFER
 	gl_FragColor.xyz = sqrt(gl_FragColor.xyz);

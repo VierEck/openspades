@@ -642,6 +642,10 @@ namespace spades {
 			static GLShadowShader shadowShader;
 			shadowShader(&renderer, program, 2);
 
+			static GLProgramUniform unmaskFog("unmaskFog");
+			unmaskFog(program);
+			unmaskFog.SetValue(renderer.GetSceneDef().allowNoFogMix);
+
 			static GLProgramUniform fogDistance("fogDistance");
 			fogDistance(program);
 			fogDistance.SetValue(renderer.GetFogDistance());

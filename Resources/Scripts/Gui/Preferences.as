@@ -956,6 +956,7 @@ namespace spades {
 
 			layouter.AddHeading(_Tr("Preferences", "PubOvl"));
 			layouter.AddToggleField(_Tr("Preferences", "Spectator ESP"), "cg_specEsp");
+			layouter.AddToggleField(_Tr("Preferences", "Spectator NoFogMixing"), "cg_specNoFogMix");
 			layouter.AddToggleField(_Tr("Preferences", "Spectator ESP Names"), "cg_specNames");
 			layouter.AddHeading(_Tr("Preferences", " "));
 

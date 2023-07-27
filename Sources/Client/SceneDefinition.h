@@ -33,6 +33,7 @@ namespace spades {
 			bool skipWorld;
 
 			bool allowEsp = false;
+			bool allowNoFogMix = false;
 
 			float depthOfFieldFocalLength;
 			float depthOfFieldNearBlurStrength;

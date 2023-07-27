@@ -47,6 +47,7 @@ DEFINE_SPADES_SETTING(cg_manualFocus, "0");
 DEFINE_SPADES_SETTING(cg_depthOfFieldAmount, "1");
 DEFINE_SPADES_SETTING(cg_shake, "1", "0");
 DEFINE_SPADES_SETTING(cg_specEsp, "1");
+DEFINE_SPADES_SETTING(cg_specNoFogMix, "1");
 
 namespace spades {
 	namespace client {
@@ -163,8 +164,9 @@ namespace spades {
 				float vibPitch = 0.f;
 				float vibYaw = 0.f;
 
-				if (cg_specEsp && world->GetLocalPlayer()) {
-					def.allowEsp = world->GetLocalPlayer()->IsSpectator();
+				if (world->GetLocalPlayer() && world->GetLocalPlayer()->IsSpectator()) {
+					def.allowEsp = cg_specEsp;
+					def.allowNoFogMix = cg_specNoFogMix;
 				}
 
 				switch (GetCameraMode()) {
