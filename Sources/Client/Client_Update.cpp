@@ -297,14 +297,6 @@ namespace spades {
 				if (targetfirestate < 0.f)
 					targetfirestate = 0.f;
 			}
-
-			if (time > lastPosSentTime + 1.f && world->GetLocalPlayer()) {
-				stmp::optional<Player &> p = world->GetLocalPlayer();
-				if (p->IsAlive() && p->GetTeamId() < 2) {
-					net->SendPosition();
-					lastPosSentTime = time;
-				}
-			}
 		}
 
 		/** Handles movement of spectating local player. */
@@ -527,6 +519,11 @@ namespace spades {
 				lastFront = curFront;
 				net->SendOrientation(curFront);
 				lastOriSentTime = time;
+			}
+			// send position
+			if (time > lastPosSentTime + 1.f) {
+				net->SendPosition();
+				lastPosSentTime = time;
 			}
 
 			lastKills = world->GetPlayerPersistent(player.GetId()).kills;
