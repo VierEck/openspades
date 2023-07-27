@@ -50,6 +50,8 @@ Block color Inverting and Mixing
 next Spawn Loadout
 "paratrooper":
 improved weapon animation based on paratrooper's M14 Remastered
+"JimPix":
+Inspiration for: spectator NoFogMixing, recoil adjustments, hottrack player names enhancements
 "MuffinTastic":
 Glow Blocks
 "sovenance":
