@@ -123,34 +123,49 @@ namespace spades {
 
 						for (int z = 0; z < 64; z++) {
 							if (map->IsSolid(x, y, z)) {
+								iCol = map->GetColor(x, y, z);
+								vCol.x = (uint8_t)(iCol);
+								vCol.y = (uint8_t)(iCol >> 8);
+								vCol.z = (uint8_t)(iCol >> 16);
+
 								//repair
-								if (snow && surface) {
-									vCol.x = vCol.y = vCol.z = 250 - SampleRandomInt(0, 15);
-									map->Set(x, y, z, true,
-										vCol.x | (vCol.y << 8) | (vCol.z << 16) | (100UL << 24), true);
-								}
+								if (snow)
+									if (surface)
+										vCol.x = vCol.y = vCol.z = 250 - SampleRandomInt(0, 15);
 								//rain
 								//shadow
 								if (grade) {
-									iCol = map->GetColor(x, y, z);
-									vCol.x = (uint8_t)(iCol);
-									vCol.y = (uint8_t)(iCol >> 8);
-									vCol.z = (uint8_t)(iCol >> 16);
-
-									vCol.x = vCol.x * gradeColor.x / 255;
-									vCol.y = vCol.y * gradeColor.y / 255;
-									vCol.z = vCol.z * gradeColor.z / 255;
-									map->Set(x, y, z, true,
-										vCol.x | (vCol.y << 8) | (vCol.z << 16) | (100UL << 24), true);
+									vCol.x *= (float)gradeColor.x / 255.f;
+									vCol.y *= (float)gradeColor.y / 255.f;
+									vCol.z *= (float)gradeColor.z / 255.f;
 								}
 								//rampx
 								//rampy
 								//rampz
 								//noisemono
 								//noisecolor
-								//debug
+								if (debug) {
+									vCol.x = ((float)x / 512.f) * 255;
+									vCol.y = ((float)y / 512.f) * 255;
+									vCol.z = ((float)z / 64.f) * 255;
+								}
 
+								if (vCol.x < 0)
+									vCol.x = 0;
+								if (vCol.y < 0)
+									vCol.y = 0;
+								if (vCol.z < 0)
+									vCol.z = 0;
+								if (vCol.x > 255)
+									vCol.x = 255;
+								if (vCol.y > 255)
+									vCol.y = 255;
+								if (vCol.z > 255)
+									vCol.z = 255;
 								surface = false;
+
+								map->Set(x, y, z, true,
+									vCol.x | (vCol.y << 8) | (vCol.z << 16) | (100UL << 24), true);
 							}
 						}
 					}
