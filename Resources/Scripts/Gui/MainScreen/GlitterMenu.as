@@ -135,6 +135,7 @@ namespace spades {
 				
 				float RangeFieldDimensionX = 85;
 				string RangePlaceHolder = "0-512 Range";
+				string ZRangePlaceHolder = "0-64 Range";
 				
 				float reversedButtonDimensionX = 75;
 				string ReversedCaption = "reversed";
@@ -389,7 +390,7 @@ namespace spades {
 					@rampZFieldRange = spades::ui::Field(Manager);
 					xPos += reversedButtonDimensionX + xSpacing;
 					rampZFieldRange.Bounds = AABB2(xPos, yPos, RangeFieldDimensionX, FieldDimensionY);
-					rampZFieldRange.Placeholder = _Tr("Glitter", RangePlaceHolder);
+					rampZFieldRange.Placeholder = _Tr("Glitter", ZRangePlaceHolder);
 					AddChild(rampZFieldRange);
 				}
 				

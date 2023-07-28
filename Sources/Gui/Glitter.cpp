@@ -74,8 +74,8 @@ namespace spades {
 				SPLog("Glitter failed. need 28 arguments. got %d instead", (int)glitArgs.size());
 				return;
 			}
-			int gradeRed = glitArgs[0]; int gradeGreen = glitArgs[1]; int gradeBlue = glitArgs[2];
-			bool grade = gradeRed >= 0 && gradeGreen >= 0 && gradeBlue >= 0;
+			IntVector3 gradeColor = {glitArgs[0], glitArgs[1], glitArgs[2]};
+			bool grade = gradeColor.x >= 0 && gradeColor.y >= 0 && gradeColor.z >= 0;
 
 			int shadowRed = glitArgs[3]; int ShadowGreen = glitArgs[4]; int shadowBlue = glitArgs[5];
 			bool shadow = shadowRed >= 0 && ShadowGreen >= 0 && shadowBlue >= 0;
@@ -112,19 +112,48 @@ namespace spades {
 			loadedMap->Release();
 			{
 
+				bool surface;
+				IntVector3 vCol;
+				uint32_t iCol;
+				if (rain >= 0)
+					rain = (float)rain * 2.55f;
 				for (int x = 0; x < 512; x++)
-					for (int y = 0; y < 512; y++)
+					for (int y = 0; y < 512; y++) {
+						surface = true;
+
 						for (int z = 0; z < 64; z++) {
-							if (snow)
-								if (map->IsSolid(x, y, z)) {
-									int random = SampleRandomInt(0, 15);
-									IntVector3 color;
-									color.x = color.y = color.z = 250 - random;
+							if (map->IsSolid(x, y, z)) {
+								//repair
+								if (snow && surface) {
+									vCol.x = vCol.y = vCol.z = 250 - SampleRandomInt(0, 15);
 									map->Set(x, y, z, true,
-										color.x | (color.y << 8) | (color.z << 16) | (100UL << 24), true);
-									break;
+										vCol.x | (vCol.y << 8) | (vCol.z << 16) | (100UL << 24), true);
 								}
+								//rain
+								//shadow
+								if (grade) {
+									iCol = map->GetColor(x, y, z);
+									vCol.x = (uint8_t)(iCol);
+									vCol.y = (uint8_t)(iCol >> 8);
+									vCol.z = (uint8_t)(iCol >> 16);
+
+									vCol.x = vCol.x * gradeColor.x / 255;
+									vCol.y = vCol.y * gradeColor.y / 255;
+									vCol.z = vCol.z * gradeColor.z / 255;
+									map->Set(x, y, z, true,
+										vCol.x | (vCol.y << 8) | (vCol.z << 16) | (100UL << 24), true);
+								}
+								//rampx
+								//rampy
+								//rampz
+								//noisemono
+								//noisecolor
+								//debug
+
+								surface = false;
+							}
 						}
+					}
 
 			}
 			auto newStream = FileManager::OpenForWriting(newName.c_str());
