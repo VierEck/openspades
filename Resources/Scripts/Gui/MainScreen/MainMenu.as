@@ -20,6 +20,7 @@
 
 #include "CreateProfileScreen.as"
 #include "ServerList.as"
+#include "GlitterMenu.as"
 
 namespace spades {
 
@@ -80,6 +81,8 @@ namespace spades {
 		spades::ui::Button @renameDoneButton;
 		spades::ui::Label @renameLabel;
 		spades::ui::Field @renameField;
+		spades::ui::Button @glitterButton;
+		bool isGlitterButtonVisible = false;
 		bool isContextMenuActive = false;
 		bool isRenameFieldActive = false;
 		string currentFileName, newCurrentFileName;
@@ -361,7 +364,10 @@ namespace spades {
 			{
 				spades::ui::Label label(Manager);
 				label.BackgroundColor = Vector4(0, 0, 0, 0.8f);
-				label.Bounds = AABB2(xPos, yPos, 70.f, 125.f);
+				if (mode == isMap)
+					label.Bounds = AABB2(xPos, yPos, 70.f, 165.f);
+				else
+					label.Bounds = AABB2(xPos, yPos, 70.f, 125.f);
 				@contextMenuLabel = label;
 				AddChild(contextMenuLabel);
 			}
@@ -392,12 +398,28 @@ namespace spades {
 				@renameButton = button;
 				AddChild(renameButton);
 			}
+			if (mode == isMap) {
+				spades::ui::Button button(Manager);
+				button.Caption = _Tr("MainScreen", "Glitter");
+				button.Bounds = AABB2(xPos + 5, yPos + 125.f, 60.f, 35.f);
+				button.Toggled = false;
+				@button.Activated = spades::ui::EventHandler(this.OnGlitter);
+				@glitterButton = button;
+				AddChild(glitterButton);
+				isGlitterButtonVisible = true;
+			}
 		}
 		
 		void MouseDown(spades::ui::MouseButton button, Vector2 clientPosition) {
 			if (isContextMenuActive) {
 				RightClickContextMenuClose();
 			}
+		}
+		
+		void OnGlitter(spades::ui::UIElement @sender) {
+			RightClickContextMenuClose();
+			GlitterMenu gm(ui, this, currentFileName);
+			gm.Run();
 		}
 		
 		void OnCopy(spades::ui::UIElement @sender) {
@@ -496,6 +518,10 @@ namespace spades {
 			RemoveChild(delButton);
 			RemoveChild(renameButton);
 			isContextMenuActive = false;
+			
+			if (isGlitterButtonVisible)
+				RemoveChild(glitterButton);
+			isGlitterButtonVisible = false;
 			
 			if (!isRenameFieldActive)
 				return;
