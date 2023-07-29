@@ -143,7 +143,17 @@ namespace spades {
 								//rampy
 								//rampz
 								//noisemono
-								//noisecolor
+								if (noisemono >= 0) {
+									float randomMono = (float)SampleRandomInt(0, noisemono) * 0.01f;
+									vCol.x -= vCol.x * randomMono;
+									vCol.y -= vCol.y * randomMono;
+									vCol.z -= vCol.z * randomMono;
+								}
+								if (noisecolor >= 0) {
+									vCol.x -= vCol.x * ((float)SampleRandomInt(0, noisecolor) * 0.01f);
+									vCol.y -= vCol.y * ((float)SampleRandomInt(0, noisecolor) * 0.01f);
+									vCol.z -= vCol.z * ((float)SampleRandomInt(0, noisecolor) * 0.01f);
+								}
 								if (debug) {
 									vCol.x = ((float)x / 512.f) * 255;
 									vCol.y = ((float)y / 512.f) * 255;
