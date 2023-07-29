@@ -787,7 +787,7 @@ namespace spades {
 			AddArgField(rainField.Text);
 			
 			AddArgButton(snowButton.Toggled);
-			AddArgButton(snowButton.Toggled);
+			AddArgButton(repairButton.Toggled);
 			AddArgButton(glowButton.Toggled);
 			AddArgButton(debugButton.Toggled);
 		}
