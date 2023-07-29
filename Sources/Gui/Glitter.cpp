@@ -116,6 +116,7 @@ namespace spades {
 				bool zRestSurfaces;
 				IntVector3 vCol;
 				uint32_t iCol;
+				uint8_t alpha;
 				if (rain >= 0)
 					rain = (float)rain * 2.55f;
 				for (int x = 0; x < 512; x++)
@@ -128,8 +129,10 @@ namespace spades {
 								vCol.x = (uint8_t)(iCol);
 								vCol.y = (uint8_t)(iCol >> 8);
 								vCol.z = (uint8_t)(iCol >> 16);
+								alpha = (uint8_t)(iCol >> 24);
 
-								//repair
+								if (repair)
+									alpha = 255;
 								if (snow)
 									if (zFirstSurface)
 										vCol.x = vCol.y = vCol.z = 250 - SampleRandomInt(0, 15);
@@ -206,7 +209,7 @@ namespace spades {
 								zFirstSurface = false;
 
 								map->Set(x, y, z, true,
-									vCol.x | (vCol.y << 8) | (vCol.z << 16) | (100UL << 24), true);
+									vCol.x | (vCol.y << 8) | (vCol.z << 16) | (alpha << 24), true);
 							} else {
 								zRestSurfaces = !zFirstSurface;
 							}
