@@ -35,8 +35,8 @@
 #include <Core/Settings.h>
 #include <Core/AudioStream.h>
 
-DEFINE_SPADES_SETTING(s_maxPolyphonics, "96");
-DEFINE_SPADES_SETTING(s_eax, "1");
+DEFINE_SPADES_SETTING(s_maxPolyphonics, "96", "64");
+DEFINE_SPADES_SETTING(s_eax, "1", "0");
 DEFINE_SPADES_SETTING(s_alPreciseErrorCheck, "1");
 DEFINE_SPADES_SETTING(s_gain, "1");
 DEFINE_SPADES_SETTING(s_openalDevice, "");
