@@ -112,6 +112,8 @@ namespace spades {
 			loadedMap->Release();
 			{
 
+				int zCountSolid;
+				float randomRainLength;
 				bool zFirstSurface;
 				bool zRestSurfaces;
 				IntVector3 vCol;
@@ -122,6 +124,9 @@ namespace spades {
 				for (int x = 0; x < 512; x++)
 					for (int y = 0; y < 512; y++) {
 
+						if (rain >= 0)
+							randomRainLength = (float)SampleRandomInt(500, 2000) * 0.01f;
+						zCountSolid = 0;
 						zFirstSurface = true;
 						for (int z = 0; z < 64; z++) {
 							if (map->IsSolid(x, y, z)) {
@@ -136,7 +141,17 @@ namespace spades {
 								if (snow)
 									if (zFirstSurface)
 										vCol.x = vCol.y = vCol.z = 250 - SampleRandomInt(0, 15);
-								//rain
+								if (rain >= 0)
+									if (zCountSolid < randomRainLength) {
+										float rainFactor = ((float)rain * 0.01f) * 255.f * 0.01f;
+										if (zCountSolid != 0)
+											rainFactor *= (zCountSolid - randomRainLength) / randomRainLength;
+										if (rainFactor < 0)
+											rainFactor *= -1;
+										vCol.x -= (float)vCol.x * rainFactor;
+										vCol.y -= (float)vCol.y * rainFactor;
+										vCol.z -= (float)vCol.z * rainFactor;
+									}
 								if (shadow)
 									//openspades already renders shadows btw which makes this
 									//kinda even worse since shadows r rendered at a 45-ish
@@ -207,6 +222,7 @@ namespace spades {
 								if (vCol.z > 255)
 									vCol.z = 255;
 								zFirstSurface = false;
+								++zCountSolid;
 
 								map->Set(x, y, z, true,
 									vCol.x | (vCol.y << 8) | (vCol.z << 16) | (alpha << 24), true);
