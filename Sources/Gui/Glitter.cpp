@@ -77,8 +77,8 @@ namespace spades {
 			IntVector3 gradeColor = {glitArgs[0], glitArgs[1], glitArgs[2]};
 			bool grade = gradeColor.x >= 0 && gradeColor.y >= 0 && gradeColor.z >= 0;
 
-			int shadowRed = glitArgs[3]; int ShadowGreen = glitArgs[4]; int shadowBlue = glitArgs[5];
-			bool shadow = shadowRed >= 0 && ShadowGreen >= 0 && shadowBlue >= 0;
+			IntVector3 shadowColor = {glitArgs[3], glitArgs[4], glitArgs[5]};
+			bool shadow = shadowColor.x >= 0 && shadowColor.y >= 0 && shadowColor.z >= 0;
 
 			IntVector3 xRampColor = {glitArgs[6], glitArgs[7], glitArgs[8]};
 			bool xRampReverse = glitArgs[9]; int xRampRange = glitArgs[10];
@@ -112,15 +112,16 @@ namespace spades {
 			loadedMap->Release();
 			{
 
-				bool surface;
+				bool zFirstSurface;
+				bool zRestSurfaces;
 				IntVector3 vCol;
 				uint32_t iCol;
 				if (rain >= 0)
 					rain = (float)rain * 2.55f;
 				for (int x = 0; x < 512; x++)
 					for (int y = 0; y < 512; y++) {
-						surface = true;
 
+						zFirstSurface = true;
 						for (int z = 0; z < 64; z++) {
 							if (map->IsSolid(x, y, z)) {
 								iCol = map->GetColor(x, y, z);
@@ -130,10 +131,20 @@ namespace spades {
 
 								//repair
 								if (snow)
-									if (surface)
+									if (zFirstSurface)
 										vCol.x = vCol.y = vCol.z = 250 - SampleRandomInt(0, 15);
 								//rain
-								//shadow
+								if (shadow)
+									//openspades already renders shadows btw which makes this
+									//kinda even worse since shadows r rendered at a 45-ish
+									//degree while this here projects shadows at a direct 90
+									//degree angle, so these two shadows visually clash with
+									//each other. 
+									if (zRestSurfaces) {
+										vCol.x -= shadowColor.x;
+										vCol.y -= shadowColor.y;
+										vCol.z -= shadowColor.z;
+									}
 								if (grade) {
 									vCol.x *= (float)gradeColor.x / 255.f;
 									vCol.y *= (float)gradeColor.y / 255.f;
@@ -192,10 +203,12 @@ namespace spades {
 									vCol.y = 255;
 								if (vCol.z > 255)
 									vCol.z = 255;
-								surface = false;
+								zFirstSurface = false;
 
 								map->Set(x, y, z, true,
 									vCol.x | (vCol.y << 8) | (vCol.z << 16) | (100UL << 24), true);
+							} else {
+								zRestSurfaces = !zFirstSurface;
 							}
 						}
 					}
