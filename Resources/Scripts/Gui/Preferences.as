@@ -1275,8 +1275,8 @@ namespace spades {
 			layouter.AddSliderField(_Tr("Preferences", "Render Scale"), "r_scale",
 			0.2, 1, 0.01, ConfigNumberFormatter(0, "%", "", 100));
 			layouter.AddChoiceField(_Tr("Preferences", "Render Scaling Filter"), "r_scaleFilter",
-									array<string> = {_Tr("Preferences", "Bilinear"),
-													 _Tr("Preferences", "Bicubic"),
+									array<string> = {_Tr("Preferences", "Bicubic"),
+													 _Tr("Preferences", "Bilinear"),
 													 _Tr("Preferences", "Nearest")},
 									array<int> = {2, 1, 0});
 			layouter.AddToggleField(_Tr("Preferences", "Rendering Statistics"), "r_debugTiming");
