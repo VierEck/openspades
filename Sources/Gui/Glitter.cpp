@@ -80,17 +80,17 @@ namespace spades {
 			int shadowRed = glitArgs[3]; int ShadowGreen = glitArgs[4]; int shadowBlue = glitArgs[5];
 			bool shadow = shadowRed >= 0 && ShadowGreen >= 0 && shadowBlue >= 0;
 
-			int xRampRed = glitArgs[6]; int xRampGreen = glitArgs[7]; int xRampBlue = glitArgs[8];
+			IntVector3 xRampColor = {glitArgs[6], glitArgs[7], glitArgs[8]};
 			bool xRampReverse = glitArgs[9]; int xRampRange = glitArgs[10];
-			bool xRamp = xRampRed >= 0 && xRampGreen >= 0 && xRampBlue >= 0 && xRampRange >= 0;
+			bool xRamp = xRampColor.x >= 0 && xRampColor.y >= 0 && xRampColor.z >= 0 && xRampRange >= 0;
 
-			int yRampRed = glitArgs[11]; int yRampGreen = glitArgs[12]; int yRampBlue = glitArgs[13];
+			IntVector3 yRampColor = {glitArgs[11], glitArgs[12], glitArgs[13]};
 			bool yRampReverse = glitArgs[14]; int yRampRange = glitArgs[15];
-			bool yRamp = yRampRed >= 0 && yRampGreen >= 0 && yRampBlue >= 0 && yRampRange >= 0;
+			bool yRamp = yRampColor.x >= 0 && yRampColor.y >= 0 && yRampColor.z >= 0 && yRampRange >= 0;
 
-			int zRampRed = glitArgs[16]; int zRampGreen = glitArgs[17]; int zRampBlue = glitArgs[18];
+			IntVector3 zRampColor = {glitArgs[16], glitArgs[17], glitArgs[18]};
 			bool zRampReverse = glitArgs[19]; int zRampRange = glitArgs[20];
-			bool zRamp = zRampRed >= 0 && zRampGreen >= 0 && zRampBlue >= 0 && zRampRange >= 0;
+			bool zRamp = zRampColor.x >= 0 && zRampColor.y >= 0 && zRampColor.z >= 0 && zRampRange >= 0;
 
 			int noisemono = glitArgs[21]; int noisecolor = glitArgs[22]; int rain = glitArgs[23];
 
@@ -139,10 +139,30 @@ namespace spades {
 									vCol.y *= (float)gradeColor.y / 255.f;
 									vCol.z *= (float)gradeColor.z / 255.f;
 								}
-								//rampx
-								//rampy
-								//rampz
-								//noisemono
+								if (xRamp) {
+									float rampFactor = xRampReverse
+										? (float)std::abs(x - 512) / (float)xRampRange
+										: (float)x / (float)xRampRange;
+									vCol.x += (float)xRampColor.x * rampFactor;
+									vCol.y += (float)xRampColor.y * rampFactor;
+									vCol.z += (float)xRampColor.z * rampFactor;
+								}
+								if (yRamp) {
+									float rampFactor = yRampReverse
+										? (float)std::abs(y - 512) / (float)yRampRange
+										: (float)y / (float)yRampRange;
+									vCol.x += (float)yRampColor.x * rampFactor;
+									vCol.y += (float)yRampColor.y * rampFactor;
+									vCol.z += (float)yRampColor.z * rampFactor;
+								}
+								if (zRamp) {
+									float rampFactor = zRampReverse
+										? (float)std::abs(64 - z) / (float)zRampRange
+										: (float)(63 - z) / (float)zRampRange;
+									vCol.x += (float)zRampColor.x * rampFactor;
+									vCol.y += (float)zRampColor.y * rampFactor;
+									vCol.z += (float)zRampColor.z * rampFactor;
+								}
 								if (noisemono >= 0) {
 									float randomMono = (float)SampleRandomInt(0, noisemono) * 0.01f;
 									vCol.x -= vCol.x * randomMono;
@@ -157,7 +177,7 @@ namespace spades {
 								if (debug) {
 									vCol.x = ((float)x / 512.f) * 255;
 									vCol.y = ((float)y / 512.f) * 255;
-									vCol.z = ((float)z / 64.f) * 255;
+									vCol.z = ((float)(63 - z) / 64.f) * 255;
 								}
 
 								if (vCol.x < 0)
