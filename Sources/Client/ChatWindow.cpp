@@ -30,8 +30,8 @@
 #include <Core/Math.h>
 #include <Core/Settings.h>
 
-DEFINE_SPADES_SETTING(cg_chatHeight, "30");
-DEFINE_SPADES_SETTING(cg_killfeedHeight, "26");
+DEFINE_SPADES_SETTING(cg_chatHeight, "30", "20");
+DEFINE_SPADES_SETTING(cg_killfeedHeight, "26", "15");
 SPADES_SETTING(cg_hudTransparency);
 
 namespace spades {
