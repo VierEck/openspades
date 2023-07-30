@@ -471,7 +471,6 @@ namespace spades {
 			Handle<IImage> playerRifle = renderer.RegisterImage("Gfx/Map/Rifle.png");
 			Handle<IImage> playerShotgun = renderer.RegisterImage("Gfx/Map/Shotgun.png");
 			Handle<IImage> playerIcon = renderer.RegisterImage("Gfx/Map/Player.png");
-			Handle<IImage> viewIcon = renderer.RegisterImage("Gfx/Map/View.png");
 
 			// draw player's icon
 			for (int i = 0; i < world->GetNumPlayerSlots(); i++) {
@@ -516,6 +515,9 @@ namespace spades {
 
 				// Draw the focused player's view
 				if (&p == &focusPlayer) {
+					Handle<IImage> viewIcon = focusPlayer.GetWeaponInput().secondary && focusPlayer.GetTool() == Player::ToolWeapon
+						? renderer.RegisterImage("Gfx/Map/ViewADS.png")
+						: renderer.RegisterImage("Gfx/Map/View.png");
 					renderer.SetColorAlphaPremultiplied(iconColorF * 0.9f);
 					DrawIcon(p.IsSpectator() ? client->freeCameraState.position : p.GetPosition(),
 					         *viewIcon, ang);
