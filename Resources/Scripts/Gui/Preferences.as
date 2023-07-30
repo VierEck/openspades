@@ -966,6 +966,7 @@ namespace spades {
 													 _Tr("Preferences", "Players"),
 													 _Tr("Preferences", "OFF")},
 									array<int> = {2, 1, 0});
+			layouter.AddToggleField(_Tr("Preferences", "Ignore Private Messages"), "cg_ignorePrivateMessages");
 			layouter.AddChoiceField(_Tr("Preferences", "Center Message"), "cg_centerMessage",
 									array<string> = {_Tr("Preferences", "Kill-msg"),
 													 _Tr("Preferences", "ON"),

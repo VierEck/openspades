@@ -69,6 +69,7 @@ DEFINE_SPADES_SETTING(cg_skipDeadPlayersWhenDead, "0");
 SPADES_SETTING(cg_playerName);
 DEFINE_SPADES_SETTING(cg_mentionWord);
 DEFINE_SPADES_SETTING(cg_ignoreChatMessages, "0");
+DEFINE_SPADES_SETTING(cg_ignorePrivateMessages, "0");
 DEFINE_SPADES_SETTING(cg_showTeamMateLocation, "1");
 
 DEFINE_SPADES_SETTING(cg_demoRecord, "1", "0");
@@ -1042,6 +1043,9 @@ namespace spades {
 			}
 
 			if (msg.substr(0, 8) == "PM from " && (int)cg_ignoreChatMessages < 2) {
+				if (cg_ignorePrivateMessages)
+					return;
+
 				std::string s = "PM from " + msg.substr(8);
 				chatWindow->AddMessage(ChatWindow::ColoredMessage(s, MsgColorGreen));
 				return;
