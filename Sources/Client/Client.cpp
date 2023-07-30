@@ -974,6 +974,8 @@ namespace spades {
 					//! but it actually can be.
 					//! The extra whitespace is not a typo.
 					s = _Tr("Client", "[Global] ");
+				if (!p.IsAlive())
+					s += "*DEAD* ";
 				s += ChatWindow::TeamColorMessage(p.GetName(), p.GetTeamId());
 				if(!global && cg_showTeamMateLocation) {
 					auto letter = char(int('A') + int(p.GetPosition().x / 64));
@@ -994,6 +996,8 @@ namespace spades {
 				std::string s;
 				if (global)
 					s = "[Global] ";
+				if (!p.IsAlive())
+					s += "*DEAD* ";
 				s += p.GetName();
 				s += ": ";
 				s += msg;
