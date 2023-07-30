@@ -275,6 +275,20 @@ namespace spades {
 
 		void Client::DrawDisconnectScreen() {}
 
+		void Client::DrawPlayingTime() {
+			float sw = renderer->ScreenWidth();
+
+			int now = (int)time;
+			int mins = now / 60;
+			int secs = now - mins * 60;
+			char buf[64];
+			sprintf(buf, "%d:%.02d", mins, secs);
+			IFont& font = fontManager->GetMediumFont();
+			Vector2 size = font.Measure(buf);
+			Vector2 pos = MakeVector2((sw - size.x) * 0.5F, 48.0F - size.y);
+			font.DrawShadow(buf, pos, 1.0F, MakeVector4(1, 1, 1, 1), MakeVector4(0, 0, 0, 0.5));
+		}
+
 		void Client::DrawHurtSprites() {
 			float per = (world->GetTime() - lastHurtTime) / 1.5f;
 			if (per > 1.f)
@@ -1442,8 +1456,10 @@ namespace spades {
 			if (!cg_hideHud)
 				centerMessageView->Draw();
 
-			if (scoreboardVisible || !p)
+			if (scoreboardVisible || !p) {
 				scoreboard->Draw();
+				DrawPlayingTime();
+			}
 
 			if (IsLimboViewActive())
 				limbo->Draw();

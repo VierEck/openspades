@@ -424,6 +424,7 @@ namespace spades {
 			void DrawBuilderDragCursor();
 			void DrawMapObjectPosition();
 
+			void DrawPlayingTime();
 			void DrawHottrackedPlayerName();
 			void DrawHurtScreenEffect();
 			void DrawHurtSprites();
