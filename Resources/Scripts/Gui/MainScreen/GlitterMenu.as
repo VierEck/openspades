@@ -591,7 +591,7 @@ namespace spades {
 		spades::ui::Label @InfoLine1;
 		spades::ui::Label @InfoLine2;
 		spades::ui::Label @InfoLine3;
-		int infoLineCount;
+		uint infoLineCount;
 		spades::ui::Label @InfoLabel;
 		spades::ui::Label @InfoBorder;
 		spades::ui::Button @InfoCloseButton;
@@ -806,7 +806,7 @@ namespace spades {
 				AddArg(-1);
 				return;
 			}
-			AddArg(text.length != 0 ? parseUInt(text) : -1);
+			AddArg(text.length != 0 ? int(parseUInt(text)) : -1);
 		}
 		void AddArgButton(bool toggled) { AddArg(toggled ? 1 : 0); }
 		void AddArg(int arg) { ui.helper.GlitterAddArg(arg); }
