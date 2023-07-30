@@ -1528,6 +1528,9 @@ namespace spades {
 
 			layouter.AddControl(_Tr("Preferences", "Open Color Palette Setting"), "cg_keyEditColor");
 			layouter.AddControl(_Tr("Preferences", "Open map.TXT Editor"), "cg_keyMapTxt");
+			layouter.AddSliderField(_Tr("Preferences", "Tab Size (map.TXT)"),
+									"cg_mapTxtTabSize", 0, 10, 1,
+									ConfigNumberFormatter(1, ""));
 			ConfigField @hotkeyField = layouter.AddInputField(_Tr("Preferences", "UI HotKey keyboard layout"), "cg_UIHotKeyLayout");
 			layouter.AddHeading(_Tr("Preferences", " "));
 
