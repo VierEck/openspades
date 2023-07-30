@@ -39,7 +39,7 @@ Killfeed image feature, Specific word message highlight, Colored chat message, C
 "ZeroGrey":
 PM message highlight, Show map sector, Ignore chat, Hitfeedback sound, Hit analyze message, HitTest Debug improvements, k/d and streak display, damage indicators, Respawn Sound, Intro Sound, Screenshot Sound, Death Sound, Score Messages, Different Playermodels based on Weapon, improved skin models animations, First Person Lower Body, Classic Corpse Bounce Physics, mouse accel toggle, voxlap zoom filter, classic view weapon, improved weapon animation, Falling Blocks Bounce Physics, throttle minimap updates, hold map zoom, playing time in scoreboard
 "Mile":
-Glitter
+Glitter, Title Map "HallWeeb.vxl",
 "nonperforming":
 QWE to select team, turn off falling blocks, turn off corpses
 "Doctor Dank":

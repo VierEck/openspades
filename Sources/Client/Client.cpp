@@ -920,8 +920,8 @@ namespace spades {
 		}
 
 		void Client::SaveMapTxt(const std::string &txt) {
-			if (mapTxtFileName == "") {
-				mapTxtFileName = mapTxtFileName.substr(0, mapTxtFileName.length() - 4) + ".txt";
+			if (mapTxtFileName.size() <= 0) {
+				mapTxtFileName = mapFileName.substr(0, mapFileName.length() - 4) + ".txt";
 			}
 			std::unique_ptr<IStream> stream(FileManager::OpenForWriting(mapTxtFileName.c_str()));
 
@@ -934,7 +934,7 @@ namespace spades {
 		}
 
 		void Client::GenMaptxt() {
-			mapTxtFileName = mapFileName.substr(0, mapTxtFileName.length() - 4) + ".txt";
+			mapTxtFileName = mapFileName.substr(0, mapFileName.length() - 4) + ".txt";
 			std::unique_ptr<IStream> stream(FileManager::OpenForWriting(mapTxtFileName.c_str()));
 			std::string txt = GenMeta();
 
