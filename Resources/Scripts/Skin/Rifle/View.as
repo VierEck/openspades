@@ -69,14 +69,11 @@ namespace spades {
 		private double lastSprintState = 0;
 		private double lastRaiseState = 0;
 
-		// I need trueReloadProgress because reloadProgress is choppy.
-		private double trueReloadProgress = 2.5;
-
 		Matrix4 AdjustToReload(Matrix4 mat) {
-			if (trueReloadProgress < 0.6) {
+			if (reloadProgress < 0.6) {
 				reloadPitchSpring.desired = 0.6;
 				reloadRollSpring.desired = 0.6;
-			} else if (trueReloadProgress < 0.9) {
+			} else if (reloadProgress < 0.9) {
 				reloadPitchSpring.desired = 0;
 				reloadRollSpring.desired = -0.6;
 			} else {
@@ -115,16 +112,16 @@ namespace spades {
 		Vector3 GetMagazineOffset() {
 			Vector3 offsetPos = Vector3(0, -6, 8);
 
-			if (trueReloadProgress < 0.2) {
+			if (reloadProgress < 0.2) {
 				return magazineAttachment;
-			} else if (trueReloadProgress < 0.25) {
+			} else if (reloadProgress < 0.25) {
 				magazineRemoved.Activate();
-				float per = Min(1.0, (trueReloadProgress-0.2) / (0.25-0.2));
+				float per = Min(1.0, (reloadProgress -0.2) / (0.25-0.2));
 				return Mix(magazineAttachment, offsetPos, SmoothStep(per));
-			} else if (trueReloadProgress < 0.4) {
+			} else if (reloadProgress < 0.4) {
 				return offsetPos;
-			} else if (trueReloadProgress < 0.5) {
-				float per = Min(1.0, (trueReloadProgress-0.4) / (0.5-0.4));
+			} else if (reloadProgress < 0.5) {
+				float per = Min(1.0, (reloadProgress -0.4) / (0.5-0.4));
 				return Mix(offsetPos, magazineAttachment, SmoothStep(per));
 			} else {
 				magazineInserted.Activate();
@@ -136,14 +133,14 @@ namespace spades {
 			Vector3 leftHandOffset = Vector3(1, 6, 1);
 			Vector3 magazineOffset = GetMagazineOffset() + Vector3(0, 0, 4);
 
-			if (trueReloadProgress < 0.1) {
-				float per = Min(1.0, trueReloadProgress / 0.1);
+			if (reloadProgress < 0.1) {
+				float per = Min(1.0, reloadProgress / 0.1);
 				return Mix(leftHandOffset, magazineOffset, SmoothStep(per));
-			} else if (trueReloadProgress < 0.6) {
+			} else if (reloadProgress < 0.6) {
 				magazineTouched.Activate();
 				return magazineOffset;
-			} else if (trueReloadProgress < 1.0) {
-				float per = Min(1.0, (trueReloadProgress-0.6) / (1.0-0.9));
+			} else if (reloadProgress < 1.0) {
+				float per = Min(1.0, (reloadProgress -0.6) / (1.0-0.9));
 				return Mix(magazineOffset, leftHandOffset, SmoothStep(per));
 			} else {
 				return leftHandOffset;
@@ -160,19 +157,19 @@ namespace spades {
 
 			Vector3 handlePullingOffset = chargingHandleOffset + Vector3(0, -6, 0);
 
-			if (trueReloadProgress < 0.7) {
+			if (reloadProgress < 0.7) {
 				return rightHandOffset;
-			} else if (trueReloadProgress < 0.8) {
-				float per = Min(1.0, (trueReloadProgress-0.7) / (0.8-0.7));
+			} else if (reloadProgress  < 0.8) {
+				float per = Min(1.0, (reloadProgress -0.7) / (0.8-0.7));
 				return Mix(rightHandOffset, chargingHandleOffset, SmoothStep(per));
-			} else if (trueReloadProgress < 0.82) {
+			} else if (reloadProgress < 0.82) {
 				return chargingHandleOffset;
-			} else if (trueReloadProgress < 0.87) {
+			} else if (reloadProgress < 0.87) {
 				chargingHandlePulled.Activate();
-				float per = Min(1.0, (trueReloadProgress-0.82) / (0.87-0.82));
+				float per = Min(1.0, (reloadProgress -0.82) / (0.87-0.82));
 				return Mix(chargingHandleOffset, handlePullingOffset, SmoothStep(per));
-			} else if (trueReloadProgress < 1.0) {
-				float per = Min(1.0, (trueReloadProgress-0.87) / (1.0-0.87));
+			} else if (reloadProgress < 1.0) {
+				float per = Min(1.0, (reloadProgress-0.87) / (1.0-0.87));
 				return Mix(handlePullingOffset, rightHandOffset, SmoothStep(per));
 			} else {
 				return rightHandOffset;
@@ -219,7 +216,6 @@ namespace spades {
 			reloadPitchSpring.Update(dt);
 			reloadRollSpring.Update(dt);
 			reloadOffsetSpring.Update(dt);
-			trueReloadProgress += dt / 2.5;
 
 			sprintSpring.Update(dt);
 			raiseSpring.Update(dt);
@@ -291,8 +287,6 @@ namespace spades {
 				param.volume = 0.5F;
 				audioDevice.PlayLocal(reloadSound, origin, param);
 			}
-
-			trueReloadProgress = 0;
 		}
 
 		float GetZPos() { return 0.2F - AimDownSightStateSmooth * 0.05F; }
