@@ -92,9 +92,8 @@ namespace spades {
 			chunkInvalid[chunkId] = true;
 		}
 
-		void GLFlatMapRenderer::Draw(const AABB2 &dest, const AABB2 &src) {
+		void GLFlatMapRenderer::UpdateChunks() {
 			SPADES_MARK_FUNCTION();
-
 			// update chunks
 			for (size_t i = 0; i < chunkInvalid.size(); i++) {
 				if (!chunkInvalid[i])
@@ -112,7 +111,10 @@ namespace spades {
 				}
 				chunkInvalid[i] = false;
 			}
+		}
 
+		void GLFlatMapRenderer::Draw(const AABB2 &dest, const AABB2 &src) {
+			SPADES_MARK_FUNCTION();
 			renderer.DrawImage(*image, dest, src);
 		}
 	} // namespace draw

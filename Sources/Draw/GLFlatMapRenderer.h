@@ -52,6 +52,7 @@ namespace spades {
 			void Draw(const AABB2 &dest, const AABB2 &src);
 
 			void GameMapChanged(int x, int y, int z, client::GameMap &);
+			void UpdateChunks();
 		};
 	} // namespace draw
 } // namespace spades

@@ -1410,6 +1410,12 @@ namespace spades {
 			                   inRect.GetMinX(), inRect.GetMaxY(), col.x, col.y, col.z, col.w);
 		}
 
+		void GLRenderer::UpdateFlatGameMap() {
+			EnsureSceneNotStarted();
+			if (flatMapRenderer)
+				flatMapRenderer->UpdateChunks();
+		}
+
 		void GLRenderer::DrawFlatGameMap(const spades::AABB2 &outRect,
 		                                 const spades::AABB2 &inRect) {
 			void EnsureSceneNotStarted();

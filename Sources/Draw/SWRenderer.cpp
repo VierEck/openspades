@@ -1023,6 +1023,9 @@ namespace spades {
 			imageRenderer->DrawPolygon(img, vtx[1], vtx[3], vtx[2]);
 		}
 
+		void SWRenderer::UpdateFlatGameMap() {
+			SPADES_MARK_FUNCTION();
+		}
 		void SWRenderer::DrawFlatGameMap(const spades::AABB2 &outRect,
 		                                 const spades::AABB2 &inRect) {
 			SPADES_MARK_FUNCTION();

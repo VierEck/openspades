@@ -747,6 +747,8 @@ namespace spades {
 						audioDevice->PlayLocal(chunk.GetPointerOrNull(), param);
 					} else if (CheckKey(cg_keyChangeMapScale, name) && down) {
 						mapView->SwitchScale();
+						renderer->UpdateFlatGameMap();
+
 						Handle<IAudioChunk> chunk =
 						  audioDevice->RegisterSound("Sounds/Misc/SwitchMapZoom.opus");
 						AudioParam param;
@@ -756,6 +758,7 @@ namespace spades {
 						bool zoomed = largeMapView->IsZoomed();
 						zoomed = cg_holdMapZoom ? down : !zoomed;
 						largeMapView->SetZoomed(zoomed);
+						renderer->UpdateFlatGameMap();
 
 						Handle<IAudioChunk> c = zoomed
 						    ? audioDevice->RegisterSound("Sounds/Misc/OpenMap.opus")
@@ -763,7 +766,6 @@ namespace spades {
 						AudioParam param;
 						param.volume = cg_mapSoundGain;
 						audioDevice->PlayLocal(c.GetPointerOrNull(), param);
-						
 					} else if (CheckKey(cg_keyScoreboard, name)) {
 						scoreboardVisible = down;
 					} else if (CheckKey(cg_keyLimbo, name) && down) {
