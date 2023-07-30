@@ -180,11 +180,6 @@ namespace spades {
 			lastScale = actualScale;
 		}
 
-		bool MapView::ToggleZoom() {
-			zoomed = !zoomed;
-			return zoomed;
-		}
-
 		static Vector4 ModifyColor(IntVector3 v) {
 			Vector4 fv;
 			fv.x = static_cast<float>(v.x) / 255.f;

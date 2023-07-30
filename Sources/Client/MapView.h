@@ -58,7 +58,8 @@ namespace spades {
 
 			void Update(float dt);
 			void SwitchScale();
-			bool ToggleZoom();
+			bool IsZoomed() { return zoomed; }
+			void SetZoomed(bool b) { zoomed = b; }
 
 			void Draw();
 		};

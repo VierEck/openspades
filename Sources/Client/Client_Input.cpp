@@ -88,6 +88,7 @@ DEFINE_SPADES_SETTING(cg_keyChatLog, "k");
 DEFINE_SPADES_SETTING(cg_keyZoomChatLog, "h");
 DEFINE_SPADES_SETTING(cg_keyChangeMapScale, "m");
 DEFINE_SPADES_SETTING(cg_keyToggleMapZoom, "n");
+DEFINE_SPADES_SETTING(cg_holdMapZoom, "0");
 DEFINE_SPADES_SETTING(cg_keyScoreboard, "Tab");
 DEFINE_SPADES_SETTING(cg_keyLimbo, "l");
 
@@ -751,18 +752,18 @@ namespace spades {
 						AudioParam param;
 						param.volume = cg_zoomMapSoundGain;
 						audioDevice->PlayLocal(chunk.GetPointerOrNull(), param);
-					} else if (CheckKey(cg_keyToggleMapZoom, name) && down) {
+					} else if (CheckKey(cg_keyToggleMapZoom, name) && (down || cg_holdMapZoom)) {
+						bool zoomed = largeMapView->IsZoomed();
+						zoomed = cg_holdMapZoom ? down : !zoomed;
+						largeMapView->SetZoomed(zoomed);
+
+						Handle<IAudioChunk> c = zoomed
+						    ? audioDevice->RegisterSound("Sounds/Misc/OpenMap.opus")
+						    : audioDevice->RegisterSound("Sounds/Misc/CloseMap.opus");
 						AudioParam param;
 						param.volume = cg_mapSoundGain;
-						if (largeMapView->ToggleZoom()) {
-							Handle<IAudioChunk> chunk =
-							  audioDevice->RegisterSound("Sounds/Misc/OpenMap.opus");
-							audioDevice->PlayLocal(chunk.GetPointerOrNull(), param);
-						} else {
-							Handle<IAudioChunk> chunk =
-							  audioDevice->RegisterSound("Sounds/Misc/CloseMap.opus");
-							audioDevice->PlayLocal(chunk.GetPointerOrNull(), param);
-						}
+						audioDevice->PlayLocal(c.GetPointerOrNull(), param);
+						
 					} else if (CheckKey(cg_keyScoreboard, name)) {
 						scoreboardVisible = down;
 					} else if (CheckKey(cg_keyLimbo, name) && down) {

@@ -1421,8 +1421,9 @@ namespace spades {
 			layouter.AddHeading(_Tr("Preferences", " "));
 
 			layouter.AddHeading(_Tr("Preferences", "Misc"));
-			layouter.AddControl(_Tr("Preferences", "Minimap Scale"), "cg_keyChangeMapScale");
+			layouter.AddToggleField(_Tr("Preferences", "Hold Large Map"), "cg_holdMapZoom");
 			layouter.AddControl(_Tr("Preferences", "Toggle Map"), "cg_keyToggleMapZoom");
+			layouter.AddControl(_Tr("Preferences", "Minimap Scale"), "cg_keyChangeMapScale");
 			layouter.AddControl(_Tr("Preferences", "Toggle HitTest Zoom"), "cg_hitTestKey");
 			layouter.AddControl(_Tr("Preferences", "Flashlight"), "cg_keyFlashlight");
 			layouter.AddControl(_Tr("Preferences", "Global Chat"), "cg_keyGlobalChat");
