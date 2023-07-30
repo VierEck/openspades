@@ -47,6 +47,8 @@
 		private AudioDevice@ audioDevice;
 		private Model@ model;
 		private Image@ sightImage;
+		
+		protected ConfigItem n_hideDefaultTarget("n_hideDefaultTarget");
 
 		ViewGrenadeSkin(Renderer@ r, AudioDevice@ dev) {
 			@renderer = r;
@@ -140,6 +142,9 @@
 		}
 
 		void Draw2D() {
+			if (n_hideDefaultTarget.IntValue > 0)
+				return;
+			
 			renderer.ColorNP = Vector4(1.0F, 1.0F, 1.0F, 1.0F);
 			renderer.DrawImage(sightImage,
 				Vector2((renderer.ScreenWidth - sightImage.Width) * 0.5F,
