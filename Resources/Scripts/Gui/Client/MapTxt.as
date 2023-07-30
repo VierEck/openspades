@@ -700,6 +700,9 @@ namespace spades {
 				if (key == "BackSpace") {
 					BackSpace();
 				}
+				if (key == "Tab") {
+					Tab();
+				}
 				if (key == "Delete") {
 					Delete();
 				}
@@ -766,6 +769,15 @@ namespace spades {
 				this.selection.CursorPosition = this.selection.MarkPosition = cursor + text.length;
 			}
 			
+			private ConfigItem cg_mapTxtTabSize("cg_mapTxtTabSize", "4");
+			void Tab() {
+				string spaces;
+				for (int i = 0; i < cg_mapTxtTabSize.IntValue; i++)
+					spaces += ' ';
+				if (spaces.length > 0)
+					Write(spaces);
+			}
+			
 			void BackSpace() {
 				int cursor = this.selection.CursorPosition;
 				int mark = this.selection.MarkPosition;
@@ -789,8 +801,15 @@ namespace spades {
 					if (cursor <= 0) {
 						return;
 					}
-					Insert(cursor - 1, cursor, "");
-					deleteLength = 1;
+					int del = 1;
+					for (int i = 1; i <= cg_mapTxtTabSize.IntValue; i++) {
+						if (Text.substr(cursor - i, 1) != ' ')
+							break;
+						if (i == cg_mapTxtTabSize.IntValue)
+							del = i;
+					}
+					Insert(cursor - del, cursor, "");
+					deleteLength = del;
 				}
 				
 				this.selection.CursorPosition = this.selection.MarkPosition = cursor - deleteLength;
@@ -813,7 +832,14 @@ namespace spades {
 					Insert(mark, cursor, "");
 					return;
 				} else {
-					Insert(cursor, cursor + 1, "");
+					int del = 1;
+					for (int i = 0; i < cg_mapTxtTabSize.IntValue; i++) {
+						if (Text.substr(cursor + i, 1) != ' ')
+							break;
+						if (i == cg_mapTxtTabSize.IntValue - 1)
+							del = i + 1;
+					}
+					Insert(cursor, cursor + del, "");
 				}
 				this.selection.CursorPosition = this.selection.MarkPosition = cursor;
 			}
