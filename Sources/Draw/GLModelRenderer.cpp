@@ -172,7 +172,7 @@ namespace spades {
 			for (RenderModel &m : models) {
 				std::vector<client::ModelRenderParam> params;
 				for (client::ModelRenderParam p : m.params) {
-					if (p.playerID != -1 && !visiblePlayers[p.playerID] || p.occludedByFog) {
+					if (p.playerID != -1 && !visiblePlayers[p.playerID]) {
 						params.push_back(p);
 					}
 				}
@@ -195,7 +195,7 @@ namespace spades {
 			for (RenderModel &m : models) {
 				std::vector<client::ModelRenderParam> params;
 				for (client::ModelRenderParam p : m.params) {
-					if (p.playerID != -1 && visiblePlayers[p.playerID] && !p.occludedByFog) {
+					if (p.playerID != -1 && visiblePlayers[p.playerID]) {
 						params.push_back(p);
 					}
 				}
@@ -210,7 +210,7 @@ namespace spades {
 			for (RenderModel &m : models) {
 				std::vector<client::ModelRenderParam> params;
 				for (client::ModelRenderParam p : m.params) {
-					if (p.playerID != -1 && visiblePlayers[p.playerID] || p.occludedByFog) {
+					if (p.playerID != -1 && visiblePlayers[p.playerID]) {
 						params.push_back(p);
 					}
 				}
@@ -228,7 +228,7 @@ namespace spades {
 			for (RenderModel &m : models) {
 				std::vector<client::ModelRenderParam> params;
 				for (client::ModelRenderParam p : m.params) {
-					if (p.playerID != -1 && !visiblePlayers[p.playerID] || p.occludedByFog) {
+					if (p.playerID != -1 && !visiblePlayers[p.playerID]) {
 						params.push_back(p);
 					}
 				}

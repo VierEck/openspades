@@ -62,7 +62,6 @@ namespace spades {
 			float opacity = 1.0;
 
 			int playerID = -1;
-			bool occludedByFog = false;
 		};
 
 		enum DynamicLightType {
