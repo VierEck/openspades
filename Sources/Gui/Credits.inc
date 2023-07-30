@@ -37,7 +37,7 @@ MapEditor, Demo Replay/Recording based on aos_replay, Chat Macros, Performance C
 "Nuceto":
 Killfeed image feature, Specific word message highlight, Colored chat message, Colored stats, HUD and Minimap transparency, Teammate map sector in chat message, HitTest Debug display transparency and size, Target Mod, Default Fade Weapon Models, killfeed distance analisation
 "ZeroGrey":
-PM message highlight, Show map sector, Ignore chat, Hitfeedback sound, Hit analyze message, HitTest Debug improvements, k/d and streak display, damage indicators, Respawn Sound, Intro Sound, Screenshot Sound, Death Sound, Score Messages, Different Playermodels based on Weapon, improved skin models animations, First Person Lower Body, Classic Corpse Bounce Physics, mouse accel toggle, voxlap zoom filter, classic view weapon, improved weapon animation, Falling Blocks Bounce Physics
+PM message highlight, Show map sector, Ignore chat, Hitfeedback sound, Hit analyze message, HitTest Debug improvements, k/d and streak display, damage indicators, Respawn Sound, Intro Sound, Screenshot Sound, Death Sound, Score Messages, Different Playermodels based on Weapon, improved skin models animations, First Person Lower Body, Classic Corpse Bounce Physics, mouse accel toggle, voxlap zoom filter, classic view weapon, improved weapon animation, Falling Blocks Bounce Physics, throttle minimap updates, hold map zoom, playing time in scoreboard
 "Mile":
 Glitter
 "nonperforming":
