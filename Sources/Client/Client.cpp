@@ -977,7 +977,8 @@ namespace spades {
 				if (!p.IsAlive())
 					s += "*DEAD* ";
 				s += ChatWindow::TeamColorMessage(p.GetName(), p.GetTeamId());
-				if(!global && cg_showTeamMateLocation) {
+				if(cg_showTeamMateLocation && !global && !p.IsLocalPlayer()) {
+					s += ' ';
 					auto letter = char(int('A') + int(p.GetPosition().x / 64));
 					auto number = std::to_string(int(p.GetPosition().y / 64) + 1);
 					s += letter + number;
