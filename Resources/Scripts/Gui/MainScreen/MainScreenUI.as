@@ -38,8 +38,9 @@ namespace spades {
 		private float time = -1.f;
 		private float reverseTime = 1.f;
 		
-		bool isFadeOut = false;
-		Vector3 camera;
+		private int sceneState = -1;
+		private bool isFadeOut = false;
+		private Vector3 camera;
 		private Vector3 roll = Vector3(0, 0, -1);
 		private Vector3 reverseRoll = Vector3(0, 0, 0);
 
@@ -75,8 +76,8 @@ namespace spades {
 		void SetupRenderer() {
 			// load map
 			@renderer.GameMap = GameMap("Maps/TitleHallWeeb.vxl");
-			renderer.FogColor = Vector3(0.1f, 0.f, 0.2f);
 			
+			sceneState = 0;
 			SetupHallScene();
 
 			// returned from the client game, so reload the server list.
@@ -125,7 +126,26 @@ namespace spades {
 			}
 
 			SceneDefinition sceneDef;
-			sceneDef = HallScene(sceneDef, dt);
+			switch (sceneState) {
+				case 0:
+					sceneDef = HallScene(sceneDef, dt);
+					break;
+				case 1:
+					sceneDef = BonfireScene(sceneDef, dt);
+					break;
+				case 2:
+					sceneDef = SkylineScene(sceneDef, dt);
+					break;
+				case 3:
+					sceneDef = AustronautScene(sceneDef, dt);
+					break;
+				case 4:
+					sceneDef = ToriiScene(sceneDef, dt);
+					break;
+				case 5:
+					sceneDef = PlaneScene(sceneDef, dt);
+					break;
+			}
 			sceneDef.zNear = 0.1f;
 			sceneDef.zFar = 222.f;
 			sceneDef.time = int(time * 1000.f);
@@ -164,7 +184,7 @@ namespace spades {
 			time += Min(dt, 0.05f) * reverseTime;
 			
 			if (time <= 0)
-				SetupHallScene();
+				SetupNextScene();
 		}
 
 		void RunFrameLate(float dt) {
@@ -176,21 +196,48 @@ namespace spades {
 
 		bool WantsToBeClosed() { return shouldExit; }
 		
-		void FadeOut() { 
+		private void FadeOut() { 
 			if (isFadeOut)
 				return;
 			isFadeOut = true;
 			reverseTime = -1.f; 
 			time = 5.f;
 		}
-		void FadeIn() {
+		private void FadeIn() {
 			isFadeOut = false;
 			time = -1.f;
 			reverseTime = 1.f;
 		}
 		
-		void SetupHallScene() {
+		void SetupNextScene() {
+			if (++sceneState > 5)
+				sceneState = 0;
+				
+			switch (sceneState) {
+				case 0:
+					SetupHallScene();
+					break;
+				case 1:
+					SetupBonfireScene();
+					break;
+				case 2:
+					SetupSkylineScene();
+					break;
+				case 3:
+					SetupAustronautScene();
+					break;
+				case 4:
+					SetupToriiScene();
+					break;
+				case 5:
+					SetupPlaneScene();
+					break;
+			}
+		}
+		
+		void SetupHallScene() {//scene 0
 			renderer.FogDistance = 128.f;
+			renderer.FogColor = Vector3(0.05f, 0.f, 0.1f);
 			reverseTime = 1.f;
 			camera.x = 400;
 			camera.y = 256;
@@ -214,10 +261,138 @@ namespace spades {
 			if (roll.y <= -1 || roll.y >= 1)
 				reverseRoll.y = 1 - reverseRoll.y;
 				
-			return SetupCamera(sceneDef, 
-				Vector3(camera.x, camera.y, camera.z),
-				Vector3(camera.x - .1f, camera.y, camera.z - 0.03f), 
-				roll, 90);
+			return SetupCamera(sceneDef, camera,
+				Vector3(camera.x - .1f, camera.y, camera.z - 0.03f), roll, 90);
+		}
+		
+		void SetupBonfireScene() {//scene 1
+			renderer.FogDistance = 128.f;
+			renderer.FogColor = Vector3(0.f, 0.f, 0.f);
+			reverseTime = 1.f;
+			camera.x = 208;
+			camera.y = 312;
+			camera.z = 59.4f;
+			roll = Vector3(0, 0, -1);
+			reverseRoll = Vector3(0, 0, 0);
+			FadeIn();
+		}
+		private SceneDefinition BonfireScene(SceneDefinition sceneDef, float dt) {
+			float delta = Min(dt, 0.05f);
+			camera.x -= delta * 1.75f;
+			
+			if (camera.x <= 200 && camera.y <= 314)
+				camera.y += delta;
+			
+			if (camera.x <= 195 &&camera.x > 177 && camera.z >= 56.4f)
+				camera.z -= delta;
+			
+			if (camera.x <= 195 && camera.x > 177 && camera.z >= 56.4f)
+				camera.z -= delta;
+				
+			if (camera.x <= 177 && camera.z <= 59.4f)
+				camera.z += delta;
+			
+			
+			if (camera.x <= 165)
+				FadeOut();
+			
+			return SetupCamera(sceneDef, camera,
+				Vector3(camera.x - .1f, camera.y, camera.z), roll, 68);
+		}
+		
+		void SetupSkylineScene() {//scene 2
+			renderer.FogDistance = 128.f;
+			renderer.FogColor = Vector3(0.05f, 0.f, 0.1f);
+			reverseTime = 1.f;
+			camera.x = 100;
+			camera.y = 256;
+			camera.z = -10.6f;
+			roll = Vector3(0, 0, -1);
+			reverseRoll = Vector3(0, 0, 0);
+			FadeIn();
+		}
+		private SceneDefinition SkylineScene(SceneDefinition sceneDef, float dt) {
+			float delta = Min(dt, 0.05f);
+			camera.x += delta * 2.f;
+			
+			if (camera.x >= 330)
+				FadeOut();
+			
+			return SetupCamera(sceneDef, camera,
+				Vector3(camera.x + .1f, camera.y, camera.z + 0.03f), roll, 90);
+		}
+		
+		void SetupAustronautScene() {//scene 3
+			renderer.FogDistance = 128.f;
+			renderer.FogColor = Vector3(0.05f, 0.f, 0.1f);
+			reverseTime = 1.f;
+			camera.x = 350;
+			camera.y = 325;
+			camera.z = 54;
+			roll = Vector3(0, 0, -1);
+			reverseRoll = Vector3(0, 0, 0);
+			FadeIn();
+		}
+		private SceneDefinition AustronautScene(SceneDefinition sceneDef, float dt) {
+			float delta = Min(dt, 0.05f);
+			camera.z -= delta * 1.5f;
+			
+			if (camera.z <= 25)
+				FadeOut();
+			
+			return SetupCamera(sceneDef, camera, Vector3(375, 313, 40), roll, 90);
+		}
+		
+		void SetupToriiScene() {//scene 4
+			renderer.FogDistance = 128.f;
+			renderer.FogColor = Vector3(0.05f, 0.f, 0.1f);
+			reverseTime = 1.f;
+			camera.x = 350;
+			camera.y = 129;
+			camera.z = 31.4f;
+			roll = Vector3(0, 0, -1);
+			reverseRoll = Vector3(0, 0, 0);
+			FadeIn();
+		}
+		private SceneDefinition ToriiScene(SceneDefinition sceneDef, float dt) {
+			float delta = Min(dt, 0.05f);
+			camera.x -= delta * 2.f;
+			
+			if (camera.x <= 170)
+				FadeOut();
+			
+			return SetupCamera(sceneDef, camera,
+				Vector3(camera.x - .1f, camera.y, camera.z - 0.03f), roll, 90);
+		}
+		
+		void SetupPlaneScene() {//scene 5
+			renderer.FogDistance = 128.f;
+			renderer.FogColor = Vector3(0.05f, 0.f, 0.1f);
+			reverseTime = 1.f;
+			camera.x = 320;
+			camera.y = 500;
+			camera.z = 0;
+			roll = Vector3(0, 0, -1);
+			reverseRoll = Vector3(0, 0, 0);
+			FadeIn();
+		}
+		private SceneDefinition PlaneScene(SceneDefinition sceneDef, float dt) {
+			float delta = Min(dt, 0.05f);
+			camera.x += delta * 2.f;
+			
+			if (camera.x >= 420)
+				FadeOut();
+			
+			float rollDelta = delta * 0.005f;
+			roll.z += reverseRoll.z == 1 ? -rollDelta : rollDelta;
+			roll.y += reverseRoll.y == 1 ? -rollDelta : rollDelta;
+			if (roll.z <= -1 || roll.z >= 1)
+				reverseRoll.z = 1 - reverseRoll.z;
+			if (roll.y <= -1 || roll.y >= 1)
+				reverseRoll.y = 1 - reverseRoll.y;
+				
+			return SetupCamera(sceneDef, camera,
+				Vector3(camera.x + .1f, camera.y - .1f, camera.z + .1f), roll, 90);
 		}
 	}
 
