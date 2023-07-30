@@ -36,6 +36,12 @@ namespace spades {
 		bool shouldExit = false;
 
 		private float time = -1.f;
+		private float reverseTime = 1.f;
+		
+		bool isFadeOut = false;
+		Vector3 camera;
+		private Vector3 roll = Vector3(0, 0, -1);
+		private Vector3 reverseRoll = Vector3(0, 0, 0);
 
 		private ConfigItem cg_playerName("cg_playerName");
 		private ConfigItem cg_playerNameIsSet("cg_playerNameIsSet", "0");
@@ -68,10 +74,10 @@ namespace spades {
 
 		void SetupRenderer() {
 			// load map
-			@renderer.GameMap = GameMap("Maps/Title.vxl");
-			renderer.FogColor = Vector3(0.1f, 0.10f, 0.1f);
-			renderer.FogDistance = 128.f;
-			time = -1.f;
+			@renderer.GameMap = GameMap("Maps/TitleHallWeeb.vxl");
+			renderer.FogColor = Vector3(0.1f, 0.f, 0.2f);
+			
+			SetupHallScene();
 
 			// returned from the client game, so reload the server list.
 			if (mainMenu !is null)
@@ -119,12 +125,7 @@ namespace spades {
 			}
 
 			SceneDefinition sceneDef;
-			float cameraX = time;
-			cameraX -= floor(cameraX / 512.f) * 512.f;
-			cameraX = 512.f - cameraX;
-			sceneDef =
-				SetupCamera(sceneDef, Vector3(cameraX, 256.f, 12.f),
-							Vector3(cameraX + .1f, 257.f, 12.5f), Vector3(0.f, 0.f, -1.f), 30.f);
+			sceneDef = HallScene(sceneDef, dt);
 			sceneDef.zNear = 0.1f;
 			sceneDef.zFar = 222.f;
 			sceneDef.time = int(time * 1000.f);
@@ -133,6 +134,7 @@ namespace spades {
 			sceneDef.denyCameraBlur = true;
 			sceneDef.depthOfFieldFocalLength = 100.f;
 			sceneDef.skipWorld = false;
+			sceneDef.allowGlowBlocks = true;
 
 			// fade the map
 			float fade = Clamp((time - 1.f) / 2.2f, 0.f, 1.f);
@@ -159,7 +161,10 @@ namespace spades {
 			manager.RunFrame(dt);
 			manager.Render();
 
-			time += Min(dt, 0.05f);
+			time += Min(dt, 0.05f) * reverseTime;
+			
+			if (time <= 0)
+				SetupHallScene();
 		}
 
 		void RunFrameLate(float dt) {
@@ -170,6 +175,50 @@ namespace spades {
 		void Closing() { shouldExit = true; }
 
 		bool WantsToBeClosed() { return shouldExit; }
+		
+		void FadeOut() { 
+			if (isFadeOut)
+				return;
+			isFadeOut = true;
+			reverseTime = -1.f; 
+			time = 5.f;
+		}
+		void FadeIn() {
+			isFadeOut = false;
+			time = -1.f;
+			reverseTime = 1.f;
+		}
+		
+		void SetupHallScene() {
+			renderer.FogDistance = 128.f;
+			reverseTime = 1.f;
+			camera.x = 400;
+			camera.y = 256;
+			camera.z = 59.4f;
+			roll = Vector3(0, 0, -1);
+			reverseRoll = Vector3(0, 0, 0);
+			FadeIn();
+		}
+		private SceneDefinition HallScene(SceneDefinition sceneDef, float dt) {
+			float delta = Min(dt, 0.05f);
+			camera.x -= delta * 2.f;
+			
+			if (camera.x <= 160)
+				FadeOut();
+			
+			float rollDelta = delta * 0.005f;
+			roll.z += reverseRoll.z == 1 ? -rollDelta : rollDelta;
+			roll.y += reverseRoll.y == 1 ? -rollDelta : rollDelta;
+			if (roll.z <= -1 || roll.z >= 1)
+				reverseRoll.z = 1 - reverseRoll.z;
+			if (roll.y <= -1 || roll.y >= 1)
+				reverseRoll.y = 1 - reverseRoll.y;
+				
+			return SetupCamera(sceneDef, 
+				Vector3(camera.x, camera.y, camera.z),
+				Vector3(camera.x - .1f, camera.y, camera.z - 0.03f), 
+				roll, 90);
+		}
 	}
 
 	/**

@@ -32,9 +32,6 @@
 #include "IGLDevice.h"
 #include <Client/GameMap.h>
 #include <Core/Debug.h>
-#include <Core/Settings.h>
-
-DEFINE_SPADES_SETTING(cg_glowBlocks, "1", "0");
 
 namespace spades {
 	namespace draw {
@@ -214,7 +211,7 @@ namespace spades {
 
 			static GLProgramUniform glowBlocks("allowGlow");
 			glowBlocks(basicProgram);
-			glowBlocks.SetValue((bool)cg_glowBlocks);
+			glowBlocks.SetValue(renderer.GetSceneDef().allowGlowBlocks);
 
 			static GLProgramUniform fogDistance("fogDistance");
 			fogDistance(basicProgram);

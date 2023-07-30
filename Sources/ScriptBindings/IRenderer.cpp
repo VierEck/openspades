@@ -442,6 +442,10 @@ namespace spades {
 														asOFFSET(SceneDefinition, skipWorld));
 						manager->CheckError(r);
 						r = eng->RegisterObjectProperty("SceneDefinition",
+														"bool allowGlowBlocks",
+														asOFFSET(SceneDefinition, allowGlowBlocks));
+						manager->CheckError(r);
+						r = eng->RegisterObjectProperty("SceneDefinition",
 														"float depthOfFieldFocalLength",
 														asOFFSET(SceneDefinition, depthOfFieldFocalLength));
 						manager->CheckError(r);

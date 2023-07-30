@@ -48,6 +48,7 @@ DEFINE_SPADES_SETTING(cg_depthOfFieldAmount, "1");
 DEFINE_SPADES_SETTING(cg_shake, "1", "0");
 DEFINE_SPADES_SETTING(cg_specEsp, "1");
 DEFINE_SPADES_SETTING(cg_specNoFogMix, "1");
+DEFINE_SPADES_SETTING(cg_glowBlocks, "1", "0");
 
 namespace spades {
 	namespace client {
@@ -168,6 +169,8 @@ namespace spades {
 					def.allowEsp = cg_specEsp;
 					def.allowNoFogMix = cg_specNoFogMix;
 				}
+
+				def.allowGlowBlocks = (bool)cg_glowBlocks;
 
 				switch (GetCameraMode()) {
 					case ClientCameraMode::None: SPUnreachable();

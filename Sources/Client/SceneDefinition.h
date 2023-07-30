@@ -32,6 +32,7 @@ namespace spades {
 			float zNear, zFar;
 			bool skipWorld;
 
+			bool allowGlowBlocks = false;
 			bool allowEsp = false;
 			bool allowNoFogMix = false;
 
