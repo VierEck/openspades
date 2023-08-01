@@ -481,18 +481,6 @@ namespace spades {
 				hasDelayedReload = false;
 			}
 
-			// PlayerInput actualInput = player.GetInput();
-			WeaponInput actualWeapInput = player.GetWeaponInput();
-
-			if (!(actualWeapInput.secondary && player.IsToolWeapon() && player.IsAlive()) &&
-			    !(cg_holdAimDownSight && weapInput.secondary)) {
-				if (player.IsToolWeapon()) {
-					// there is a possibility that player has respawned or something.
-					// stop aiming down
-					weapInput.secondary = false;
-				}
-			}
-
 			// send orientation
 			Vector3 curFront = player.GetFront();
 			if (time > lastOriSentTime + 0.0084f
