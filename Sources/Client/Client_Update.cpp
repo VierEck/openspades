@@ -425,13 +425,6 @@ namespace spades {
 			PlayerInput inp = playerInput;
 			WeaponInput winp = weapInput;
 
-			Vector3 velocity = player.GetVelocity();
-			Vector3 horizontalVelocity{velocity.x, velocity.y, 0.0f};
-
-			if (horizontalVelocity.GetLength() < 0.1f) {
-				inp.sprint = false;
-			}
-
 			// Can't use a tool while sprinting or switching to another tool, etc.
 			if (!CanLocalPlayerUseToolNow()) {
 				winp.primary = false;
