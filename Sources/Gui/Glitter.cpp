@@ -70,8 +70,8 @@ namespace spades {
 
 		void Glitter::GlitterProcess(const std::string &fileName, const std::string &newName) {
 			SPADES_MARK_FUNCTION();
-			if (glitArgs.size() != 28) {
-				SPLog("Glitter failed. need 28 arguments. got %d instead", (int)glitArgs.size());
+			if (glitArgs.size() != 29) {
+				SPLog("Glitter failed. need 29 arguments. got %d instead", (int)glitArgs.size());
 				return;
 			}
 
@@ -97,13 +97,14 @@ namespace spades {
 
 			int noisemono = glitArgs[i++]; int noisecolor = glitArgs[i++]; int rain = glitArgs[i++];
 
-			bool snow = glitArgs[i++]; bool repair = glitArgs[i++]; bool glowComp = glitArgs[i++];  bool debug = glitArgs[i++];
+			bool snow = glitArgs[i++]; bool repair = glitArgs[i++]; bool glowComp = glitArgs[i++];
+			bool glowClamp = glitArgs[i++]; bool debug = glitArgs[i++];
 
 			glitArgs.clear();
 
 			if (!grade && !shadow && !xRamp && !yRamp && !zRamp
 				&& !(noisemono >= 0) && !(noisecolor >= 0) && !(rain >= 0)
-				&& !snow && !repair && !glowComp && !debug) {
+				&& !snow && !repair && !glowComp && !glowClamp && !debug) {
 				SPLog("Glitter canceled. No Arguments given");
 				return;
 			}
@@ -210,6 +211,11 @@ namespace spades {
 									vCol.x = ((float)x / 512.f) * 255;
 									vCol.y = ((float)y / 512.f) * 255;
 									vCol.z = ((float)(63 - z) / 64.f) * 255;
+								}
+								if (glowClamp) {
+									vCol.x = std::min(vCol.x, 254);
+									vCol.y = std::min(vCol.y, 254);
+									vCol.z = std::min(vCol.z, 254);
 								}
 
 								if (vCol.x < 0)

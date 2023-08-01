@@ -58,6 +58,7 @@ namespace spades {
 		ToggleButton @snowButton;
 		ToggleButton @repairButton;
 		ToggleButton @glowButton;
+		ToggleButton @glowClampButton;
 		ToggleButton @debugButton;
 		
 		GlitterMenu(MainScreenUI @ui, MainScreenMainMenu @owner, string fN) {
@@ -394,6 +395,7 @@ namespace spades {
 					AddChild(rampZFieldRange);
 				}
 				
+				ySpacing = 20;
 				HeadingSpacing = 105;
 				yPos = ContentsTop + TopBegin; //right page
 				{//noisemono
@@ -551,6 +553,34 @@ namespace spades {
 					button.Bounds = AABB2(xPos, yPos, InfoButtonDimensionX, ButtonDimensionY);
 					button.Enable = true;
 					@button.Activated = spades::ui::EventHandler(this.OnInfoGlow);
+					AddChild(button);
+					yPos += ButtonExtraY;
+				}
+				{//glowcompliant
+					xPos = ContentsMid + LineBegin;
+					yPos += FieldDimensionY + ySpacing;
+					
+					spades::ui::Label label(Manager);
+					label.Bounds = AABB2(xPos, yPos, 0, 0);
+					label.Text = "GlowClamp";
+					AddChild(label);
+					
+					@glowClampButton = ToggleButton(Manager);
+					glowClampButton.Caption = _Tr("Glitter", EnabledCaption);
+					xPos += HeadingSpacing;
+					yPos -= ButtonExtraY;
+					glowClampButton.Bounds = AABB2(xPos, yPos, EnabledButtonDimensionX, ButtonDimensionY);
+					glowClampButton.Enable = true;
+					AddChild(glowClampButton);
+					yPos += ButtonExtraY;
+					
+					spades::ui::Button button(Manager);
+					button.Caption = _Tr("Glitter", InfoButtonCaption);
+					xPos += EnabledButtonDimensionX + InfoSpacing;
+					yPos -= ButtonExtraY;
+					button.Bounds = AABB2(xPos, yPos, InfoButtonDimensionX, ButtonDimensionY);
+					button.Enable = true;
+					@button.Activated = spades::ui::EventHandler(this.OnInfoGlowClamp);
 					AddChild(button);
 					yPos += ButtonExtraY;
 				}
@@ -746,6 +776,12 @@ namespace spades {
 			info += "\nUseful for debugging/making sure Glitter works fine.";
 			InfoFieldOpen("Debug", info);
 		}
+		void OnInfoGlowClamp(spades::ui::UIElement @sender) {
+			string info;
+			info += "Clamps color rgb values to 254.";
+			info += "\nUseful if u want to remove all glow blocks in a map";
+			InfoFieldOpen("GlowClamp", info);
+		}
 		
 		
 		void OnMile(spades::ui::UIElement @sender) {
@@ -789,6 +825,7 @@ namespace spades {
 			AddArgButton(snowButton.Toggled);
 			AddArgButton(repairButton.Toggled);
 			AddArgButton(glowButton.Toggled);
+			AddArgButton(glowClampButton.Toggled);
 			AddArgButton(debugButton.Toggled);
 		}
 		void AddArgField(string text) { 
