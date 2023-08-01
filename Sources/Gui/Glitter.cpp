@@ -218,18 +218,9 @@ namespace spades {
 									vCol.z = std::min(vCol.z, 254);
 								}
 
-								if (vCol.x < 0)
-									vCol.x = 0;
-								if (vCol.y < 0)
-									vCol.y = 0;
-								if (vCol.z < 0)
-									vCol.z = 0;
-								if (vCol.x > 255)
-									vCol.x = 255;
-								if (vCol.y > 255)
-									vCol.y = 255;
-								if (vCol.z > 255)
-									vCol.z = 255;
+								vCol.x = std::max(std::min(vCol.x, 255), 0);
+								vCol.y = std::max(std::min(vCol.y, 255), 0);
+								vCol.z = std::max(std::min(vCol.z, 255), 0);
 								zFirstSurface = false;
 								++zCountSolid;
 
