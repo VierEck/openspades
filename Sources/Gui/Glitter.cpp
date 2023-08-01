@@ -74,27 +74,30 @@ namespace spades {
 				SPLog("Glitter failed. need 28 arguments. got %d instead", (int)glitArgs.size());
 				return;
 			}
-			IntVector3 gradeColor = {glitArgs[0], glitArgs[1], glitArgs[2]};
+
+			int i = 0;
+
+			IntVector3 gradeColor = {glitArgs[i++], glitArgs[i++], glitArgs[i++]};
 			bool grade = gradeColor.x >= 0 && gradeColor.y >= 0 && gradeColor.z >= 0;
 
-			IntVector3 shadowColor = {glitArgs[3], glitArgs[4], glitArgs[5]};
+			IntVector3 shadowColor = {glitArgs[i++], glitArgs[i++], glitArgs[i++]};
 			bool shadow = shadowColor.x >= 0 && shadowColor.y >= 0 && shadowColor.z >= 0;
 
-			IntVector3 xRampColor = {glitArgs[6], glitArgs[7], glitArgs[8]};
-			bool xRampReverse = glitArgs[9]; int xRampRange = glitArgs[10];
+			IntVector3 xRampColor = {glitArgs[i++], glitArgs[i++], glitArgs[i++]};
+			bool xRampReverse = glitArgs[i++]; int xRampRange = glitArgs[i++];
 			bool xRamp = xRampColor.x >= 0 && xRampColor.y >= 0 && xRampColor.z >= 0 && xRampRange >= 0;
 
-			IntVector3 yRampColor = {glitArgs[11], glitArgs[12], glitArgs[13]};
-			bool yRampReverse = glitArgs[14]; int yRampRange = glitArgs[15];
+			IntVector3 yRampColor = {glitArgs[i++], glitArgs[i++],glitArgs[i++]};
+			bool yRampReverse = glitArgs[i++]; int yRampRange = glitArgs[i++];
 			bool yRamp = yRampColor.x >= 0 && yRampColor.y >= 0 && yRampColor.z >= 0 && yRampRange >= 0;
 
-			IntVector3 zRampColor = {glitArgs[16], glitArgs[17], glitArgs[18]};
-			bool zRampReverse = glitArgs[19]; int zRampRange = glitArgs[20];
+			IntVector3 zRampColor = {glitArgs[i++], glitArgs[i++], glitArgs[i++]};
+			bool zRampReverse = glitArgs[i++]; int zRampRange = glitArgs[i++];
 			bool zRamp = zRampColor.x >= 0 && zRampColor.y >= 0 && zRampColor.z >= 0 && zRampRange >= 0;
 
-			int noisemono = glitArgs[21]; int noisecolor = glitArgs[22]; int rain = glitArgs[23];
+			int noisemono = glitArgs[i++]; int noisecolor = glitArgs[i++]; int rain = glitArgs[i++];
 
-			bool snow = glitArgs[24]; bool repair = glitArgs[25]; bool glowComp = glitArgs[26]; bool debug = glitArgs[27];
+			bool snow = glitArgs[i++]; bool repair = glitArgs[i++]; bool glowComp = glitArgs[i++];  bool debug = glitArgs[i++];
 
 			glitArgs.clear();
 
