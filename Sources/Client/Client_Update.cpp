@@ -515,8 +515,9 @@ namespace spades {
 
 			// send orientation
 			Vector3 curFront = player.GetFront();
-			if ((curFront.x != lastFront.x || curFront.y != lastFront.y ||
-			    curFront.z != lastFront.z) && time > lastOriSentTime + 0.0084f) {
+			if (time > lastOriSentTime + 0.0084f
+				&& (curFront.x != lastFront.x || curFront.y != lastFront.y
+					|| curFront.z != lastFront.z)) {
 				lastFront = curFront;
 				net->SendOrientation(curFront);
 				lastOriSentTime = time;
