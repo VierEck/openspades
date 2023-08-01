@@ -21,93 +21,93 @@
 
 namespace spades {
 
-    class ClientMenu : spades::ui::UIElement {
-        private ClientUI @ui;
-        private ClientUIHelper @helper;
+	class ClientMenu : spades::ui::UIElement {
+		private ClientUI @ui;
+		private ClientUIHelper @helper;
 
-        ClientMenu(ClientUI @ui) {
-            super(ui.manager);
-            @this.ui = ui;
-            @this.helper = ui.helper;
+		ClientMenu(ClientUI @ui) {
+			super(ui.manager);
+			@this.ui = ui;
+			@this.helper = ui.helper;
 
-            float winW = 180.f, winH = 32.f * 4.f - 2.f;
-            float winX = (Manager.Renderer.ScreenWidth - winW) * 0.5f;
-            float winY = (Manager.Renderer.ScreenHeight - winH) * 0.5f;
+			float winW = 180.f, winH = 32.f * 4.f - 2.f;
+			float winX = (Manager.Renderer.ScreenWidth - winW) * 0.5f;
+			float winY = (Manager.Renderer.ScreenHeight - winH) * 0.5f;
 
-            {
-                spades::ui::Label label(Manager);
-                label.BackgroundColor = Vector4(0, 0, 0, 0.5f);
-                label.Bounds =
-                    AABB2(0.f, 0.f, Manager.Renderer.ScreenWidth, Manager.Renderer.ScreenHeight);
-                AddChild(label);
-            }
+			{
+				spades::ui::Label label(Manager);
+				label.BackgroundColor = Vector4(0, 0, 0, 0.5f);
+				label.Bounds =
+					AABB2(0.f, 0.f, Manager.Renderer.ScreenWidth, Manager.Renderer.ScreenHeight);
+				AddChild(label);
+			}
 
-            {
-                spades::ui::Label label(Manager);
-                label.BackgroundColor = Vector4(0, 0, 0, 0.5f);
-                label.Bounds = AABB2(winX - 8.f, winY - 8.f, winW + 16.f, winH + 16.f);
-                AddChild(label);
-            }
-            {
-                spades::ui::Button button(Manager);
-                button.Caption = _Tr("Client", "Back to Game");
-                button.Bounds = AABB2(winX, winY, winW, 30.f);
-                @button.Activated = spades::ui::EventHandler(this.OnBackToGame);
-                AddChild(button);
-            }
-            {
-                spades::ui::Button button(Manager);
-                button.Caption = _Tr("Client", "Chat Log");
-                button.Bounds = AABB2(winX, winY + 32.f, winW, 30.f);
-                @button.Activated = spades::ui::EventHandler(this.OnChatLog);
-                AddChild(button);
-            }
-            {
-                spades::ui::Button button(Manager);
-                button.Caption = _Tr("Client", "Setup");
-                button.Bounds = AABB2(winX, winY + 64.f, winW, 30.f);
-                @button.Activated = spades::ui::EventHandler(this.OnSetup);
-                AddChild(button);
-            }
-            {
-                spades::ui::Button button(Manager);
-                button.Caption = _Tr("Client", "Disconnect");
-                button.Bounds = AABB2(winX, winY + 96.f, winW, 30.f);
-                @button.Activated = spades::ui::EventHandler(this.OnDisconnect);
-                AddChild(button);
-            }
-            {
-                spades::ui::Button button(Manager);
-                button.Caption = _Tr("Client", "Save Map");
-                button.Bounds = AABB2(winX, winY - 48.f, winW, 30.f);
-                @button.Activated = spades::ui::EventHandler(this.OnSaveMap);
-                AddChild(button);
-            }
-        }
+			{
+				spades::ui::Label label(Manager);
+				label.BackgroundColor = Vector4(0, 0, 0, 0.5f);
+				label.Bounds = AABB2(winX - 8.f, winY - 8.f, winW + 16.f, winH + 16.f);
+				AddChild(label);
+			}
+			{
+				spades::ui::Button button(Manager);
+				button.Caption = _Tr("Client", "Back to Game");
+				button.Bounds = AABB2(winX, winY, winW, 30.f);
+				@button.Activated = spades::ui::EventHandler(this.OnBackToGame);
+				AddChild(button);
+			}
+			{
+				spades::ui::Button button(Manager);
+				button.Caption = _Tr("Client", "Chat Log");
+				button.Bounds = AABB2(winX, winY + 32.f, winW, 30.f);
+				@button.Activated = spades::ui::EventHandler(this.OnChatLog);
+				AddChild(button);
+			}
+			{
+				spades::ui::Button button(Manager);
+				button.Caption = _Tr("Client", "Setup");
+				button.Bounds = AABB2(winX, winY + 64.f, winW, 30.f);
+				@button.Activated = spades::ui::EventHandler(this.OnSetup);
+				AddChild(button);
+			}
+			{
+				spades::ui::Button button(Manager);
+				button.Caption = _Tr("Client", "Disconnect");
+				button.Bounds = AABB2(winX, winY + 96.f, winW, 30.f);
+				@button.Activated = spades::ui::EventHandler(this.OnDisconnect);
+				AddChild(button);
+			}
+			{
+				spades::ui::Button button(Manager);
+				button.Caption = _Tr("Client", "Save Map");
+				button.Bounds = AABB2(winX, winY - 48.f, winW, 30.f);
+				@button.Activated = spades::ui::EventHandler(this.OnSaveMap);
+				AddChild(button);
+			}
+		}
 
-        private void OnBackToGame(spades::ui::UIElement @sender) { @ui.ActiveUI = null; }
-        private void OnSetup(spades::ui::UIElement @sender) {
-            PreferenceViewOptions opt;
-            opt.GameActive = true;
+		private void OnBackToGame(spades::ui::UIElement @sender) { @ui.ActiveUI = null; }
+		private void OnSetup(spades::ui::UIElement @sender) {
+			PreferenceViewOptions opt;
+			opt.GameActive = true;
 
-            PreferenceView al(this, opt, ui.fontManager);
-            al.Run();
-        }
-        private void OnChatLog(spades::ui::UIElement @sender) {
-            @ui.ActiveUI = @ui.chatLogWindow;
-            ui.chatLogWindow.ScrollToEnd();
-        }
-        private void OnDisconnect(spades::ui::UIElement @sender) { ui.shouldExit = true; }
+			PreferenceView al(this, opt, ui.fontManager);
+			al.Run();
+		}
+		private void OnChatLog(spades::ui::UIElement @sender) {
+			@ui.ActiveUI = @ui.chatLogWindow;
+			ui.chatLogWindow.ScrollToEnd();
+		}
+		private void OnDisconnect(spades::ui::UIElement @sender) { ui.shouldExit = true; }
 
-        private void OnSaveMap(spades::ui::UIElement @sender) { ui.helper.SaveMap(); }
+		private void OnSaveMap(spades::ui::UIElement @sender) { ui.helper.SaveMap(); }
 
-        void HotKey(string key) {
-            if (IsEnabled and key == "Escape") {
-                @ui.ActiveUI = null;
-            } else {
-                UIElement::HotKey(key);
-            }
-        }
-    }
+		void HotKey(string key) {
+			if (IsEnabled and key == "Escape") {
+				@ui.ActiveUI = null;
+			} else {
+				UIElement::HotKey(key);
+			}
+		}
+	}
 
 }
