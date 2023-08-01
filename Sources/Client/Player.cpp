@@ -407,6 +407,9 @@ namespace spades {
 		void Player::ReloadDone(int clip, int stock) {
 			reloadingServerSide = false;
 			weapon->ReloadDone(clip, stock);
+
+			if (world.GetListener() && clip == 0 && stock == 0)
+				world.GetListener()->LocalPlayerSpentAmmoOrStock();
 		}
 
 		void Player::Restock() {
@@ -1004,6 +1007,9 @@ namespace spades {
 			}
 
 			if (this->IsLocalPlayer()) {
+				if (world.GetListener())
+					world.GetListener()->LocalPlayerSpentAmmoOrStock();
+
 				// in OS 0.1.3's way
 				// in AoS 0.75's way
 				Vector3 o = orientation;
@@ -1035,6 +1041,8 @@ namespace spades {
 			if (!holdingGrenade)
 				return;
 			grenades--;
+			if (world.GetListener())
+				world.GetListener()->LocalPlayerSpentAmmoOrStock();
 
 			Vector3 muzzle = GetEye() + GetFront() * 0.1f;
 			Vector3 vel = GetFront() * 1.f;
@@ -1754,6 +1762,12 @@ namespace spades {
 		}
 
 		void Player::SetTeam(int tId) { teamId = tId; }
+
+		void Player::UsedBlocks(int c) {
+			blockStocks = std::max(blockStocks - c, 0);
+			if (GetWorld().GetListener())
+				GetWorld().GetListener()->LocalPlayerSpentAmmoOrStock();
+		}
 
 		bool Player::IsReadyToUseTool() {
 			SPADES_MARK_FUNCTION_DEBUG();

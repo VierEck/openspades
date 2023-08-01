@@ -221,7 +221,7 @@ namespace spades {
 
 			void SetWeaponType(WeaponType weap);
 			void SetTeam(int);
-			void UsedBlocks(int c) { blockStocks = std::max(blockStocks - c, 0); }
+			void UsedBlocks(int c);
 
 			/** makes player's health 0. */
 			void KilledBy(KillType, Player &killer, int respawnTime);

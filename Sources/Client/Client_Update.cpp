@@ -493,28 +493,6 @@ namespace spades {
 				}
 			}
 
-			// is the selected tool no longer usable (ex. out of ammo)?
-			if (!player.IsToolSelectable(player.GetTool())) {
-				// release mouse button before auto-switching tools
-				winp.primary = false;
-				winp.secondary = false;
-				weapInput = winp;
-				net->SendWeaponInput(weapInput);
-				actualWeapInput = winp = player.GetWeaponInput();
-
-				// select another tool
-				Player::ToolType t = player.GetTool();
-				do {
-					switch (t) {
-						case Player::ToolSpade: t = Player::ToolGrenade; break;
-						case Player::ToolBlock: t = Player::ToolSpade; break;
-						case Player::ToolWeapon: t = Player::ToolBlock; break;
-						case Player::ToolGrenade: t = Player::ToolWeapon; break;
-					}
-				} while (!world->GetLocalPlayer()->IsToolSelectable(t));
-				SetSelectedTool(t);
-			}
-
 			// send orientation
 			Vector3 curFront = player.GetFront();
 			if (time > lastOriSentTime + 0.0084f
@@ -1712,6 +1690,32 @@ namespace spades {
 				case BuildFailureReason::InvalidPosition:
 					ShowAlert(_Tr("Client", "You cannot place a block there."), AlertType::Error);
 					break;
+			}
+		}
+
+		void Client::LocalPlayerSpentAmmoOrStock() {
+			SPADES_MARK_FUNCTION();
+			stmp::optional<Player &> p = world->GetLocalPlayer();
+			if (!p)
+				return;
+
+			// is the selected tool no longer usable (ex. out of ammo)?
+			if (!p->IsToolSelectable(p->GetTool())) {
+				// release mouse button before auto-switching tools
+				weapInput.primary = weapInput.secondary = false;
+				net->SendWeaponInput(weapInput);
+
+				// select another tool
+				Player::ToolType t = p->GetTool();
+				do {
+					switch (t) {
+						case Player::ToolSpade: t = Player::ToolGrenade; break;
+						case Player::ToolBlock: t = Player::ToolSpade; break;
+						case Player::ToolWeapon: t = Player::ToolBlock; break;
+						case Player::ToolGrenade: t = Player::ToolWeapon; break;
+					}
+				} while (!world->GetLocalPlayer()->IsToolSelectable(t));
+				SetSelectedTool(t);
 			}
 		}
 
