@@ -498,7 +498,7 @@ namespace spades {
 
 			// show block count when building block lines.
 			if (player.IsAlive() && player.GetTool() == Player::ToolBlock &&
-			    player.GetWeaponInput().secondary && player.IsBlockCursorDragging()) {
+			    player.IsBlockCursorDragging()) {
 				if (player.IsBlockCursorActive()) {
 					IntVector3 diagonal = player.GetBlockCursorDragPos() - player.GetBlockCursorPos();
 					diagonal.x *= 1 - 2 * (diagonal.x < 0);
