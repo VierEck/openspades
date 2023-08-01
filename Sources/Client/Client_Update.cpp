@@ -552,9 +552,6 @@ namespace spades {
 				}
 			}
 
-			if (player.IsAlive())
-				lastAliveTime = time;
-
 			inp.jump = false;
 		}
 
@@ -894,29 +891,6 @@ namespace spades {
 
 		void Client::PlayerKilledPlayer(spades::client::Player &killer,
 		                                spades::client::Player &victim, KillType kt) {
-
-			if (killer.IsLocalPlayer() && &killer != &victim) {
-				curKills++;
-				curStreak++;
-				if (kt == KillTypeMelee)
-					meleeKills++;
-				else if (kt == KillTypeGrenade)
-					nadeKills++;
-			}
-
-			if (victim.IsLocalPlayer()) {
-				curDeaths++;
-				if (curStreak > bestStreak)
-					bestStreak = curStreak;
-				curStreak = 0;
-
-				// play death sound
-				Handle<IAudioChunk> c = audioDevice->RegisterSound("Sounds/Player/Death.opus");
-				AudioParam param;
-				param.volume = (float)cg_deathSoundGain;
-				audioDevice->PlayLocal(c.GetPointerOrNull(), param);
-			}
-
 			// play hit sound
 			if (kt == KillTypeWeapon || kt == KillTypeHeadshot) {
 				// don't play on local: see BullethitPlayer
@@ -945,7 +919,8 @@ namespace spades {
 			}
 
 			// The local player is dead; initialize the look-you-are-dead cam
-			if (&victim == world->GetLocalPlayer()) {
+			if (victim.IsLocalPlayer()) {
+				lastAliveTime = time;
 				followCameraState.enabled = false;
 
 				Vector3 v = -victim.GetFront();
@@ -964,6 +939,26 @@ namespace spades {
 
 				//play the hurt sound for local player
 				LocalPlayerHurt(HurtTypeKill, false, MakeVector3(0, 0, 0));
+
+				// play death sound
+				Handle<IAudioChunk> c = audioDevice->RegisterSound("Sounds/Player/Death.opus");
+				AudioParam param;
+				param.volume = (float)cg_deathSoundGain;
+				audioDevice->PlayLocal(c.GetPointerOrNull(), param);
+
+				curDeaths++;
+				if (curStreak > bestStreak)
+					bestStreak = curStreak;
+				curStreak = 0;
+			}
+
+			if (killer.IsLocalPlayer() && &killer != &victim) {
+				curKills++;
+				curStreak++;
+				if (kt == KillTypeMelee)
+					meleeKills++;
+				else if (kt == KillTypeGrenade)
+					nadeKills++;
 			}
 
 			// emit blood (also for local player)
