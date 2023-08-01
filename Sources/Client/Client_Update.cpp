@@ -465,11 +465,13 @@ namespace spades {
 
 			// send player input
 			{
-				PlayerInput sentInput = inp;
-				WeaponInput sentWeaponInput = winp;
+				if (lastSentPlayerInput != inp) {
+					//only send input if changed
+					net->SendPlayerInput(inp);
+					lastSentPlayerInput = inp;
+				}
 
-				// FIXME: send only there are any changed?
-				net->SendPlayerInput(sentInput);
+				WeaponInput sentWeaponInput = winp;
 				net->SendWeaponInput(sentWeaponInput);
 			}
 

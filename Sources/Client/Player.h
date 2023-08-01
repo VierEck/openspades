@@ -50,6 +50,17 @@ namespace spades {
 			      crouch(false),
 			      sneak(false),
 			      sprint(false) {}
+			
+			bool operator!=(PlayerInput compare) {
+				return moveForward != compare.moveForward
+					|| moveBackward != compare.moveBackward
+					|| moveLeft != compare.moveLeft
+					|| moveRight != compare.moveRight
+					|| jump != compare.jump
+					|| crouch != compare.crouch
+					|| sprint != compare.sprint
+					|| sneak != compare.sneak;
+			}
 		};
 
 		struct WeaponInput {

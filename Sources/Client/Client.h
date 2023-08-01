@@ -149,6 +149,7 @@ namespace spades {
 			// player state
 			PlayerInput playerInput;
 			WeaponInput weapInput;
+			PlayerInput lastSentPlayerInput;
 			KeypadInput keypadInput;
 			Player::ToolType lastTool;
 			bool hasLastTool;
