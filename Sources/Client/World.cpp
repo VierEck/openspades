@@ -64,7 +64,7 @@ namespace spades {
 			ApplyBlockActions();
 
 			for (const auto &player : players)
-				if (player)
+				if (player && !player->IsSpectator())
 					player->Update(dt);
 
 			while (!blockRegenerationQueue.empty()) {
