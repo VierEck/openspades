@@ -67,6 +67,11 @@ namespace spades {
 			bool primary : 1;
 			bool secondary : 1;
 			WeaponInput() : primary(false), secondary(false) {}
+
+			bool operator!=(WeaponInput compare) {
+				return primary != compare.primary
+					|| secondary != compare.secondary;
+			}
 		};
 
 		class Player {

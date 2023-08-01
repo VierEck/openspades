@@ -150,6 +150,7 @@ namespace spades {
 			PlayerInput playerInput;
 			WeaponInput weapInput;
 			PlayerInput lastSentPlayerInput;
+			WeaponInput lastSentWeapInput;
 			KeypadInput keypadInput;
 			Player::ToolType lastTool;
 			bool hasLastTool;

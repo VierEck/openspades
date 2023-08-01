@@ -463,16 +463,16 @@ namespace spades {
 			// Uncrouching may be prevented by an obstacle
 			inp.crouch = player.GetInput().crouch;
 
-			// send player input
+			// send player input, but only if they changed
 			{
 				if (lastSentPlayerInput != inp) {
-					//only send input if changed
 					net->SendPlayerInput(inp);
 					lastSentPlayerInput = inp;
 				}
-
-				WeaponInput sentWeaponInput = winp;
-				net->SendWeaponInput(sentWeaponInput);
+				if (lastSentWeapInput != winp) {
+					net->SendWeaponInput(winp);
+					lastSentWeapInput = winp;
+				}
 			}
 
 			if (hasDelayedReload) {
