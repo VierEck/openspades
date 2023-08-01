@@ -1416,9 +1416,6 @@ namespace spades {
 						default: break;
 					}
 					p.KilledBy(type, *killer, respawnTime);
-					if (&p != killer) {
-						GetWorld()->GetPlayerPersistent(killer->GetId()).kills += 1;
-					}
 				} break;
 				case PacketTypeChatMessage: {
 					// might be wrong player id for server message
@@ -1473,7 +1470,6 @@ namespace spades {
 					Player &p = GetPlayer(reader.ReadByte());
 
 					client->PlayerLeaving(p);
-					GetWorld()->GetPlayerPersistent(p.GetId()).kills = 0;
 
 					savedPlayerTeam[p.GetId()] = -1;
 					GetWorld()->SetPlayer(p.GetId(), NULL);
@@ -1563,7 +1559,6 @@ namespace spades {
 
 					Player &p = GetPlayer(reader.ReadByte());
 					client->PlayerCapturedIntel(p);
-					GetWorld()->GetPlayerPersistent(p.GetId()).kills += 10;
 					ctf.GetTeam(p.GetTeamId()).hasIntel = false;
 					ctf.GetTeam(p.GetTeamId()).score++;
 

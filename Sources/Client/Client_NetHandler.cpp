@@ -151,6 +151,8 @@ namespace spades {
 		}
 
 		void Client::PlayerCapturedIntel(Player &p) {
+			GetWorld()->GetPlayerPersistent(p.GetId()).kills += 10;
+
 			std::string msg;
 			{
 				std::string holderName = chatWindow->TeamColorMessage(p.GetName(), p.GetTeamId());
@@ -189,6 +191,8 @@ namespace spades {
 					s += ChatWindow::ColoredMessage("+10", MsgColorSysInfo);
 					s += " points for capturing the enemy flag";
 					chatWindow->AddMessage(s);
+
+					lastKills = world->GetPlayerPersistent(p.GetId()).kills;
 				}
 			}
 		}
@@ -315,6 +319,7 @@ namespace spades {
 
 		void Client::PlayerJoinedTeam(Player &p) {
 			std::string teamName = world->GetTeam(p.GetTeamId()).name;
+			GetWorld()->GetPlayerPersistent(p.GetId()).kills = 0;
 
 			if (p.GetTeamId() >= 2) {
 				if (p.IsSpectator()) {

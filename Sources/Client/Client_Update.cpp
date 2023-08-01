@@ -527,8 +527,6 @@ namespace spades {
 				lastPosSentTime = time;
 			}
 
-			lastKills = world->GetPlayerPersistent(player.GetId()).kills;
-
 			// show block count when building block lines.
 			if (player.IsAlive() && player.GetTool() == Player::ToolBlock &&
 			    player.GetWeaponInput().secondary && player.IsBlockCursorDragging()) {
@@ -952,15 +950,6 @@ namespace spades {
 				curStreak = 0;
 			}
 
-			if (killer.IsLocalPlayer() && &killer != &victim) {
-				curKills++;
-				curStreak++;
-				if (kt == KillTypeMelee)
-					meleeKills++;
-				else if (kt == KillTypeGrenade)
-					nadeKills++;
-			}
-
 			// emit blood (also for local player)
 			// FIXME: emiting blood for either
 			// client-side or server-side hit?
@@ -1115,6 +1104,8 @@ namespace spades {
 
 			// show big message if player is involved
 			if (&victim != &killer) {
+				GetWorld()->GetPlayerPersistent(killer.GetId()).kills += 1;
+
 				stmp::optional<Player &> local = world->GetLocalPlayer();
 				if (&killer == local || &victim == local) {
 					std::string msg;
@@ -1127,6 +1118,15 @@ namespace spades {
 							s += " point for neutralizing an enemy";
 							chatWindow->AddMessage(s);
 						}
+
+						lastKills = world->GetPlayerPersistent(killer.GetId()).kills;
+
+						curKills++;
+						curStreak++;
+						if (kt == KillTypeMelee)
+							meleeKills++;
+						else if (kt == KillTypeGrenade)
+							nadeKills++;
 					} else {
 						msg = _Tr("Client", "You were killed by {0}", killer.GetName());
 					}
