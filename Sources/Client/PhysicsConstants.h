@@ -58,7 +58,7 @@ enum HitType {
 	HitTypeMelee
 };
 
-enum HurtType { HurtTypeFall = 0, HurtTypeWeapon };
+enum HurtType { HurtTypeFall = 0, HurtTypeWeapon, HurtTypeKill };
 
 enum KillType {
 	KillTypeWeapon = 0,

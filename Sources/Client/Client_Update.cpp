@@ -555,48 +555,6 @@ namespace spades {
 			if (player.IsAlive())
 				lastAliveTime = time;
 
-			if (player.GetHealth() < lastHealth) {
-				// ouch!
-				lastHealth = player.GetHealth();
-				lastHurtTime = world->GetTime();
-
-				Handle<IAudioChunk> c;
-				switch (SampleRandomInt(0, 3)) {
-					case 0:
-						c = audioDevice->RegisterSound("Sounds/Weapons/Impacts/FleshLocal1.opus");
-						break;
-					case 1:
-						c = audioDevice->RegisterSound("Sounds/Weapons/Impacts/FleshLocal2.opus");
-						break;
-					case 2:
-						c = audioDevice->RegisterSound("Sounds/Weapons/Impacts/FleshLocal3.opus");
-						break;
-					case 3:
-						c = audioDevice->RegisterSound("Sounds/Weapons/Impacts/FleshLocal4.opus");
-						break;
-				}
-				AudioParam param;
-				param.volume = cg_localFleshSoundGain;
-				audioDevice->PlayLocal(c.GetPointerOrNull(), AudioParam());
-
-				float hpper = player.GetHealth() / 100.f;
-				int cnt = 18 - (int)(player.GetHealth() / 100.f * 8.f);
-				hurtSprites.resize(std::max(cnt, 6));
-				for (size_t i = 0; i < hurtSprites.size(); i++) {
-					HurtSprite &spr = hurtSprites[i];
-					spr.angle = SampleRandomFloat() * (2.f * static_cast<float>(M_PI));
-					spr.scale = .2f + SampleRandomFloat() * SampleRandomFloat() * .7f;
-					spr.horzShift = SampleRandomFloat();
-					spr.strength = .3f + SampleRandomFloat() * .7f;
-					if (hpper > .5f) {
-						spr.strength *= 1.5f - hpper;
-					}
-				}
-
-			} else {
-				lastHealth = player.GetHealth();
-			}
-
 			inp.jump = false;
 		}
 
@@ -696,6 +654,9 @@ namespace spades {
 			if (p) {
 				clientPlayers[id] = Handle<ClientPlayer>::New(*p, *this);
 			}
+
+			if (id == world->GetLocalPlayerIndex());
+				lastHealth = 100;
 		}
 
 		void Client::PlayerJumped(spades::client::Player &p) {
@@ -1000,6 +961,9 @@ namespace spades {
 					}
 					nextSpawnConfig.reset();
 				}
+
+				//play the hurt sound for local player
+				LocalPlayerHurt(HurtTypeKill, false, MakeVector3(0, 0, 0));
 			}
 
 			// emit blood (also for local player)
@@ -1684,16 +1648,55 @@ namespace spades {
 
 		void Client::LocalPlayerHurt(HurtType type, bool sourceGiven, spades::Vector3 source) {
 			SPADES_MARK_FUNCTION();
+			stmp::optional<Player &> p = world->GetLocalPlayer();
+			if (!p)
+				return;
 
 			if (sourceGiven) {
-				stmp::optional<Player &> p = world->GetLocalPlayer();
-				if (!p)
-					return;
 				Vector3 rel = source - p->GetEye();
 				rel.z = 0.f;
 				rel = rel.Normalize();
 				hurtRingView->Add(rel);
 			}
+
+			if (p->GetHealth() < lastHealth) {
+				// ouch!
+				lastHurtTime = world->GetTime();
+
+				Handle<IAudioChunk> c;
+				switch (SampleRandomInt(0, 3)) {
+					case 0:
+						c = audioDevice->RegisterSound("Sounds/Weapons/Impacts/FleshLocal1.opus");
+						break;
+					case 1:
+						c = audioDevice->RegisterSound("Sounds/Weapons/Impacts/FleshLocal2.opus");
+						break;
+					case 2:
+						c = audioDevice->RegisterSound("Sounds/Weapons/Impacts/FleshLocal3.opus");
+						break;
+					case 3:
+						c = audioDevice->RegisterSound("Sounds/Weapons/Impacts/FleshLocal4.opus");
+						break;
+				}
+				AudioParam param;
+				param.volume = cg_localFleshSoundGain;
+				audioDevice->PlayLocal(c.GetPointerOrNull(), AudioParam());
+
+				float hpper = p->GetHealth() / 100.f;
+				int cnt = 18 - (int)(p->GetHealth() / 100.f * 8.f);
+				hurtSprites.resize(std::max(cnt, 6));
+				for (size_t i = 0; i < hurtSprites.size(); i++) {
+					HurtSprite &spr = hurtSprites[i];
+					spr.angle = SampleRandomFloat() * (2.f * static_cast<float>(M_PI));
+					spr.scale = .2f + SampleRandomFloat() * SampleRandomFloat() * .7f;
+					spr.horzShift = SampleRandomFloat();
+					spr.strength = .3f + SampleRandomFloat() * .7f;
+					if (hpper > .5f) {
+						spr.strength *= 1.5f - hpper;
+					}
+				}
+			}
+			lastHealth = p->GetHealth();
 		}
 
 		void Client::LocalPlayerBuildError(BuildFailureReason reason) {
