@@ -201,7 +201,9 @@ namespace spades {
 				GLFogFilter(*this);
 			}
 
-			lensDustFilter = new GLLensDustFilter(*this);
+			if (settings.r_bloom) {
+				lensDustFilter = new GLLensDustFilter(*this);
+			}
 
 			if (settings.r_hdr) {
 				autoExposureFilter = new GLAutoExposureFilter(*this);
@@ -1101,6 +1103,9 @@ namespace spades {
 					}
 
 					if (settings.r_bloom) {
+						if (!lensDustFilter)
+							lensDustFilter = new GLLensDustFilter(*this);
+
 						GLProfiler::Context p(*profiler, "Bloom");
 						handle = lensDustFilter->Filter(handle);
 					}
