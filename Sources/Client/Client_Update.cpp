@@ -518,8 +518,6 @@ namespace spades {
 					ShowAlert(msg, type, 0.f, true);
 				}
 			}
-
-			inp.jump = false;
 		}
 
 		/** Handles movement of local player in MapEditor. */
