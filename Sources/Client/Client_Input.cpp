@@ -502,6 +502,10 @@ namespace spades {
 					return;
 				}
 
+				if (!world->GetLocalPlayer())
+					return; //limbo
+				Player &p = world->GetLocalPlayer().value();
+
 				if (DemoKeyEvent(name, down))
 					return;
 
@@ -512,7 +516,7 @@ namespace spades {
 					case ClientCameraMode::NotJoined:
 					case ClientCameraMode::FirstPersonLocal: break;
 					case ClientCameraMode::ThirdPersonLocal:
-						if (world->GetLocalPlayer()->IsAlive()) {
+						if (p.IsAlive()) {
 							break;
 						}
 					case ClientCameraMode::FirstPersonFollow:
@@ -525,8 +529,7 @@ namespace spades {
 									// Start with the local player
 									followedPlayerId = world->GetLocalPlayerIndex().value();
 								}
-								if (world->GetLocalPlayer()->IsSpectator() ||
-								    time > lastAliveTime + 1.3f) {
+								if (p.IsSpectator() || time > lastAliveTime + 1.3f) {
 									FollowNextPlayer(false);
 								}
 							}
@@ -538,7 +541,7 @@ namespace spades {
 									// Start with the local player
 									followedPlayerId = world->GetLocalPlayerIndex().value();
 								}
-								if (world->GetLocalPlayer()->IsSpectator() ||
+								if (p.IsSpectator() ||
 								    time > lastAliveTime + 1.3f) {
 									FollowNextPlayer(true);
 								}
@@ -550,8 +553,7 @@ namespace spades {
 								followCameraState.firstPerson = !followCameraState.firstPerson;
 							}
 							return;
-						} else if (CheckKey(cg_keyReloadWeapon, name) &&
-						           world->GetLocalPlayer()->IsSpectator()) {
+						} else if (CheckKey(cg_keyReloadWeapon, name) && p.IsSpectator()) {
 							if (down) {
 								if (followCameraState.enabled) {
 									//unfollow
@@ -565,9 +567,7 @@ namespace spades {
 						break;
 				}
 
-				if (world->GetLocalPlayer()) {
-					Player &p = world->GetLocalPlayer().value();
-
+				{
 					if (MapEditorKeyEvent(name, down))
 						return;
 
@@ -579,9 +579,8 @@ namespace spades {
 
 					if (cg_debugCorpse) {
 						if (name == "p" && down) {
-							Player &victim = world->GetLocalPlayer().value();
-							auto corp = stmp::make_unique<Corpse>(*renderer, *map, victim);
-							corp->AddImpulse(victim.GetFront() * 32.f);
+							auto corp = stmp::make_unique<Corpse>(*renderer, *map, p);
+							corp->AddImpulse(p.GetFront() * 32.f);
 							corpses.emplace_back(std::move(corp));
 
 							if (corpses.size() > corpseHardLimit) {
@@ -632,17 +631,15 @@ namespace spades {
 						weapInput.primary = down;
 					} else if (CheckKey(cg_keyAltAttack, name)) {
 						auto lastVal = weapInput.secondary;
-						if (world->GetLocalPlayer()->IsToolWeapon() && (!cg_holdAimDownSight)) {
-							if (down && !world->GetLocalPlayer()->GetWeapon().IsReloading()) {
+						if (p.IsToolWeapon() && (!cg_holdAimDownSight)) {
+							if (down && !p.GetWeapon().IsReloading()) {
 								weapInput.secondary = !weapInput.secondary;
 							}
 						} else {
 							weapInput.secondary = down;
 						}
-						if (world->GetLocalPlayer()->IsToolWeapon() && weapInput.secondary &&
-						    !lastVal &&
-						    world->GetLocalPlayer()->GetWeapon().TimeToNextFire() <= 0 &&
-						    !world->GetLocalPlayer()->GetWeapon().IsReloading() &&
+						if (p.IsToolWeapon() && weapInput.secondary && !lastVal &&
+						    p.GetWeapon().TimeToNextFire() <= 0 && !p.GetWeapon().IsReloading() &&
 						    GetSprintState() == 0.0f) {
 							AudioParam params;
 							params.volume = cg_AimDownSightSoundGain;
@@ -652,12 +649,11 @@ namespace spades {
 							                       MakeVector3(.4f, -.3f, .5f), params);
 						}
 					} else if (CheckKey(cg_keyReloadWeapon, name) && down) {
-						Weapon &w = world->GetLocalPlayer()->GetWeapon();
+						Weapon &w = p.GetWeapon();
 						if (w.GetAmmo() < w.GetClipSize() && w.GetStock() > 0 &&
-						    (!world->GetLocalPlayer()->IsAwaitingReloadCompletion()) &&
-						    (!w.IsReloading()) &&
-						    world->GetLocalPlayer()->GetTool() == Player::ToolWeapon) {
-							if (world->GetLocalPlayer()->IsToolWeapon()) {
+						    (!p.IsAwaitingReloadCompletion()) &&
+						    (!w.IsReloading()) && p.GetTool() == Player::ToolWeapon) {
+							if (p.IsToolWeapon()) {
 								if (weapInput.secondary) {
 									// if we send WeaponInput after sending Reload,
 									// server might cancel the reload.
@@ -667,19 +663,16 @@ namespace spades {
 									return;
 								}
 							}
-							world->GetLocalPlayer()->Reload();
+							p.Reload();
 							net->SendReload();
 						}
 					} else if (CheckKey(cg_keyToolSpade, name) && down) {
-						if (world->GetLocalPlayer()->GetTeamId() < 2 &&
-						    world->GetLocalPlayer()->IsAlive() &&
-						    world->GetLocalPlayer()->IsToolSelectable(Player::ToolSpade)) {
+						if (p.GetTeamId() < 2 && p.IsAlive() && p.IsToolSelectable(Player::ToolSpade)) {
 							SetSelectedTool(Player::ToolSpade);
 						}
 					} else if (CheckKey(cg_keyToolBlock, name) && down) {
-						if (world->GetLocalPlayer()->GetTeamId() < 2 &&
-						    world->GetLocalPlayer()->IsAlive()) {
-							if (world->GetLocalPlayer()->IsToolSelectable(Player::ToolBlock)) {
+						if (p.GetTeamId() < 2 && p.IsAlive()) {
+							if (p.IsToolSelectable(Player::ToolBlock)) {
 								SetSelectedTool(Player::ToolBlock);
 							} else {
 								if (cg_alerts)
@@ -689,9 +682,8 @@ namespace spades {
 							}
 						}
 					} else if (CheckKey(cg_keyToolWeapon, name) && down) {
-						if (world->GetLocalPlayer()->GetTeamId() < 2 &&
-						    world->GetLocalPlayer()->IsAlive()) {
-							if (world->GetLocalPlayer()->IsToolSelectable(Player::ToolWeapon)) {
+						if (p.GetTeamId() < 2 && p.IsAlive()) {
+							if (p.IsToolSelectable(Player::ToolWeapon)) {
 								SetSelectedTool(Player::ToolWeapon);
 							} else {
 								if (cg_alerts)
@@ -701,9 +693,8 @@ namespace spades {
 							}
 						}
 					} else if (CheckKey(cg_keyToolGrenade, name) && down) {
-						if (world->GetLocalPlayer()->GetTeamId() < 2 &&
-						    world->GetLocalPlayer()->IsAlive()) {
-							if (world->GetLocalPlayer()->IsToolSelectable(Player::ToolGrenade)) {
+						if (p.GetTeamId() < 2 && p.IsAlive()) {
+							if (p.IsToolSelectable(Player::ToolGrenade)) {
 								SetSelectedTool(Player::ToolGrenade);
 							} else {
 								if (cg_alerts)
@@ -713,9 +704,8 @@ namespace spades {
 							}
 						}
 					} else if (CheckKey(cg_keyLastTool, name) && down) {
-						if (hasLastTool && world->GetLocalPlayer()->GetTeamId() < 2 &&
-						    world->GetLocalPlayer()->IsAlive() &&
-						    world->GetLocalPlayer()->IsToolSelectable(lastTool)) {
+						if (hasLastTool && p.GetTeamId() < 2 &&
+						    p.IsAlive() && p.IsToolSelectable(lastTool)) {
 							hasLastTool = false;
 							SetSelectedTool(lastTool);
 						}
@@ -769,9 +759,8 @@ namespace spades {
 					} else if (CheckKey(cg_keyScoreboard, name)) {
 						scoreboardVisible = down;
 					} else if (CheckKey(cg_keyLimbo, name) && down) {
-						limbo->SetSelectedTeam(world->GetLocalPlayer()->GetTeamId());
-						limbo->SetSelectedWeapon(
-						  world->GetLocalPlayer()->GetWeapon().GetWeaponType());
+						limbo->SetSelectedTeam(p.GetTeamId());
+						limbo->SetSelectedWeapon(p.GetWeapon().GetWeaponType());
 						inGameLimbo = true;
 					} else if (CheckKey(cg_keySceneshot, name) && down) {
 						TakeScreenShot(true);
@@ -787,8 +776,7 @@ namespace spades {
 						hitTestSizeToggle = !hitTestSizeToggle;		
 					} else if (CheckKey(cg_keyFlashlight, name) && down) {
 						// spectators and dead players should not be able to toggle the flashlight
-						if (world->GetLocalPlayer()->IsSpectator() ||
-						    !world->GetLocalPlayer()->IsAlive())
+						if (p.IsSpectator() || !p.IsAlive())
 							return;
 						flashlightOn = !flashlightOn;
 						flashlightOnTime = time;
@@ -809,10 +797,8 @@ namespace spades {
 								dist = std::min(dist + 0.01f, 1.f);
 								targetFocalLength = 1.f / dist;
 								autoFocusEnabled = false;
-							} else if (cg_switchToolByWheel &&
-							           world->GetLocalPlayer()->GetTeamId() < 2 &&
-							           world->GetLocalPlayer()->IsAlive()) {
-								Player::ToolType t = world->GetLocalPlayer()->GetTool();
+							} else if (cg_switchToolByWheel && p.GetTeamId() < 2 && p.IsAlive()) {
+								Player::ToolType t = p.GetTool();
 								do {
 									switch (t) {
 										case Player::ToolSpade: t = Player::ToolGrenade; break;
@@ -820,7 +806,7 @@ namespace spades {
 										case Player::ToolWeapon: t = Player::ToolBlock; break;
 										case Player::ToolGrenade: t = Player::ToolWeapon; break;
 									}
-								} while (!world->GetLocalPlayer()->IsToolSelectable(t));
+								} while (!p.IsToolSelectable(t));
 								SetSelectedTool(t);
 							}
 							return;
@@ -833,10 +819,8 @@ namespace spades {
 								  std::max(dist - 0.01f, 1.f / 128.f); // limit to fog max distance
 								targetFocalLength = 1.f / dist;
 								autoFocusEnabled = false;
-							} else if (cg_switchToolByWheel &&
-							           world->GetLocalPlayer()->GetTeamId() < 2 &&
-							           world->GetLocalPlayer()->IsAlive()) {
-								Player::ToolType t = world->GetLocalPlayer()->GetTool();
+							} else if (cg_switchToolByWheel && p.GetTeamId() < 2 && p.IsAlive()) {
+								Player::ToolType t = p.GetTool();
 								do {
 									switch (t) {
 										case Player::ToolSpade: t = Player::ToolBlock; break;
@@ -844,7 +828,7 @@ namespace spades {
 										case Player::ToolWeapon: t = Player::ToolGrenade; break;
 										case Player::ToolGrenade: t = Player::ToolSpade; break;
 									}
-								} while (!world->GetLocalPlayer()->IsToolSelectable(t));
+								} while (!p.IsToolSelectable(t));
 								SetSelectedTool(t);
 							}
 							return;
@@ -854,8 +838,6 @@ namespace spades {
 						if (msg.size() > 0)
 							net->SendChat(msg, false);
 					}
-				} else {
-					// limbo
 				}
 			}
 		}
