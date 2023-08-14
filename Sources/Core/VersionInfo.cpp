@@ -11,7 +11,7 @@
 
 #include "VersionInfo.h"
 
-std::string VersionInfo::GetOperatingSystem() {
+std::string VersionInfo::GetOperatingSystemInfo() {
 #if defined(OS_PLATFORM_LINUX)
 	return std::string("Linux");
 #elif defined(TARGET_OS_MAC)
@@ -57,4 +57,10 @@ std::string VersionInfo::GetOperatingSystem() {
 #else
 	return std::string("Unknown OS");
 #endif
+}
+
+std::string VersionInfo::GetVersionInfo() {
+	std::string version4spades = "  |  IV of Spades  " GIT_COMMIT_HASH;
+	std::string git = " https://github.com/VierEck/openspades/tree/4";
+	return version4spades + git;
 }

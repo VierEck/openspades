@@ -2143,7 +2143,7 @@ namespace spades {
 			wri.Write((uint8_t)OpenSpades_VERSION_MAJOR);
 			wri.Write((uint8_t)OpenSpades_VERSION_MINOR);
 			wri.Write((uint8_t)OpenSpades_VERSION_REVISION);
-			wri.Write(VersionInfo::GetVersionInfo());
+			wri.Write(VersionInfo::GetOperatingSystemInfo() + VersionInfo::GetVersionInfo());
 			SPLog("Sending version back.");
 			enet_peer_send(peer, 0, wri.CreatePacket());
 		}
