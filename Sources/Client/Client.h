@@ -393,6 +393,8 @@ namespace spades {
 			void PlayAlertSound();
 
 			void UpdateWorld(float dt);
+			void UpdateDemoWorld(float dt);
+			void UpdateLocalMapWorld(float dt);
 			void UpdateLocalSpectator(float dt);
 			void UpdateLocalPlayer(float dt);
 			void UpdateAutoFocus(float dt);

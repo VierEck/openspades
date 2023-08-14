@@ -192,6 +192,15 @@ namespace spades {
 		void Client::UpdateWorld(float dt) {
 			SPADES_MARK_FUNCTION();
 
+			if (demo.replaying) {
+				UpdateDemoWorld(dt);
+				return;
+			}
+			if (IsLocalMapEditor()) {
+				UpdateLocalMapWorld(dt);
+				return;
+			}
+
 			stmp::optional<Player &> player = world->GetLocalPlayer();
 
 			if (player) {
@@ -215,9 +224,6 @@ namespace spades {
 				}
 			}
 
-			if (demo.replaying && net->IsDemoPaused())
-				return;
-
 #if 0
 			// dynamic time step
 			// physics diverges from server
@@ -230,7 +236,7 @@ namespace spades {
 
 			float frameStep = 1.f / 60.f;
 			while (worldSubFrame >= frameStep) {
-				world->Advance(frameStep * demo.speed);
+				world->Advance(frameStep);
 				worldSubFrame -= frameStep;
 			}
 #endif
@@ -238,7 +244,7 @@ namespace spades {
 			// update player view (doesn't affect physics/game logics)
 			for (auto &clientPlayer : clientPlayers) {
 				if (clientPlayer) {
-					clientPlayer->Update(dt * demo.speed);
+					clientPlayer->Update(dt);
 				}
 			}
 
@@ -257,7 +263,7 @@ namespace spades {
 					}
 				}
 			};
-			CorpseUpdateDispatch corpseDispatch{*this, dt * demo.speed};
+			CorpseUpdateDispatch corpseDispatch{*this, dt};
 			corpseDispatch.Start();
 
 			// local entities should be done in the client thread
@@ -265,7 +271,7 @@ namespace spades {
 				decltype(localEntities)::iterator it;
 				std::vector<decltype(it)> its;
 				for (it = localEntities.begin(); it != localEntities.end(); it++) {
-					if (!(*it)->Update(dt * demo.speed))
+					if (!(*it)->Update(dt))
 						its.push_back(it);
 				}
 				for (size_t i = 0; i < its.size(); i++) {
@@ -276,19 +282,189 @@ namespace spades {
 			corpseDispatch.Join();
 
 			if (grenadeVibration > 0.f) {
-				grenadeVibration -= dt * demo.speed;
+				grenadeVibration -= dt;
 				if (grenadeVibration < 0.f)
 					grenadeVibration = 0.f;
 			}
 
 			if (grenadeVibrationSlow > 0.f) {
-				grenadeVibrationSlow -= dt * demo.speed;
+				grenadeVibrationSlow -= dt;
 				if (grenadeVibrationSlow < 0.f)
 					grenadeVibrationSlow = 0.f;
 			}
 
 			if (hitFeedbackIconState > 0.f) {
-				hitFeedbackIconState -= dt * 4.f * demo.speed;
+				hitFeedbackIconState -= dt * 4.f;
+				if (hitFeedbackIconState < 0.f)
+					hitFeedbackIconState = 0.f;
+			}
+
+			if (targetfirestate > 0.f) {
+				targetfirestate -= dt * 4.f;
+				if (targetfirestate < 0.f)
+					targetfirestate = 0.f;
+			}
+		}
+
+		void Client::UpdateDemoWorld(float dt) {
+			SPADES_MARK_FUNCTION();
+
+			stmp::optional<Player &> player = world->GetLocalPlayer();
+
+			if (player) {
+				// disable input when UI is open
+				if (scriptedUI->NeedsInput()) {
+					weapInput.primary = false;
+					if (player->GetTeamId() >= 2 || player->GetTool() != Player::ToolWeapon) {
+						weapInput.secondary = false;
+					}
+					playerInput = PlayerInput();
+				}
+
+				if (player->GetTeamId() >= 2) {
+					if (!player->IsBuilder()) {
+						UpdateLocalSpectator(dt);
+					} else {
+						UpdateLocalBuilder(dt);//yes its possible to record an online map editing session
+					}
+				} else {
+					UpdateLocalPlayer(dt);
+				}
+			}
+
+			if (net->IsDemoPaused())
+				return;
+
+#if 0
+			// dynamic time step
+			// physics diverges from server
+			world->Advance(dt);
+#else
+			// accurately resembles server's physics
+			// but not smooth
+			if (dt > 0.f)
+				worldSubFrame += dt;
+
+			float frameStep = 1.f / 60.f;
+			while (worldSubFrame >= frameStep) {
+				world->Advance(frameStep * demo.speed);//multiply framestep instead dt to not increase amount of while loops
+				worldSubFrame -= frameStep;
+			}
+#endif
+
+			dt *= demo.speed;//now we can multiply dt
+
+			// update player view (doesn't affect physics/game logics)
+			for (auto &clientPlayer : clientPlayers) {
+				if (clientPlayer) {
+					clientPlayer->Update(dt);
+				}
+			}
+
+			// corpse never accesses audio nor renderer, so
+			// we can do it in the separate thread
+			class CorpseUpdateDispatch : public ConcurrentDispatch {
+				Client &client;
+				float dt;
+
+			public:
+				CorpseUpdateDispatch(Client &c, float dt) : client{c}, dt{dt} {}
+				void Run() override {
+					for (auto &c : client.corpses) {
+						for (int i = 0; i < 4; i++)
+							c->Update(dt / 4.f);
+					}
+				}
+			};
+			CorpseUpdateDispatch corpseDispatch{*this, dt};
+			corpseDispatch.Start();
+
+			// local entities should be done in the client thread
+			{
+				decltype(localEntities)::iterator it;
+				std::vector<decltype(it)> its;
+				for (it = localEntities.begin(); it != localEntities.end(); it++) {
+					if (!(*it)->Update(dt))
+						its.push_back(it);
+				}
+				for (size_t i = 0; i < its.size(); i++) {
+					localEntities.erase(its[i]);
+				}
+			}
+
+			corpseDispatch.Join();
+
+			if (grenadeVibration > 0.f) {
+				grenadeVibration -= dt;
+				if (grenadeVibration < 0.f)
+					grenadeVibration = 0.f;
+			}
+
+			if (grenadeVibrationSlow > 0.f) {
+				grenadeVibrationSlow -= dt;
+				if (grenadeVibrationSlow < 0.f)
+					grenadeVibrationSlow = 0.f;
+			}
+
+			if (hitFeedbackIconState > 0.f) {
+				hitFeedbackIconState -= dt * 4.f;
+				if (hitFeedbackIconState < 0.f)
+					hitFeedbackIconState = 0.f;
+			}
+
+			if (targetfirestate > 0.f) {
+				targetfirestate -= dt * 4.f;
+				if (targetfirestate < 0.f)
+					targetfirestate = 0.f;
+			}
+		}
+
+		void Client::UpdateLocalMapWorld(float dt) {
+			SPADES_MARK_FUNCTION();
+
+			stmp::optional<Player &> player = world->GetLocalPlayer();
+
+			if (player) {
+				// disable input when UI is open
+				if (scriptedUI->NeedsInput()) {
+					weapInput.primary = false;
+					if (player->GetTeamId() >= 2 || player->GetTool() != Player::ToolWeapon) {
+						weapInput.secondary = false;
+					}
+					playerInput = PlayerInput();
+				}
+
+				if (player->GetTeamId() >= 2) {
+					UpdateLocalBuilder(dt);//u cant become spectator in local map editor
+				} else {
+					UpdateLocalPlayer(dt);
+				}
+			}
+
+			//we can do dynamic time step. we r not connected to any server
+			world->Advance(dt);
+
+			// update player view (doesn't affect physics/game logics)
+			for (auto &clientPlayer : clientPlayers) {
+				if (clientPlayer) {
+					clientPlayer->Update(dt);
+				}
+			}
+
+			if (grenadeVibration > 0.f) {
+				grenadeVibration -= dt;
+				if (grenadeVibration < 0.f)
+					grenadeVibration = 0.f;
+			}
+
+			if (grenadeVibrationSlow > 0.f) {
+				grenadeVibrationSlow -= dt;
+				if (grenadeVibrationSlow < 0.f)
+					grenadeVibrationSlow = 0.f;
+			}
+
+			if (hitFeedbackIconState > 0.f) {
+				hitFeedbackIconState -= dt * 4.f;
 				if (hitFeedbackIconState < 0.f)
 					hitFeedbackIconState = 0.f;
 			}
