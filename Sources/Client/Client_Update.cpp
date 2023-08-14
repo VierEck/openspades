@@ -842,16 +842,28 @@ namespace spades {
 				bool sprinting = clientPlayers[p.GetId()]
 				                   ? clientPlayers[p.GetId()]->GetSprintState() > 0.5f
 				                   : false;
+
+				//lets make footsteps at least twice as noisy.
+				//on voxlap u can quite literally hear ppl from across the map.
+				//vanilla openspades cant compete at all against that. 
+				AudioParam params;
+				params.volume = 2.f;
+
+				if (sprinting && !p.GetWade()) {
+					//sprintstate cant be higher 1 (look at ClientPlayer::Update).
+					//so we multiply by a minimum of 1. we dont want to decrease the volume afterall. 
+					params.volume *= 1 + clientPlayers[p.GetId()]->GetSprintState();
+
+					Handle<IAudioChunk> c = audioDevice->RegisterSound(SampleRandomElement(rsnds));
+					audioDevice->Play(c.GetPointerOrNull(), p.GetOrigin(), params);
+				}
+
+				//in voxlap when u sprint on wade the noise does become more noticable.
+				//so we do the same by moving this down here to use multiplied params.volume.
 				Handle<IAudioChunk> c = p.GetWade()
 				                          ? audioDevice->RegisterSound(SampleRandomElement(wsnds))
 				                          : audioDevice->RegisterSound(SampleRandomElement(snds));
-				audioDevice->Play(c.GetPointerOrNull(), p.GetOrigin(), AudioParam());
-				if (sprinting && !p.GetWade()) {
-					AudioParam param;
-					param.volume *= clientPlayers[p.GetId()]->GetSprintState();
-					c = audioDevice->RegisterSound(SampleRandomElement(rsnds));
-					audioDevice->Play(c.GetPointerOrNull(), p.GetOrigin(), param);
-				}
+				audioDevice->Play(c.GetPointerOrNull(), p.GetOrigin(), params);
 			}
 		}
 
