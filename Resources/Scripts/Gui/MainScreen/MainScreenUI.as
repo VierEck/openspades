@@ -38,6 +38,7 @@ namespace spades {
 		private float time = -1.f;
 		private float reverseTime = 1.f;
 		
+		private ConfigItem cg_lastMainMenuScene("cg_lastMainMenuScene", "-1");
 		private int sceneState = -1;
 		private bool isFadeOut = false;
 		private Vector3 camera;
@@ -77,8 +78,12 @@ namespace spades {
 			// load map
 			@renderer.GameMap = GameMap("Maps/TitleHallWeeb.vxl");
 			
-			sceneState = 0;
-			SetupHallScene();
+			if (cg_lastMainMenuScene.IntValue > 5)
+				cg_lastMainMenuScene.IntValue = 5;
+			if (cg_lastMainMenuScene.IntValue < -1)
+				cg_lastMainMenuScene.IntValue = -1;
+			sceneState = cg_lastMainMenuScene.IntValue;
+			SetupNextScene();
 
 			// returned from the client game, so reload the server list.
 			if (mainMenu !is null)
@@ -233,6 +238,8 @@ namespace spades {
 					SetupPlaneScene();
 					break;
 			}
+			
+			cg_lastMainMenuScene.IntValue = sceneState;
 		}
 		
 		void SetupHallScene() {//scene 0
