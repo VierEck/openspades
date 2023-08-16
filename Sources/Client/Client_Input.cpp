@@ -473,8 +473,10 @@ namespace spades {
 						scriptedUI->setIgnored("");
 					}
 				}
-				if (!(bool)cg_demoRecord && net->IsDemoRecording())
+				if (!cg_demoRecord && net->IsDemoRecording())
 					net->StopDemo();
+				else if (cg_demoRecord && !net->IsDemoRecording() && !demo.replaying && !IsLocalMapEditor())
+					net->StartDemo("midgame_start_recording_pls", hostname);
 				return;
 			}
 
