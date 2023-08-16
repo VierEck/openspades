@@ -2395,6 +2395,33 @@ namespace spades {
 				ScanDemo();
 				demo.isFirstJoin = true;
 			} else {
+				fileName = "Demos/";
+
+				{
+					time_t t;
+					struct tm tm;
+					::time(&t);
+					tm = *localtime(&t);
+					char buf[256];
+					sprintf(
+						buf, "%04d-%02d-%02d_%02d-%02d-%02d_", tm.tm_year + 1900,
+						tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec
+					);
+					fileName += buf;
+				}
+
+				std::string hn = hostname.ToString(false);
+				for (size_t i = 0; i < hn.size(); i++) {
+					char c = hn[i];
+					if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')) {
+						fileName += c;
+					} else {
+						fileName += '_';
+					}
+				}
+
+				fileName += ".demo";
+
 				demo.stream = FileManager::OpenForWriting(fileName.c_str());
 
 				std::vector<unsigned char> buf = { (unsigned char)aos_replayVersion::v1, (unsigned char)protocolVersion };

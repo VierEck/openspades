@@ -418,7 +418,6 @@ namespace spades {
 			// decide log file name
 			std::string fn = hostname.ToString(false);
 			std::string fn2;
-			std::string demoName = "Demos/";
 			{
 				time_t t;
 				struct tm tm;
@@ -428,34 +427,22 @@ namespace spades {
 				sprintf(buf, "%04d%02d%02d%02d%02d%02d_", tm.tm_year + 1900, tm.tm_mon + 1,
 				        tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
 				fn2 = buf;
-
-				if ((bool)cg_demoRecord) {
-					sprintf(
-						buf, "%04d-%02d-%02d_%02d-%02d-%02d_", tm.tm_year + 1900,
-						tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec
-					);
-					demoName += buf;
-				}
 			}
 
-			std::string hostName;
 			for (size_t i = 0; i < fn.size(); i++) {
 				char c = fn[i];
 				if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')) {
-					hostName += c;
+					fn2 += c;
 				} else {
-					hostName += '_';
+					fn2 += '_';
 				}
 			}
-			fn2 += hostName;
 
 			if ((bool)cg_demoRecord) {
-				demoName += hostName + ".demo";
 				try {
-					net->StartDemo(demoName, hostname);
-					SPLog("Demo Recording Started at '%s'", demoName.c_str());
+					net->StartDemo("", hostname);
 				} catch (const std::exception &ex) {
-					SPLog("Failed to open new demo file '%s' (%s)", demoName.c_str(), ex.what());
+					SPLog("Failed to open new demo file (%s)", ex.what());
 				}
 			}
 
