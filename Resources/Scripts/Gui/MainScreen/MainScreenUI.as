@@ -40,7 +40,7 @@ namespace spades {
 		
 		private ConfigItem cg_lastMainMenuScene("cg_lastMainMenuScene", "-1");
 		private int sceneState = -1;
-		private int maxSceneState = 7;
+		private int maxSceneState = 9;
 		private bool isFadeOut = false;
 		private Vector3 camera;
 		private Vector3 roll = Vector3(0, 0, -1);
@@ -157,6 +157,12 @@ namespace spades {
 				case 7:
 					sceneDef = SakuraScene(sceneDef, dt);
 					break;
+				case 8:
+					sceneDef = MidHallScene(sceneDef, dt);
+					break;
+				case 9:
+					sceneDef = AlohaScene(sceneDef, dt);
+					break;
 			}
 			sceneDef.zNear = 0.1f;
 			sceneDef.zFar = 222.f;
@@ -249,6 +255,12 @@ namespace spades {
 					break;
 				case 7:
 					SetupSakuraScene();
+					break;
+				case 8:
+					SetupMidHallScene();
+					break;
+				case 9:
+					SetupAlohaScene();
 					break;
 			}
 			
@@ -452,6 +464,52 @@ namespace spades {
 				
 			return SetupCamera(sceneDef, camera,
 				Vector3(378, 187, 57), roll, 68);
+		}
+		
+		private void SetupMidHallScene() {//scene 8
+			renderer.FogDistance = 128.f;
+			renderer.FogColor = Vector3(0.05f, 0.f, 0.1f);
+			reverseTime = 1.f;
+			camera.x = 255.2f;
+			camera.y = 93;
+			camera.z = 23.4f;
+			roll = Vector3(0, 0, -1);
+			reverseRoll = Vector3(0, 0, 0);
+			FadeIn();
+		}
+		private SceneDefinition MidHallScene(SceneDefinition sceneDef, float dt) {
+			float delta = Min(dt, 0.05f);
+			
+			camera.y += delta * 2.5f;
+			
+			if (camera.y >= 340)
+				FadeOut();
+				
+			return SetupCamera(sceneDef, camera,
+				camera + Vector3(0, 0.1f, 0.005f), roll, 90);
+		}
+		
+		private void SetupAlohaScene() {//scene 9
+			renderer.FogDistance = 128.f;
+			renderer.FogColor = Vector3(0.05f, 0.f, 0.1f);
+			reverseTime = 1.f;
+			camera.x = 60;
+			camera.y = 482;
+			camera.z = 0;
+			roll = Vector3(0, 0, -1);
+			reverseRoll = Vector3(0, 0, 0);
+			FadeIn();
+		}
+		private SceneDefinition AlohaScene(SceneDefinition sceneDef, float dt) {
+			float delta = Min(dt, 0.05f);
+			
+			camera.x += delta * 2.f;
+			
+			if (camera.x >= 190)
+				FadeOut();
+				
+			return SetupCamera(sceneDef, camera,
+				camera + Vector3(0, -0.1f, 1), roll, 90);
 		}
 	}
 
