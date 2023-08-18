@@ -34,6 +34,18 @@ namespace spades {
 		MainScreenMainMenu @mainMenu;
 
 		bool shouldExit = false;
+		
+		private bool isFree = false;
+		private Vector2 currentMousePos = Vector2(0, 0);
+		private Vector2 lastMousePos = Vector2(0, 0);
+		private Vector3 ori = Vector3(1, 0, 0);
+		private bool forward = false;
+		private bool backward = false;
+		private bool right = false;
+		private bool left = false;
+		private bool jump = false;
+		private bool crouch = false;
+		private bool sprint = false;
 
 		private float time = -1.f;
 		private float reverseTime = 1.f;
@@ -94,12 +106,28 @@ namespace spades {
 				manager.KeyPanic();
 		}
 
-		void MouseEvent(float x, float y) { manager.MouseEvent(x, y); }
-
+		void MouseEvent(float x, float y) { 
+			if (isFree)
+				FreeMouseEvent(x, y);
+			else
+				manager.MouseEvent(x, y); 
+		}
+		
 		void WheelEvent(float x, float y) { manager.WheelEvent(x, y); }
 
-		void KeyEvent(string key, bool down) { manager.KeyEvent(key, down); }
-
+		void KeyEvent(string key, bool down) {
+			if (down && key == "F4") {
+				isFree = !isFree;
+				mainMenu.Visible = mainMenu.Enable = !isFree;
+				if (!isFree)
+					SetupNextScene();
+			}
+			if (isFree)
+				FreeKeyEvent(key, down);
+			else
+				manager.KeyEvent(key, down);
+		}
+		
 		void TextInputEvent(string text) { manager.TextInputEvent(text); }
 
 		void TextEditingEvent(string text, int start, int len) {
@@ -132,37 +160,41 @@ namespace spades {
 			}
 
 			SceneDefinition sceneDef;
-			switch (sceneState) {
-				case 0:
-					sceneDef = HallScene(sceneDef, dt);
-					break;
-				case 1:
-					sceneDef = BonfireScene(sceneDef, dt);
-					break;
-				case 2:
-					sceneDef = SkylineScene(sceneDef, dt);
-					break;
-				case 3:
-					sceneDef = AustronautScene(sceneDef, dt);
-					break;
-				case 4:
-					sceneDef = ToriiScene(sceneDef, dt);
-					break;
-				case 5:
-					sceneDef = PlaneScene(sceneDef, dt);
-					break;
-				case 6:
-					sceneDef = CenterScene(sceneDef, dt);
-					break;
-				case 7:
-					sceneDef = SakuraScene(sceneDef, dt);
-					break;
-				case 8:
-					sceneDef = MidHallScene(sceneDef, dt);
-					break;
-				case 9:
-					sceneDef = AlohaScene(sceneDef, dt);
-					break;
+			if (isFree) {
+				sceneDef = FreeScene(sceneDef, dt);
+			} else {
+				switch (sceneState) {
+					case 0:
+						sceneDef = HallScene(sceneDef, dt);
+						break;
+					case 1:
+						sceneDef = BonfireScene(sceneDef, dt);
+						break;
+					case 2:
+						sceneDef = SkylineScene(sceneDef, dt);
+						break;
+					case 3:
+						sceneDef = AustronautScene(sceneDef, dt);
+						break;
+					case 4:
+						sceneDef = ToriiScene(sceneDef, dt);
+						break;
+					case 5:
+						sceneDef = PlaneScene(sceneDef, dt);
+						break;
+					case 6:
+						sceneDef = CenterScene(sceneDef, dt);
+						break;
+					case 7:
+						sceneDef = SakuraScene(sceneDef, dt);
+						break;
+					case 8:
+						sceneDef = MidHallScene(sceneDef, dt);
+						break;
+					case 9:
+						sceneDef = AlohaScene(sceneDef, dt);
+						break;
+				}
 			}
 			sceneDef.zNear = 0.1f;
 			sceneDef.zFar = 222.f;
@@ -196,8 +228,10 @@ namespace spades {
 			renderer.ColorNP = Vector4(1.f, 1.f, 1.f, 1.f);
 			renderer.DrawImage(img, Vector2((renderer.ScreenWidth - img.Width) * 0.5f, 64.f));
 
-			manager.RunFrame(dt);
-			manager.Render();
+			if (!isFree) {
+				manager.RunFrame(dt);
+				manager.Render();
+			}
 
 			time += Min(dt, 0.05f) * reverseTime;
 			
@@ -213,6 +247,85 @@ namespace spades {
 		void Closing() { shouldExit = true; }
 
 		bool WantsToBeClosed() { return shouldExit; }
+		
+		private void FreeMouseEvent(float x, float y) {
+			currentMousePos.x = x;
+			currentMousePos.y = y;
+		}
+		
+		private void FreeKeyEvent(string key, bool down) {
+			if (key == "W")
+				forward = down;
+			if (key == "S")
+				backward = down;
+			if (key == "D")
+				right = down;
+			if (key == "A")
+				left = down;
+			if (key == " ")
+				jump = down;
+			if (key == "Control")
+				crouch = down;
+			if (key == "Shift")
+				sprint = down;
+		}
+		
+		private SceneDefinition FreeScene(SceneDefinition sceneDef, float dt) {
+			MoveFree(dt);
+			
+			//orientation is limited since scriptedUI only uses absolute 
+			//mouse coordinates instead of relative mouse movement :/
+			Vector2 diff = (currentMousePos - lastMousePos) * dt * 0.5f;
+			lastMousePos = currentMousePos;
+			
+			if (diff.x != 0)
+				ori += Vector3(-ori.y, ori.x, 0) * diff.x;
+			
+			if (diff.y != 0)
+				ori.z += diff.y;
+			
+			ori /= sqrt(ori.x * ori.x + ori.y * ori.y + ori.z * ori.z);
+			
+			return SetupCamera(sceneDef, camera,
+				camera + ori, Vector3(0, 0, -1), 90);
+		}
+		private void MoveFree(float dt) {
+			Vector3 dir = Vector3(0, 0, 0);
+			
+			if (forward)
+				dir += ori;
+			else if (backward)
+				dir -= ori;
+			if (right)
+				dir += Vector3(-ori.y, ori.x, 0);
+			else if (left)
+				dir += Vector3(ori.y, -ori.x, 0);
+			if (jump)
+				dir -= Vector3(0, 0, 1);
+			else if (crouch)
+				dir += Vector3(0, 0, 1);
+			
+			dir *= dt * 10.f;
+			if (sprint)
+				dir *= 2.f;
+			
+			Vector3 modCam = camera + dir;
+			
+			if (modCam.z < 62.5f)
+				camera.z = modCam.z;
+				
+			if (modCam.x < 0.f)
+				modCam.x += 512.f;
+			if (modCam.x > 512.f)
+				modCam.x -= 512.f;
+			camera.x = modCam.x;
+			
+			if (modCam.y < 0.f)
+				modCam.y += 512.f;
+			if (modCam.y > 512.f)
+				modCam.y -= 512.f;
+			camera.y = modCam.y;
+		}
 		
 		private void FadeOut() { 
 			if (isFadeOut)
