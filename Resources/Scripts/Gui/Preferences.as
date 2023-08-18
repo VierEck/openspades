@@ -1251,46 +1251,6 @@ namespace spades {
 			layouter.AddToggleField(_Tr("Preferences", "Debug Skin Anchors"), "cg_debugToolSkinAnchors");
 			layouter.AddHeading(_Tr("Preferences", " "));
 
-			layouter.AddHeading(_Tr("Preferences", "Nuceto's Target Mod"));
-			layouter.AddToggleField(_Tr("Preferences", "Target"), "n_Target");
-			layouter.AddToggleField(_Tr("Preferences", "Hide Default Target"), "n_hideDefaultTarget");
-			layouter.AddToggleField(_Tr("Preferences", "Hide Default Scope"), "n_hideDefaultScope");
-			layouter.AddToggleField(_Tr("Preferences", "Target in scope"), "n_TargetOnScope");
-			layouter.AddSliderField(_Tr("Preferences", "Size"), "n_TargetSize", 1, 4, 0.1,
-			ConfigNumberFormatter(1, "x"));
-
-			layouter.AddToggleField(_Tr("Preferences", "Dot"), "n_TargetDot");
-			layouter.AddToggleField(_Tr("Preferences", "Lines"), "n_TargetLines");
-			layouter.AddSliderField(_Tr("Preferences", "Linespos"), "n_TargetLinesPos", -64, 16, 1,
-			ConfigNumberFormatter(1, "x"));
-
-			layouter.AddSliderField(_Tr("Preferences", "LinesHeight"), "n_TargetLinesHeight", 0, 500, 1,
-			ConfigNumberFormatter(1, "x"));	
-
-			layouter.AddToggleField(_Tr("Preferences", "Dynamic Lines Fire"), "n_TargetLinesDynamicFire");
-			layouter.AddToggleField(_Tr("Preferences", "Dynamic Lines Sprint"), "n_TargetLinesDynamicSprint");
-			layouter.AddSliderField(_Tr("Preferences", "Dynamic Lines Multiplier"), "n_TargetLinesDynamicMultiplier", 1, 100, 1,
-			ConfigNumberFormatter(1, "x"));
-
-			layouter.AddSliderField(_Tr("Preferences", "Dot Transparency"), "n_TargetDotTransparency", 0, 1, 0.01,
-									ConfigNumberFormatter(0, " %", "", 100));
-			layouter.AddSliderField(_Tr("Preferences", "Dot Red"), "n_TargetDotColorRed", 0, 255, 1,
-			ConfigNumberFormatter(0, " r"));
-			layouter.AddSliderField(_Tr("Preferences", "Dot Green"), "n_TargetDotColorGreen", 0, 255, 1,
-			ConfigNumberFormatter(0, " g"));
-			layouter.AddSliderField(_Tr("Preferences", "Dot Blue"), "n_TargetDotColorBlue", 0, 255, 1,
-			ConfigNumberFormatter(0, " b"));
-
-			layouter.AddSliderField(_Tr("Preferences", "Line Transparency"), "n_TargetLineTransparency", 0, 1, 0.01,
-									ConfigNumberFormatter(0, " %", "", 100));
-			layouter.AddSliderField(_Tr("Preferences", "Line Red"), "n_TargetLineColorRed", 0, 255, 1,
-			ConfigNumberFormatter(0, " r"));
-			layouter.AddSliderField(_Tr("Preferences", "Line Green"), "n_TargetLineColorGreen", 0, 255, 1,
-			ConfigNumberFormatter(0, " g"));
-			layouter.AddSliderField(_Tr("Preferences", "Line Blue"), "n_TargetLineColorBlue", 0, 255, 1,
-			ConfigNumberFormatter(0, " b"));
-			layouter.AddHeading(_Tr("Preferences", " "));
-
 			layouter.FinishLayout();
 		}
 	}

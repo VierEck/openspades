@@ -298,12 +298,6 @@ namespace spades {
 				if (hitFeedbackIconState < 0.f)
 					hitFeedbackIconState = 0.f;
 			}
-
-			if (targetfirestate > 0.f) {
-				targetfirestate -= dt * 4.f;
-				if (targetfirestate < 0.f)
-					targetfirestate = 0.f;
-			}
 		}
 
 		void Client::UpdateDemoWorld(float dt) {
@@ -411,12 +405,6 @@ namespace spades {
 				if (hitFeedbackIconState < 0.f)
 					hitFeedbackIconState = 0.f;
 			}
-
-			if (targetfirestate > 0.f) {
-				targetfirestate -= dt * 4.f;
-				if (targetfirestate < 0.f)
-					targetfirestate = 0.f;
-			}
 		}
 
 		void Client::UpdateLocalMapWorld(float dt) {
@@ -467,12 +455,6 @@ namespace spades {
 				hitFeedbackIconState -= dt * 4.f;
 				if (hitFeedbackIconState < 0.f)
 					hitFeedbackIconState = 0.f;
-			}
-
-			if (targetfirestate > 0.f) {
-				targetfirestate -= dt * 4.f;
-				if (targetfirestate < 0.f)
-					targetfirestate = 0.f;
 			}
 		}
 
@@ -876,7 +858,6 @@ namespace spades {
 			if (&p == world->GetLocalPlayer()) {
 				localFireVibrationTime = time;
 				lastShotTime = time;
-				targetfirestate = 1.f;
 				shotsCount++;
 			}
 

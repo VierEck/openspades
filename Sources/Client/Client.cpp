@@ -120,7 +120,6 @@ namespace spades {
 		      flashlightOn(false),
 		      hitFeedbackIconState(0.f),
 		      hitFeedbackFriendly(false),
-			  targetfirestate(0.f),
 		      focalLength(20.f),
 		      targetFocalLength(20.f),
 		      autoFocusEnabled(true),
