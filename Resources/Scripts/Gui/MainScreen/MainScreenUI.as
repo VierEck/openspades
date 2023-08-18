@@ -36,8 +36,7 @@ namespace spades {
 		bool shouldExit = false;
 		
 		private bool isFree = false;
-		private Vector2 currentMousePos = Vector2(0, 0);
-		private Vector2 lastMousePos = Vector2(0, 0);
+		private Vector2 mouseMove = Vector2(0, 0);
 		private Vector3 ori = Vector3(1, 0, 0);
 		private bool forward = false;
 		private bool backward = false;
@@ -105,6 +104,8 @@ namespace spades {
 			if (manager !is null)
 				manager.KeyPanic();
 		}
+
+		bool NeedsAbsoluteMouseCoordinate() { return !isFree; }
 
 		void MouseEvent(float x, float y) { 
 			if (isFree)
@@ -248,10 +249,7 @@ namespace spades {
 
 		bool WantsToBeClosed() { return shouldExit; }
 		
-		private void FreeMouseEvent(float x, float y) {
-			currentMousePos.x = x;
-			currentMousePos.y = y;
-		}
+		private void FreeMouseEvent(float x, float y) { mouseMove = Vector2(x, y); }
 		
 		private void FreeKeyEvent(string key, bool down) {
 			if (key == "W")
@@ -273,16 +271,13 @@ namespace spades {
 		private SceneDefinition FreeScene(SceneDefinition sceneDef, float dt) {
 			MoveFree(dt);
 			
-			//orientation is limited since scriptedUI only uses absolute 
-			//mouse coordinates instead of relative mouse movement :/
-			Vector2 diff = (currentMousePos - lastMousePos) * dt * 0.5f;
-			lastMousePos = currentMousePos;
+			mouseMove *= dt * 0.5f;
 			
-			if (diff.x != 0)
-				ori += Vector3(-ori.y, ori.x, 0) * diff.x;
+			if (mouseMove.x != 0)
+				ori += Vector3(-ori.y, ori.x, 0) * mouseMove.x;
 			
-			if (diff.y != 0)
-				ori.z += diff.y;
+			if (mouseMove.y != 0)
+				ori.z += mouseMove.y;
 			
 			ori /= sqrt(ori.x * ori.x + ori.y * ori.y + ori.z * ori.z);
 			
