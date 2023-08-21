@@ -25,49 +25,44 @@ namespace spades {
 	}
 
 	class PreferenceView : spades::ui::UIElement {
-		spades::ui::UIElement @owner;
+		spades::ui::UIElement@ owner;
 
 		private PreferenceTab @[] tabs;
-		float ContentsLeft, ContentsRight, ContentsWidth;
+		float ContentsLeft, ContentsWidth;
 		float ContentsTop, ContentsHeight;
+		float ContentsRight;
 
 		int SelectedTabIndex = 0;
 
-		spades::ui::EventHandler @Closed;
+		spades::ui::EventHandler@ Closed;
 
-		PreferenceView(spades::ui::UIElement @owner, PreferenceViewOptions @options,
-					   FontManager @fontManager) {
+		PreferenceView(spades::ui::UIElement@ owner,
+			PreferenceViewOptions@ options, FontManager@ fontManager) {
 			super(owner.Manager);
 			@this.owner = owner;
 			this.Bounds = owner.Bounds;
-			
-			float sw = Manager.Renderer.ScreenWidth;
-			float sh = Manager.Renderer.ScreenHeight;
-			
+
+			float sw = Manager.ScreenWidth;
+			float sh = Manager.ScreenHeight;
+
 			ContentsWidth = sw - 16.0F;
 			float maxContentsWidth = 800.0F;
 			if (ContentsWidth > maxContentsWidth)
 				ContentsWidth = maxContentsWidth;
-				
+
 			ContentsHeight = sh - 8.0F;
 			float maxContentsHeight = 550.0F;
 			if (ContentsHeight > maxContentsHeight)
 				ContentsHeight = maxContentsHeight;
-				
+
 			ContentsTop = (sh - ContentsHeight) * 0.5F;
 			ContentsLeft = (sw - ContentsWidth) * 0.5F;
 			ContentsRight = ContentsLeft + ContentsWidth;
 
 			{
 				spades::ui::Label label(Manager);
-				label.BackgroundColor = Vector4(0, 0, 0, 0.4f);
-				label.Bounds = Bounds;
-				AddChild(label);
-			}
-			{
-				spades::ui::Label label(Manager);
-				label.BackgroundColor = Vector4(0, 0, 0, 0.8f);
-				label.Bounds = AABB2(0.f, ContentsTop - 13.f, Size.x, ContentsHeight + 27.f);
+				label.BackgroundColor = Vector4(0.0F, 0.0F, 0.0F, 0.9F);
+				label.Bounds = AABB2(0.0F, ContentsTop - 13.0F, Size.x, ContentsHeight + 27.0F);
 				AddChild(label);
 			}
 
@@ -96,10 +91,9 @@ namespace spades {
 			{
 				PreferenceTabButton button(Manager);
 				button.Caption = _Tr("Preferences", "Back");
-				button.Bounds =
-					AABB2(ContentsLeft + 10.f, ContentsTop + 10.f + float(tabs.length) * 32.f + 5.f,
-						  150.f, 30.f);
-				button.Alignment = Vector2(0.f, 0.5f);
+				button.HotKeyText = "[Esc]";
+				button.Bounds = AABB2(ContentsLeft + 10.0F,
+					ContentsTop + 10.0F + float(tabs.length) * 32.0F + 5.0F, 150.0F, 30.0F);
 				@button.Activated = spades::ui::EventHandler(this.OnClosePressed);
 				AddChild(button);
 			}
@@ -107,22 +101,21 @@ namespace spades {
 			UpdateTabs();
 		}
 
-		private void AddTab(spades::ui::UIElement @view, string caption) {
+		private void AddTab(spades::ui::UIElement@ view, string caption) {
 			PreferenceTab tab(this, view);
-			int order = int(tabs.length);
-			tab.TabButton.Bounds =
-				AABB2(ContentsLeft + 10.f, ContentsTop + 10.f + float(order) * 32.f, 150.f, 30.f);
 			tab.TabButton.Caption = caption;
-			tab.View.Bounds = AABB2(ContentsLeft + 170.f, ContentsTop + 10.f, ContentsWidth - 180.f,
-									ContentsHeight - 20.f);
-			tab.View.Visible = false;
+			tab.TabButton.Bounds = AABB2(ContentsLeft + 10.0F,
+				ContentsTop + 10.0F + float(tabs.length) * 32.0F, 150.0F, 30.0F);
 			@tab.TabButton.Activated = spades::ui::EventHandler(this.OnTabButtonActivated);
+			tab.View.Bounds = AABB2((ContentsLeft + 2.0F) + 150.0F,
+				ContentsTop + 10.0F, ContentsWidth, ContentsHeight - 20.0F);
+			tab.View.Visible = false;
 			AddChild(tab.View);
 			AddChild(tab.TabButton);
 			tabs.insertLast(tab);
 		}
 
-		private void OnTabButtonActivated(spades::ui::UIElement @sender) {
+		private void OnTabButtonActivated(spades::ui::UIElement@ sender) {
 			for (uint i = 0; i < tabs.length; i++) {
 				if (cast<spades::ui::UIElement>(tabs[i].TabButton) is sender) {
 					SelectedTabIndex = i;
@@ -133,14 +126,14 @@ namespace spades {
 
 		void UpdateTabs() {
 			for (uint i = 0; i < tabs.length; i++) {
-				PreferenceTab @tab = tabs[i];
+				PreferenceTab@ tab = tabs[i];
 				bool selected = SelectedTabIndex == int(i);
 				tab.TabButton.Toggled = selected;
 				tab.View.Visible = selected;
 			}
 		}
 
-		private void OnClosePressed(spades::ui::UIElement @sender) { Close(); }
+		private void OnClosePressed(spades::ui::UIElement@ sender) { Close(); }
 
 		private void OnClosed() {
 			if (Closed !is null)
@@ -156,19 +149,13 @@ namespace spades {
 		}
 
 		void Render() {
+			Renderer@ r = Manager.Renderer;
 			Vector2 pos = ScreenPosition;
 			Vector2 size = Size;
-			Renderer @r = Manager.Renderer;
-			Image @img = r.RegisterImage("Gfx/White.tga");
 
-			r.ColorNP = Vector4(1, 1, 1, 0.08f);
-			r.DrawImage(img, AABB2(pos.x, pos.y + ContentsTop - 15.f, size.x, 1.f));
-			r.DrawImage(img,
-						AABB2(pos.x, pos.y + ContentsTop + ContentsHeight + 15.f, size.x, 1.f));
-			r.ColorNP = Vector4(1, 1, 1, 0.2f);
-			r.DrawImage(img, AABB2(pos.x, pos.y + ContentsTop - 14.f, size.x, 1.f));
-			r.DrawImage(img,
-						AABB2(pos.x, pos.y + ContentsTop + ContentsHeight + 14.f, size.x, 1.f));
+			r.ColorNP = Vector4(1.0F, 1.0F, 1.0F, 0.07F);
+			r.DrawImage(null, AABB2(pos.x, pos.y + ContentsTop - 14.0F, size.x, 1.0F));
+			r.DrawImage(null, AABB2(pos.x, pos.y + ContentsTop + ContentsHeight + 14.0F, size.x, 1.0F));
 
 			UIElement::Render();
 		}
@@ -186,39 +173,17 @@ namespace spades {
 	}
 
 	class PreferenceTabButton : spades::ui::Button {
-		PreferenceTabButton(spades::ui::UIManager @manager) {
+		PreferenceTabButton(spades::ui::UIManager@ manager) {
 			super(manager);
-			Alignment = Vector2(0.f, 0.5f);
+			Alignment = Vector2(0.0F, 0.5F);
 		}
-		/*
-		void Render() {
-				Renderer@ renderer = Manager.Renderer;
-				Vector2 pos = ScreenPosition;
-				Vector2 size = Size;
-
-				Vector4 color = Vector4(0.2f, 0.2f, 0.2f, 0.5f);
-				if(Toggled or (Pressed and Hover)) {
-						color = Vector4(0.7f, 0.7f, 0.7f, 0.9f);
-				}else if(Hover) {
-						color = Vector4(0.4f, 0.4f, 0.4f, 0.7f);
-				}
-
-				Font@ font = this.Font;
-				string text = this.Caption;
-				Vector2 txtSize = font.Measure(text);
-				Vector2 txtPos;
-				txtPos.y = pos.y + (size.y - txtSize.y) * 0.5f;
-
-				font.DrawShadow(text, txtPos, 1.f,
-						color, Vector4(0.f, 0.f, 0.f, 0.4f));
-		}*/
 	}
 
 	class PreferenceTab {
-		spades::ui::UIElement @View;
-		PreferenceTabButton @TabButton;
+		spades::ui::UIElement@ View;
+		PreferenceTabButton@ TabButton;
 
-		PreferenceTab(PreferenceView @parent, spades::ui::UIElement @view) {
+		PreferenceTab(PreferenceView@ parent, spades::ui::UIElement@ view) {
 			@View = view;
 			@TabButton = PreferenceTabButton(parent.Manager);
 			TabButton.Toggle = true;
@@ -226,7 +191,7 @@ namespace spades {
 	}
 
 	class ConfigField : spades::ui::Field {
-		ConfigItem @config;
+		ConfigItem@ config;
 		ConfigField(spades::ui::UIManager manager, string configName) {
 			super(manager);
 			@config = ConfigItem(configName);
@@ -261,16 +226,15 @@ namespace spades {
 			this.prescale = prescale;
 		}
 		private string FormatInternal(float value) {
-			if (value < 0.f) {
+			if (value < 0.0F)
 				return "-" + Format(-value);
-			}
 
 			value *= prescale;
 
 			// do rounding
-			float rounding = 0.5f;
+			float rounding = 0.5F;
 			for (int i = digits; i > 0; i--)
-				rounding *= 0.1f;
+				rounding *= 0.1F;
 			value += rounding;
 
 			int intPart = int(value);
@@ -279,7 +243,7 @@ namespace spades {
 				s += ".";
 				for (int i = digits; i > 0; i--) {
 					value -= float(intPart);
-					value *= 10.f;
+					value *= 10.0F;
 					intPart = int(value);
 					if (intPart > 9)
 						intPart = 9;
@@ -290,6 +254,69 @@ namespace spades {
 			return s;
 		}
 		string Format(float value) { return prefix + FormatInternal(value); }
+	}
+
+	class ConfigRenderScaleFormatter : ConfigNumberFormatter {
+		ConfigRenderScaleFormatter() {
+			super(0, "");
+		}
+
+		string Format(float value) {
+			if (value == 1)
+				return _Tr("Preferences", "Bicubic");
+			else if (value == 2)
+				return _Tr("Preferences", "Bilinear");
+			else
+				return _Tr("Preferences", "Nearest Neighbour");
+		}
+	}
+
+	class ConfigSensScaleFormatter : ConfigNumberFormatter {
+		ConfigSensScaleFormatter() {
+			super(0, "");
+		}
+
+		string Format(float value) {
+			if (value == 1)
+				return "Quake/Source";
+			else if (value == 2)
+				return "Overwatch";
+			else if (value == 3)
+				return "Valorant";
+			else
+				return _Tr("Preferences", "Default");
+		}
+	}
+
+	class ConfigHUDColorFormatter : ConfigNumberFormatter {
+		ConfigHUDColorFormatter() {
+			super(0, "");
+		}
+
+		string Format(float value) {
+			if (value == 1)
+				return _Tr("Preferences", "Team Color");
+			else if (value == 2)
+				return _Tr("Preferences", "Light Blue");
+			else if (value == 3)
+				return _Tr("Preferences", "Blue");
+			else if (value == 4)
+				return _Tr("Preferences", "Purple");
+			else if (value == 5)
+				return _Tr("Preferences", "Red");
+			else if (value == 6)
+				return _Tr("Preferences", "Orange");
+			else if (value == 7)
+				return _Tr("Preferences", "Yellow");
+			else if (value == 8)
+				return _Tr("Preferences", "Green");
+			else if (value == 9)
+				return _Tr("Preferences", "Aqua");
+			else if (value == 10)
+				return _Tr("Preferences", "Pink");
+			else
+				return _Tr("Preferences", "Custom");
+		}
 	}
 
 	class ConfigTargetColorFormatter : ConfigNumberFormatter {
@@ -332,15 +359,14 @@ namespace spades {
 		}
 	}
 
-
 	class ConfigSlider : spades::ui::Slider {
-		ConfigItem @config;
+		ConfigItem@ config;
 		float stepSize;
-		spades::ui::Label @label;
-		ConfigNumberFormatter @formatter;
+		spades::ui::Label@ label;
+		ConfigNumberFormatter@ formatter;
 
 		ConfigSlider(spades::ui::UIManager manager, string configName, float minValue,
-					 float maxValue, float stepValue, ConfigNumberFormatter @formatter) {
+					 float maxValue, float stepValue, ConfigNumberFormatter@ formatter) {
 			super(manager);
 			@config = ConfigItem(configName);
 			this.MinValue = minValue;
@@ -355,14 +381,14 @@ namespace spades {
 			this.LargeChange = float(steps) * stepValue;
 
 			@label = spades::ui::Label(Manager);
-			label.Alignment = Vector2(1.f, 0.5f);
+			label.Alignment = Vector2(0.5F, 0.5F);
 			AddChild(label);
 			UpdateLabel();
 		}
 
 		void OnResized() {
 			Slider::OnResized();
-			label.Bounds = AABB2(Size.x, 0.f, 80.f, Size.y);
+			label.Bounds = AABB2(0.0F, 0.0F, Size.x, Size.y);
 		}
 
 		void UpdateLabel() { label.Text = formatter.Format(config.FloatValue); }
@@ -390,9 +416,9 @@ namespace spades {
 		}
 	}
 	class ConfigHotKeyField : spades::ui::UIElement {
-		ConfigItem @config;
+		ConfigItem@ config;
 		private bool hover;
-		spades::ui::EventHandler @KeyBound;
+		spades::ui::EventHandler@ KeyBound;
 
 		ConfigHotKeyField(spades::ui::UIManager manager, string configName) {
 			super(manager);
@@ -452,34 +478,29 @@ namespace spades {
 
 		void Render() {
 			// render background
-			Renderer @renderer = Manager.Renderer;
+			Renderer@ r = Manager.Renderer;
 			Vector2 pos = ScreenPosition;
 			Vector2 size = Size;
-			Image @img = renderer.RegisterImage("Gfx/White.tga");
-			renderer.ColorNP = Vector4(0.f, 0.f, 0.f, IsFocused ? 0.3f : 0.1f);
-			renderer.DrawImage(img, AABB2(pos.x, pos.y, size.x, size.y));
 
-			if (IsFocused) {
-				renderer.ColorNP = Vector4(1.f, 1.f, 1.f, 0.2f);
-			} else if (hover) {
-				renderer.ColorNP = Vector4(1.f, 1.f, 1.f, 0.1f);
-			} else {
-				renderer.ColorNP = Vector4(1.f, 1.f, 1.f, 0.06f);
-			}
-			renderer.DrawImage(img, AABB2(pos.x, pos.y, size.x, 1.f));
-			renderer.DrawImage(img, AABB2(pos.x, pos.y + size.y - 1.f, size.x, 1.f));
-			renderer.DrawImage(img, AABB2(pos.x, pos.y + 1.f, 1.f, size.y - 2.f));
-			renderer.DrawImage(img, AABB2(pos.x + size.x - 1.f, pos.y + 1.f, 1.f, size.y - 2.f));
+			r.ColorNP = Vector4(0.0F, 0.0F, 0.0F, IsFocused ? 0.3F : 0.1F);
+			r.DrawImage(null, AABB2(pos.x, pos.y, size.x, size.y));
 
-			Font @font = this.Font;
+			if (IsFocused)
+				r.ColorNP = Vector4(1.0F, 1.0F, 1.0F, 0.2F);
+			else if (hover)
+				r.ColorNP = Vector4(1.0F, 1.0F, 1.0F, 0.1F);
+			else
+				r.ColorNP = Vector4(1.0F, 1.0F, 1.0F, 0.06F);
+			DrawOutlinedRect(r, pos.x, pos.y, pos.x + size.x, pos.y + size.y);
+
+			Font@ font = this.Font;
 			string text = IsFocused
-							  ? _Tr("Preferences", "Press Key to Bind or [Escape] to Cancel...")
-							  : config.StringValue;
+				? _Tr("Preferences", "Press Key to Bind or [Escape] to Cancel...")
+				: config.StringValue;
 
-			Vector4 color(1, 1, 1, 1);
-
+			Vector4 color = Vector4(1.0F, 1.0F, 1.0F, 1.0F);
 			if (IsFocused) {
-				color.w = abs(sin(Manager.Time * 2.f));
+				color.w = abs(sin(Manager.Time * 2.0F));
 			} else {
 				AcceptsFocus = false;
 			}
@@ -488,7 +509,7 @@ namespace spades {
 				text = _Tr("Preferences", "Space");
 			} else if (text.length == 0) {
 				text = _Tr("Preferences", "Unbound");
-				color.w *= 0.3f;
+				color.w *= 0.3F;
 			} else if (text == "Shift") {
 				text = _Tr("Preferences", "Shift");
 			} else if (text == "Control") {
@@ -507,24 +528,23 @@ namespace spades {
 				text = _Tr("Preferences", "Mouse Button 4");
 			} else if (text == "MouseButton5") {
 				text = _Tr("Preferences", "Mouse Button 5");
-			} else {
+			} else if (!IsFocused) {
 				for (uint i = 0, len = text.length; i < len; i++)
 					text[i] = ToUpper(text[i]);
 			}
 
 			Vector2 txtSize = font.Measure(text);
-			Vector2 txtPos;
-			txtPos = pos + (size - txtSize) * 0.5f;
+			Vector2 txtPos = pos + (size - txtSize) * 0.5F;
 
-			font.Draw(text, txtPos, 1.f, color);
+			font.Draw(text, txtPos, 1.0F, color);
 		}
 	}
 
 	class ConfigSimpleToggleButton : spades::ui::RadioButton {
-		ConfigItem @config;
+		ConfigItem@ config;
 		int value;
-		ConfigSimpleToggleButton(spades::ui::UIManager manager, string caption, string configName,
-								 int value) {
+		ConfigSimpleToggleButton(spades::ui::UIManager manager,
+			string caption, string configName, int value) {
 			super(manager);
 			@config = ConfigItem(configName);
 			this.Caption = caption;
@@ -542,161 +562,6 @@ namespace spades {
 		void Render() {
 			this.Toggled = config.IntValue == value;
 			RadioButton::Render();
-		}
-	}
-	
-	class PerformanceToggleButton : spades::ui::RadioButton {
-		ConfigItem @config;
-		int value;
-		private FontManager @fontManager;
-		PreferenceView@ pViewer;
-		
-		PerformanceToggleButton(spades::ui::UIManager manager, string caption,
-								 int value, PreferenceView@ pV, FontManager @fM) {
-			super(manager);
-			@config = ConfigItem("cg_performanceSetting");
-			this.Caption = caption;
-			this.value = value;
-			this.Toggle = true;
-			this.Toggled = config.IntValue == value;
-			@pViewer = pV;
-			@fontManager = fM;
-		}
-
-		void OnActivated() {
-			RadioButton::OnActivated();
-			this.Toggled = true;
-			config = value;
-			
-			PreferenceView al(pViewer.owner, PreferenceViewOptions(), fontManager);
-			al.Run();
-			al.SelectedTabIndex = 0;
-			al.UpdateTabs();
-			pViewer.Close();
-		}
-
-		void Render() {
-			this.Toggled = config.IntValue == value;
-			RadioButton::Render();
-		}
-	}
-
-	class MacroHotKeyField : spades::ui::UIElement {
-		MacroItem @macro;
-		private bool hover;
-		spades::ui::EventHandler @KeyBound;
-
-		MacroHotKeyField(spades::ui::UIManager manager, string name) {
-			super(manager);
-			@macro = MacroItem(name);
-			IsMouseInteractive = true;
-		}
-
-		string BoundKey {
-			get { return macro.key; }
-			set { macro.key = value; }
-		}
-
-		void KeyDown(string key) {
-			if (IsFocused) {
-				if (key != "Escape") {
-					if (key == " ") {
-						key = "Space";
-					} else if (key == "BackSpace" or key == "Delete") {
-						key = ""; // unbind
-					}
-					macro.key = key;
-					KeyBound(this);
-				}
-				@Manager.ActiveElement = null;
-				AcceptsFocus = false;
-			} else {
-				UIElement::KeyDown(key);
-			}
-		}
-
-		void MouseDown(spades::ui::MouseButton button, Vector2 clientPosition) {
-			if (not AcceptsFocus) {
-				AcceptsFocus = true;
-				@Manager.ActiveElement = this;
-				return;
-			}
-		}
-
-		void MouseEnter() { hover = true; }
-		void MouseLeave() { hover = false; }
-
-		void Render() {
-			// render background
-			Renderer @renderer = Manager.Renderer;
-			Vector2 pos = ScreenPosition;
-			Vector2 size = Size;
-			Image @img = renderer.RegisterImage("Gfx/White.tga");
-			renderer.ColorNP = Vector4(0.f, 0.f, 0.f, IsFocused ? 0.3f : 0.1f);
-			renderer.DrawImage(img, AABB2(pos.x, pos.y, size.x, size.y));
-
-			if (IsFocused) {
-				renderer.ColorNP = Vector4(1.f, 1.f, 1.f, 0.2f);
-			} else if (hover) {
-				renderer.ColorNP = Vector4(1.f, 1.f, 1.f, 0.1f);
-			} else {
-				renderer.ColorNP = Vector4(1.f, 1.f, 1.f, 0.06f);
-			}
-			renderer.DrawImage(img, AABB2(pos.x, pos.y, size.x, 1.f));
-			renderer.DrawImage(img, AABB2(pos.x, pos.y + size.y - 1.f, size.x, 1.f));
-			renderer.DrawImage(img, AABB2(pos.x, pos.y + 1.f, 1.f, size.y - 2.f));
-			renderer.DrawImage(img, AABB2(pos.x + size.x - 1.f, pos.y + 1.f, 1.f, size.y - 2.f));
-
-			Font @font = this.Font;
-			string text = IsFocused
-							  ? _Tr("Preferences", "Press Key to Bind or [Escape] to Cancel...")
-							  : macro.key;
-
-			Vector4 color(1, 1, 1, 1);
-
-			if (IsFocused) {
-				color.w = abs(sin(Manager.Time * 2.f));
-			} else {
-				AcceptsFocus = false;
-			}
-
-			if (text == " " or text == "Space") {
-				text = _Tr("Preferences", "Space");
-			} else if (text.length == 0) {
-				text = _Tr("Preferences", "Unbound");
-				color.w *= 0.3f;
-			} else if (text == "Shift") {
-				text = _Tr("Preferences", "Shift");
-			} else if (text == "Control") {
-				text = _Tr("Preferences", "Control");
-			} else if (text == "Meta") {
-				text = _Tr("Preferences", "Meta");
-			} else if (text == "Alt") {
-				text = _Tr("Preferences", "Alt");
-			} else {
-				for (uint i = 0, len = text.length; i < len; i++)
-					text[i] = ToUpper(text[i]);
-			}
-
-			Vector2 txtSize = font.Measure(text);
-			Vector2 txtPos;
-			txtPos = pos + (size - txtSize) * 0.5f;
-
-			font.Draw(text, txtPos, 1.f, color);
-		}
-	}
-
-	class MacroField : spades::ui::Field {
-		MacroItem @macro;
-		MacroField(spades::ui::UIManager manager, string name) {
-			super(manager);
-			@macro = MacroItem(name);
-			this.Text = macro.msg;
-		}
-
-		void OnChanged() {
-			Field::OnChanged();
-			macro.msg = this.Text;
 		}
 	}
 
@@ -1022,54 +887,224 @@ namespace spades {
 		}
 	}
 
+	class PerformanceToggleButton : spades::ui::RadioButton {
+		ConfigItem @config;
+		int value;
+		private FontManager @fontManager;
+		PreferenceView@ pViewer;
+		
+		PerformanceToggleButton(spades::ui::UIManager manager, string caption,
+								 int value, PreferenceView@ pV, FontManager @fM) {
+			super(manager);
+			@config = ConfigItem("cg_performanceSetting");
+			this.Caption = caption;
+			this.value = value;
+			this.Toggle = true;
+			this.Toggled = config.IntValue == value;
+			@pViewer = pV;
+			@fontManager = fM;
+		}
+
+		void OnActivated() {
+			RadioButton::OnActivated();
+			this.Toggled = true;
+			config = value;
+			
+			PreferenceView al(pViewer.owner, PreferenceViewOptions(), fontManager);
+			al.Run();
+			al.SelectedTabIndex = 0;
+			al.UpdateTabs();
+			pViewer.Close();
+		}
+
+		void Render() {
+			this.Toggled = config.IntValue == value;
+			RadioButton::Render();
+		}
+	}
+
+	class MacroHotKeyField : spades::ui::UIElement {
+		MacroItem @macro;
+		private bool hover;
+		spades::ui::EventHandler @KeyBound;
+
+		MacroHotKeyField(spades::ui::UIManager manager, string name) {
+			super(manager);
+			@macro = MacroItem(name);
+			IsMouseInteractive = true;
+		}
+
+		string BoundKey {
+			get { return macro.key; }
+			set { macro.key = value; }
+		}
+
+		void KeyDown(string key) {
+			if (IsFocused) {
+				if (key != "Escape") {
+					if (key == " ") {
+						key = "Space";
+					} else if (key == "BackSpace" or key == "Delete") {
+						key = ""; // unbind
+					}
+					macro.key = key;
+					KeyBound(this);
+				}
+				@Manager.ActiveElement = null;
+				AcceptsFocus = false;
+			} else {
+				UIElement::KeyDown(key);
+			}
+		}
+
+		void MouseDown(spades::ui::MouseButton button, Vector2 clientPosition) {
+			if (not AcceptsFocus) {
+				AcceptsFocus = true;
+				@Manager.ActiveElement = this;
+				return;
+			}
+		}
+
+		void MouseEnter() { hover = true; }
+		void MouseLeave() { hover = false; }
+
+		void Render() {
+			// render background
+			Renderer @renderer = Manager.Renderer;
+			Vector2 pos = ScreenPosition;
+			Vector2 size = Size;
+			Image @img = renderer.RegisterImage("Gfx/White.tga");
+			renderer.ColorNP = Vector4(0.f, 0.f, 0.f, IsFocused ? 0.3f : 0.1f);
+			renderer.DrawImage(img, AABB2(pos.x, pos.y, size.x, size.y));
+
+			if (IsFocused) {
+				renderer.ColorNP = Vector4(1.f, 1.f, 1.f, 0.2f);
+			} else if (hover) {
+				renderer.ColorNP = Vector4(1.f, 1.f, 1.f, 0.1f);
+			} else {
+				renderer.ColorNP = Vector4(1.f, 1.f, 1.f, 0.06f);
+			}
+			renderer.DrawImage(img, AABB2(pos.x, pos.y, size.x, 1.f));
+			renderer.DrawImage(img, AABB2(pos.x, pos.y + size.y - 1.f, size.x, 1.f));
+			renderer.DrawImage(img, AABB2(pos.x, pos.y + 1.f, 1.f, size.y - 2.f));
+			renderer.DrawImage(img, AABB2(pos.x + size.x - 1.f, pos.y + 1.f, 1.f, size.y - 2.f));
+
+			Font @font = this.Font;
+			string text = IsFocused
+							  ? _Tr("Preferences", "Press Key to Bind or [Escape] to Cancel...")
+							  : macro.key;
+
+			Vector4 color(1, 1, 1, 1);
+
+			if (IsFocused) {
+				color.w = abs(sin(Manager.Time * 2.f));
+			} else {
+				AcceptsFocus = false;
+			}
+
+			if (text == " " or text == "Space") {
+				text = _Tr("Preferences", "Space");
+			} else if (text.length == 0) {
+				text = _Tr("Preferences", "Unbound");
+				color.w *= 0.3f;
+			} else if (text == "Shift") {
+				text = _Tr("Preferences", "Shift");
+			} else if (text == "Control") {
+				text = _Tr("Preferences", "Control");
+			} else if (text == "Meta") {
+				text = _Tr("Preferences", "Meta");
+			} else if (text == "Alt") {
+				text = _Tr("Preferences", "Alt");
+			} else {
+				for (uint i = 0, len = text.length; i < len; i++)
+					text[i] = ToUpper(text[i]);
+			}
+
+			Vector2 txtSize = font.Measure(text);
+			Vector2 txtPos;
+			txtPos = pos + (size - txtSize) * 0.5f;
+
+			font.Draw(text, txtPos, 1.f, color);
+		}
+	}
+
+	class MacroField : spades::ui::Field {
+		MacroItem @macro;
+		MacroField(spades::ui::UIManager manager, string name) {
+			super(manager);
+			@macro = MacroItem(name);
+			this.Text = macro.msg;
+		}
+
+		void OnChanged() {
+			Field::OnChanged();
+			macro.msg = this.Text;
+		}
+	}
+
 	class StandardPreferenceLayouterModel : spades::ui::ListViewModel {
 		private spades::ui::UIElement @[] @items;
 		StandardPreferenceLayouterModel(spades::ui::UIElement @[] @items) { @this.items = items; }
-		int NumRows {
-			get { return int(items.length); }
-		}
-		spades::ui::UIElement @CreateElement(int row) { return items[row]; }
-		void RecycleElement(spades::ui::UIElement @elem) {}
+		int NumRows { get { return int(items.length); } }
+		spades::ui::UIElement@ CreateElement(int row) { return items[row]; }
+		void RecycleElement(spades::ui::UIElement@ elem) {}
 	}
 	class StandardPreferenceLayouter {
-		spades::ui::UIElement @Parent;
-		private float FieldX = 250.f;
-		private float FieldWidth = 310.f;
+		spades::ui::UIElement@ Parent;
 		private spades::ui::UIElement @[] items;
 		private ConfigHotKeyField @[] hotkeyItems;
+		private FontManager@ fontManager;
 		private MacroHotKeyField @[] hotkeyItemsMacro;
 		private spades::ui::Button @[] MacroRemoveButtons;
-		private FontManager @fontManager;
 		spades::ui::Button @AddMacroButton;
 		spades::ui::Button @RemoveMacroButton;
 		PreferenceView@ pViewer;
 
-		StandardPreferenceLayouter(spades::ui::UIElement @parent, FontManager @fontManager) {
+		float FieldX, FieldWidth, FieldHeight;
+
+		StandardPreferenceLayouter(spades::ui::UIElement@ parent, FontManager@ fontManager) {
 			@Parent = parent;
 			@this.fontManager = fontManager;
+
+			float sw = Parent.Manager.ScreenWidth;
+			float sh = Parent.Manager.ScreenHeight;
+
+			FieldX = sw - 440.0F;
+			float maxFieldX = 250.0F;
+			if (FieldX > maxFieldX)
+				FieldX = maxFieldX;
+
+			FieldWidth = sw - 400.0F;
+			float maxFieldWidth = 320.0F;
+			if (FieldWidth > maxFieldWidth)
+				FieldWidth = maxFieldWidth;
+
+			FieldHeight = sh - 8.0F;
+			float maxFieldHeight = 550.0F;
+			if (FieldHeight > maxFieldHeight)
+				FieldHeight = maxFieldHeight;
 		}
 
-		private spades::ui::UIElement @CreateItem() {
+		private spades::ui::UIElement@ CreateItem() {
 			spades::ui::UIElement elem(Parent.Manager);
-			elem.Size = Vector2(300.f, 32.f);
+			elem.Size = Vector2(FieldWidth, 32.0F);
 			items.insertLast(elem);
 			return elem;
 		}
 
-		private void OnKeyBound(spades::ui::UIElement @sender) {
+		private void OnKeyBound(spades::ui::UIElement@ sender) {
 			// unbind already bound key
-			ConfigHotKeyField @bindField = cast<ConfigHotKeyField>(sender);
+			ConfigHotKeyField@ bindField = cast<ConfigHotKeyField>(sender);
 			string key = bindField.BoundKey;
 			for (uint i = 0; i < hotkeyItems.length; i++) {
-				ConfigHotKeyField @f = hotkeyItems[i];
+				ConfigHotKeyField@ f = hotkeyItems[i];
 				if (f !is bindField) {
-					if (f.BoundKey == key) {
+					if (f.BoundKey == key)
 						f.BoundKey = "";
-					}
 				}
 			}
 		}
-		
+
 		private void OnKeyBoundMacro(spades::ui::UIElement @sender) {
 			// unbind already bound key
 			MacroHotKeyField @bindField = cast<MacroHotKeyField>(sender);
@@ -1085,16 +1120,16 @@ namespace spades {
 		}
 
 		void AddHeading(string text) {
-			spades::ui::UIElement @container = CreateItem();
+			spades::ui::UIElement@ container = CreateItem();
 
 			spades::ui::Label label(Parent.Manager);
 			label.Text = text;
-			label.Alignment = Vector2(0.f, 1.f);
+			label.Alignment = Vector2(0.5F, 0.5F);
 			@label.Font = fontManager.HeadingFont;
-			label.Bounds = AABB2(10.f, 0.f, 300.f, 32.f);
+			label.Bounds = AABB2(10.0F, 0.0F, FieldX + FieldWidth - 10.0F, 32.0F);
 			container.AddChild(label);
 		}
-		
+
 		void AddParagraph(string text) {
 			spades::ui::UIElement @container = CreateItem();
 
@@ -1106,43 +1141,42 @@ namespace spades {
 			container.AddChild(label);
 		}
 
-		ConfigField @AddInputField(string caption, string configName, bool enabled = true) {
-			spades::ui::UIElement @container = CreateItem();
+		ConfigField@ AddInputField(string caption, string configName, bool enabled = true) {
+			spades::ui::UIElement@ container = CreateItem();
 
 			spades::ui::Label label(Parent.Manager);
 			label.Text = caption;
-			label.Alignment = Vector2(0.f, 0.5f);
-			label.Bounds = AABB2(10.f, 0.f, 300.f, 32.f);
+			label.Alignment = Vector2(0.0F, 0.5F);
+			label.Bounds = AABB2(10.0F, 0.0F, FieldX + FieldWidth - 10.0F, 32.0F);
 			container.AddChild(label);
 
 			ConfigField field(Parent.Manager, configName);
-			field.Bounds = AABB2(FieldX, 1.f, FieldWidth, 30.f);
+			field.Bounds = AABB2(FieldX, 1.0F, FieldWidth, 30.0F);
 			field.Enable = enabled;
 			container.AddChild(field);
 
 			return field;
 		}
 
-		ConfigSlider
-			@AddSliderField(string caption, string configName, float minRange, float maxRange,
-							float step, ConfigNumberFormatter @formatter, bool enabled = true) {
-			spades::ui::UIElement @container = CreateItem();
+		ConfigSlider@ AddSliderField(string caption, string configName, float minRange, float maxRange,
+			float step, ConfigNumberFormatter@ formatter, bool enabled = true) {
+			spades::ui::UIElement@ container = CreateItem();
 
 			spades::ui::Label label(Parent.Manager);
 			label.Text = caption;
-			label.Alignment = Vector2(0.f, 0.5f);
-			label.Bounds = AABB2(10.f, 0.f, 300.f, 32.f);
+			label.Alignment = Vector2(0.0F, 0.5F);
+			label.Bounds = AABB2(10.0F, 0.0F, FieldX + FieldWidth - 10.0F, 32.0F);
 			container.AddChild(label);
 
 			ConfigSlider slider(Parent.Manager, configName, minRange, maxRange, step, formatter);
-			slider.Bounds = AABB2(FieldX, 8.f, FieldWidth - 80.f, 16.f);
+			slider.Bounds = AABB2(FieldX, 4.0F, FieldWidth, 24.0F);
 			slider.Enable = enabled;
 			container.AddChild(slider);
 
 			return slider;
 		}
 
-		ConfigSlider @AddVolumeSlider(string caption, string configName) {
+		ConfigSlider@ AddVolumeSlider(string caption, string configName) {
 			return AddSliderField(caption, configName, 0, 1, 0.01, ConfigNumberFormatter(0, "%", "", 100));
 		}
 
@@ -1172,37 +1206,37 @@ namespace spades {
 		}
 
 		void AddControl(string caption, string configName, bool enabled = true) {
-			spades::ui::UIElement @container = CreateItem();
+			spades::ui::UIElement@ container = CreateItem();
 
 			spades::ui::Label label(Parent.Manager);
 			label.Text = caption;
-			label.Alignment = Vector2(0.f, 0.5f);
-			label.Bounds = AABB2(10.f, 0.f, 300.f, 32.f);
+			label.Alignment = Vector2(0.0F, 0.5F);
+			label.Bounds = AABB2(10.0F, 0.0F, FieldX + FieldWidth - 10.0F, 32.0F);
 			container.AddChild(label);
 
 			ConfigHotKeyField field(Parent.Manager, configName);
-			field.Bounds = AABB2(FieldX, 1.f, FieldWidth, 30.f);
+			field.Bounds = AABB2(FieldX, 1.0F, FieldWidth, 30.0F);
 			field.Enable = enabled;
 			container.AddChild(field);
 
-			@field.KeyBound = spades::ui::EventHandler(OnKeyBound);
+			@field.KeyBound = spades::ui::EventHandler(this.OnKeyBound);
 			hotkeyItems.insertLast(field);
 		}
 
-		void AddChoiceField(string caption, string configName, array<string> labels,
-							array<int> values, bool enabled = true) {
-			spades::ui::UIElement @container = CreateItem();
+		void AddChoiceField(string caption, string configName,
+			array<string> labels, array<int> values, bool enabled = true) {
+			spades::ui::UIElement@ container = CreateItem();
 
 			spades::ui::Label label(Parent.Manager);
 			label.Text = caption;
-			label.Alignment = Vector2(0.f, 0.5f);
-			label.Bounds = AABB2(10.f, 0.f, 300.f, 32.f);
+			label.Alignment = Vector2(0.0F, 0.5F);
+			label.Bounds = AABB2(10.0F, 0.0F, FieldX + FieldWidth - 10.0F, 32.0F);
 			container.AddChild(label);
 
+			float width = FieldWidth / labels.length;
 			for (uint i = 0; i < labels.length; ++i) {
 				ConfigSimpleToggleButton field(Parent.Manager, labels[i], configName, values[i]);
-				field.Bounds = AABB2(FieldX + FieldWidth / labels.length * i, 1.f,
-									 FieldWidth / labels.length, 30.f);
+				field.Bounds = AABB2(FieldX + width * i, 1.0F, width, 30.0F);
 				field.Enable = enabled;
 				container.AddChild(field);
 			}
@@ -1210,7 +1244,8 @@ namespace spades {
 
 		void AddToggleField(string caption, string configName, bool enabled = true) {
 			AddChoiceField(caption, configName,
-						   array<string> = {_Tr("Preferences", "ON"), _Tr("Preferences", "OFF")},
+						   array<string> = {_Tr("Preferences", "ON"),
+											_Tr("Preferences", "OFF")},
 						   array<int> = {1, 0}, enabled);
 		}
 
@@ -1222,12 +1257,44 @@ namespace spades {
 						   array<int> = {1, -1, 0}, enabled);
 		}
 
-		void FinishLayout() {
-			spades::ui::ListView list(Parent.Manager);
-			@list.Model = StandardPreferenceLayouterModel(items);
-			list.RowHeight = 32.f;
-			list.Bounds = AABB2(0.f, 0.f, 580.f, 530.f);
-			Parent.AddChild(list);
+		void AddTargetPreview() {
+			spades::ui::UIElement@ container = CreateItem();
+
+			ConfigTarget field(Parent.Manager);
+			field.Bounds = AABB2(10.0F, 0.0F, FieldX + FieldWidth - 10.0F, 64.0F);
+			container.AddChild(field);
+
+			spades::ui::SimpleButton resetButton(Parent.Manager);
+			resetButton.Caption = _Tr("Preferences", "Reset");
+			resetButton.Bounds = AABB2(10.0F, 0.0F, 50.0F, 20.0F);
+			@resetButton.Activated = spades::ui::EventHandler(field.OnResetPressed);
+			container.AddChild(resetButton);
+
+			spades::ui::SimpleButton randomizeButton(Parent.Manager);
+			randomizeButton.Caption = _Tr("Preferences", "Randomize");
+			randomizeButton.Bounds = AABB2(FieldX + FieldWidth - 80.0F, 0.0F, 80.0F, 20.0F);
+			@randomizeButton.Activated = spades::ui::EventHandler(field.OnRandomizePressed);
+			container.AddChild(randomizeButton);
+		}
+
+		void AddScopePreview() {
+			spades::ui::UIElement@ container = CreateItem();
+
+			ConfigScope field(Parent.Manager);
+			field.Bounds = AABB2(10.0F, 0.0F, FieldX + FieldWidth - 10.0F, 64.0F);
+			container.AddChild(field);
+
+			spades::ui::SimpleButton resetButton(Parent.Manager);
+			resetButton.Caption = _Tr("Preferences", "Reset");
+			resetButton.Bounds = AABB2(10.0F, 0.0F, 50.0F, 20.0F);
+			@resetButton.Activated = spades::ui::EventHandler(field.OnResetPressed);
+			container.AddChild(resetButton);
+
+			spades::ui::SimpleButton randomizeButton(Parent.Manager);
+			randomizeButton.Caption = _Tr("Preferences", "Randomize");
+			randomizeButton.Bounds = AABB2(FieldX + FieldWidth - 80.0F, 0.0F, 80.0F, 20.0F);
+			@randomizeButton.Activated = spades::ui::EventHandler(field.OnRandomizePressed);
+			container.AddChild(randomizeButton);
 		}
 
 		void AddPerformanceSetting(string caption, PreferenceView@ pV) {
@@ -1334,46 +1401,14 @@ namespace spades {
 			return field;
 		}		
 	
-		void AddTargetPreview() {
-			spades::ui::UIElement@ container = CreateItem();
 
-			ConfigTarget field(Parent.Manager);
-			field.Bounds = AABB2(10.0F, 0.0F, FieldX + FieldWidth - 10.0F, 64.0F);
-			container.AddChild(field);
-
-			spades::ui::SimpleButton resetButton(Parent.Manager);
-			resetButton.Caption = _Tr("Preferences", "Reset");
-			resetButton.Bounds = AABB2(10.0F, 0.0F, 50.0F, 20.0F);
-			@resetButton.Activated = spades::ui::EventHandler(field.OnResetPressed);
-			container.AddChild(resetButton);
-
-			spades::ui::SimpleButton randomizeButton(Parent.Manager);
-			randomizeButton.Caption = _Tr("Preferences", "Randomize");
-			randomizeButton.Bounds = AABB2(FieldX + FieldWidth - 80.0F, 0.0F, 80.0F, 20.0F);
-			@randomizeButton.Activated = spades::ui::EventHandler(field.OnRandomizePressed);
-			container.AddChild(randomizeButton);
+		void FinishLayout() {
+			spades::ui::ListView list(Parent.Manager);
+			@list.Model = StandardPreferenceLayouterModel(items);
+			list.RowHeight = 32.0F;
+			list.Bounds = AABB2(10.0F, 0.0F, FieldX + (FieldWidth + 30.0F) - 10.0F, FieldHeight - 20.0F);
+			Parent.AddChild(list);
 		}
-
-		void AddScopePreview() {
-			spades::ui::UIElement@ container = CreateItem();
-
-			ConfigScope field(Parent.Manager);
-			field.Bounds = AABB2(10.0F, 0.0F, FieldX + FieldWidth - 10.0F, 64.0F);
-			container.AddChild(field);
-
-			spades::ui::SimpleButton resetButton(Parent.Manager);
-			resetButton.Caption = _Tr("Preferences", "Reset");
-			resetButton.Bounds = AABB2(10.0F, 0.0F, 50.0F, 20.0F);
-			@resetButton.Activated = spades::ui::EventHandler(field.OnResetPressed);
-			container.AddChild(resetButton);
-
-			spades::ui::SimpleButton randomizeButton(Parent.Manager);
-			randomizeButton.Caption = _Tr("Preferences", "Randomize");
-			randomizeButton.Bounds = AABB2(FieldX + FieldWidth - 80.0F, 0.0F, 80.0F, 20.0F);
-			@randomizeButton.Activated = spades::ui::EventHandler(field.OnRandomizePressed);
-			container.AddChild(randomizeButton);
-		}
-
 	}
 
 	class GameOptionsPanel : spades::ui::UIElement {
@@ -2104,4 +2139,3 @@ namespace spades {
 		}
 	}
 }
-//converted spaces to tabs. deal with it.

@@ -14,7 +14,7 @@
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with OpenSpades.  If not, see <http://www.gnu.org/licenses/>.
+ along with OpenSpades.	 If not, see <http://www.gnu.org/licenses/>.
 
  */
 
@@ -31,7 +31,7 @@ namespace spades {
 
 		class FieldBase : UIElement {
 			bool Dragging = false;
-			EventHandler @Changed;
+			EventHandler@ Changed;
 			string Placeholder;
 			int MarkPosition = 0;
 			int CursorPosition = 0;
@@ -42,21 +42,19 @@ namespace spades {
 			private FieldCommand @[] history;
 			private int historyPos = 0; // index to insert next command
 
-			Vector4 TextColor = Vector4(1.f, 1.f, 1.f, 1.f);
-			Vector4 DisabledTextColor = Vector4(1.f, 1.f, 1.f, 0.3f);
-			Vector4 PlaceholderColor = Vector4(1.f, 1.f, 1.f, 0.5f);
-			Vector4 HighlightColor = Vector4(1.f, 1.f, 1.f, 0.3f);
+			Vector4 TextColor = Vector4(1.0F, 1.0F, 1.0F, 1.0F);
+			Vector4 DisabledTextColor = Vector4(1.0F, 1.0F, 1.0F, 0.3F);
+			Vector4 PlaceholderColor = Vector4(1.0F, 1.0F, 1.0F, 0.5F);
+			Vector4 HighlightColor = Vector4(1.0F, 1.0F, 1.0F, 0.3F);
 
-			Vector2 TextOrigin = Vector2(0.f, 0.f);
-			float TextScale = 1.f;
+			Vector2 TextOrigin = Vector2(0.0F, 0.0F);
+			float TextScale = 1.0F;
 
-			FieldBase(UIManager @manager) {
+			FieldBase(UIManager@ manager) {
 				super(manager);
 				IsMouseInteractive = true;
 				AcceptsFocus = true;
-				@this.Cursor
-				= Cursor(Manager, manager.Renderer.RegisterImage("Gfx/UI/IBeam.png"),
-						 Vector2(16.f, 16.f));
+				@this.Cursor = Cursor(Manager, manager.Renderer.RegisterImage("Gfx/UI/IBeam.png"), Vector2(16.0F, 16.0F));
 			}
 
 			string Text {
@@ -76,18 +74,16 @@ namespace spades {
 				if (DenyNonAscii) {
 					for (uint i = 0, len = s.length; i < len; i++) {
 						int c = s[i];
-						if ((c & 0x80) != 0) {
+						if ((c & 0x80) != 0)
 							return false;
-						}
 					}
 				}
 				return true;
 			}
 
 			void OnChanged() {
-				if (Changed !is null) {
+				if (Changed !is null)
 					Changed(this);
-				}
 			}
 
 			int SelectionStart {
@@ -108,9 +104,8 @@ namespace spades {
 			string SelectedText {
 				get final { return Text.substr(SelectionStart, SelectionLength); }
 				set {
-					if (!CheckCharType(value)) {
+					if (not CheckCharType(value))
 						return;
-					}
 					FieldCommand cmd;
 					cmd.oldString = this.SelectedText;
 					if (cmd.oldString == value)
@@ -121,12 +116,12 @@ namespace spades {
 				}
 			}
 
-			private void RunFieldCommand(FieldCommand @cmd, bool autoSelect, bool addHistory) {
+			private void RunFieldCommand(FieldCommand@ cmd, bool autoSelect, bool addHistory) {
 				text = text.substr(0, cmd.index) + cmd.newString +
 					   text.substr(cmd.index + cmd.oldString.length);
+
 				if (autoSelect)
 					Select(cmd.index, cmd.newString.length);
-
 				if (addHistory) {
 					history.length = historyPos;
 					history.insertLast(cmd);
@@ -176,22 +171,21 @@ namespace spades {
 					Vector2 siz = this.Size;
 					string text = Text;
 					int cursorPos = CursorPosition;
-					Font @font = this.Font;
+					Font@ font = this.Font;
 					float width = font.Measure(text.substr(0, cursorPos)).x;
 					float fontHeight = font.Measure("A").y;
-					return AABB2(textPos.x + width, textPos.y, siz.x - textPos.x - width,
-								 fontHeight);
+					return AABB2(textPos.x + width, textPos.y, siz.x - textPos.x - width, fontHeight);
 				}
 			}
 
 			private int PointToCharIndex(float x) {
 				x -= TextOrigin.x;
-				if (x < 0.f)
+				if (x < 0.0F)
 					return 0;
 				x /= TextScale;
 				string text = Text;
 				int len = text.length;
-				float lastWidth = 0.f;
+				float lastWidth = 0.0F;
 				Font @font = this.Font;
 				// FIXME: use binary search for better performance?
 				int idx = 0;
@@ -200,21 +194,19 @@ namespace spades {
 					idx = GetByteIndexForString(text, 1, idx);
 					float width = font.Measure(text.substr(0, idx)).x;
 					if (width > x) {
-						if (x < (lastWidth + width) * 0.5f) {
+						if (x < (lastWidth + width) * 0.5F)
 							return lastIdx;
-						} else {
+						else
 							return idx;
-						}
 					}
 					lastWidth = width;
-					if (idx >= len) {
+					if (idx >= len)
 						return len;
-					}
 				}
 				return len;
 			}
-			int PointToCharIndex(Vector2 pt) { return PointToCharIndex(pt.x); }
 
+			int PointToCharIndex(Vector2 pt) { return PointToCharIndex(pt.x); }
 			int ClampCursorPosition(int pos) { return Clamp(pos, 0, Text.length); }
 
 			void Select(int start, int length = 0) {
@@ -227,13 +219,6 @@ namespace spades {
 			void BackSpace() {
 				if (SelectionLength > 0) {
 					SelectedText = "";
-				} else if (Manager.IsControlPressed) {
-					while (CursorPosition > 0 and Text.substr(CursorPosition - 1, 1) != " ") {
-						CursorPosition--;
-					}
-					if (SelectionLength > 0) {
-						SelectedText = "";
-					}
 				} else {
 					int pos = CursorPosition;
 					int cIdx = GetCharIndexForString(Text, CursorPosition);
@@ -247,13 +232,6 @@ namespace spades {
 			void Delete() {
 				if (SelectionLength > 0) {
 					SelectedText = "";
-				} else if (Manager.IsControlPressed) {
-					while (CursorPosition < int(Text.length) and Text.substr(CursorPosition, 1) != " ") {
-						CursorPosition++;
-					}
-					if (SelectionLength > 0) {
-						SelectedText = "";
-					}
 				} else if (CursorPosition < int(Text.length)) {
 					int pos = CursorPosition;
 					int cIdx = GetCharIndexForString(Text, CursorPosition);
@@ -265,14 +243,13 @@ namespace spades {
 			}
 
 			void Insert(string text) {
-				if (!CheckCharType(text)) {
+				if (not CheckCharType(text))
 					return;
-				}
 				string oldText = SelectedText;
 				SelectedText = text;
 
 				// if text overflows, deny the insertion
-				if ((not FitsInBox(Text))or(int(Text.length) > MaxLength)) {
+				if ((not FitsInBox(Text)) or (int(Text.length) > MaxLength)) {
 					SelectedText = oldText;
 					return;
 				}
@@ -287,12 +264,6 @@ namespace spades {
 				} else if (key == "Delete") {
 					Delete();
 				} else if (key == "Left") {
-					if (Manager.IsControlPressed) {
-						while (CursorPosition > 0 and Text.substr(CursorPosition - 1, 1) != " ") {
-							CursorPosition--;
-						}
-						return;
-					}
 					if (Manager.IsShiftPressed) {
 						int cIdx = GetCharIndexForString(Text, CursorPosition);
 						CursorPosition = ClampCursorPosition(GetByteIndexForString(Text, cIdx - 1));
@@ -306,12 +277,6 @@ namespace spades {
 					}
 					return;
 				} else if (key == "Right") {
-					if (Manager.IsControlPressed) {
-						while (CursorPosition < int(Text.length) and Text.substr(CursorPosition, 1) != " ") {
-							CursorPosition++;
-						}
-						return;
-					}
 					if (Manager.IsShiftPressed) {
 						int cIdx = GetCharIndexForString(Text, CursorPosition);
 						CursorPosition = ClampCursorPosition(GetByteIndexForString(Text, cIdx + 1));
@@ -323,26 +288,17 @@ namespace spades {
 							Select(SelectionEnd);
 						}
 					}
+
 					return;
-				} else if (key == "Home") {
-					if(Manager.IsShiftPressed) {
-						CursorPosition = 0;
-					}else {
-						Select(0);
-					}
-				} else if (key == "End") {
-					if (Manager.IsShiftPressed) {
-						Select(MarkPosition, 99999);
-					}else {
-						Select(99999);
-					}
 				}
-				if (Manager.IsControlPressed or Manager.IsMetaPressed /* for OSX; Cmd + [a-z] */) {
+
+				 if (Manager.IsControlPressed or Manager.IsMetaPressed /* for OSX; Cmd + [a-z] */) {
 					if (key == "A") {
 						SelectAll();
 						return;
 					} else if (key == "V") {
 						Manager.Paste(PasteClipboardEventHandler(this.Insert));
+						OnChanged();
 					} else if (key == "C") {
 						Manager.Copy(this.SelectedText);
 					} else if (key == "X") {
@@ -358,40 +314,35 @@ namespace spades {
 								OnChanged();
 						}
 					} else if (key == "W") {
-						if (Redo()) {
+						if (Redo())
 							OnChanged();
-						}
 					}
 				}
+
 				Manager.ProcessHotKey(key);
 			}
 			void KeyUp(string key) {}
 
 			void KeyPress(string text) {
-				if (!(Manager.IsControlPressed or Manager.IsMetaPressed)) {
+				if (not(Manager.IsControlPressed or Manager.IsMetaPressed))
 					Insert(text);
-				}
 			}
 			void MouseDown(MouseButton button, Vector2 clientPosition) {
-				if (button != spades::ui::MouseButton::LeftMouseButton) {
+				if (button != spades::ui::MouseButton::LeftMouseButton)
 					return;
-				}
 				Dragging = true;
-				if (Manager.IsShiftPressed) {
+				if (Manager.IsShiftPressed)
 					MouseMove(clientPosition);
-				} else {
+				else
 					Select(PointToCharIndex(clientPosition));
-				}
 			}
 			void MouseMove(Vector2 clientPosition) {
-				if (Dragging) {
+				if (Dragging)
 					CursorPosition = PointToCharIndex(clientPosition);
-				}
 			}
 			void MouseUp(MouseButton button, Vector2 clientPosition) {
-				if (button != spades::ui::MouseButton::LeftMouseButton) {
+				if (button != spades::ui::MouseButton::LeftMouseButton)
 					return;
-				}
 				Dragging = false;
 			}
 
@@ -399,39 +350,29 @@ namespace spades {
 				return Font.Measure(text).x * TextScale < Size.x - TextOrigin.x;
 			}
 
-			void DrawHighlight(float x, float y, float w, float h) {
-				Renderer @renderer = Manager.Renderer;
-				renderer.ColorNP = Vector4(1.f, 1.f, 1.f, 0.2f);
-
-				Image @img = renderer.RegisterImage("Gfx/White.tga");
-				renderer.DrawImage(img, AABB2(x, y, w, h));
+			void DrawHighlight(Renderer@ r, float x, float y, float w, float h) {
+				r.ColorNP = HighlightColor;
+				r.DrawImage(null, AABB2(x, y, w, h));
 			}
 
-			void DrawBeam(float x, float y, float h) {
-				Renderer @renderer = Manager.Renderer;
-				float pulse = sin(Manager.Time * 5.f);
-				pulse = abs(pulse);
-				renderer.ColorNP = Vector4(1.f, 1.f, 1.f, pulse);
-
-				Image @img = renderer.RegisterImage("Gfx/White.tga");
-				renderer.DrawImage(img, AABB2(x - 1.f, y, 2, h));
+			void DrawBeam(Renderer@ r, float x, float y, float h) {
+				float pulse = float((int(Manager.Time * 2.0F)) & 1);
+				r.ColorNP = Vector4(1.0F, 1.0F, 1.0F, pulse);
+				r.DrawImage(null, AABB2(x - 1.0F, y, 2.0F, h));
 			}
 
-			void DrawEditingLine(float x, float y, float w, float h) {
-				Renderer @renderer = Manager.Renderer;
-				renderer.ColorNP = Vector4(1.f, 1.f, 1.f, .3f);
-
-				Image @img = renderer.RegisterImage("Gfx/White.tga");
-				renderer.DrawImage(img, AABB2(x, y + h, w, 2.f));
+			void DrawEditingLine(Renderer@ r, float x, float y, float w, float h) {
+				r.ColorNP = Vector4(1.0F, 1.0F, 1.0F, 0.3F);
+				r.DrawImage(null, AABB2(x, y + h, w, 2.0F));
 			}
 
 			void Render() {
-				Renderer @renderer = Manager.Renderer;
+				Renderer@ r = Manager.Renderer;
 				Vector2 pos = ScreenPosition;
 				Vector2 size = Size;
-				Font @font = this.Font;
-				Vector2 textPos = TextOrigin + pos;
+				Font@ font = this.Font;
 				string text = Text;
+				Vector2 textPos = TextOrigin + pos;
 
 				string composition = this.EditingText;
 				int editStart = this.TextEditingRangeStart;
@@ -444,16 +385,7 @@ namespace spades {
 					this.SelectedText = "";
 					markStart = SelectionStart + editStart;
 					markEnd = markStart + editLen;
-					text =
-						text.substr(0, SelectionStart) + composition + text.substr(SelectionStart);
-				}
-
-				if (text.length == 0) {
-					if (IsEnabled) {
-						font.Draw(Placeholder, textPos, TextScale, PlaceholderColor);
-					}
-				} else {
-					font.Draw(text, textPos, TextScale, IsEnabled ? TextColor : DisabledTextColor);
+					text = text.substr(0, SelectionStart) + composition + text.substr(SelectionStart);
 				}
 
 				if (IsFocused) {
@@ -464,11 +396,11 @@ namespace spades {
 					int end = markEnd;
 					if (end == start) {
 						float x = font.Measure(text.substr(0, start)).x;
-						DrawBeam(x + textPos.x, textPos.y, fontHeight);
+						DrawBeam(r, x + textPos.x, textPos.y, fontHeight);
 					} else {
 						float x1 = font.Measure(text.substr(0, start)).x;
 						float x2 = font.Measure(text.substr(0, end)).x;
-						DrawHighlight(textPos.x + x1, textPos.y, x2 - x1, fontHeight);
+						DrawHighlight(r, textPos.x + x1, textPos.y, x2 - x1, fontHeight);
 					}
 
 					// draw composition underline
@@ -477,8 +409,15 @@ namespace spades {
 						end = start + composition.length;
 						float x1 = font.Measure(text.substr(0, start)).x;
 						float x2 = font.Measure(text.substr(0, end)).x;
-						DrawEditingLine(textPos.x + x1, textPos.y, x2 - x1, fontHeight);
+						DrawEditingLine(r, textPos.x + x1, textPos.y, x2 - x1, fontHeight);
 					}
+				}
+
+				if (text.length == 0) {
+					if (IsEnabled)
+						font.Draw(Placeholder, textPos, TextScale, PlaceholderColor);
+				} else {
+					font.Draw(text, textPos, TextScale, IsEnabled ? TextColor : DisabledTextColor);
 				}
 
 				UIElement::Render();
@@ -487,9 +426,9 @@ namespace spades {
 
 		class Field : FieldBase {
 			private bool hover;
-			Field(UIManager @manager) {
+			Field(UIManager@ manager) {
 				super(manager);
-				TextOrigin = Vector2(2.f, 2.f);
+				TextOrigin = Vector2(4.0F, 4.0F);
 			}
 			void MouseEnter() {
 				hover = true;
@@ -501,29 +440,23 @@ namespace spades {
 			}
 			void Render() {
 				// render background
-				Renderer @renderer = Manager.Renderer;
+				Renderer@ r = Manager.Renderer;
 				Vector2 pos = ScreenPosition;
 				Vector2 size = Size;
-				Image @img = renderer.RegisterImage("Gfx/White.tga");
-				renderer.ColorNP = Vector4(0.f, 0.f, 0.f, IsFocused ? 0.3f : 0.1f);
-				renderer.DrawImage(img, AABB2(pos.x, pos.y, size.x, size.y));
 
-				if (IsFocused) {
-					renderer.ColorNP = Vector4(1.f, 1.f, 1.f, 0.2f);
-				} else if (hover) {
-					renderer.ColorNP = Vector4(1.f, 1.f, 1.f, 0.1f);
-				} else {
-					renderer.ColorNP = Vector4(1.f, 1.f, 1.f, 0.06f);
-				}
-				renderer.DrawImage(img, AABB2(pos.x, pos.y, size.x, 1.f));
-				renderer.DrawImage(img, AABB2(pos.x, pos.y + size.y - 1.f, size.x, 1.f));
-				renderer.DrawImage(img, AABB2(pos.x, pos.y + 1.f, 1.f, size.y - 2.f));
-				renderer.DrawImage(img,
-								   AABB2(pos.x + size.x - 1.f, pos.y + 1.f, 1.f, size.y - 2.f));
+				r.ColorNP = Vector4(0.0F, 0.0F, 0.0F, IsFocused ? 0.3F : 0.1F);
+				r.DrawImage(null, AABB2(pos.x, pos.y, size.x, size.y));
+
+				if (IsFocused)
+					r.ColorNP = Vector4(1.0F, 1.0F, 1.0F, 0.2F);
+				else if (hover)
+					r.ColorNP = Vector4(1.0F, 1.0F, 1.0F, 0.1F);
+				else
+					r.ColorNP = Vector4(1.0F, 1.0F, 1.0F, 0.06F);
+				DrawOutlinedRect(r, pos.x, pos.y, pos.x + size.x, pos.y + size.y);
 
 				FieldBase::Render();
 			}
 		}
-
 	}
 }
