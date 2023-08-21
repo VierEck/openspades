@@ -20,6 +20,8 @@ namespace spades {
 			dir = (p2 - p1).Normalize();
 			length = (p2 - p1).GetLength();
 
+			velocity *= 0.5f;
+
 			const float maxTimeSpread = 1.0f / 60.f;
 			const float shutterTime = 1.0f / 100.f;
 
