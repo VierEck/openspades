@@ -28,7 +28,7 @@ namespace spades {
 		spades::ui::UIElement @owner;
 
 		private PreferenceTab @[] tabs;
-		float ContentsLeft, ContentsWidth;
+		float ContentsLeft, ContentsRight, ContentsWidth;
 		float ContentsTop, ContentsHeight;
 
 		int SelectedTabIndex = 0;
@@ -40,10 +40,23 @@ namespace spades {
 			super(owner.Manager);
 			@this.owner = owner;
 			this.Bounds = owner.Bounds;
-			ContentsWidth = 800.f;
-			ContentsLeft = (Manager.Renderer.ScreenWidth - ContentsWidth) * 0.5f;
-			ContentsHeight = 550.f;
-			ContentsTop = (Manager.Renderer.ScreenHeight - ContentsHeight) * 0.5f;
+			
+			float sw = Manager.Renderer.ScreenWidth;
+			float sh = Manager.Renderer.ScreenHeight;
+			
+			ContentsWidth = sw - 16.0F;
+			float maxContentsWidth = 800.0F;
+			if (ContentsWidth > maxContentsWidth)
+				ContentsWidth = maxContentsWidth;
+				
+			ContentsHeight = sh - 8.0F;
+			float maxContentsHeight = 550.0F;
+			if (ContentsHeight > maxContentsHeight)
+				ContentsHeight = maxContentsHeight;
+				
+			ContentsTop = (sh - ContentsHeight) * 0.5F;
+			ContentsLeft = (sw - ContentsWidth) * 0.5F;
+			ContentsRight = ContentsLeft + ContentsWidth;
 
 			{
 				spades::ui::Label label(Manager);
@@ -68,6 +81,8 @@ namespace spades {
 				   _Tr("Preferences", "Sounds"));
 			AddTab(EffectsOptionsPanel(Manager, options, fontManager),
 				   _Tr("Preferences", "Effects & Skins"));
+			AddTab(TargetOptionsPanel(Manager, options, fontManager),
+				   _Tr("Preferences", "Target & Scope"));
 			AddTab(GraphicsOptionsPanel(Manager, options, fontManager),
 				   _Tr("Preferences", "Graphics"));
 			AddTab(MacroOptionsPanel(Manager, options, fontManager, this),
@@ -276,6 +291,47 @@ namespace spades {
 		}
 		string Format(float value) { return prefix + FormatInternal(value); }
 	}
+
+	class ConfigTargetColorFormatter : ConfigNumberFormatter {
+		ConfigTargetColorFormatter() {
+			super(0, "");
+		}
+
+		string Format(float value) {
+			if (value == 1)
+				return _Tr("Preferences", "Red");
+			else if (value == 2)
+				return _Tr("Preferences", "Green");
+			else if (value == 3)
+				return _Tr("Preferences", "Blue");
+			else if (value == 4)
+				return _Tr("Preferences", "Yellow");
+			else if (value == 5)
+				return _Tr("Preferences", "Cyan");
+			else if (value == 6)
+				return _Tr("Preferences", "Pink");
+			else
+				return _Tr("Preferences", "Custom");
+		}
+	}
+
+	class ConfigScopeTypeFormatter : ConfigNumberFormatter {
+		ConfigScopeTypeFormatter() {
+			super(0, "");
+		}
+
+		string Format(float value) {
+			if (value == 1)
+				return _Tr("Preferences", "Classic");
+			else if (value == 2)
+				return _Tr("Preferences", "Dot Sight");
+			else if (value == 3)
+				return _Tr("Preferences", "Custom");
+			else
+				return _Tr("Preferences", "Iron Sight");
+		}
+	}
+
 
 	class ConfigSlider : spades::ui::Slider {
 		ConfigItem @config;
@@ -644,6 +700,328 @@ namespace spades {
 		}
 	}
 
+	class ConfigTarget : spades::ui::UIElement {
+		private ConfigItem cg_target("cg_target", "1");
+		private ConfigItem cg_targetLines("cg_targetLines", "1");
+		private ConfigItem cg_targetColor("cg_targetColor", "0");
+		private ConfigItem cg_targetColorR("cg_targetColorR", "255");
+		private ConfigItem cg_targetColorG("cg_targetColorG", "255");
+		private ConfigItem cg_targetColorB("cg_targetColorB", "255");
+		private ConfigItem cg_targetAlpha("cg_targetAlpha", "255");
+		private ConfigItem cg_targetGap("cg_targetGap", "4");
+		private ConfigItem cg_targetSizeHorizontal("cg_targetSizeHorizontal", "5");
+		private ConfigItem cg_targetSizeVertical("cg_targetSizeVertical", "5");
+		private ConfigItem cg_targetThickness("cg_targetThickness", "1");
+		private ConfigItem cg_targetTStyle("cg_targetTStyle", "0");
+		private ConfigItem cg_targetDot("cg_targetDot", "0");
+		private ConfigItem cg_targetDotColorR("cg_targetDotColorR", "255");
+		private ConfigItem cg_targetDotColorG("cg_targetDotColorG", "255");
+		private ConfigItem cg_targetDotColorB("cg_targetDotColorB", "255");
+		private ConfigItem cg_targetDotAlpha("cg_targetDotAlpha", "255");
+		private ConfigItem cg_targetDotThickness("cg_targetDotThickness", "1");
+		private ConfigItem cg_targetOutline("cg_targetOutline", "1");
+		private ConfigItem cg_targetOutlineColorR("cg_targetOutlineColorR", "0");
+		private ConfigItem cg_targetOutlineColorG("cg_targetOutlineColorG", "0");
+		private ConfigItem cg_targetOutlineColorB("cg_targetOutlineColorB", "0");
+		private ConfigItem cg_targetOutlineAlpha("cg_targetOutlineAlpha", "255");
+		private ConfigItem cg_targetOutlineThickness("cg_targetOutlineThickness", "1");
+		private ConfigItem cg_targetOutlineRoundedStyle("cg_targetOutlineRoundedStyle", "0");
+		private ConfigItem cg_targetDynamic("cg_targetDynamic", "1");
+		private ConfigItem cg_targetDynamicSplitDist("cg_targetDynamicSplitdist", "7");
+
+		ConfigTarget(spades::ui::UIManager@ manager) {
+			super(manager);
+		}
+
+		private void OnResetPressed(spades::ui::UIElement@ sender) {
+			cg_targetLines.StringValue = cg_targetLines.DefaultValue;
+			cg_targetColor.StringValue = cg_targetColor.DefaultValue;
+			cg_targetColorR.StringValue = cg_targetColorR.DefaultValue;
+			cg_targetColorG.StringValue = cg_targetColorG.DefaultValue;
+			cg_targetColorB.StringValue = cg_targetColorB.DefaultValue;
+			cg_targetAlpha.StringValue = cg_targetAlpha.DefaultValue;
+			cg_targetGap.StringValue = cg_targetGap.DefaultValue;
+			cg_targetSizeHorizontal.StringValue = cg_targetSizeHorizontal.DefaultValue;
+			cg_targetSizeVertical.StringValue = cg_targetSizeVertical.DefaultValue;
+			cg_targetThickness.StringValue = cg_targetThickness.DefaultValue;
+			cg_targetTStyle.StringValue = cg_targetTStyle.DefaultValue;
+			cg_targetDot.StringValue = cg_targetDot.DefaultValue;
+			cg_targetDotColorR.StringValue = cg_targetDotColorR.DefaultValue;
+			cg_targetDotColorG.StringValue = cg_targetDotColorG.DefaultValue;
+			cg_targetDotColorB.StringValue = cg_targetDotColorB.DefaultValue;
+			cg_targetDotAlpha.StringValue = cg_targetDotAlpha.DefaultValue;
+			cg_targetDotThickness.StringValue = cg_targetDotThickness.DefaultValue;
+			cg_targetOutline.StringValue = cg_targetOutline.DefaultValue;
+			cg_targetOutlineColorR.StringValue = cg_targetOutlineColorR.DefaultValue;
+			cg_targetOutlineColorG.StringValue = cg_targetOutlineColorG.DefaultValue;
+			cg_targetOutlineColorB.StringValue = cg_targetOutlineColorB.DefaultValue;
+			cg_targetOutlineAlpha.StringValue = cg_targetOutlineAlpha.DefaultValue;
+			cg_targetOutlineThickness.StringValue = cg_targetOutlineThickness.DefaultValue;
+			cg_targetOutlineRoundedStyle.StringValue = cg_targetOutlineRoundedStyle.DefaultValue;
+			cg_targetDynamic.StringValue = cg_targetDynamic.DefaultValue;
+			cg_targetDynamicSplitDist.StringValue = cg_targetDynamicSplitDist.DefaultValue;
+		}
+
+		private void OnRandomizePressed(spades::ui::UIElement@ sender) {
+			cg_targetColorR.IntValue = GetRandom(0, 255);
+			cg_targetColorG.IntValue = GetRandom(0, 255);
+			cg_targetColorB.IntValue = GetRandom(0, 255);
+			cg_targetAlpha.IntValue = GetRandom(50, 255);
+			cg_targetGap.IntValue = GetRandom(1, 10);
+			cg_targetSizeHorizontal.IntValue = GetRandom(1, 10);
+			cg_targetSizeVertical.IntValue = cg_targetSizeHorizontal.IntValue;
+			cg_targetThickness.IntValue = GetRandom(1, 4);
+			cg_targetDot.IntValue = GetRandom(2);
+			cg_targetDotColorR.IntValue = GetRandom(0, 255);
+			cg_targetDotColorG.IntValue = GetRandom(0, 255);
+			cg_targetDotColorB.IntValue = GetRandom(0, 255);
+			cg_targetDotAlpha.IntValue = GetRandom(50, 255);
+			cg_targetDotThickness.IntValue = cg_targetThickness.IntValue;
+			cg_targetOutline.IntValue = GetRandom(2);
+			cg_targetOutlineColorR.IntValue = GetRandom(0, 255);
+			cg_targetOutlineColorG.IntValue = GetRandom(0, 255);
+			cg_targetOutlineColorB.IntValue = GetRandom(0, 255);
+			cg_targetOutlineAlpha.IntValue = GetRandom(50, 255);
+			cg_targetOutlineRoundedStyle.IntValue = GetRandom(2);
+		}
+
+		void Render() {
+			Renderer@ r = Manager.Renderer;
+			Vector2 pos = ScreenPosition;
+			Vector2 size = Size;
+			Vector2 center = pos + size * 0.5F;
+
+			IntVector3 col;
+			switch (cg_targetColor.IntValue) {
+				case 1: col = IntVector3(250, 50, 50); break; // red
+				case 2: col = IntVector3(50, 250, 50); break; // green
+				case 3: col = IntVector3(50, 50, 250); break; // blue
+				case 4: col = IntVector3(250, 250, 50); break; // yellow
+				case 5: col = IntVector3(50, 250, 250); break; // cyan
+				case 6: col = IntVector3(250, 50, 250); break; // pink
+				default: // custom
+					col.x = cg_targetColorR.IntValue;
+					col.y = cg_targetColorG.IntValue;
+					col.z = cg_targetColorB.IntValue;
+					break;
+			}
+
+			Vector4 color = ConvertColorRGBA(col);
+			color.w = Clamp(cg_targetAlpha.IntValue, 0, 255) / 255.0F;
+
+			// draw preview background
+			float luminosity = color.x + color.y + color.z;
+			float opacity = 1.0F - luminosity;
+			r.ColorNP = cg_targetOutline.IntValue > 0
+					? Vector4(0.6F, 0.6F, 0.6F, 0.9F)
+					: Vector4(opacity, opacity, opacity, 0.6F);
+			r.DrawImage(null, AABB2(pos.x, pos.y, size.x, size.y));
+
+			// draw preview border
+			r.ColorNP = Vector4(1.0F, 1.0F, 1.0F, 0.1F);
+			DrawOutlinedRect(r, pos.x, pos.y, pos.x + size.x, pos.y + size.y);
+
+			// draw target
+			if (cg_target.IntValue == 1) { // draw default target
+				Image@ sightImage = r.RegisterImage("Gfx/Target.png");
+				Vector2 imgSize = Vector2(sightImage.Width, sightImage.Height);
+				r.ColorNP = color;
+				r.DrawImage(sightImage, center - (imgSize * 0.5F));
+			} else if (cg_target.IntValue == 2) { // draw custom target
+				TargetParam param;
+				param.lineColor = color;
+				param.drawLines = cg_targetLines.IntValue > 0;
+				param.useTStyle = cg_targetTStyle.IntValue > 0;
+				param.lineGap = Clamp(cg_targetGap.FloatValue, -10.0F, 10.0F);
+				param.lineLength.x = Clamp(cg_targetSizeHorizontal.FloatValue, 0.0F, 10.0F);
+				param.lineLength.y = Clamp(cg_targetSizeVertical.FloatValue, 0.0F, 10.0F);
+				param.lineThickness = Clamp(cg_targetThickness.FloatValue, 1.0F, 4.0F);
+
+				param.drawDot = cg_targetDot.IntValue > 0;
+				col.x = cg_targetDotColorR.IntValue;
+				col.y = cg_targetDotColorG.IntValue;
+				col.z = cg_targetDotColorB.IntValue;
+				color = ConvertColorRGBA(col);
+				color.w = Clamp(cg_targetDotAlpha.IntValue, 0, 255) / 255.0F;
+				param.dotColor = color;
+				param.dotThickness = Clamp(cg_targetDotThickness.FloatValue, 1.0F, 4.0F);
+
+				param.drawOutline = cg_targetOutline.IntValue > 0;
+				param.useRoundedStyle = cg_targetOutlineRoundedStyle.IntValue > 0;
+				col.x = cg_targetOutlineColorR.IntValue;
+				col.y = cg_targetOutlineColorG.IntValue;
+				col.z = cg_targetOutlineColorB.IntValue;
+				color = ConvertColorRGBA(col);
+				color.w = Clamp(cg_targetOutlineAlpha.IntValue, 0, 255) / 255.0F;
+				param.outlineColor = color;
+				param.outlineThickness = Clamp(cg_targetOutlineThickness.FloatValue, 1.0F, 4.0F);
+
+				DrawTarget(r, center, param);
+			}
+		}
+	}
+
+	class ConfigScope : spades::ui::UIElement {
+		private ConfigItem cg_pngScope("cg_pngScope", "0");
+		private ConfigItem cg_scopeLines("cg_scopeLines", "1");
+		private ConfigItem cg_scopeColor("cg_scopeColor", "0");
+		private ConfigItem cg_scopeColorR("cg_scopeColorR", "255");
+		private ConfigItem cg_scopeColorG("cg_scopeColorG", "0");
+		private ConfigItem cg_scopeColorB("cg_scopeColorB", "255");
+		private ConfigItem cg_scopeAlpha("cg_scopeAlpha", "255");
+		private ConfigItem cg_scopeGap("cg_scopeGap", "4");
+		private ConfigItem cg_scopeSizeHorizontal("cg_scopeSizeHorizontal", "5");
+		private ConfigItem cg_scopeSizeVertical("cg_scopeSizeVertical", "5");
+		private ConfigItem cg_scopeThickness("cg_scopeThickness", "1");
+		private ConfigItem cg_scopeTStyle("cg_scopeTStyle", "0");
+		private ConfigItem cg_scopeDot("cg_scopeDot", "0");
+		private ConfigItem cg_scopeDotColorR("cg_scopeDotColorR", "0");
+		private ConfigItem cg_scopeDotColorG("cg_scopeDotColorG", "0");
+		private ConfigItem cg_scopeDotColorB("cg_scopeDotColorB", "0");
+		private ConfigItem cg_scopeDotAlpha("cg_scopeDotAlpha", "255");
+		private ConfigItem cg_scopeDotThickness("cg_scopeDotThickness", "1");
+		private ConfigItem cg_scopeOutline("cg_scopeOutline", "1");
+		private ConfigItem cg_scopeOutlineColorR("cg_scopeOutlineColorR", "0");
+		private ConfigItem cg_scopeOutlineColorG("cg_scopeOutlineColorG", "0");
+		private ConfigItem cg_scopeOutlineColorB("cg_scopeOutlineColorB", "0");
+		private ConfigItem cg_scopeOutlineAlpha("cg_scopeOutlineAlpha", "255");
+		private ConfigItem cg_scopeOutlineThickness("cg_scopeOutlineThickness", "1");
+		private ConfigItem cg_scopeOutlineRoundedStyle("cg_scopeOutlineRoundedStyle", "0");
+		private ConfigItem cg_scopeDynamic("cg_scopeDynamic", "1");
+		private ConfigItem cg_scopeDynamicSplitDist("cg_scopeDynamicSplitdist", "7");
+
+		ConfigScope(spades::ui::UIManager@ manager) {
+			super(manager);
+		}
+
+		private void OnResetPressed(spades::ui::UIElement@ sender) {
+			cg_scopeLines.StringValue = cg_scopeLines.DefaultValue;
+			cg_scopeColor.StringValue = cg_scopeColor.DefaultValue;
+			cg_scopeColorR.StringValue = cg_scopeColorR.DefaultValue;
+			cg_scopeColorG.StringValue = cg_scopeColorG.DefaultValue;
+			cg_scopeColorB.StringValue = cg_scopeColorB.DefaultValue;
+			cg_scopeAlpha.StringValue = cg_scopeAlpha.DefaultValue;
+			cg_scopeGap.StringValue = cg_scopeGap.DefaultValue;
+			cg_scopeSizeHorizontal.StringValue = cg_scopeSizeHorizontal.DefaultValue;
+			cg_scopeSizeVertical.StringValue = cg_scopeSizeVertical.DefaultValue;
+			cg_scopeThickness.StringValue = cg_scopeThickness.DefaultValue;
+			cg_scopeTStyle.StringValue = cg_scopeTStyle.DefaultValue;
+			cg_scopeDot.StringValue = cg_scopeDot.DefaultValue;
+			cg_scopeDotColorR.StringValue = cg_scopeDotColorR.DefaultValue;
+			cg_scopeDotColorG.StringValue = cg_scopeDotColorG.DefaultValue;
+			cg_scopeDotColorB.StringValue = cg_scopeDotColorB.DefaultValue;
+			cg_scopeDotAlpha.StringValue = cg_scopeDotAlpha.DefaultValue;
+			cg_scopeDotThickness.StringValue = cg_scopeDotThickness.DefaultValue;
+			cg_scopeOutline.StringValue = cg_scopeOutline.DefaultValue;
+			cg_scopeOutlineColorR.StringValue = cg_scopeOutlineColorR.DefaultValue;
+			cg_scopeOutlineColorG.StringValue = cg_scopeOutlineColorG.DefaultValue;
+			cg_scopeOutlineColorB.StringValue = cg_scopeOutlineColorB.DefaultValue;
+			cg_scopeOutlineAlpha.StringValue = cg_scopeOutlineAlpha.DefaultValue;
+			cg_scopeOutlineThickness.StringValue = cg_scopeOutlineThickness.DefaultValue;
+			cg_scopeOutlineRoundedStyle.StringValue = cg_scopeOutlineRoundedStyle.DefaultValue;
+			cg_scopeDynamic.StringValue = cg_scopeDynamic.DefaultValue;
+			cg_scopeDynamicSplitDist.StringValue = cg_scopeDynamicSplitDist.DefaultValue;
+		}
+
+		private void OnRandomizePressed(spades::ui::UIElement@ sender) {
+			cg_scopeColorR.IntValue = GetRandom(0, 255);
+			cg_scopeColorG.IntValue = GetRandom(0, 255);
+			cg_scopeColorB.IntValue = GetRandom(0, 255);
+			cg_scopeAlpha.IntValue = GetRandom(50, 255);
+			cg_scopeGap.IntValue = GetRandom(1, 10);
+			cg_scopeSizeHorizontal.IntValue = GetRandom(1, 10);
+			cg_scopeSizeVertical.IntValue = cg_scopeSizeHorizontal.IntValue;
+			cg_scopeThickness.IntValue = GetRandom(1, 4);
+			cg_scopeDot.IntValue = GetRandom(2);
+			cg_scopeDotColorR.IntValue = GetRandom(0, 255);
+			cg_scopeDotColorG.IntValue = GetRandom(0, 255);
+			cg_scopeDotColorB.IntValue = GetRandom(0, 255);
+			cg_scopeDotAlpha.IntValue = GetRandom(50, 255);
+			cg_scopeDotThickness.IntValue = cg_scopeThickness.IntValue;
+			cg_scopeOutline.IntValue = GetRandom(2);
+			cg_scopeOutlineColorR.IntValue = GetRandom(0, 255);
+			cg_scopeOutlineColorG.IntValue = GetRandom(0, 255);
+			cg_scopeOutlineColorB.IntValue = GetRandom(0, 255);
+			cg_scopeOutlineAlpha.IntValue = GetRandom(50, 255);
+			cg_scopeOutlineRoundedStyle.IntValue = GetRandom(2);
+		}
+
+		void Render() {
+			Renderer@ r = Manager.Renderer;
+			Vector2 pos = ScreenPosition;
+			Vector2 size = Size;
+			Vector2 center = pos + size * 0.5F;
+
+			IntVector3 col;
+			col.x = cg_scopeColorR.IntValue;
+			col.y = cg_scopeColorG.IntValue;
+			col.z = cg_scopeColorB.IntValue;
+
+			Vector4 color = ConvertColorRGBA(col);
+			color.w = Clamp(cg_scopeAlpha.IntValue, 0, 255) / 255.0F;
+
+			// draw preview background
+			if (cg_pngScope.IntValue >= 2) {
+				float luminosity = color.x + color.y + color.z;
+				float opacity = 1.0F - luminosity;
+				if (cg_scopeOutline.IntValue > 0 and cg_pngScope.IntValue == 3)
+					r.ColorNP = Vector4(0.6F, 0.6F, 0.6F, 0.9F);
+				else
+					r.ColorNP = Vector4(opacity, opacity, opacity, 0.6F);
+			} else if (cg_pngScope.IntValue < 2) {
+				r.ColorNP = Vector4(0.0F, 0.0F, 0.0F, 0.6F);
+			}
+			r.DrawImage(null, AABB2(pos.x, pos.y, size.x, size.y));
+
+			// draw preview border
+			r.ColorNP = Vector4(1.0F, 1.0F, 1.0F, 0.1F);
+			DrawOutlinedRect(r, pos.x, pos.y, pos.x + size.x, pos.y + size.y);
+
+			// draw target
+			if (cg_pngScope.IntValue == 2) { // draw dot png scope
+				Image@ dotSightImage = r.RegisterImage("Gfx/DotSight.tga");
+				Vector2 imgSize = Vector2(dotSightImage.Width, dotSightImage.Height);
+				r.ColorNP = color;
+				r.DrawImage(dotSightImage, center - (imgSize * 0.5F));
+			} else if (cg_pngScope.IntValue == 3) { // draw custom target scope
+				TargetParam param;
+				param.lineColor = color;
+				param.drawLines = cg_scopeLines.IntValue > 0;
+				param.useTStyle = cg_scopeTStyle.IntValue > 0;
+				param.lineGap = Clamp(cg_scopeGap.FloatValue, -10.0F, 10.0F);
+				param.lineLength.x = Clamp(cg_scopeSizeHorizontal.FloatValue, 0.0F, 10.0F);
+				param.lineLength.y = Clamp(cg_scopeSizeVertical.FloatValue, 0.0F, 10.0F);
+				param.lineThickness = Clamp(cg_scopeThickness.FloatValue, 1.0F, 4.0F);
+
+				param.drawDot = cg_scopeDot.IntValue > 0;
+				col.x = cg_scopeDotColorR.IntValue;
+				col.y = cg_scopeDotColorG.IntValue;
+				col.z = cg_scopeDotColorB.IntValue;
+				color = ConvertColorRGBA(col);
+				color.w = Clamp(cg_scopeDotAlpha.IntValue, 0, 255) / 255.0F;
+				param.dotColor = color;
+				param.dotThickness = Clamp(cg_scopeDotThickness.FloatValue, 1.0F, 4.0F);
+
+				param.drawOutline = cg_scopeOutline.IntValue > 0;
+				param.useRoundedStyle = cg_scopeOutlineRoundedStyle.IntValue > 0;
+				col.x = cg_scopeOutlineColorR.IntValue;
+				col.y = cg_scopeOutlineColorG.IntValue;
+				col.z = cg_scopeOutlineColorB.IntValue;
+				color = ConvertColorRGBA(col);
+				color.w = Clamp(cg_scopeOutlineAlpha.IntValue, 0, 255) / 255.0F;
+				param.outlineColor = color;
+				param.outlineThickness = Clamp(cg_scopeOutlineThickness.FloatValue, 1.0F, 4.0F);
+
+				DrawTarget(r, center, param);
+			} else {
+				Font@ font = this.Font;
+				string text = _Tr("Preferences", "No Preview Available.");
+				Vector2 txtPos = pos + (size - font.Measure(text)) * 0.5F;
+				font.Draw(text, txtPos, 1.0F, Vector4(1.0F, 1.0F, 1.0F, 0.5F));
+			}
+		}
+	}
+
 	class StandardPreferenceLayouterModel : spades::ui::ListViewModel {
 		private spades::ui::UIElement @[] @items;
 		StandardPreferenceLayouterModel(spades::ui::UIElement @[] @items) { @this.items = items; }
@@ -766,6 +1144,31 @@ namespace spades {
 
 		ConfigSlider @AddVolumeSlider(string caption, string configName) {
 			return AddSliderField(caption, configName, 0, 1, 0.01, ConfigNumberFormatter(0, "%", "", 100));
+		}
+
+		void AddSliderGroup(string caption, array<string> labels,
+			float minRange, float maxRange, float step, int digits,
+			array<string> prefix, bool enabled = true) {
+			spades::ui::UIElement@ container = CreateItem();
+
+			spades::ui::Label label(Parent.Manager);
+			label.Text = caption;
+			label.Alignment = Vector2(0.0F, 0.5F);
+			label.Bounds = AABB2(10.0F, 0.0F, FieldX + FieldWidth - 10.0F, 32.0F);
+			container.AddChild(label);
+
+			float width = FieldWidth / labels.length;
+			for (uint i = 0; i < labels.length; ++i) {
+				ConfigSlider slider(Parent.Manager, labels[i], minRange, maxRange, step,
+					ConfigNumberFormatter(digits, "", prefix[i]));
+				slider.Bounds = AABB2(FieldX + width * i, 4.0F, width, 24.0F);
+				slider.Enable = enabled;
+				container.AddChild(slider);
+			}
+		}
+
+		void AddRGBSlider(string caption, array<string> labels, bool enabled = true) {
+			AddSliderGroup(caption, labels, 0, 255, 1, 0, array<string> = { "R: ", "G: ", "B: "});
 		}
 
 		void AddControl(string caption, string configName, bool enabled = true) {
@@ -930,6 +1333,47 @@ namespace spades {
 
 			return field;
 		}		
+	
+		void AddTargetPreview() {
+			spades::ui::UIElement@ container = CreateItem();
+
+			ConfigTarget field(Parent.Manager);
+			field.Bounds = AABB2(10.0F, 0.0F, FieldX + FieldWidth - 10.0F, 64.0F);
+			container.AddChild(field);
+
+			spades::ui::SimpleButton resetButton(Parent.Manager);
+			resetButton.Caption = _Tr("Preferences", "Reset");
+			resetButton.Bounds = AABB2(10.0F, 0.0F, 50.0F, 20.0F);
+			@resetButton.Activated = spades::ui::EventHandler(field.OnResetPressed);
+			container.AddChild(resetButton);
+
+			spades::ui::SimpleButton randomizeButton(Parent.Manager);
+			randomizeButton.Caption = _Tr("Preferences", "Randomize");
+			randomizeButton.Bounds = AABB2(FieldX + FieldWidth - 80.0F, 0.0F, 80.0F, 20.0F);
+			@randomizeButton.Activated = spades::ui::EventHandler(field.OnRandomizePressed);
+			container.AddChild(randomizeButton);
+		}
+
+		void AddScopePreview() {
+			spades::ui::UIElement@ container = CreateItem();
+
+			ConfigScope field(Parent.Manager);
+			field.Bounds = AABB2(10.0F, 0.0F, FieldX + FieldWidth - 10.0F, 64.0F);
+			container.AddChild(field);
+
+			spades::ui::SimpleButton resetButton(Parent.Manager);
+			resetButton.Caption = _Tr("Preferences", "Reset");
+			resetButton.Bounds = AABB2(10.0F, 0.0F, 50.0F, 20.0F);
+			@resetButton.Activated = spades::ui::EventHandler(field.OnResetPressed);
+			container.AddChild(resetButton);
+
+			spades::ui::SimpleButton randomizeButton(Parent.Manager);
+			randomizeButton.Caption = _Tr("Preferences", "Randomize");
+			randomizeButton.Bounds = AABB2(FieldX + FieldWidth - 80.0F, 0.0F, 80.0F, 20.0F);
+			@randomizeButton.Activated = spades::ui::EventHandler(field.OnRandomizePressed);
+			container.AddChild(randomizeButton);
+		}
+
 	}
 
 	class GameOptionsPanel : spades::ui::UIElement {
@@ -1251,45 +1695,97 @@ namespace spades {
 			layouter.AddToggleField(_Tr("Preferences", "Debug Skin Anchors"), "cg_debugToolSkinAnchors");
 			layouter.AddHeading(_Tr("Preferences", " "));
 
-			layouter.AddHeading(_Tr("Preferences", "Nuceto's Target Mod"));
-			layouter.AddToggleField(_Tr("Preferences", "Target"), "n_Target");
-			layouter.AddToggleField(_Tr("Preferences", "Hide Default Target"), "n_hideDefaultTarget");
-			layouter.AddToggleField(_Tr("Preferences", "Hide Default Scope"), "n_hideDefaultScope");
-			layouter.AddToggleField(_Tr("Preferences", "Target in scope"), "n_TargetOnScope");
-			layouter.AddSliderField(_Tr("Preferences", "Size"), "n_TargetSize", 1, 4, 0.1,
-			ConfigNumberFormatter(1, "x"));
+			layouter.FinishLayout();
+		}
+	}
 
-			layouter.AddToggleField(_Tr("Preferences", "Dot"), "n_TargetDot");
-			layouter.AddToggleField(_Tr("Preferences", "Lines"), "n_TargetLines");
-			layouter.AddSliderField(_Tr("Preferences", "Linespos"), "n_TargetLinesPos", -64, 16, 1,
-			ConfigNumberFormatter(1, "x"));
+	class TargetOptionsPanel : spades::ui::UIElement {
+		TargetOptionsPanel(spades::ui::UIManager @manager, PreferenceViewOptions @options,
+						 FontManager @fontManager) {
+			super(manager);
 
-			layouter.AddSliderField(_Tr("Preferences", "LinesHeight"), "n_TargetLinesHeight", 0, 500, 1,
-			ConfigNumberFormatter(1, "x"));	
+			StandardPreferenceLayouter layouter(this, fontManager);
 
-			layouter.AddToggleField(_Tr("Preferences", "Dynamic Lines Fire"), "n_TargetLinesDynamicFire");
-			layouter.AddToggleField(_Tr("Preferences", "Dynamic Lines Sprint"), "n_TargetLinesDynamicSprint");
-			layouter.AddSliderField(_Tr("Preferences", "Dynamic Lines Multiplier"), "n_TargetLinesDynamicMultiplier", 1, 100, 1,
-			ConfigNumberFormatter(1, "x"));
+			layouter.AddHeading(_Tr("Preferences", "Target"));
+			layouter.AddTargetPreview();
+			layouter.AddHeading("");
+			layouter.AddChoiceField(_Tr("Preferences", "Target Type"), "cg_target",
+									array<string> = {_Tr("Preferences", "OFF"),
+													 _Tr("Preferences", "Default"),
+													 _Tr("Preferences", "Custom")},
+									array<int> = {0, 1, 2});
+			layouter.AddToggleField(_Tr("Preferences", "Lines"), "cg_targetLines");
+			layouter.AddSliderField(_Tr("Preferences", "Color"), "cg_targetColor",
+			0, 6, 1, ConfigTargetColorFormatter());
+			layouter.AddRGBSlider(_Tr("Preferences", "Custom Color"),
+			array<string> = { "cg_targetColorR", "cg_targetColorG", "cg_targetColorB"});
+			layouter.AddSliderField(_Tr("Preferences", "Opacity"), "cg_targetAlpha",
+			0, 255, 1, ConfigNumberFormatter(0, ""));
+			layouter.AddSliderGroup(_Tr("Preferences", "Length"),
+			array<string> = { "cg_targetSizeHorizontal", "cg_targetSizeVertical"},
+			1, 10, 1, 0, array<string> = { "", "" });
+			layouter.AddSliderField(_Tr("Preferences", "Thickness"), "cg_targetThickness",
+			1, 4, 1, ConfigNumberFormatter(0, "px"));
+			layouter.AddSliderField(_Tr("Preferences", "Gap"), "cg_targetGap",
+			-10, 10, 1, ConfigNumberFormatter(0, "px"));
+			layouter.AddToggleField(_Tr("Preferences", "Dynamic"), "cg_targetDynamic");
+			layouter.AddSliderField(_Tr("Preferences", "Dynamic Split Dist"), "cg_targetDynamicSplitdist",
+			1, 20, 1, ConfigNumberFormatter(0, ""));
+			layouter.AddToggleField(_Tr("Preferences", "Outline"), "cg_targetOutline");
+			layouter.AddRGBSlider(_Tr("Preferences", "Outline Color"),
+			array<string> = { "cg_targetOutlineColorR", "cg_targetOutlineColorG", "cg_targetOutlineColorB"});
+			layouter.AddSliderField(_Tr("Preferences", "Outline Opacity"), "cg_targetOutlineAlpha",
+			0, 255, 1, ConfigNumberFormatter(0, ""));
+			layouter.AddSliderField(_Tr("Preferences", "Outline Thickness"), "cg_targetOutlineThickness",
+			1, 4, 1, ConfigNumberFormatter(0, "px"));
+			layouter.AddToggleField(_Tr("Preferences", "Rounded Corners Style"), "cg_targetOutlineRoundedStyle");
+			layouter.AddToggleField(_Tr("Preferences", "Center Dot"), "cg_targetDot");
+			layouter.AddRGBSlider(_Tr("Preferences", "Center Dot Color"),
+			array<string> = { "cg_targetDotColorR", "cg_targetDotColorG", "cg_targetDotColorB"});
+			layouter.AddSliderField(_Tr("Preferences", "Center Dot Opacity"), "cg_targetDotAlpha",
+			0, 255, 1, ConfigNumberFormatter(0, ""));
+			layouter.AddSliderField(_Tr("Preferences", "Center Dot Thickness"), "cg_targetDotThickness",
+			1, 4, 1, ConfigNumberFormatter(0, "px"));
+			layouter.AddToggleField(_Tr("Preferences", "T Style"), "cg_targetTStyle");
+			layouter.AddHeading("");
 
-			layouter.AddSliderField(_Tr("Preferences", "Dot Transparency"), "n_TargetDotTransparency", 0, 1, 0.01,
-									ConfigNumberFormatter(0, " %", "", 100));
-			layouter.AddSliderField(_Tr("Preferences", "Dot Red"), "n_TargetDotColorRed", 0, 255, 1,
-			ConfigNumberFormatter(0, " r"));
-			layouter.AddSliderField(_Tr("Preferences", "Dot Green"), "n_TargetDotColorGreen", 0, 255, 1,
-			ConfigNumberFormatter(0, " g"));
-			layouter.AddSliderField(_Tr("Preferences", "Dot Blue"), "n_TargetDotColorBlue", 0, 255, 1,
-			ConfigNumberFormatter(0, " b"));
-
-			layouter.AddSliderField(_Tr("Preferences", "Line Transparency"), "n_TargetLineTransparency", 0, 1, 0.01,
-									ConfigNumberFormatter(0, " %", "", 100));
-			layouter.AddSliderField(_Tr("Preferences", "Line Red"), "n_TargetLineColorRed", 0, 255, 1,
-			ConfigNumberFormatter(0, " r"));
-			layouter.AddSliderField(_Tr("Preferences", "Line Green"), "n_TargetLineColorGreen", 0, 255, 1,
-			ConfigNumberFormatter(0, " g"));
-			layouter.AddSliderField(_Tr("Preferences", "Line Blue"), "n_TargetLineColorBlue", 0, 255, 1,
-			ConfigNumberFormatter(0, " b"));
-			layouter.AddHeading(_Tr("Preferences", " "));
+			layouter.AddHeading(_Tr("Preferences", "Scope"));
+			layouter.AddScopePreview();
+			layouter.AddHeading("");
+			layouter.AddSliderField(_Tr("Preferences", "Scope Type"), "cg_pngScope",
+			0, 3, 1, ConfigScopeTypeFormatter());
+			layouter.AddToggleField(_Tr("Preferences", "Lines"), "cg_scopeLines");
+			layouter.AddRGBSlider(_Tr("Preferences", "Color"),
+			array<string> = { "cg_scopeColorR", "cg_scopeColorG", "cg_scopeColorB"});
+			layouter.AddSliderField(_Tr("Preferences", "Opacity"), "cg_scopeAlpha",
+			0, 255, 1, ConfigNumberFormatter(0, ""));
+			layouter.AddSliderGroup(_Tr("Preferences", "Length"),
+			array<string> = { "cg_scopeSizeHorizontal", "cg_scopeSizeVertical"},
+			1, 10, 1, 0, array<string> = { "", "" });
+			layouter.AddSliderField(_Tr("Preferences", "Thickness"), "cg_scopeThickness",
+			1, 4, 1, ConfigNumberFormatter(0, "px"));
+			layouter.AddSliderField(_Tr("Preferences", "Gap"), "cg_scopeGap",
+			-10, 10, 1, ConfigNumberFormatter(0, "px"));
+			layouter.AddToggleField(_Tr("Preferences", "Dynamic"), "cg_scopeDynamic");
+			layouter.AddSliderField(_Tr("Preferences", "Dynamic Split Dist"), "cg_scopeDynamicSplitdist",
+			1, 20, 1, ConfigNumberFormatter(0, ""));
+			layouter.AddToggleField(_Tr("Preferences", "Outline"), "cg_scopeOutline");
+			layouter.AddRGBSlider(_Tr("Preferences", "Outline Color"),
+			array<string> = { "cg_scopeOutlineColorR", "cg_scopeOutlineColorG", "cg_scopeOutlineColorB"});
+			layouter.AddSliderField(_Tr("Preferences", "Outline Opacity"), "cg_scopeOutlineAlpha",
+			0, 255, 1, ConfigNumberFormatter(0, ""));
+			layouter.AddSliderField(_Tr("Preferences", "Outline Thickness"), "cg_scopeOutlineThickness",
+			1, 4, 1, ConfigNumberFormatter(0, "px"));
+			layouter.AddToggleField(_Tr("Preferences", "Rounded Corners Style"), "cg_scopeOutlineRoundedStyle");
+			layouter.AddToggleField(_Tr("Preferences", "Center Dot"), "cg_scopeDot");
+			layouter.AddRGBSlider(_Tr("Preferences", "Center Dot Color"),
+			array<string> = { "cg_scopeDotColorR", "cg_scopeDotColorG", "cg_scopeDotColorB"});
+			layouter.AddSliderField(_Tr("Preferences", "Center Dot Opacity"), "cg_scopeDotAlpha",
+			0, 255, 1, ConfigNumberFormatter(0, ""));
+			layouter.AddSliderField(_Tr("Preferences", "Center Dot Thickness"), "cg_scopeDotThickness",
+			1, 4, 1, ConfigNumberFormatter(0, "px"));
+			layouter.AddToggleField(_Tr("Preferences", "T Style"), "cg_scopeTStyle");
+			layouter.AddHeading("");
 
 			layouter.FinishLayout();
 		}

@@ -95,25 +95,6 @@ DEFINE_SPADES_SETTING(cg_screenShotSoundGain, "1");
 DEFINE_SPADES_SETTING(cg_DemoProgressBarOnlyInUi, "0");
 DEFINE_SPADES_SETTING(cg_DrawDragCursorPos, "1");
 
-DEFINE_SPADES_SETTING(n_Target, "0");
-DEFINE_SPADES_SETTING(n_TargetOnScope, "0");
-DEFINE_SPADES_SETTING(n_TargetLineTransparency, "1");
-DEFINE_SPADES_SETTING(n_TargetDotTransparency, "1");
-DEFINE_SPADES_SETTING(n_TargetSize, "2");
-DEFINE_SPADES_SETTING(n_TargetLineColorRed, "0");
-DEFINE_SPADES_SETTING(n_TargetLineColorGreen, "1");
-DEFINE_SPADES_SETTING(n_TargetLineColorBlue, "0");
-DEFINE_SPADES_SETTING(n_TargetDotColorRed, "0");
-DEFINE_SPADES_SETTING(n_TargetDotColorGreen, "1");
-DEFINE_SPADES_SETTING(n_TargetDotColorBlue, "0");
-DEFINE_SPADES_SETTING(n_TargetDot, "1");
-DEFINE_SPADES_SETTING(n_TargetLines, "1");
-DEFINE_SPADES_SETTING(n_TargetLinesPos, "0");
-DEFINE_SPADES_SETTING(n_TargetLinesHeight, "20");
-DEFINE_SPADES_SETTING(n_TargetLinesDynamicFire, "1");
-DEFINE_SPADES_SETTING(n_TargetLinesDynamicSprint, "1");
-DEFINE_SPADES_SETTING(n_TargetLinesDynamicMultiplier, "10");
-
 namespace spades {
 	namespace client {
 
@@ -480,40 +461,6 @@ namespace spades {
 			renderer->DrawImage(img, AABB2(p2.x, p1.y - 1, 1, p2.y - p1.y + 2));
 		}
 
-		void Client::DrawTarget() {
-			SPADES_MARK_FUNCTION();
-			float x = renderer->ScreenWidth() / 2;
-			float y = renderer->ScreenHeight() / 2;
-			float size = n_TargetSize;
-			float linepos = n_TargetLinesPos;
-			float lineh = n_TargetLinesHeight;
-
-			if(n_TargetLinesDynamicFire){
-				linepos -= targetfirestate * (float)n_TargetLinesDynamicMultiplier;
-			}
-			if(n_TargetLinesDynamicSprint){
-				linepos -= GetSprintState() * (float)n_TargetLinesDynamicMultiplier;
-			}
-			
-			Handle<IImage> img = renderer->RegisterImage("Gfx/White.tga");
-			
-			if(n_TargetDot){
-				renderer->SetColorAlphaPremultiplied(MakeVector4((float)n_TargetDotColorRed / 255.f, 
-				(float)n_TargetDotColorGreen / 255.f, (float)n_TargetDotColorBlue / 255.f, (float)n_TargetDotTransparency));
-				renderer->DrawImage(img, AABB2(x - 2/size, y - (2/ size), 4/ size, 4/ size));
-			}
-			
-			if(n_TargetLines){
-				renderer->SetColorAlphaPremultiplied(MakeVector4((float)n_TargetLineColorRed / 255.f, 
-				(float)n_TargetLineColorGreen / 255.f, (float)n_TargetLineColorBlue / 255.f, (float)n_TargetLineTransparency));
-				renderer->DrawImage(img, AABB2(x - (2/ size), y - (7/ size)+linepos, 4/ size, -lineh/ size));
-				renderer->DrawImage(img, AABB2(x - (2/ size), y + (7/ size)-linepos, 4/ size, lineh/ size));
-			
-				renderer->DrawImage(img, AABB2(x - (6/ size)+linepos, y - (2/ size), -lineh/ size, 4/ size));
-				renderer->DrawImage(img, AABB2(x + (6/ size)-linepos, y - (2/ size), lineh/ size, 4/ size));
-			}
-		}
-
 		void Client::DrawFirstPersonHUD() {
 			SPADES_MARK_FUNCTION();
 
@@ -568,11 +515,6 @@ namespace spades {
 
 			if ((int)cg_hideFirstPersonModel > 1)
 				DrawCurrentToolIcon(player);
-
-			if (n_Target) {
-				if (n_TargetOnScope || GetAimDownState() < 1)
-					DrawTarget();
-			} 
 		}
 
 		void Client::DrawJoinedAlivePlayerHUD() {

@@ -35,9 +35,9 @@ And many others which weren't mentioned here.
 "VierEck.":
 MapEditor, Demo Replay/Recording based on aos_replay, Chat Macros, Performance Config
 "Nuceto":
-Killfeed image feature, Specific word message highlight, Colored chat message, Colored stats, HUD and Minimap transparency, Teammate map sector in chat message, HitTest Debug display transparency and size, Target Mod, Default Fade Weapon Models, killfeed distance analisation, improved footstep audio
+Killfeed image feature, Specific word message highlight, Colored chat message, Colored stats, HUD and Minimap transparency, Teammate map sector in chat message, HitTest Debug display transparency and size, Default Fade Weapon Models, killfeed distance analisation, improved footstep audio
 "ZeroGrey":
-PM message highlight, Show map sector, Ignore chat, Hitfeedback sound, Hit analyze message, HitTest Debug improvements, k/d and streak display, damage indicators, Respawn Sound, Intro Sound, Screenshot Sound, Death Sound, Score Messages, Different Playermodels based on Weapon, improved skin models animations, First Person Lower Body, Classic Corpse Bounce Physics, mouse accel toggle, voxlap zoom filter, classic view weapon, improved weapon animation, Falling Blocks Bounce Physics, throttle minimap updates, hold map zoom, playing time in scoreboard
+PM message highlight, Show map sector, Ignore chat, Hitfeedback sound, Hit analyze message, HitTest Debug improvements, k/d and streak display, damage indicators, Respawn Sound, Intro Sound, Screenshot Sound, Death Sound, Score Messages, Different Playermodels based on Weapon, improved skin models animations, First Person Lower Body, Classic Corpse Bounce Physics, mouse accel toggle, voxlap zoom filter, classic view weapon, improved weapon animation, Falling Blocks Bounce Physics, throttle minimap updates, hold map zoom, playing time in scoreboard, custom target and scope
 "Mile":
 Glitter, Title Map "HallWeeb.vxl",
 "nonperforming":

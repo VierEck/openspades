@@ -132,4 +132,95 @@ namespace spades {
 
 		return charIndex;
 	}
+
+	Vector4 ConvertColorRGBA(IntVector3 v) {
+		return Vector4(v.x / 255.0F, v.y / 255.0F, v.z / 255.0F, 1.0F);
+	}
+
+	void DrawFilledRect(Renderer@ r, float x0, float y0, float x1, float y1) {
+		r.DrawImage(null, AABB2(x0, y0, x1 - x0, y1 - y0));
+	}
+	void DrawOutlinedRect(Renderer@ r, float x0, float y0, float x1, float y1) {
+		DrawFilledRect(r, x0, y0, x1, y0 + 1);		 // top
+		DrawFilledRect(r, x0, y1 - 1, x1, y1);		   // bottom
+		DrawFilledRect(r, x0, y0 + 1, x0 + 1, y1 - 1); // left
+		DrawFilledRect(r, x1 - 1, y0 + 1, x1, y1 - 1); // right
+	}
+
+	class TargetParam {
+		bool drawLines;
+		bool useTStyle;
+		Vector4 lineColor;
+		float lineGap;
+		Vector2 lineLength;
+		float lineThickness;
+		bool drawOutline;
+		bool useRoundedStyle;
+		Vector4 outlineColor;
+		float outlineThickness;
+		bool drawDot;
+		Vector4 dotColor;
+		float dotThickness;
+	}
+
+	void DrawTargetRect(Renderer@ r, int x, int y, int w, int h, TargetParam param) {
+		if (param.drawOutline) {
+			r.ColorNP = param.outlineColor;
+			int thickness = int(param.outlineThickness);
+			if (param.useRoundedStyle) {
+				DrawFilledRect(r, x, y-thickness, w, y);
+				DrawFilledRect(r, x, h, w, h+thickness);
+			} else {
+				DrawFilledRect(r, x-thickness, y-thickness, w+thickness, y);
+				DrawFilledRect(r, x-thickness, h, w+thickness, h+thickness);
+			}
+			DrawFilledRect(r, x-thickness, y, x, h);
+			DrawFilledRect(r, w, y, w+thickness, h);
+		}
+
+		r.ColorNP = param.lineColor;
+		DrawFilledRect(r, x, y, w, h);
+	}
+
+	void DrawTarget(Renderer@ r, Vector2 pos, TargetParam param) {
+		int thickness = int(param.lineThickness);
+		int x = int(pos.x) - thickness / 2;
+		int y = int(pos.y) - thickness / 2;
+		int w = x + thickness;
+		int h = y + thickness;
+
+		// draw target lines
+		if (param.drawLines) {
+			int lineGap = int(param.lineGap);
+
+			// horizontal lines
+			int lineLengthHorizontal = int(param.lineLength.x);
+			int innerLeft = x - lineGap;
+			int innerRight = w + lineGap;
+			int outerLeft = innerLeft - lineLengthHorizontal;
+			int outerRight = innerRight + lineLengthHorizontal;
+			DrawTargetRect(r, outerLeft, y, innerLeft, h, param); // left
+			DrawTargetRect(r, innerRight, y, outerRight, h, param); // right
+
+			// vertical lines
+			int lineLengthVertical = int(param.lineLength.y);
+			int innerTop = y - lineGap;
+			int innerBottom = h + lineGap;
+			int outerTop = innerTop - lineLengthVertical;
+			int outerBottom = innerBottom + lineLengthVertical;
+			if (not param.useTStyle)
+				DrawTargetRect(r, x, outerTop, w, innerTop, param); // top
+			DrawTargetRect(r, x, innerBottom, w, outerBottom, param); // bottom
+		}
+
+		// draw center dot
+		if (param.drawDot) {
+			thickness = int(param.dotThickness);
+			x = int(pos.x) - thickness / 2;
+			y = int(pos.y) - thickness / 2;
+			w = x + thickness;
+			h = y + thickness;
+			DrawTargetRect(r, x, y, w, h, param);
+		}
+	}
 }
