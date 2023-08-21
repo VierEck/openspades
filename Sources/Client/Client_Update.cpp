@@ -78,7 +78,6 @@ DEFINE_SPADES_SETTING(cg_localDryFireSoundGain, "1");
 DEFINE_SPADES_SETTING(cg_restockSoundGain, "1");
 DEFINE_SPADES_SETTING(cg_throwNadeSoundGain, "1");
 DEFINE_SPADES_SETTING(cg_spadeMissSoundGain, "1");
-DEFINE_SPADES_SETTING(cg_blockHitSoundGain, "1");
 DEFINE_SPADES_SETTING(cg_nadePinSoundGain, "1");
 
 DEFINE_SPADES_SETTING(cg_specSpeedWalk, "1");
@@ -1001,18 +1000,8 @@ namespace spades {
 			}
 
 			if (!IsMuted()) {
-				bool isLocal = &p == world->GetLocalPlayer();
-				Handle<IAudioChunk> c =
-				  audioDevice->RegisterSound("Sounds/Weapons/Spade/HitBlock.opus");
-				if (isLocal) {
-					AudioParam param;
-					param.volume = cg_blockHitSoundGain;
-					audioDevice->PlayLocal(c.GetPointerOrNull(), MakeVector3(.1f, -.1f, 1.2f), param);
-				}
-				else
-					audioDevice->Play(c.GetPointerOrNull(),
-					                  p.GetOrigin() + p.GetFront() * 0.5f - p.GetUp() * .2f,
-					                  AudioParam());
+				Handle<IAudioChunk> c = audioDevice->RegisterSound("Sounds/Weapons/Spade/HitBlock.opus");
+				audioDevice->Play(c.GetPointerOrNull(), shiftedHitPos, AudioParam());
 			}
 		}
 

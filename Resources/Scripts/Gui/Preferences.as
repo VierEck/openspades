@@ -1642,8 +1642,6 @@ namespace spades {
 				0.0, 1.5, 0.01, ConfigNumberFormatter(0, " %", "", 100));
 			layouter.AddSliderField(_Tr("Preferences", "Spade Miss Sound"), "cg_spadeMissSoundGain", 
 				0.0, 1.5, 0.01, ConfigNumberFormatter(0, " %", "", 100));
-			layouter.AddSliderField(_Tr("Preferences", "Hit Block Sound"), "cg_blockHitSoundGain", 
-				0.0, 1.5, 0.01, ConfigNumberFormatter(0, " %", "", 100));
 			layouter.AddSliderField(_Tr("Preferences", "Raise Tool Sound"), "cg_raiseToolSoundGain", 
 				0.0, 1.5, 0.01, ConfigNumberFormatter(0, " %", "", 100));
 			layouter.AddSliderField(_Tr("Preferences", "Switch Tool Sound"), "cg_switchToolSoundGain", 
