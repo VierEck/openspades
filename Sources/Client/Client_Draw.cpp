@@ -73,6 +73,9 @@ SPADES_SETTING(cg_keyAltAttack);
 SPADES_SETTING(cg_keyCrouch);
 DEFINE_SPADES_SETTING(cg_screenshotFormat, "2");
 DEFINE_SPADES_SETTING(cg_stats, "0", "1");
+DEFINE_SPADES_SETTING(cg_statsColor, "0");
+DEFINE_SPADES_SETTING(cg_statsBackground, "1");
+DEFINE_SPADES_SETTING(cg_statsTransparency, "1");
 DEFINE_SPADES_SETTING(cg_hideHud, "0");
 DEFINE_SPADES_SETTING(cg_playerNames, "4");
 DEFINE_SPADES_SETTING(cg_playerNameX, "0");
@@ -266,7 +269,7 @@ namespace spades {
 			sprintf(buf, "%d:%.02d", mins, secs);
 			IFont& font = fontManager->GetMediumFont();
 			Vector2 size = font.Measure(buf);
-			Vector2 pos = MakeVector2((sw - size.x) * 0.5F, 48.0F - size.y);
+			Vector2 pos = MakeVector2((sw - size.x) * 0.5F, 68.0F - size.y);
 			font.DrawShadow(buf, pos, 1.0F, MakeVector4(1, 1, 1, 1), MakeVector4(0, 0, 0, 0.5));
 		}
 
@@ -1462,6 +1465,8 @@ namespace spades {
 
 			if (!cg_stats)
 				return;
+			if (!scoreboardVisible && (int)cg_stats == 3)
+				return;
 
 			char buf[256];
 			std::string str;
@@ -1482,11 +1487,11 @@ namespace spades {
 					sprintf(buf, "%.02f fps", fps);
 					fpsStr += buf;
 				}
-				if ((int)cg_stats > 1) {
+				if (cg_statsColor) {
 					if (fps > 60)
 						fps = 60.f;
 					fps *= 0.016f;
-					fpsColor = MakeVector4(1.f - fps, fps, 0.f, (float)cg_hudTransparency);
+					fpsColor = MakeVector4(1.f - fps, fps, 0.f, (float)cg_statsTransparency);
 				}
 			}
 			{
@@ -1498,11 +1503,11 @@ namespace spades {
 					sprintf(buf, ", %.02f ups", ups);
 					upsStr  += buf;
 				}
-				if ((int)cg_stats > 1) {
+				if (cg_statsColor) {
 					if (ups > 20) //upperlimit for voxlap
 						ups = 20.f;
 					ups *= 0.05f;
-					upsColor = MakeVector4(1.f - ups, ups, 0.f, (float)cg_hudTransparency);
+					upsColor = MakeVector4(1.f - ups, ups, 0.f, (float)cg_statsTransparency);
 				}
 			}
 
@@ -1513,11 +1518,11 @@ namespace spades {
 
 				sprintf(buf, ", ping: %dms, ", (int)ping);
 				pingStr += buf;
-				if ((int)cg_stats > 1) {
+				if (cg_statsColor) {
 					if (ping > 300) //this is very generous
 						ping = 300;
 					ping *= 0.0033f;
-					pingColor = MakeVector4(ping, 1.f - ping, 0.f, (float)cg_hudTransparency);
+					pingColor = MakeVector4(ping, 1.f - ping, 0.f, (float)cg_statsTransparency);
 				}
 
 				sprintf(buf, "up/down: %.02f/%.02fkbps", upbps / 1000.0, downbps / 1000.0);
@@ -1537,30 +1542,35 @@ namespace spades {
 			auto size = font.Measure(str);
 			size += Vector2(margin * 2.f, margin * 2.f);
 
-			auto pos = (Vector2(scrWidth, scrHeight) - size) * Vector2(0.5f, 1.f);
+			auto pos = (Vector2(scrWidth, scrHeight) - size);
 
-			renderer->SetColorAlphaPremultiplied(Vector4(0.f, 0.f, 0.f, 0.5f * (float)cg_hudTransparency));
-			renderer->DrawImage(nullptr, AABB2(pos.x, pos.y, size.x, size.y));
+			pos *= MakeVector2(0.5F, ((int)cg_stats < 2) ? 1.0F : 0.0F);
+			pos.y += ((int)cg_stats < 2) ? (margin * 0.5F) : -(margin * 0.5F);
 
-			if ((int)cg_stats > 1) {
+			if (cg_statsBackground) {
+				renderer->SetColorAlphaPremultiplied(Vector4(0.f, 0.f, 0.f, 0.5f * (float)cg_statsTransparency));
+				renderer->DrawImage(nullptr, AABB2(pos.x, pos.y, size.x, size.y));
+			}
+
+			if (cg_statsColor) {
 				font.DrawShadow(fpsStr, pos + Vector2(margin, margin), 
-				1.f, fpsColor, Vector4(0.f, 0.f, 0.f, 0.5f * (float)cg_hudTransparency));
+				1.f, fpsColor, Vector4(0.f, 0.f, 0.f, 0.5f * (float)cg_statsTransparency));
 			
 				font.DrawShadow(upsStr, pos + Vector2(margin, margin) + 
-				Vector2(font.Measure(fpsStr).x, 0.f), 1.f, upsColor, Vector4(0.f, 0.f, 0.f, 0.5f * (float)cg_hudTransparency));
+				Vector2(font.Measure(fpsStr).x, 0.f), 1.f, upsColor, Vector4(0.f, 0.f, 0.f, 0.5f * (float)cg_statsTransparency));
 			
 				font.DrawShadow(pingStr, pos + Vector2(margin, margin) +
 				Vector2(font.Measure(fpsStr).x + font.Measure(upsStr).x, 0.f), 
-				1.f, pingColor, Vector4(0.f, 0.f, 0.f, 0.5f * (float)cg_hudTransparency));
+				1.f, pingColor, Vector4(0.f, 0.f, 0.f, 0.5f * (float)cg_statsTransparency));
 			
 				font.DrawShadow(updownStr, pos + Vector2(margin, margin) + Vector2(font.Measure(fpsStr).x + 
 				font.Measure(upsStr).x + font.Measure(pingStr).x, 0.f), 1.f, 
-				Vector4(1.f, 1.f, 1.f, (float)cg_hudTransparency), Vector4(0.f, 0.f, 0.f, 0.5f * (float)cg_hudTransparency));
+				Vector4(1.f, 1.f, 1.f, (float)cg_statsTransparency), Vector4(0.f, 0.f, 0.f, 0.5f * (float)cg_statsTransparency));
 				return;
 			}
 
-			font.DrawShadow(str, pos + Vector2(margin, margin), 1.f, Vector4(1.f, 1.f, 1.f, (float)cg_hudTransparency),
-			                Vector4(0.f, 0.f, 0.f, 0.5f * (float)cg_hudTransparency));
+			font.DrawShadow(str, pos + Vector2(margin, margin), 1.f, Vector4(1.f, 1.f, 1.f, (float)cg_statsTransparency),
+			                Vector4(0.f, 0.f, 0.f, 0.5f * (float)cg_statsTransparency));
 		}
 
 		void Client::DrawDemoProgress() {
