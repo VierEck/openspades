@@ -49,28 +49,31 @@ namespace spades {
 			}
 			renderer.ColorNP = bgcolor;
 			renderer.DrawImage(img, AABB2(pos.x, pos.y, size.x, size.y));
-
-			Font.Draw(item.Name, ScreenPosition + Vector2(4.f, 2.f), 1.f, fgcolor);
-			string playersStr = ToString(item.NumPlayers) + "/" + ToString(item.MaxPlayers);
+			
 			Vector4 col(1, 1, 1, 1);
 			if (item.NumPlayers >= item.MaxPlayers)
 				col = Vector4(1, 0.7f, 0.7f, 1);
 			else if (item.NumPlayers >= item.MaxPlayers * 3 / 4)
 				col = Vector4(1, 1, 0.7f, 1);
-			else if (item.NumPlayers == 0)
-				col = Vector4(0.7f, 0.7f, 1, 1);
+			else if (item.NumPlayers == 0) {
+				col = Vector4(0.7f, 0.7f, 1, 0.5f);
+				fgcolor.w *= 0.5f;
+			}
+
+			Font.Draw(item.Name, ScreenPosition + Vector2(4.f, 2.f), 1.f, fgcolor);
+			string playersStr = ToString(item.NumPlayers) + "/" + ToString(item.MaxPlayers);
 			Font.Draw(playersStr,
 					  ScreenPosition + Vector2(405.f - Font.Measure(playersStr).x * 0.5f, 2.f), 1.f,
 					  col);
-			Font.Draw(item.MapName, ScreenPosition + Vector2(430.f, 2.f), 1.f, Vector4(1, 1, 1, 1));
+			Font.Draw(item.MapName, ScreenPosition + Vector2(430.f, 2.f), 1.f, Vector4(1, 1, 1, col.w));
 			Font.Draw(item.GameMode, ScreenPosition + Vector2(580.f, 2.f), 1.f,
-					  Vector4(1, 1, 1, 1));
+					  Vector4(1, 1, 1, col.w));
 			Font.Draw(item.Protocol, ScreenPosition + Vector2(665.f, 2.f), 1.f,
-					  Vector4(1, 1, 1, 1));
+					  Vector4(1, 1, 1, col.w));
 			if (not flagIconRenderer.DrawIcon(item.Country,
 											  ScreenPosition + Vector2(715.f, size.y * 0.5f))) {
 				Font.Draw(item.Country, ScreenPosition + Vector2(715.f, 2.f), 1.f,
-						  Vector4(1, 1, 1, 1));
+						  Vector4(1, 1, 1, col.w));
 			}
 			string pingStr = ToString(item.Ping);
 			Vector4 pingCol(Min((2.0F * item.Ping) / 300.0F, 1.0F), Min((2.0F * (300 - item.Ping)) / 300.0F, 1.0F), 0.1F, col.w);
