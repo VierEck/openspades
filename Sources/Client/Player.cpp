@@ -719,8 +719,16 @@ namespace spades {
 		bool Player::RayCastApprox(spades::Vector3 start, spades::Vector3 dir) {
 			Vector3 diff = position - start;
 
+			// Skip if out of range.
+			if ((diff.x * diff.x + diff.y * diff.y) > 128 * 128)
+				return false;
+
 			// |P-A| * cos(theta)
 			float c = Vector3::Dot(diff, dir);
+
+			// Looking away?
+			if (c <= 0.0F)
+				return false;
 
 			// |P-A|^2
 			float sq = diff.GetPoweredLength();
