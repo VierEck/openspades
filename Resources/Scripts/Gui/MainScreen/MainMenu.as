@@ -141,8 +141,15 @@ namespace spades {
 				AddChild(button);
 			}
 			{
+				spades::ui::Button button(Manager);
+				button.Caption = _Tr("MainScreen", "Connect Local");
+				button.Bounds = AABB2(contentsLeft + contentsWidth - 300.f, 200.f, 150.f, 30.f);
+				@button.Activated = spades::ui::EventHandler(this.OnConnectLocalPressed);
+				AddChild(button);
+			}
+			{
 				@addressField = spades::ui::Field(Manager);
-				addressField.Bounds = AABB2(contentsLeft, 200, contentsWidth - 240.f, 30.f);
+				addressField.Bounds = AABB2(contentsLeft, 200, contentsWidth - 390.f, 30.f);
 				addressField.Placeholder = _Tr("MainScreen", "Quick Connect");
 				addressField.Text = cg_lastQuickConnectHost.StringValue;
 				@addressField.Changed = spades::ui::EventHandler(this.OnAddressChanged);
@@ -151,7 +158,7 @@ namespace spades {
 			{
 				@protocol3Button = ProtocolButton(Manager);
 				protocol3Button.Bounds =
-					AABB2(contentsLeft + contentsWidth - 240.f + 6.f, 200, 40.f, 30.f);
+					AABB2(contentsLeft + contentsWidth - 390.f + 6.f, 200, 40.f, 30.f);
 				protocol3Button.Caption = _Tr("MainScreen", "0.75");
 				@protocol3Button.Activated = spades::ui::EventHandler(this.OnProtocol3Pressed);
 				protocol3Button.Toggle = true;
@@ -161,7 +168,7 @@ namespace spades {
 			{
 				@protocol4Button = ProtocolButton(Manager);
 				protocol4Button.Bounds =
-					AABB2(contentsLeft + contentsWidth - 200.f + 6.f, 200, 40.f, 30.f);
+					AABB2(contentsLeft + contentsWidth - 350.f + 6.f, 200, 40.f, 30.f);
 				protocol4Button.Caption = _Tr("MainScreen", "0.76");
 				@protocol4Button.Activated = spades::ui::EventHandler(this.OnProtocol4Pressed);
 				protocol4Button.Toggle = true;
@@ -797,6 +804,15 @@ namespace spades {
 		}
 
 		private void OnConnectPressed(spades::ui::UIElement @sender) { Connect(); }
+
+		private void OnConnectLocalPressed(spades::ui::UIElement @sender) {
+			string msg = helper.ConnectServer("127.0.0.1", cg_protocolVersion.IntValue, isOnline, "", "");
+			if (msg.length > 0) {
+				// failde to initialize client.
+				AlertScreen al(this, msg);
+				al.Run();
+			}
+		}
 
 		private void OnServerList(spades::ui::UIElement @sender) {
 			ChangeList(isOnline);
