@@ -75,7 +75,9 @@ namespace spades {
 			AddTab(SoundsOptionsPanel(Manager, options, fontManager),
 				   _Tr("Preferences", "Sounds"));
 			AddTab(EffectsOptionsPanel(Manager, options, fontManager),
-				   _Tr("Preferences", "Effects & Skins"));
+				   _Tr("Preferences", "Effects"));
+			AddTab(SkinOptionsPanel(Manager, options, fontManager),
+				   _Tr("Preferences", "Skin"));
 			AddTab(TargetOptionsPanel(Manager, options, fontManager),
 				   _Tr("Preferences", "Target & Scope"));
 			AddTab(GraphicsOptionsPanel(Manager, options, fontManager),
@@ -1700,13 +1702,19 @@ namespace spades {
 									"cg_autoFocusSpeed", 0.1, 2.0, 0.01,
 									ConfigNumberFormatter(2, "s"));
 			layouter.AddHeading(_Tr("Preferences", " "));
+
+			layouter.FinishLayout();
+		}
+	}
+	
+	class SkinOptionsPanel : spades::ui::UIElement {
+		SkinOptionsPanel(spades::ui::UIManager @manager, PreferenceViewOptions @options,
+						 FontManager @fontManager) {
+			super(manager);
+
+			StandardPreferenceLayouter layouter(this, fontManager);
 			
 			layouter.AddHeading(_Tr("Preferences", "Skin"));
-			layouter.AddChoiceField(_Tr("Preferences", "Scope"), "cg_pngScope",
-									array<string> = {_Tr("Preferences", "dotsight"),
-													 _Tr("Preferences", "png"),
-													 _Tr("Preferences", "model")},
-									array<int> = {2, 1, 0});
 			layouter.AddToggleField(_Tr("Preferences", "Classic View WeaponModels"), "cg_classicViewWeapon");
 			layouter.AddToggleField(_Tr("Preferences", "Weap-based PlayerModels"), "cg_PlayerModelsViaWeapon");
 			layouter.AddChoiceField(_Tr("Preferences", "Hide FirstPerson Model"), "cg_hideFirstPersonModel",
