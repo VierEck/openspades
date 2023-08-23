@@ -58,6 +58,7 @@ DEFINE_SPADES_SETTING(cg_particles, "2", "0");
 DEFINE_SPADES_SETTING(cg_waterImpact, "1", "0");
 SPADES_SETTING(cg_manualFocus);
 DEFINE_SPADES_SETTING(cg_autoFocusSpeed, "0.4");
+DEFINE_SPADES_SETTING(cg_muzzleFire, "1", "0");
 
 namespace spades {
 	namespace client {
@@ -306,6 +307,9 @@ namespace spades {
 		}
 
 		void Client::MuzzleFire(spades::Vector3 origin, spades::Vector3 dir, bool local) {
+			if (!cg_muzzleFire)
+				return;
+
 			DynamicLightParam l;
 			l.origin = origin;
 			l.radius = 5.f;

@@ -1682,6 +1682,7 @@ namespace spades {
 			layouter.AddToggleField(_Tr("Preferences", "Tracers"), "cg_tracers");
 			layouter.AddToggleField(_Tr("Preferences", "FirstPerson Tracers"), "cg_tracersFirstPerson");
 			layouter.AddToggleField(_Tr("Preferences", "Ejecting Brass"), "cg_ejectBrass");
+			layouter.AddToggleField(_Tr("Preferences", "Muzzle Fire"), "cg_muzzleFire");
 			layouter.AddToggleField(_Tr("Preferences", "Falling Blocks"), "cg_fallingBlocks");
 			layouter.AddToggleField(_Tr("Preferences", "Falling Blocks Bounce"), "cg_fallingBlocksBounce");
 			layouter.AddToggleField(_Tr("Preferences", "Classic Corpse Bounce"), "cg_corpseBounce");
