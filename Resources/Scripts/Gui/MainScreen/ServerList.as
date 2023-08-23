@@ -72,6 +72,9 @@ namespace spades {
 				Font.Draw(item.Country, ScreenPosition + Vector2(715.f, 2.f), 1.f,
 						  Vector4(1, 1, 1, 1));
 			}
+			string pingStr = ToString(item.Ping);
+			Vector4 pingCol(Min((2.0F * item.Ping) / 300.0F, 1.0F), Min((2.0F * (300 - item.Ping)) / 300.0F, 1.0F), 0.1F, col.w);
+			Font.Draw(pingStr, pos + Vector2(760.0F - Font.Measure(pingStr).x, 2.0F), 1.0F, pingCol);
 		}
 	}
 

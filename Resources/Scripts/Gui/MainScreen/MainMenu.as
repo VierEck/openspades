@@ -108,7 +108,7 @@ namespace spades {
 			@this.ui = ui;
 			@this.helper = ui.helper;
 
-			float contentsWidth = 750.f;
+			float contentsWidth = 785.f;
 			float contentsLeft = (Manager.Renderer.ScreenWidth - contentsWidth) * 0.5f;
 			float footerPos = Manager.Renderer.ScreenHeight - 50.f;
 			{
@@ -288,6 +288,13 @@ namespace spades {
 				header.Bounds = AABB2(contentsLeft + 700.f, 240.f, 35.f, 30.f);
 				header.Text = _Tr("MainScreen", "Loc.");
 				@header.Activated = spades::ui::EventHandler(this.SortServerListByCountry);
+				AddChild(header);
+			}
+			{
+				ServerListHeader header(Manager);
+				header.Bounds = AABB2(contentsLeft + 735.f, 240.f, 35.f, 30.f);
+				header.Text = _Tr("MainScreen", "Ping");
+				@header.Activated = spades::ui::EventHandler(this.SortServerListByPing);
 				AddChild(header);
 			}
 			{
