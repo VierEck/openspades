@@ -134,7 +134,11 @@ namespace spades {
 				return (std::string)handle;
 			}
 			std::string GetDefaultValue() {
-				return handle.GetDescriptor().defaultValue;
+				if (!Settings::GetInstance()->IsPerformance()) {
+					return handle.GetDescriptor().defaultValue;
+				} else {
+					return handle.GetDescriptor().performanceValue;
+				}
 			}
 			bool IsUnknown() {
 				return handle.IsUnknown();
