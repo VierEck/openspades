@@ -55,7 +55,7 @@ namespace spades {
 				col = Vector4(1, 0.7f, 0.7f, 1);
 			else if (item.NumPlayers >= item.MaxPlayers * 3 / 4)
 				col = Vector4(1, 1, 0.7f, 1);
-			else if (item.NumPlayers == 0) {
+			else if (item.NumPlayers == 0 && !Hover) {
 				col = Vector4(0.7f, 0.7f, 1, 0.5f);
 				fgcolor.w *= 0.5f;
 			}
