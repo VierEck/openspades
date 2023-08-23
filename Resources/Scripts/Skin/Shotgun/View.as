@@ -349,12 +349,12 @@ namespace spades {
 		// IWeaponSkin3 (override BasicViewWeapon::{get_MuzzlePosition, get_CaseEjectPosition})
 		Vector3 MuzzlePosition { 
 			get {
-				return eyeMatrix * GetViewWeaponMatrix() * (Vector3(0.0F, 0.4F, -0.1F)); 
+				return eyeMatrix * GetViewWeaponMatrix() * (Vector3(0.0F, 0.4F, -0.1F) + ManualViewWeaponOffset); 
 			} 
 		}
 		Vector3 CaseEjectPosition { 
 			get { 
-				return eyeMatrix * GetViewWeaponMatrix() * (Vector3(0.0F, -0.1F, -0.1F)); 
+				return eyeMatrix * GetViewWeaponMatrix() * (Vector3(0.0F, -0.1F, -0.1F) + ManualViewWeaponOffset); 
 			} 
 		}
 

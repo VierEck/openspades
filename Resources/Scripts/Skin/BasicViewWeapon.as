@@ -82,6 +82,18 @@ namespace spades {
 		protected float raiseState;
 		protected Vector3 teamColor;
 		protected bool muted;
+		
+		protected ConfigItem cg_viewWeaponX("cg_viewWeaponX");
+		protected ConfigItem cg_viewWeaponY("cg_viewWeaponY");
+		protected ConfigItem cg_viewWeaponZ("cg_viewWeaponZ");
+		
+		Vector3 ManualViewWeaponOffset {
+			get {
+				Vector3 getConfigOffsetVector = 
+					Vector3(cg_viewWeaponX.FloatValue, cg_viewWeaponY.FloatValue, cg_viewWeaponZ.FloatValue);
+				return getConfigOffsetVector * (1.F - AimDownSightState); 
+			}
+		}
 
 		float SprintState {
 			set { sprintState = value; }
@@ -185,10 +197,10 @@ namespace spades {
 
 		// IWeaponSkin3
 		Vector3 MuzzlePosition { get { 
-			return eyeMatrix * GetViewWeaponMatrix() * Vector3(0.0F, 0.35F, -0.05F); } 
+			return eyeMatrix * GetViewWeaponMatrix() * Vector3(0.0F, 0.35F, -0.05F) + ManualViewWeaponOffset; } 
 		}
 		Vector3 CaseEjectPosition { get { 
-			return eyeMatrix * GetViewWeaponMatrix() * Vector3(0.0F, -0.1F, -0.05F); } 
+			return eyeMatrix * GetViewWeaponMatrix() * Vector3(0.0F, -0.1F, -0.05F) + ManualViewWeaponOffset; } 
 		}
 
 		protected Renderer@ renderer;
