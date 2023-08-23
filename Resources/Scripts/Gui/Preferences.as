@@ -1686,6 +1686,12 @@ namespace spades {
 			layouter.AddToggleField(_Tr("Preferences", "Hurt Screen Effect"), "cg_hurtScreenEffect");
 			layouter.AddToggleField(_Tr("Preferences", "Falling Blocks"), "cg_fallingBlocks");
 			layouter.AddToggleField(_Tr("Preferences", "Falling Blocks Bounce"), "cg_fallingBlocksBounce");
+			layouter.AddChoiceField(_Tr("Preferences", "Corpse Model"), "cg_corpse",
+									array<string> = {_Tr("Preferences", "Ragdoll"),
+													 _Tr("Preferences", "ON"),
+													 _Tr("Preferences", "OFF")},
+									array<int> = {2, 1, 0});
+			layouter.AddToggleField(_Tr("Preferences", "Clear Corpse On Respawn"), "cg_clearCorpseOnRespawn");
 			layouter.AddToggleField(_Tr("Preferences", "Classic Corpse Bounce"), "cg_corpseBounce");
 			layouter.AddToggleField(_Tr("Preferences", "Corpse Line Collision"), "r_corpseLineCollision");
 			layouter.AddToggleField(_Tr("Preferences", "Animations"), "cg_animations");
@@ -1728,11 +1734,6 @@ namespace spades {
 									array<int> = {2, 1, 0});
 			layouter.AddToggleField(_Tr("Preferences", "Hide FirstPerson Lower Body"), "cg_hideBody");
 			layouter.AddToggleField(_Tr("Preferences", "Hide FirstPerson Arms"), "cg_hideArms");
-			layouter.AddChoiceField(_Tr("Preferences", "Dead Player Model"), "cg_corpse",
-									array<string> = {_Tr("Preferences", "Ragdoll"),
-													 _Tr("Preferences", "ON"),
-													 _Tr("Preferences", "OFF")},
-									array<int> = {2, 1, 0});
 			layouter.AddSliderField(_Tr("Preferences", "View Weapon X"),
 									"cg_viewWeaponX", -1.5, 1.5, 0.01,
 									ConfigNumberFormatter(2, ""));

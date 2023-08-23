@@ -45,6 +45,8 @@
 DEFINE_SPADES_SETTING(cg_centerMessage, "2");
 DEFINE_SPADES_SETTING(cg_scoreMessages, "0");
 
+DEFINE_SPADES_SETTING(cg_clearCorpseOnRespawn, "1");
+
 DEFINE_SPADES_SETTING(cg_introSoundGain, "1");
 DEFINE_SPADES_SETTING(cg_teamCaptureSoundGain, "1");
 DEFINE_SPADES_SETTING(cg_enemyCaptureSoundGain, "1");
@@ -350,7 +352,7 @@ namespace spades {
 		}
 
 		void Client::PlayerSpawned(Player &p) {
-			if (net->GetGameProperties()->clearCorpseOnRespawn) {
+			if (cg_clearCorpseOnRespawn) {
 				RemoveCorpseForPlayer(p.GetId());
 			}
 		}
