@@ -1100,6 +1100,10 @@ namespace spades {
 							dir *= 3.5f;
 						}
 					}
+
+					if (kt == KillTypeHeadshot || kt == KillTypeMelee)
+						corp->AddHeadImpulse(dir * 16.f);
+
 					corp->AddImpulse(dir);
 				} else if (kt == KillTypeGrenade) {
 					corp->AddImpulse(MakeVector3(0, 0, -4.f - SampleRandomFloat() * 4.f));

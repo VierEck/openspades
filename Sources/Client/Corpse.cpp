@@ -746,6 +746,10 @@ namespace spades {
 			return false;
 		}
 
+		void Corpse::AddHeadImpulse(spades::Vector3 v) {
+			nodes[Head].vel += v;
+		}
+
 		void Corpse::AddImpulse(spades::Vector3 v) {
 			for (int i = 0; i < NodeCount; i++)
 				nodes[i].vel += v;
