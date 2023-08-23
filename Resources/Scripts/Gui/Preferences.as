@@ -1566,6 +1566,8 @@ namespace spades {
 			
 			layouter.AddHeading(_Tr("Preferences", "Statistics"));
 			layouter.AddToggleField(_Tr("Preferences", "Show Player Stats"), "cg_playerStats");
+			layouter.AddSliderField(_Tr("Preferences", "Player Stats Transparency"), "cg_playerStatsTransparency", 0, 1, 0.01,
+									ConfigNumberFormatter(0, " %", "", 100));
 			layouter.AddSliderField(_Tr("Preferences", "Player Stats Height"), "cg_playerStatsHeight", 0, 100, 1,
 									ConfigNumberFormatter(0, "px"));
 			layouter.AddChoiceField(_Tr("Preferences", "Show Network Stats"), "cg_stats",

@@ -92,6 +92,7 @@ DEFINE_SPADES_SETTING(cg_playerStats, "1");
 DEFINE_SPADES_SETTING(cg_damageIndicators, "1", "0");
 SPADES_SETTING(cg_hideFirstPersonModel);
 DEFINE_SPADES_SETTING(cg_playerStatsHeight, "84");
+DEFINE_SPADES_SETTING(cg_playerStatsTransparency, "1", "0.8");
 DEFINE_SPADES_SETTING(cg_respawnSoundGain, "1");
 DEFINE_SPADES_SETTING(cg_screenShotSoundGain, "1");
 
@@ -767,12 +768,12 @@ namespace spades {
 				Vector2 size = font.Measure("0Head Spread Acc:  000000");
 				size *= 0.8f;
 
-				renderer->SetColorAlphaPremultiplied(Vector4(0.f, 0.f, 0.f, 0.5f * (float)cg_hudTransparency));
+				renderer->SetColorAlphaPremultiplied(Vector4(0.f, 0.f, 0.f, 0.5f * (float)cg_playerStatsTransparency));
 				renderer->DrawImage(nullptr, AABB2(pos.x, pos.y, size.x, size.y));
 
 				font.DrawShadow(
-					buf, pos, 0.8f, MakeVector4(1, 1, 1, (float)cg_hudTransparency),
-					MakeVector4(0, 0, 0, (float)cg_hudTransparency)
+					buf, pos, 0.8f, MakeVector4(1, 1, 1, (float)cg_playerStatsTransparency),
+					MakeVector4(0, 0, 0, (float)cg_playerStatsTransparency)
 				);
 			};
 
