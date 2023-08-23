@@ -1363,7 +1363,7 @@ namespace spades {
 					default: break;
 				}
 
-				if (cg_hitAnalyze) {
+				if (cg_hitAnalyze && !by.IsBuilder()) {
 					char buf[256];
 
 					std::string distType;
