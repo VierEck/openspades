@@ -95,7 +95,7 @@ DEFINE_SPADES_SETTING(cg_keyLimbo, "l");
 DEFINE_SPADES_SETTING(cg_flashlightSoundGain, "1");
 DEFINE_SPADES_SETTING(cg_mapSoundGain, "1");
 DEFINE_SPADES_SETTING(cg_zoomMapSoundGain, "1");
-DEFINE_SPADES_SETTING(cg_AimDownSightSoundGain, "0.08");
+DEFINE_SPADES_SETTING(cg_AimDownSightSoundGain, "1");
 DEFINE_SPADES_SETTING(cg_mapEditorFeedbackSoundGain, "1");
 
 DEFINE_SPADES_SETTING(cg_keyScreenshot, "0");

@@ -70,7 +70,7 @@ DEFINE_SPADES_SETTING(cg_killFeedImg, "1", "0");
 DEFINE_SPADES_SETTING(cg_hitMarkSoundGain, "0.5");
 DEFINE_SPADES_SETTING(cg_hitAnalyze, "1");
 DEFINE_SPADES_SETTING(cg_killDistAnalyze, "1");
-DEFINE_SPADES_SETTING(cg_deathSoundGain, "0.2");
+DEFINE_SPADES_SETTING(cg_deathSoundGain, "1");
 SPADES_SETTING(cg_scoreMessages);
 DEFINE_SPADES_SETTING(cg_switchToolSoundGain, "1");
 DEFINE_SPADES_SETTING(cg_localFleshSoundGain, "1");
