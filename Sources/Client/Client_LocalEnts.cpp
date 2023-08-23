@@ -310,6 +310,11 @@ namespace spades {
 			if (!cg_muzzleFire)
 				return;
 
+			Vector3 diff = origin - lastSceneDef.viewOrigin;
+			float distSqr2d = diff.x * diff.x + diff.y * diff.y;
+			if (distSqr2d > 128 * 128)
+				return;
+
 			DynamicLightParam l;
 			l.origin = origin;
 			l.radius = 5.f;
