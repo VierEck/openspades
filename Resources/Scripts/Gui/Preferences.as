@@ -74,14 +74,14 @@ namespace spades {
 				   _Tr("Preferences", "HUD"));
 			AddTab(SoundsOptionsPanel(Manager, options, fontManager),
 				   _Tr("Preferences", "Sounds"));
+			AddTab(GraphicsOptionsPanel(Manager, options, fontManager),
+				   _Tr("Preferences", "Graphics"));
 			AddTab(EffectsOptionsPanel(Manager, options, fontManager),
 				   _Tr("Preferences", "Effects"));
 			AddTab(SkinOptionsPanel(Manager, options, fontManager),
 				   _Tr("Preferences", "Skin"));
 			AddTab(TargetOptionsPanel(Manager, options, fontManager),
 				   _Tr("Preferences", "Target & Scope"));
-			AddTab(GraphicsOptionsPanel(Manager, options, fontManager),
-				   _Tr("Preferences", "Graphics"));
 			AddTab(MacroOptionsPanel(Manager, options, fontManager, this),
 				   _Tr("Preferences", "Chat Macros"));
 			AddTab(DemoOptionsPanel(Manager, options, fontManager),
@@ -1324,7 +1324,7 @@ namespace spades {
 			string[] @no = AddMacroItem();//fixme make this a void
 			PreferenceView al(pViewer.owner, PreferenceViewOptions(), fontManager);
 			al.Run();
-			al.SelectedTabIndex = 6;
+			al.SelectedTabIndex = 8;
 			al.UpdateTabs();
 			pViewer.Close();
 		}
@@ -1343,7 +1343,7 @@ namespace spades {
 			string[] @no = RemoveMacroItem(name);//fixme make this a void
 			PreferenceView al(pViewer.owner, PreferenceViewOptions(), fontManager);
 			al.Run();
-			al.SelectedTabIndex = 6;
+			al.SelectedTabIndex = 8;
 			al.UpdateTabs();
 			pViewer.Close();
 		}
