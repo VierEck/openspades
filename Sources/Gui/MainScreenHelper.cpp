@@ -206,17 +206,17 @@ namespace spades {
 
 				std::deque<std::string> defaultFiles;
 				for (auto &file : fileList) {
-					if (file.size() > 5 && file.substr(file.size() - 5, 5) != ".demo")
-						continue;
+					if ((file.size() > 5 && file.substr(file.size() - 5, 5) == ".demo")
+						|| (file.size() > 6 && file.substr(file.size() - 6, 6) == ".demoz")) {
+						if (file.size() == 41 && file[4] == '-') {
+							defaultFiles.push_back(file);
+							continue;
+						}
 
-					if (file.size() == 41 && file[4] == '-') {
-						defaultFiles.push_back(file);
-						continue;
+						std::unique_ptr<ServerItem> srv{ServerItem::CreateDemoItem(file)};
+						if (srv)
+							resp->list.emplace_back(new MainScreenServerItem(srv.get(), owner->favorites.count(srv->GetAddress()) >= 1), false);
 					}
-
-					std::unique_ptr<ServerItem> srv{ServerItem::CreateDemoItem(file)};
-					if (srv)
-						resp->list.emplace_back(new MainScreenServerItem(srv.get(), owner->favorites.count(srv->GetAddress()) >= 1),false);
 				}
 
 				if (defaultFiles.size() <= 0) {
