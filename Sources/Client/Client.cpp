@@ -451,6 +451,7 @@ namespace spades {
 			if ((bool)cg_demoRecord) {
 				demoName += hostName + ".demo";
 				try {
+					demo.fileName = demoName;
 					net->StartDemo(demoName, hostname);
 					SPLog("Demo Recording Started at '%s'", demoName.c_str());
 				} catch (const std::exception &ex) {

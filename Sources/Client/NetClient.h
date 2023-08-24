@@ -256,6 +256,8 @@ namespace spades {
 			void StartDemo(std::string fileName, const ServerAddress &hostname, bool replay = false);
 			void StopDemo();
 
+			void CompressDemo();
+
 			void DemoSkip(float sec);
 			void DemoUps(int ups);
 			void DemoPause(bool unpause = false);

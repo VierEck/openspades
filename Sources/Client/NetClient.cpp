@@ -47,6 +47,7 @@
 #include <Core/FileManager.h>
 
 DEFINE_SPADES_SETTING(cg_unicode, "1");
+DEFINE_SPADES_SETTING(cg_compressDemo, "1");
 
 namespace spades {
 	namespace client {
@@ -2411,6 +2412,25 @@ namespace spades {
 			SPADES_MARK_FUNCTION();
 			demo.recording = false;
 			demo.stream.reset();
+			if (cg_compressDemo)
+				CompressDemo();
+		}
+
+		void NetClient::CompressDemo() {
+			SPADES_MARK_FUNCTION();
+			std::string fn = client->GetDemoFileName();
+			{
+				auto readStream = FileManager::OpenForReading(fn.c_str());
+				auto writeStream = FileManager::OpenForWriting((fn + "z").c_str());
+
+				DeflateStream deflate(writeStream.get(), CompressModeCompress, false);
+				deflate.Write(readStream->ReadAllBytes().data(), readStream->GetLength());
+				deflate.DeflateEnd();
+
+				readStream.reset();
+			}
+
+			FileManager::RemoveFile(fn.c_str());
 		}
 
 		void NetClient::ScanDemo() {
