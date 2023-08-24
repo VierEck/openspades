@@ -115,6 +115,8 @@ namespace spades {
 			SPRaise("State is invalid");
 		}
 
+		CompressBuffer();
+
 		char outputBuffer[chunkSize];
 
 		zstream.avail_in = 0;
