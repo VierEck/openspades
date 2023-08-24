@@ -137,7 +137,8 @@ DEFINE_SPADES_SETTING(cg_keyVolumeCylinder, "5");
 DEFINE_SPADES_SETTING(cg_keyToolPaint, "F");
 DEFINE_SPADES_SETTING(cg_keyToolBrush, "R");
 DEFINE_SPADES_SETTING(cg_keyToolCopy, "C");
-DEFINE_SPADES_SETTING(cg_keyToolMapObject, "X");
+DEFINE_SPADES_SETTING(cg_keyToolMove, "X");
+DEFINE_SPADES_SETTING(cg_keyToolMapObject, "Z");
 
 DEFINE_SPADES_SETTING(cg_keyScaleBuildDistance, "MiddleMouseButton");
 SPADES_SETTING(cg_MaxBuildDistance);
@@ -964,6 +965,10 @@ namespace spades {
 			}
 			if (CheckKey(cg_keyToolCopy, name) && down) {
 				p.SetMapTool(ToolCopying);
+				ret = true;
+			}
+			if (CheckKey(cg_keyToolMove, name) && down) {
+				p.SetMapTool(ToolMoving);
 				ret = true;
 			}
 			if (CheckKey(cg_keyToolMapObject, name) && down) {

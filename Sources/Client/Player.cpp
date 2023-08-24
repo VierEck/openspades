@@ -308,7 +308,7 @@ namespace spades {
 			} else {
 				if (currentMapTool == ToolPainting) {
 					volAct = VolumeActionPaint;
-				} else if (currentMapTool == ToolCopying) {
+				} else if (currentMapTool == ToolCopying || currentMapTool == ToolMoving) {
 					volAct = VolumeActionTextureBuild;
 				}
 			}
@@ -697,7 +697,7 @@ namespace spades {
 			blockCursorIndentPos = result.hitBlock;
 			if (map->IsValidBuildCoord(blockCursorIndentPos) &&
 				(weapInput.secondary || currentMapTool == ToolPainting ||
-				(currentMapTool == ToolCopying && TextureColors.size() == 0))) {
+				((currentMapTool == ToolCopying  || currentMapTool == ToolMoving) && TextureColors.size() == 0))) {
 				if (map->IsSolidWrapped(blockCursorIndentPos.x, blockCursorIndentPos.y, blockCursorIndentPos.z)) {
 					blockCursor = blockCursorIndentPos;
 				} else {

@@ -1752,11 +1752,22 @@ namespace spades {
 					p->TextureColors = world->GetColorVolume(cells);
 					return;
 				}
+
+				if (p->GetCurrentMapTool() == ToolMoving) {
+					net->SendBlockVolume(
+						std::get<0>(p->savedTexturePkt), std::get<1>(p->savedTexturePkt),
+						std::get<2>(p->savedTexturePkt), VolumeActionDestroy
+					);
+				}
+
 				IntVector3 move = v1 - std::get<0>(p->savedTexturePkt);
 				net->SendBlockVolume(
 					std::get<0>(p->savedTexturePkt) + move, std::get<1>(p->savedTexturePkt) + move,
 					std::get<2>(p->savedTexturePkt), volAct, p->TextureColors
 				);
+
+				if (p->GetCurrentMapTool() == ToolMoving)
+					p->TextureColors.clear();
 				return;
 			}
 
