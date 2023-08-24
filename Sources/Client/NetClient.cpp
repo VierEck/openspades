@@ -454,6 +454,11 @@ namespace spades {
 		NetClient::~NetClient() {
 			SPADES_MARK_FUNCTION();
 
+			if (demo.replaying) {
+				demo.stream.reset();
+				FileManager::RemoveFile("temp_demo_vier_was_here_69_420");
+			}
+
 			Disconnect();
 			if (host)
 				enet_host_destroy(host);
@@ -2415,11 +2420,14 @@ namespace spades {
 
 		void NetClient::StopDemo() {
 			SPADES_MARK_FUNCTION();
-			demo.recording = false;
+			if (demo.replaying) {
+				demo.stream.reset();
+				FileManager::RemoveFile("temp_demo_vier_was_here_69_420");
+			}
+			demo.recording = demo.replaying = false;
 			demo.stream.reset();
 			if (cg_compressDemo)
 				CompressDemo();
-			FileManager::RemoveFile("temp_demo_vier_was_here_69_420");
 		}
 
 		void NetClient::CompressDemo() {
