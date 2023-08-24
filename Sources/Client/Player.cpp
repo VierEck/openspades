@@ -473,19 +473,6 @@ namespace spades {
 			SPADES_MARK_FUNCTION();
 
 			orientation = v;
-
-			if (cg_detectCheats && !IsLocalPlayer()) {
-				Vector3 diff = orientation - v;
-				float diffLen = sqrtf(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z);
-				float maxMagnitude = 0.7f; //around 45 degrees
-				if (diffLen > maxMagnitude) {
-					if (world.GetListener())
-						world.GetListener()->AddCheatDetectMessage(
-							"!!! detected possible aimbot snap. playerID: #" + std::to_string(GetId()) + " magnitude: "
-							+ std::to_string(diffLen)
-						);
-				}
-			}
 		}
 
 		void Player::Turn(float longitude, float latitude) {
