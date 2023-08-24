@@ -595,6 +595,8 @@ namespace spades {
 
 			void AddTrueAccuracy(bool trueHead) override;
 
+			void AddCheatDetectMessage(const std::string msg) override;
+
 			float GetClientTime() { return time; }
 			float GetClientTimeMultiplied() { return time * demo.speed; }
 

@@ -95,6 +95,7 @@ namespace spades {
 			virtual void LocalPlayerCreatedVolume(IntVector3, IntVector3, VolumeType, VolumeActionType) = 0;
 
 			virtual void AddTrueAccuracy(bool trueHead) = 0;
+			virtual void AddCheatDetectMessage(const std::string msg) = 0;
 		};
 	} // namespace client
 } // namespace spades
