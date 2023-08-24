@@ -257,6 +257,7 @@ namespace spades {
 			void StopDemo();
 
 			void CompressDemo();
+			void DecompressDemo();
 
 			void DemoSkip(float sec);
 			void DemoUps(int ups);

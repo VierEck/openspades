@@ -124,26 +124,31 @@ namespace spades {
 		auto stream = FileManager::OpenForReading(("Demos/" + fileName).c_str());
 		unsigned char ver;
 
-		if (stream->Read(&ver, sizeof(ver)) == sizeof(ver)) {
-			if (ver != (unsigned char)aos_replayVersion::v1) {
-				map = "invalid aos_replay";
-			}
-
+		if (fileName.size() > 6 && fileName.substr(fileName.size() - 6, 6) == ".demoz") {
+			map = "compressed data. assuming 0.75";
+			version = "0.75";
+		} else {
 			if (stream->Read(&ver, sizeof(ver)) == sizeof(ver)) {
-				switch (ver) {
-					case (unsigned char)ProtocolVersion::v075:
-						version = "0.75";
-						break;
-					case (unsigned char)ProtocolVersion::v076:
-						version = "0.76";
-						break;
-					default: version = "invalid";
+				if (ver != (unsigned char)aos_replayVersion::v1) {
+					map = "invalid aos_replay";
+				}
+
+				if (stream->Read(&ver, sizeof(ver)) == sizeof(ver)) {
+					switch (ver) {
+						case (unsigned char)ProtocolVersion::v075:
+							version = "0.75";
+							break;
+						case (unsigned char)ProtocolVersion::v076:
+							version = "0.76";
+							break;
+						default: version = "invalid";
+					}
+				} else {
+					version = "invalid";
 				}
 			} else {
-				version = "invalid";
+				map = "invalid aos_replay";
 			}
-		} else {
-			map = "invalid aos_replay";
 		}
 
 		item = new ServerItem(name, ip, map, gameMode, country, version, ping, players, maxPlayers);

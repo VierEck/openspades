@@ -2368,7 +2368,12 @@ namespace spades {
 		void NetClient::StartDemo(std::string fileName, const ServerAddress &hostname, bool replay) {
 			SPADES_MARK_FUNCTION();
 			if (replay) {
-				demo.stream = FileManager::OpenForReading(fileName.c_str());
+				if (fileName.size() > 6 && fileName.substr(fileName.size() - 6, 6) == ".demoz") {
+					DecompressDemo();
+					demo.stream = FileManager::OpenForReading("temp_demo_vier_was_here_69_420");
+				} else {
+					demo.stream = FileManager::OpenForReading(fileName.c_str());
+				}
 				demo.stream->SetPosition(2); //version check should happen at mainmenu demolist
 
 				ProtocolVersion version;
@@ -2414,6 +2419,7 @@ namespace spades {
 			demo.stream.reset();
 			if (cg_compressDemo)
 				CompressDemo();
+			FileManager::RemoveFile("temp_demo_vier_was_here_69_420");
 		}
 
 		void NetClient::CompressDemo() {
@@ -2431,6 +2437,18 @@ namespace spades {
 			}
 
 			FileManager::RemoveFile(fn.c_str());
+		}
+
+		void NetClient::DecompressDemo() {
+			SPADES_MARK_FUNCTION();
+			std::string fn = client->GetDemoFileName();
+			{
+				auto readStream = FileManager::OpenForReading(fn.c_str());
+				auto writeStream = FileManager::OpenForWriting("temp_demo_vier_was_here_69_420");
+
+				DeflateStream inflate(readStream.get(), CompressModeDecompress, false);
+				writeStream->Write(inflate.ReadAllBytes().data(), readStream->GetLength());
+			}
 		}
 
 		void NetClient::ScanDemo() {
