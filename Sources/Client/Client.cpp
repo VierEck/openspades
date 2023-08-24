@@ -713,13 +713,6 @@ namespace spades {
 			}
 		}
 
-		void Client::AddCheatDetectMessage(const std::string msg) {
-			SPADES_MARK_FUNCTION();
-
-			chatWindow->AddMessage(ChatWindow::ColoredMessage(msg, MsgColorRed));
-			scriptedUI->RecordChatLog(msg, MakeVector4(1, 0, 0, 0.8f));
-		}
-
 #pragma mark - Snapshots
 
 		void Client::TakeMapShot(bool mapEditor) {

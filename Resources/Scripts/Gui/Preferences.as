@@ -1439,7 +1439,6 @@ namespace spades {
 			layouter.AddToggleField(_Tr("Preferences", "Spectator ESP"), "cg_specEsp");
 			layouter.AddToggleField(_Tr("Preferences", "Spectator NoFogMixing"), "cg_specNoFogMix");
 			layouter.AddToggleField(_Tr("Preferences", "Spectator ESP Names"), "cg_specNames");
-			layouter.AddToggleField(_Tr("Preferences", "Detect Cheats"), "cg_detectCheats");
 			layouter.AddHeading(_Tr("Preferences", " "));
 
 			layouter.AddHeading(_Tr("Preferences", "Feedbacks"));

@@ -42,8 +42,6 @@ DEFINE_SPADES_SETTING(cg_FlySpeedWalk, "2");
 DEFINE_SPADES_SETTING(cg_FlySpeedSprint, "10");
 DEFINE_SPADES_SETTING(cg_FlySpeedSneak, "0.5");
 
-DEFINE_SPADES_SETTING(cg_detectCheats, "0");
-
 namespace spades {
 	namespace client {
 
@@ -835,12 +833,10 @@ namespace spades {
 			Vector3 dir2 = GetFront();
 			for (int i = 0; i < pellets; i++) {
 
-				if (!cg_detectCheats || i > 0 || IsLocalPlayer()) {
-					// AoS 0.75's way (dir2 shouldn't be normalized!)
-					dir2.x += (SampleRandomFloat() - SampleRandomFloat()) * spread;
-					dir2.y += (SampleRandomFloat() - SampleRandomFloat()) * spread;
-					dir2.z += (SampleRandomFloat() - SampleRandomFloat()) * spread;
-				}
+				// AoS 0.75's way (dir2 shouldn't be normalized!)
+				dir2.x += (SampleRandomFloat() - SampleRandomFloat()) * spread;
+				dir2.y += (SampleRandomFloat() - SampleRandomFloat()) * spread;
+				dir2.z += (SampleRandomFloat() - SampleRandomFloat()) * spread;
 				Vector3 dir = dir2.Normalize();
 
 				bulletVectors.push_back(dir);
@@ -915,20 +911,6 @@ namespace spades {
 
 				if (IsBuilder() && !hitPlayer)
 					return;
-
-				if (cg_detectCheats && i == 0 && !IsLocalPlayer() && world.GetListener()) {
-					if (hitPlayer && hitPlayerDistance > 128.f) {
-						world.GetListener()->AddCheatDetectMessage(
-							"!!! detected possible fog shot. playerID: #" + std::to_string(GetId()) + " dist: "
-							+ std::to_string(hitPlayerDistance)
-						);
-					}
-					if (mapResult.hit && hitPlayer && GetHorizontalLength(mapResult.hitPos - muzzle) < hitPlayerDistance) {
-						world.GetListener()->AddCheatDetectMessage(
-							"!!! detected possible wallhack. playerID: #" + std::to_string(GetId())
-						);
-					}
-				}
 
 				if (mapResult.hit && GetHorizontalLength(mapResult.hitPos - muzzle) < 128.f &&
 				    (!hitPlayer ||
