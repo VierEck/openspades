@@ -2367,6 +2367,10 @@ namespace spades {
 
 		void NetClient::StartDemo(std::string fileName, const ServerAddress &hostname, bool replay) {
 			SPADES_MARK_FUNCTION();
+			demo.startTime = client->GetClientTime();
+			demo.recording = !replay;
+			demo.replaying = replay;
+			demo.paused = false;
 			if (replay) {
 				demo.stream = FileManager::OpenForReading(fileName.c_str());
 				demo.stream->SetPosition(2); //version check should happen at mainmenu demolist
@@ -2436,10 +2440,6 @@ namespace spades {
 					DemoWriteState();
 				}
 			}
-			demo.startTime = client->GetClientTime();
-			demo.recording = !replay;
-			demo.replaying = replay;
-			demo.paused = false;
 		}
 
 		void NetClient::StopDemo() {
