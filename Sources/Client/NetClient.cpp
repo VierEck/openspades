@@ -2545,20 +2545,27 @@ namespace spades {
 				DemoRegisterPacket(wri.CreatePacket());
 			}
 
-			/*{//mapchunk
-				auto pipe = CreatePipeStream();
-				auto writeStream = std::move(std::get<0>(pipe));
-				auto readStream = std::move(std::get<1>(pipe));
+			{//mapchunk
+				{
+					auto writeStream = FileManager::OpenForWriting("temp_mapchunk_data");
 
-				DeflateStream deflate(writeStream.get(), CompressModeCompress, true);
-				GetWorld()->GetMap()->Save(&deflate);
-				deflate.DeflateEnd();
+					DeflateStream deflate(writeStream.get(), CompressModeCompress, false);
+					GetWorld()->GetMap()->Save(&deflate);
+					deflate.DeflateEnd();
+				}
+				{
+					auto readStream = FileManager::OpenForReading("temp_mapchunk_data");
 
-				//we gonna write one big mapchunk pkt lol
-				NetPacketWriter wri(PacketTypeMapChunk);
-				//wri.Write(readStream->ReadAllBytes());
-				DemoRegisterPacket(wri.CreatePacket());
-			}*/
+					//we gonna write one big mapchunk pkt lol
+					NetPacketWriter wri(PacketTypeMapChunk);
+					for (char& c : readStream->ReadAllBytes())
+						wri.Write((uint8_t)c);
+					DemoRegisterPacket(wri.CreatePacket());
+
+					readStream.reset();
+				}
+				FileManager::RemoveFile("temp_mapchunk_data");
+			}
 		}
 
 		void NetClient::DemoWriteState() {
