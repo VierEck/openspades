@@ -599,6 +599,7 @@ namespace spades {
 			float GetClientTimeMultiplied() { return time * demo.speed; }
 
 			std::string GetDemoFileName() { return demo.fileName; }
+			void SetDemoFileName(const std::string &str) { demo.fileName = str; }
 
 			void SetIsMapEditor(bool b);
 			bool IsLocalMapEditor() { return isLocalMapEditor; }

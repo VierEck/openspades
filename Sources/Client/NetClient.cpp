@@ -45,6 +45,7 @@
 #include <Core/Strings.h>
 #include <Core/TMPUtils.h>
 #include <Core/FileManager.h>
+#include <Core/PipeStream.h>
 
 DEFINE_SPADES_SETTING(cg_unicode, "1");
 DEFINE_SPADES_SETTING(cg_compressDemo, "1");
@@ -2372,6 +2373,10 @@ namespace spades {
 
 		void NetClient::StartDemo(std::string fileName, const ServerAddress &hostname, bool replay) {
 			SPADES_MARK_FUNCTION();
+			demo.startTime = client->GetClientTime();
+			demo.recording = !replay;
+			demo.replaying = replay;
+			demo.paused = false;
 			if (replay) {
 				if (fileName.size() > 6 && fileName.substr(fileName.size() - 6, 6) == ".demoz") {
 					DecompressDemo();
@@ -2406,16 +2411,48 @@ namespace spades {
 				ScanDemo();
 				demo.isFirstJoin = true;
 			} else {
+				bool midgame = fileName == "midgame_start_recording_pls";
+
+				fileName = "Demos/";
+
+				{
+					time_t t;
+					struct tm tm;
+					::time(&t);
+					tm = *localtime(&t);
+					char buf[256];
+					sprintf(
+						buf, "%04d-%02d-%02d_%02d-%02d-%02d_", tm.tm_year + 1900,
+						tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec
+					);
+					fileName += buf;
+				}
+
+				std::string hn = hostname.ToString(false);
+				for (size_t i = 0; i < hn.size(); i++) {
+					char c = hn[i];
+					if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')) {
+						fileName += c;
+					} else {
+						fileName += '_';
+					}
+				}
+
+				fileName += ".demo";
+
+				client->SetDemoFileName(fileName);
+
 				demo.stream = FileManager::OpenForWriting(fileName.c_str());
 
 				std::vector<unsigned char> buf = { (unsigned char)aos_replayVersion::v1, (unsigned char)protocolVersion };
 				demo.stream->Write(buf.data(), buf.size());
 				demo.stream->Flush();
+
+				if (midgame) {
+					DemoWriteMap();
+					DemoWriteState();
+				}
 			}
-			demo.startTime = client->GetClientTime();
-			demo.recording = !replay;
-			demo.replaying = replay;
-			demo.paused = false;
 		}
 
 		void NetClient::StopDemo() {
@@ -2545,6 +2582,148 @@ namespace spades {
 
 			if (reader.GetType() == PacketTypeStateData)
 				GetWorld()->SetLocalPlayerIndex(33);
+		}
+
+		void NetClient::DemoWriteMap() {
+			SPADES_MARK_FUNCTION();
+
+			{//mapstart
+				NetPacketWriter wri(PacketTypeMapStart);
+				wri.Write((uint32_t)1);//map transfer doesnt need accurate size prediction
+				DemoRegisterPacket(wri.CreatePacket());
+			}
+
+			{//mapchunk
+				{
+					auto writeStream = FileManager::OpenForWriting("temp_mapchunk_data");
+					//todo: use pipe stream instead of temp file
+
+					DeflateStream deflate(writeStream.get(), CompressModeCompress, false);
+					GetWorld()->GetMap()->Save(&deflate);
+					deflate.DeflateEnd();
+				}
+				{
+					auto readStream = FileManager::OpenForReading("temp_mapchunk_data");
+
+					auto dataLen = readStream->GetLength();
+					while (readStream->GetPosition() < dataLen) {
+						NetPacketWriter wri(PacketTypeMapChunk);
+						for (char &c : readStream->Read(8192))
+							//8192 = pique mapchunk pkt len
+							//we want to limit pkt len since demo stores len as an unsigned short.
+							//making one big chunk would exceed that. 
+							wri.Write((uint8_t)c);
+						DemoRegisterPacket(wri.CreatePacket());
+					}
+
+					readStream.reset();
+				}
+				FileManager::RemoveFile("temp_mapchunk_data");
+			}
+		}
+
+		void NetClient::DemoWriteState() {
+			SPADES_MARK_FUNCTION();
+
+			{//existingplayer
+				for (int i = 0; i < GetWorld()->GetNumPlayerSlots(); i++) {
+					stmp::optional<Player &> p = GetPlayerOrNull(i);
+
+					if (p) {
+						NetPacketWriter wri(PacketTypeExistingPlayer);
+						wri.Write((uint8_t)p->GetId());
+						wri.Write((uint8_t)p->GetTeamId());
+						wri.Write((uint8_t)p->GetWeaponType());
+						wri.Write((uint8_t)p->GetTool());
+						wri.Write((uint32_t)GetWorld()->GetPlayerPersistent(i).kills);
+						wri.WriteColor(p->GetBlockColor());
+						wri.Write(p->GetName());
+
+						DemoRegisterPacket(wri.CreatePacket());
+					}
+				}
+			}
+
+			{//statedata
+				NetPacketWriter wri(PacketTypeStateData);
+				wri.Write((uint8_t)33);
+				wri.WriteColor(GetWorld()->GetFogColor());
+
+				auto team1 = GetWorld()->GetTeam(0);
+				auto team2 = GetWorld()->GetTeam(1);
+
+				wri.WriteColor(team1.color);
+				wri.WriteColor(team2.color);
+
+				std::string teamName = team1.name;
+				int strPadding = 10 - teamName.size();
+				for (int i = 0; i < strPadding; i++)
+					teamName += ' ';
+				wri.Write(teamName);
+
+				teamName = team2.name;
+				strPadding = 10 - teamName.size();
+				for (int i = 0; i < strPadding; i++)
+					teamName += ' ';
+				wri.Write(teamName);
+
+				stmp::optional<IGameMode &> mode = GetWorld()->GetMode();
+
+				if (mode->ModeType() == IGameMode::m_CTF) {//!mode shouldnt happen
+					auto &ctf = dynamic_cast<CTFGameMode &>(mode.value());
+
+					wri.Write((uint8_t)0);
+					CTFGameMode::Team &mt1 = ctf.GetTeam(0);
+					CTFGameMode::Team &mt2 = ctf.GetTeam(1);
+
+					wri.Write((uint8_t)mt1.score);
+					wri.Write((uint8_t)mt2.score);
+					wri.Write((uint8_t)ctf.captureLimit);
+					wri.Write((uint8_t)(mt1.hasIntel + mt2.hasIntel * 2));
+
+					if (mt2.hasIntel) {
+						wri.Write((uint8_t)mt1.carrier);
+						for (int i = 0; i < 11; i++)
+							wri.Write((uint8_t)0);
+					} else {
+						wri.Write(mt1.flagPos.x);
+						wri.Write(mt1.flagPos.y);
+						wri.Write(mt1.flagPos.z);
+					}
+					if (mt1.hasIntel) {
+						wri.Write((uint8_t)mt2.carrier);
+						for (int i = 0; i < 11; i++)
+							wri.Write((uint8_t)0);
+					} else {
+						wri.Write(mt2.flagPos.x);
+						wri.Write(mt2.flagPos.y);
+						wri.Write(mt2.flagPos.z);
+					}
+
+					wri.Write(mt1.basePos.x);
+					wri.Write(mt1.basePos.y);
+					wri.Write(mt1.basePos.z);
+
+					wri.Write(mt2.basePos.x);
+					wri.Write(mt2.basePos.y);
+					wri.Write(mt2.basePos.z);
+				} else {//tc
+					auto &tc = dynamic_cast<TCGameMode &>(mode.value());
+
+					wri.Write((uint8_t)1);
+					wri.Write((uint8_t)tc.GetNumTerritories());
+					for (int i = 0; i < tc.GetNumTerritories(); i++) {
+						auto &ter = tc.GetTerritory(i);
+						wri.Write(ter.pos.x);
+						wri.Write(ter.pos.y);
+						wri.Write(ter.pos.z);
+						wri.Write((uint8_t)ter.ownerTeamId);
+					}
+
+				}
+
+				DemoRegisterPacket(wri.CreatePacket());
+			}
 		}
 
 		void NetClient::DemoJoinGame() {

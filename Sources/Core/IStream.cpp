@@ -111,4 +111,12 @@ namespace spades {
 			SPRaise("Failed to read 4 bytes");
 		return data;
 	}
+
+	void IStream::WriteLittleShort(uint16_t s) {
+		Write(&s, 2);
+	}
+
+	void IStream::WriteLittleInt(uint32_t s) {
+		Write(&s, 4);
+	}
 } // namespace spades
