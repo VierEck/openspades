@@ -2606,8 +2606,18 @@ namespace spades {
 
 				wri.WriteColor(team1.color);
 				wri.WriteColor(team2.color);
-				wri.Write(team1.name);
-				wri.Write(team2.name);
+
+				std::string teamName = team1.name;
+				int strPadding = 10 - teamName.size();
+				for (int i = 0; i < strPadding; i++)
+					teamName += ' ';
+				wri.Write(teamName);
+
+				teamName = team2.name;
+				strPadding = 10 - teamName.size();
+				for (int i = 0; i < strPadding; i++)
+					teamName += ' ';
+				wri.Write(teamName);
 
 				stmp::optional<IGameMode &> mode = GetWorld()->GetMode();
 
@@ -2625,11 +2635,8 @@ namespace spades {
 
 					if (mt2.hasIntel) {
 						wri.Write((uint8_t)mt1.carrier);
-						//padding 11 bytes
-						for (int i = 0; i < 2; i++)
-							wri.Write((uint32_t)0);
-						wri.Write((uint16_t)0);
-						wri.Write((uint8_t)0);
+						for (int i = 0; i < 11; i++)
+							wri.Write((uint8_t)0);
 					} else {
 						wri.Write(mt1.flagPos.x);
 						wri.Write(mt1.flagPos.y);
@@ -2637,11 +2644,8 @@ namespace spades {
 					}
 					if (mt1.hasIntel) {
 						wri.Write((uint8_t)mt2.carrier);
-						//padding 11 bytes
-						for (int i = 0; i < 2; i++)
-							wri.Write((uint32_t)0);
-						wri.Write((uint16_t)0);
-						wri.Write((uint8_t)0);
+						for (int i = 0; i < 11; i++)
+							wri.Write((uint8_t)0);
 					} else {
 						wri.Write(mt2.flagPos.x);
 						wri.Write(mt2.flagPos.y);
