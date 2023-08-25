@@ -2548,6 +2548,7 @@ namespace spades {
 			{//mapchunk
 				{
 					auto writeStream = FileManager::OpenForWriting("temp_mapchunk_data");
+					//todo: use pipe stream instead of temp file
 
 					DeflateStream deflate(writeStream.get(), CompressModeCompress, false);
 					GetWorld()->GetMap()->Save(&deflate);
@@ -2556,11 +2557,16 @@ namespace spades {
 				{
 					auto readStream = FileManager::OpenForReading("temp_mapchunk_data");
 
-					//we gonna write one big mapchunk pkt lol
-					NetPacketWriter wri(PacketTypeMapChunk);
-					for (char& c : readStream->ReadAllBytes())
-						wri.Write((uint8_t)c);
-					DemoRegisterPacket(wri.CreatePacket());
+					auto dataLen = readStream->GetLength();
+					while (readStream->GetPosition() < dataLen) {
+						NetPacketWriter wri(PacketTypeMapChunk);
+						for (char &c : readStream->Read(8192))
+							//8192 = pique mapchunk pkt len
+							//we want to limit pkt len since demo stores len as an unsigned short.
+							//making one big chunk would exceed that. 
+							wri.Write((uint8_t)c);
+						DemoRegisterPacket(wri.CreatePacket());
+					}
 
 					readStream.reset();
 				}
