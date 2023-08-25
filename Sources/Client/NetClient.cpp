@@ -48,7 +48,7 @@
 #include <Core/PipeStream.h>
 
 DEFINE_SPADES_SETTING(cg_unicode, "1");
-DEFINE_SPADES_SETTING(cg_compressDemo, "1");
+DEFINE_SPADES_SETTING(cg_compressDemo, "0");
 
 namespace spades {
 	namespace client {
@@ -2456,15 +2456,11 @@ namespace spades {
 		}
 
 		void NetClient::StopDemo() {
-			SPADES_MARK_FUNCTION();
-			if (demo.replaying) {
-				demo.stream.reset();
-				FileManager::RemoveFile("temp_demo_vier_was_here_69_420");
-			}
-			demo.recording = demo.replaying = false;
 			demo.stream.reset();
-			if (cg_compressDemo)
+			if (cg_compressDemo && demo.recording)
 				CompressDemo();
+			FileManager::RemoveFile("temp_demo_vier_was_here_69_420");
+			demo.recording = demo.replaying = false;
 		}
 
 		void NetClient::CompressDemo() {
@@ -2475,10 +2471,12 @@ namespace spades {
 				auto writeStream = FileManager::OpenForWriting((fn + "z").c_str());
 
 				DeflateStream deflate(writeStream.get(), CompressModeCompress, false);
-				deflate.Write(readStream->ReadAllBytes().data(), readStream->GetLength());
+				auto demoLen = readStream->GetLength();
+				deflate.Write(readStream->ReadAllBytes().data(), demoLen);
 				deflate.DeflateEnd();
 
 				readStream.reset();
+				writeStream.reset();
 			}
 
 			FileManager::RemoveFile(fn.c_str());
@@ -2492,7 +2490,9 @@ namespace spades {
 				auto writeStream = FileManager::OpenForWriting("temp_demo_vier_was_here_69_420");
 
 				DeflateStream inflate(readStream.get(), CompressModeDecompress, false);
-				writeStream->Write(inflate.ReadAllBytes().data(), readStream->GetLength());
+				auto demoLen = readStream->GetLength();
+				auto data = inflate.ReadAllBytes();
+				writeStream->Write(data.data(), demoLen);
 			}
 		}
 
