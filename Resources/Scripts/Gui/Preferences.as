@@ -2019,7 +2019,7 @@ namespace spades {
 			StandardPreferenceLayouter layouter(this, fontManager);
 			layouter.AddHeading(_Tr("Preferences", "Demo Recording"));
 			layouter.AddToggleField(_Tr("Preferences", "Enable Demo Recording"), "cg_demoRecord");
-			//layouter.AddToggleField(_Tr("Preferences", "Enable Demo Compression"), "cg_compressDemo");
+			layouter.AddToggleField(_Tr("Preferences", "Enable Demo Compression"), "cg_compressDemo");
 			layouter.AddHeading(_Tr("Preferences", " "));
 
 			layouter.AddHeading(_Tr("Preferences", "Demo Replaying"));

@@ -48,7 +48,7 @@
 #include <Core/PipeStream.h>
 
 DEFINE_SPADES_SETTING(cg_unicode, "1");
-DEFINE_SPADES_SETTING(cg_compressDemo, "0");
+DEFINE_SPADES_SETTING(cg_compressDemo, "1");
 
 namespace spades {
 	namespace client {
@@ -2492,7 +2492,7 @@ namespace spades {
 				DeflateStream inflate(readStream.get(), CompressModeDecompress, false);
 				auto demoLen = readStream->GetLength();
 				auto data = inflate.ReadAllBytes();
-				writeStream->Write(data.data(), demoLen);
+				writeStream->Write(data);
 			}
 		}
 
