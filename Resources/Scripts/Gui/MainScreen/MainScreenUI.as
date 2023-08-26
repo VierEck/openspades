@@ -281,8 +281,7 @@ namespace spades {
 			
 			ori /= sqrt(ori.x * ori.x + ori.y * ori.y + ori.z * ori.z);
 			
-			return SetupCamera(sceneDef, camera,
-				camera + ori, Vector3(0, 0, -1), 90);
+			return SetupCamera(sceneDef, camera, camera + ori, Vector3(0, 0, -1), 90);
 		}
 		private void MoveFree(float dt) {
 			Vector3 dir = Vector3(0, 0, 0);
@@ -379,9 +378,8 @@ namespace spades {
 			renderer.FogDistance = 128.f;
 			renderer.FogColor = Vector3(0.05f, 0.f, 0.1f);
 			reverseTime = 1.f;
-			camera.x = 400;
-			camera.y = 256;
-			camera.z = 59.4f;
+			camera = Vector3(400, 256, 59.4f);
+			ori = Vector3(-.1f, 0, -.03f);
 			roll = Vector3(0, 0, -1);
 			reverseRoll = Vector3(0, 0, 0);
 			FadeIn();
@@ -401,17 +399,15 @@ namespace spades {
 			if (roll.y <= -1 || roll.y >= 1)
 				reverseRoll.y = 1 - reverseRoll.y;
 				
-			return SetupCamera(sceneDef, camera,
-				Vector3(camera.x - .1f, camera.y, camera.z - 0.03f), roll, 90);
+			return SetupCamera(sceneDef, camera, camera + ori, roll, 90);
 		}
 		
 		private void SetupBonfireScene() {//scene 1
 			renderer.FogDistance = 128.f;
 			renderer.FogColor = Vector3(0.f, 0.f, 0.f);
 			reverseTime = 1.f;
-			camera.x = 208;
-			camera.y = 312;
-			camera.z = 59.4f;
+			camera = Vector3(208, 312, 59.4f);
+			ori = Vector3(-.1f, 0, 0);
 			roll = Vector3(0, 0, -1);
 			reverseRoll = Vector3(0, 0, 0);
 			FadeIn();
@@ -436,17 +432,15 @@ namespace spades {
 			if (camera.x <= 165)
 				FadeOut();
 			
-			return SetupCamera(sceneDef, camera,
-				Vector3(camera.x - .1f, camera.y, camera.z), roll, 68);
+			return SetupCamera(sceneDef, camera, camera + ori, roll, 68);
 		}
 		
 		private void SetupSkylineScene() {//scene 2
 			renderer.FogDistance = 128.f;
 			renderer.FogColor = Vector3(0.05f, 0.f, 0.1f);
 			reverseTime = 1.f;
-			camera.x = 100;
-			camera.y = 256;
-			camera.z = -10.6f;
+			camera = Vector3(100, 256, -10.6f);
+			ori = Vector3(.1f, 0, .03f);
 			roll = Vector3(0, 0, -1);
 			reverseRoll = Vector3(0, 0, 0);
 			FadeIn();
@@ -458,17 +452,15 @@ namespace spades {
 			if (camera.x >= 330)
 				FadeOut();
 			
-			return SetupCamera(sceneDef, camera,
-				Vector3(camera.x + .1f, camera.y, camera.z + 0.03f), roll, 90);
+			return SetupCamera(sceneDef, camera, camera + ori, roll, 90);
 		}
 		
 		private void SetupAustronautScene() {//scene 3
 			renderer.FogDistance = 128.f;
 			renderer.FogColor = Vector3(0.05f, 0.f, 0.1f);
 			reverseTime = 1.f;
-			camera.x = 350;
-			camera.y = 325;
-			camera.z = 54;
+			camera = Vector3(350, 325, 54);
+			ori = Vector3(1, 0, 0);
 			roll = Vector3(0, 0, -1);
 			reverseRoll = Vector3(0, 0, 0);
 			FadeIn();
@@ -479,17 +471,20 @@ namespace spades {
 			
 			if (camera.z <= 25)
 				FadeOut();
+				
+			Vector3 focus = Vector3(375, 313, 40);
+			ori = focus - camera;
+			ori /= sqrt(ori.x * ori.x + ori.y * ori.y + ori.z * ori.z);
 			
-			return SetupCamera(sceneDef, camera, Vector3(375, 313, 40), roll, 90);
+			return SetupCamera(sceneDef, camera, focus, roll, 90);
 		}
 		
 		private void SetupToriiScene() {//scene 4
 			renderer.FogDistance = 128.f;
 			renderer.FogColor = Vector3(0.05f, 0.f, 0.1f);
 			reverseTime = 1.f;
-			camera.x = 350;
-			camera.y = 129;
-			camera.z = 31.4f;
+			camera = Vector3(350, 129, 31.4f);
+			ori = Vector3(-.1f, 0, -.03f);
 			roll = Vector3(0, 0, -1);
 			reverseRoll = Vector3(0, 0, 0);
 			FadeIn();
@@ -501,17 +496,15 @@ namespace spades {
 			if (camera.x <= 170)
 				FadeOut();
 			
-			return SetupCamera(sceneDef, camera,
-				Vector3(camera.x - .1f, camera.y, camera.z - 0.03f), roll, 90);
+			return SetupCamera(sceneDef, camera, camera + ori, roll, 90);
 		}
 		
 		private void SetupPlaneScene() {//scene 5
 			renderer.FogDistance = 128.f;
 			renderer.FogColor = Vector3(0.05f, 0.f, 0.1f);
 			reverseTime = 1.f;
-			camera.x = 320;
-			camera.y = 500;
-			camera.z = 0;
+			camera = Vector3(320, 500, 0);
+			ori = Vector3(.1f, -1.f, .1f);
 			roll = Vector3(0, 0, -1);
 			reverseRoll = Vector3(0, 0, 0);
 			FadeIn();
@@ -523,18 +516,16 @@ namespace spades {
 			if (camera.x >= 420)
 				FadeOut();
 				
-			return SetupCamera(sceneDef, camera,
-				Vector3(camera.x + .1f, camera.y - .1f, camera.z + .1f), roll, 90);
+			return SetupCamera(sceneDef, camera, camera + ori, roll, 90);
 		}
 	
 		private void SetupCenterScene() {//scene 6
 			renderer.FogDistance = 128.f;
 			renderer.FogColor = Vector3(0.05f, 0.f, 0.1f);
 			reverseTime = 1.f;
-			camera.x = 256;
-			camera.y = 256;
-			camera.z = 0;
-			roll = Vector3(1, 0, 0.5f);
+			camera = Vector3(256, 256, 0);
+			ori = Vector3(1, 0, 0.5f);
+			roll = Vector3(0, 0, -1);
 			reverseRoll = Vector3(0, 0, 0);
 			FadeIn();
 		}
@@ -544,19 +535,19 @@ namespace spades {
 			if (time >= 95)
 				FadeOut();
 			
-			roll += Vector3(roll.y, -roll.x, 0) * delta * 0.0625f;
+			ori += Vector3(ori.y, -ori.x, 0) * delta * 0.0625f;
+			ori /= sqrt(ori.x * ori.x + ori.y * ori.y + ori.z * ori.z);
 				
-			return SetupCamera(sceneDef, camera,
-				camera + roll, Vector3(0, 0, -1), 90);
+			return SetupCamera(sceneDef, camera, camera + ori, roll, 90);
 		}
 		
 		private void SetupSakuraScene() {//scene 7
 			renderer.FogDistance = 128.f;
 			renderer.FogColor = Vector3(0.05f, 0.f, 0.1f);
 			reverseTime = 1.f;
-			camera.x = 310;
-			camera.y = 202;
-			camera.z = 59.4f;
+			camera = Vector3(310, 202, 59.4f);
+			ori = Vector3(378, 187, 57) - camera;
+			ori /= sqrt(ori.x * ori.x + ori.y * ori.y + ori.z * ori.z);
 			roll = Vector3(0, 0, -1);
 			reverseRoll = Vector3(0, 0, 0);
 			FadeIn();
@@ -570,17 +561,15 @@ namespace spades {
 			if (camera.x >= 355)
 				FadeOut();
 				
-			return SetupCamera(sceneDef, camera,
-				Vector3(378, 187, 57), roll, 68);
+			return SetupCamera(sceneDef, camera, Vector3(378, 187, 57), roll, 68);
 		}
 		
 		private void SetupMidHallScene() {//scene 8
 			renderer.FogDistance = 128.f;
 			renderer.FogColor = Vector3(0.05f, 0.f, 0.1f);
 			reverseTime = 1.f;
-			camera.x = 255.2f;
-			camera.y = 93;
-			camera.z = 23.4f;
+			camera = Vector3(255.2f, 93, 23.4f);
+			ori = Vector3(0, 0.1f, 0.005f);
 			roll = Vector3(0, 0, -1);
 			reverseRoll = Vector3(0, 0, 0);
 			FadeIn();
@@ -593,17 +582,15 @@ namespace spades {
 			if (camera.y >= 340)
 				FadeOut();
 				
-			return SetupCamera(sceneDef, camera,
-				camera + Vector3(0, 0.1f, 0.005f), roll, 90);
+			return SetupCamera(sceneDef, camera, camera + ori, roll, 90);
 		}
 		
 		private void SetupAlohaScene() {//scene 9
 			renderer.FogDistance = 128.f;
 			renderer.FogColor = Vector3(0.05f, 0.f, 0.1f);
 			reverseTime = 1.f;
-			camera.x = 60;
-			camera.y = 482;
-			camera.z = 0;
+			camera = Vector3(60, 482, 0);
+			ori = Vector3(0, -0.1f, 1);
 			roll = Vector3(0, 0, -1);
 			reverseRoll = Vector3(0, 0, 0);
 			FadeIn();
@@ -616,8 +603,7 @@ namespace spades {
 			if (camera.x >= 190)
 				FadeOut();
 				
-			return SetupCamera(sceneDef, camera,
-				camera + Vector3(0, -0.1f, 1), roll, 90);
+			return SetupCamera(sceneDef, camera, camera + ori, roll, 90);
 		}
 	}
 
