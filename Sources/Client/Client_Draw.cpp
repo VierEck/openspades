@@ -748,6 +748,9 @@ namespace spades {
 		void Client::DrawPlayerStats() {
 			SPADES_MARK_FUNCTION();
 
+			if (chatWindow->GetExpanded())
+				return;
+
 			IFont &font = fontManager->GetGuiFont();
 
 			float sh = renderer->ScreenHeight();

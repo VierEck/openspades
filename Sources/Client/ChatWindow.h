@@ -86,6 +86,7 @@ namespace spades {
 			static std::string killImage(int killType, int weapon);
 
 			void SetExpanded(bool value) { expanded = value; }
+			bool GetExpanded() { return expanded; }
 
 			void Update(float dt);
 			void Draw();
