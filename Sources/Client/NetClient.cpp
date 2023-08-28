@@ -2378,28 +2378,38 @@ namespace spades {
 			demo.replaying = replay;
 			demo.paused = false;
 			if (replay) {
+				ProtocolVersion version;
+				int checkVersion;
 				if (fileName.size() > 6 && fileName.substr(fileName.size() - 6, 6) == ".demoz") {
 					DecompressDemo();
 					demo.stream = FileManager::OpenForReading("temp_demo_vier_was_here_69_420");
+					unsigned char ver;
+					if (demo.stream->Read(&ver, sizeof(ver)) != sizeof(ver))
+						SPRaise("failed reading demo file");
+					if (ver != (unsigned char)aos_replayVersion::v1)
+						SPRaise("Invalid aos_replay version: %d", ver);
+
+					if (demo.stream->Read(&ver, sizeof(ver)) != sizeof(ver))
+						SPRaise("failed reading demo file");
+					checkVersion = ver;
 				} else {
 					demo.stream = FileManager::OpenForReading(fileName.c_str());
+					checkVersion = (int)hostname.GetProtocolVersion();
 				}
-				demo.stream->SetPosition(2); //version check should happen at mainmenu demolist
-
-				ProtocolVersion version;
-				switch (hostname.GetProtocolVersion()) {
-					case ProtocolVersion::v075:
+				switch (checkVersion) {
+					case (int)ProtocolVersion::v075:
 						SPLog("Using Ace of Spades 0.75 protocol");
 						protocolVersion = 3;
 						version = ProtocolVersion::v075;
 						break;
-					case ProtocolVersion::v076:
+					case (int)ProtocolVersion::v076:
 						SPLog("Using Ace of Spades 0.76 protocol");
 						protocolVersion = 4;
 						version = ProtocolVersion::v076;
 						break;
 					default: SPRaise("Invalid ProtocolVersion"); break;
 				}
+				demo.stream->SetPosition(2);
 				properties.reset(new GameProperties(version));
 
 				status = NetClientStatusConnecting;
