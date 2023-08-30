@@ -478,7 +478,11 @@ namespace spades {
 				AddChild(renameField);
 				@Manager.ActiveElement = renameField;
 				if (mode == isDemo)
-					renameField.Select(0, currentFileName.length - 5);
+					if (currentFileName.substr(currentFileName.length - 5, 5) == ".demo") {
+						renameField.Select(0, currentFileName.length - 5);
+					} else if (currentFileName.substr(currentFileName.length - 6, 6) == ".demoz") {
+						renameField.Select(0, currentFileName.length - 6);
+					}
 				if (mode == isMap)
 					renameField.Select(0, currentFileName.length - 4);
 			}
@@ -507,7 +511,11 @@ namespace spades {
 			if (newCurrentFileName == currentFileName)
 				return;
 			if (mode == isDemo) {
-				if (newCurrentFileName.substr(newCurrentFileName.length - 5, 5) != ".demo")
+				if (newCurrentFileName.substr(newCurrentFileName.length - 5, 5) != ".demo"
+					&& newCurrentFileName.substr(newCurrentFileName.length - 6, 6) != ".demoz")
+					return;
+				if (newCurrentFileName.substr(newCurrentFileName.length - 5, 5)
+					!= currentFileName.substr(currentFileName.length - 5, 5))
 					return;
 				ui.helper.RenameFile("Demos/" + currentFileName, "Demos/" + newCurrentFileName);
 			}
