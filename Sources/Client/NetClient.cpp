@@ -2738,16 +2738,14 @@ namespace spades {
 
 		void NetClient::DemoJoinGame() {
 			SPADES_MARK_FUNCTION();
-			if (!GetLocalPlayerOrNull()) {
-				GetWorld()->SetLocalPlayerIndex(33);
-				auto p = stmp::make_unique<Player>(*GetWorld(), 33, RIFLE_WEAPON, 2, MakeVector3(255, 255, 255),GetWorld()->GetTeam(2).color);
-				GetWorld()->SetPlayer(33, std::move(p));
-				savedPlayerTeam[33] = 2;
+			GetWorld()->SetLocalPlayerIndex(33);
+			auto p = stmp::make_unique<Player>(*GetWorld(), 33, RIFLE_WEAPON, 2, MakeVector3(255, 255, 255),GetWorld()->GetTeam(2).color);
+			GetWorld()->SetPlayer(33, std::move(p));
+			savedPlayerTeam[33] = 2;
 
-				SPADES_SETTING(cg_playerName);
-				World::PlayerPersistent &pers = GetWorld()->GetPlayerPersistent(33);
-				pers.name = (std::string)cg_playerName;
-			}
+			SPADES_SETTING(cg_playerName);
+			World::PlayerPersistent &pers = GetWorld()->GetPlayerPersistent(33);
+			pers.name = (std::string)cg_playerName;
 		}
 
 		void NetClient::DemoSetSkimOfs(float sec_ups, float skipToTime) {
