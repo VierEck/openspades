@@ -211,8 +211,8 @@ namespace spades {
 
 				std::deque<std::string> defaultFiles;
 				for (auto &file : fileList) {
-					if ((file.size() > 5 && file.substr(file.size() - 5, 5) == ".demo")
-						|| (file.size() > 6 && file.substr(file.size() - 6, 6) == ".demoz")) {
+					if ((file.size() >= 5 && file.substr(file.size() - 5, 5) == ".demo")
+						|| (file.size() >= 6 && file.substr(file.size() - 6, 6) == ".demoz")) {
 						if (file.size() == 41 && file[4] == '-') {
 							defaultFiles.push_back(file);
 							continue;
@@ -279,11 +279,13 @@ namespace spades {
 				std::vector<std::string> txtFiles;
 				std::unique_ptr<MainScreenServerList> resp{new MainScreenServerList()};
 				for (std::string file : FileNames) {
-					if (file.size() > 4 && file.substr(file.size() - 4, 4) == ".txt" && !canvas) {
+					if (file.size() < 4)
+						continue;
+					if (file.substr(file.size() - 4, 4) == ".txt" && !canvas) {
 						txtFiles.push_back(file);
 						continue;
 					}
-					if (file.size() < 4 || file.substr(file.size() - 4, 4) != ".vxl")
+					if (file.substr(file.size() - 4, 4) != ".vxl")
 						continue;
 
 					bool txtExist = false;
