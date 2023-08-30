@@ -49,6 +49,7 @@
 
 DEFINE_SPADES_SETTING(cg_unicode, "1");
 DEFINE_SPADES_SETTING(cg_compressDemo, "1");
+SPADES_SETTING(cg_playerName);
 
 namespace spades {
 	namespace client {
@@ -2743,7 +2744,6 @@ namespace spades {
 			GetWorld()->SetPlayer(33, std::move(p));
 			savedPlayerTeam[33] = 2;
 
-			SPADES_SETTING(cg_playerName);
 			World::PlayerPersistent &pers = GetWorld()->GetPlayerPersistent(33);
 			pers.name = (std::string)cg_playerName;
 		}
