@@ -35,6 +35,8 @@ namespace spades {
 
 		bool shouldExit = false;
 		
+		GameMap @map = GameMap("Maps/TitleHallWeeb.vxl");
+		
 		private bool isFree = false;
 		private Vector2 mouseMove = Vector2(0, 0);
 		private Vector3 ori = Vector3(1, 0, 0);
@@ -48,6 +50,8 @@ namespace spades {
 
 		private float time = -1.f;
 		private float reverseTime = 1.f;
+		
+		private float lastBlockActionTime = 0;
 		
 		private ConfigItem cg_lastMainMenuScene("cg_lastMainMenuScene", "-1");
 		private int sceneState = -1;
@@ -88,7 +92,7 @@ namespace spades {
 
 		void SetupRenderer() {
 			// load map
-			@renderer.GameMap = GameMap("Maps/TitleHallWeeb.vxl");
+			@renderer.GameMap = map;
 			
 			if (cg_lastMainMenuScene.IntValue > maxSceneState)
 				cg_lastMainMenuScene.IntValue = maxSceneState;
@@ -122,6 +126,7 @@ namespace spades {
 				mainMenu.Visible = mainMenu.Enable = !isFree;
 				if (!isFree)
 					SetupNextScene();
+				lastBlockActionTime = time;
 			}
 			if (isFree)
 				FreeKeyEvent(key, down);
@@ -266,6 +271,11 @@ namespace spades {
 				crouch = down;
 			if (key == "Shift")
 				sprint = down;
+			
+			if (key == "LeftMouseButton")
+				CreateBlock();
+			if (key == "RightMouseButton")
+				DestroyBlock();
 		}
 		
 		private SceneDefinition FreeScene(SceneDefinition sceneDef, float dt) {
@@ -319,6 +329,49 @@ namespace spades {
 			if (modCam.y > 512.f)
 				modCam.y -= 512.f;
 			camera.y = modCam.y;
+		}
+		
+		private void CreateBlock() {
+			if (time - lastBlockActionTime < 0.2f)
+				return;
+			
+			GameMapRayCastResult result = GetRayCastResult();
+			if (!result.hit)
+				return;
+			
+			IntVector3 blockCursor = result.hitBlock + result.normal;
+			if (!IsValidBuildCoord(blockCursor))
+				return;
+			
+			map.SetSolid(blockCursor.x, blockCursor.y, blockCursor.z, 0);
+			lastBlockActionTime = time;
+		}
+		
+		private void DestroyBlock() {
+			if (time - lastBlockActionTime < 0.2f)
+				return;
+			
+			GameMapRayCastResult result = GetRayCastResult();
+			if (!result.hit)
+				return;
+				
+			IntVector3 blockCursor = result.hitBlock;
+			if (!IsValidBuildCoord(blockCursor))
+				return;
+			
+			map.SetAir(blockCursor.x, blockCursor.y, blockCursor.z);
+			lastBlockActionTime = time;
+		}
+		
+		private GameMapRayCastResult GetRayCastResult() {
+			return map.CastRay(camera, ori, 128);
+		}
+		
+		private bool IsValidBuildCoord(IntVector3 block) {
+			return 
+				   block.x >= 0 && block.x < 512
+				&& block.y >= 0 && block.y < 512
+				&& block.z <= 63 && block.z >= 0;
 		}
 		
 		private void FadeOut() { 
