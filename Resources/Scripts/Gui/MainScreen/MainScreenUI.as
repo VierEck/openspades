@@ -266,7 +266,10 @@ namespace spades {
 				} else if (!changedRand) {
 					rand = GetRandom(0, int(randomTexts.length) - 1);
 					if (rand == oldRand)
-						rand += rand == int(randomTexts.length) - 1 ? -1 : 1;
+						if (int(rand) == int(randomTexts.length) - 1)
+							rand--;
+						else
+							rand++;
 					oldRand = rand;
 					changedRand = true;
 				}
