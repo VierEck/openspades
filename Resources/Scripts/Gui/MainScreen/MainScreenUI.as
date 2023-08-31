@@ -35,8 +35,11 @@ namespace spades {
 
 		bool shouldExit = false;
 		
+		Vector2 MousePos = Vector2(0, 0);
+		
 		GameMap @map = GameMap("Maps/TitleHallWeeb.vxl");
 		Vector3 fogColor = Vector3(0.05f, 0.f, 0.1f);
+		Image @logoImg = renderer.RegisterImage("Gfx/Title/Logo.png");
 		
 		private IntVector3 currentColor = IntVector3(255, 0, 255);
 		private int currentColorValue = 0;
@@ -120,10 +123,12 @@ namespace spades {
 		bool NeedsAbsoluteMouseCoordinate() { return !isFree; }
 
 		void MouseEvent(float x, float y) { 
-			if (isFree)
+			if (isFree) {
 				FreeMouseEvent(x, y);
-			else
+			} else {
 				manager.MouseEvent(x, y); 
+				MousePos = Vector2(x, y);
+			}
 		}
 		
 		void WheelEvent(float x, float y) { manager.WheelEvent(x, y); }
@@ -238,9 +243,8 @@ namespace spades {
 			}
 
 			// draw title logo
-			Image @img = renderer.RegisterImage("Gfx/Title/Logo.png");
 			renderer.ColorNP = Vector4(1.f, 1.f, 1.f, 1.f);
-			renderer.DrawImage(img, Vector2((renderer.ScreenWidth - img.Width) * 0.5f, 64.f));
+			renderer.DrawImage(logoImg, Vector2((renderer.ScreenWidth - logoImg.Width) * 0.5f, 48.f));
 			
 			if (isFree) {
 				DrawCurrentColor();
@@ -251,6 +255,22 @@ namespace spades {
 			}
 
 			if (!isFree) {
+				if (
+					MousePos.x < (renderer.ScreenWidth + logoImg.Width) * 0.5f
+					&& MousePos.x > (renderer.ScreenWidth - logoImg.Width) * 0.5f
+					&& MousePos.y < 48.f + logoImg.Height
+					&& MousePos.y > 48.f
+				) {
+					DrawRandomText();
+					changedRand = false;
+				} else if (!changedRand) {
+					rand = GetRandom(0, int(randomTexts.length) - 1);
+					if (rand == oldRand)
+						rand += rand == int(randomTexts.length) - 1 ? -1 : 1;
+					oldRand = rand;
+					changedRand = true;
+				}
+			
 				manager.RunFrame(dt);
 				manager.Render();
 			}
@@ -793,6 +813,32 @@ namespace spades {
 				FadeOut();
 				
 			return SetupCamera(sceneDef, camera, camera + ori, roll, 90);
+		}
+	
+		private array<string> randomTexts = {
+			"Hi ^w^", "VierEck was here", "Press F4 and see what happens ;)",
+			"\"IV of Spades\" is the name of a Philippine rock band",
+			"The Word \"Deuce\" can mean \"a side of a dice with two spots\"",
+			"The Head of the Deuce Model kind of looks like a dice, doesn't it?",
+			"https://github.com/VierEck/openspades/tree/4", "Hello World",
+			"Made with Love. Powered by hamster wheels", "Bavaria is a Country", 
+			"Right click in the Demos and Maps list to enter the context menu",
+			"Visit https://aloha.pk for more Ace of Spades content and more",
+			"Use Arrow Keys in F4 free mode to change color", "<3", 
+			"Press E to pick the color of a map block in F4 free mode",
+			"Checkout ZeroSpades by ZeroGrey", "Checkout NucetoSpades by Nuceto", 
+			"Checkout DankSpades by Mile", "Checkout OpenSpadesPlus by NonPerforming",
+			"Thanks 4 playing on IV of Spades", "https://aloha.pk/t/iv-of-spades/23639/1",
+			"Look at the stars, go a little bit faster", 
+		};
+		uint rand = GetRandom(0, int(randomTexts.length) - 1);
+		uint oldRand = rand;
+		bool changedRand = false;
+		private void DrawRandomText() {
+			float textScale = 0.85f;
+			Vector2 txtSize = fontManager.GuiFont.Measure(randomTexts[rand]) * textScale;
+			Vector2 txtPos = Vector2((renderer.ScreenWidth - txtSize.x) * 0.5f, 48.f + logoImg.Height);
+			fontManager.GuiFont.Draw(randomTexts[rand], txtPos, textScale, Vector4(1, 0, 1, 1));
 		}
 	}
 
