@@ -913,6 +913,18 @@ namespace spades {
 							"You were disconnected from the server because of the following reason:\n\n{0}",
 							msg);
 					}
+					if (msg.findFirst("Demo Replay Ended:") >= 0) {
+						int ind1 = msg.findFirst("Demo Replay Ended:");
+						int ind2 = msg.findFirst("\n", ind1);
+						if (ind2 < 0)
+							ind2 = msg.length;
+						ind1 += "Demo Replay Ended:".length;
+						msg = msg.substr(ind1, ind2 - ind1);
+						msg = _Tr(
+							"MainScreen",
+							"Demo Replay Ended:\n\n{0}",
+							msg);
+					}
 
 					// failed to connect.
 					AlertScreen al(this, msg);
