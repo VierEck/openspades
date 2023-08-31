@@ -504,7 +504,7 @@ namespace spades {
 			renderer.FogColor = Vector3(0.05f, 0.f, 0.1f);
 			reverseTime = 1.f;
 			camera = Vector3(320, 500, 0);
-			ori = Vector3(.1f, -1.f, .1f);
+			ori = Vector3(.1f, -.1f, .1f);
 			roll = Vector3(0, 0, -1);
 			reverseRoll = Vector3(0, 0, 0);
 			FadeIn();
