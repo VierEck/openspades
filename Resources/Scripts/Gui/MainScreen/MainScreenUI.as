@@ -36,6 +36,7 @@ namespace spades {
 		bool shouldExit = false;
 		
 		GameMap @map = GameMap("Maps/TitleHallWeeb.vxl");
+		Vector3 fogColor = Vector3(0.05f, 0.f, 0.1f);
 		
 		private IntVector3 currentColor = IntVector3(255, 0, 255);
 		private int currentColorValue = 0;
@@ -300,6 +301,9 @@ namespace spades {
 				SwitchCurrentColorValue(true);
 			if (key == "Left")
 				SwitchCurrentColorValue(false);
+			
+			if (key == "E")
+				PickMapBlockColor();
 		}
 		
 		private SceneDefinition FreeScene(SceneDefinition sceneDef, float dt) {
@@ -419,21 +423,21 @@ namespace spades {
 			DrawCurrentColorUIElement(IntVector3(255, 255, 255), sW - xPosSel1, sH - yPos1 - 3, sW - xPosSel2, sH - yPos2 + 3);
 			
 			//blue slider
-			int yPos1Col = 8 + (float(currentColor.z) * (64.f / 255.f));
+			int yPos1Col = 8 + int(float(currentColor.z) * (64.f / 255.f));
 			DrawCurrentColorUIElement(IntVector3(0, 0,   0), sW - xPos1, sH - yPos1, sW - xPos2, sH - yPos2);
 			DrawCurrentColorUIElement(IntVector3(0, 0, 255), sW - xPos1, sH - yPos1Col, sW - xPos2, sH - yPos2);
 			
 			//green slider 64 = 255 / x
 			xPos1 += 16;
 			xPos2 += 16;
-			yPos1Col = 8 + (float(currentColor.y) * (64.f / 255.f));
+			yPos1Col = 8 + int(float(currentColor.y) * (64.f / 255.f));
 			DrawCurrentColorUIElement(IntVector3(0,   0, 0), sW - xPos1, sH - yPos1, sW - xPos2, sH - yPos2);
 			DrawCurrentColorUIElement(IntVector3(0, 255, 0), sW - xPos1, sH - yPos1Col, sW - xPos2, sH - yPos2);
 			
 			//red slider
 			xPos1 += 16;
 			xPos2 += 16;
-			yPos1Col = 8 + (float(currentColor.x) * (64.f / 255.f));
+			yPos1Col = 8 + int(float(currentColor.x) * (64.f / 255.f));
 			DrawCurrentColorUIElement(IntVector3(  0, 0, 0), sW - xPos1, sH - yPos1, sW - xPos2, sH - yPos2);
 			DrawCurrentColorUIElement(IntVector3(255, 0, 0), sW - xPos1, sH - yPos1Col, sW - xPos2, sH - yPos2);
 		}
@@ -474,6 +478,36 @@ namespace spades {
 				currentColorValue = 0;
 			
 			lastEditCurrentColorTime = time;
+		}
+		
+		private void PickMapBlockColor() {
+			GameMapRayCastResult result = GetRayCastResult();
+			if (!result.hit) {
+				currentColor.x = int(fogColor.x * 255.f);
+				currentColor.y = int(fogColor.y * 255.f);
+				currentColor.z = int(fogColor.z * 255.f);
+				return;
+			}
+				
+			IntVector3 blockCursor = result.hitBlock;
+			
+			if (blockCursor.x >= 512)
+				blockCursor.x -= 512;
+			if (blockCursor.x < 0)
+				blockCursor.x += 512;
+			if (blockCursor.y >= 512)
+				blockCursor.y -= 512;
+			if (blockCursor.y < 0)
+				blockCursor.y += 512;
+			if (blockCursor.z < 0)
+				return;
+			if (blockCursor.z > 63)
+				return;
+				
+			uint iCol = map.GetColor(blockCursor.x, blockCursor.y, blockCursor.z);
+			currentColor.x = uint8(iCol);
+			currentColor.y = uint8(iCol >> 8);
+			currentColor.z = uint8(iCol >> 16);
 		}
 		
 		private void FadeOut() { 
@@ -531,7 +565,7 @@ namespace spades {
 		
 		private void SetupHallScene() {//scene 0
 			renderer.FogDistance = 128.f;
-			renderer.FogColor = Vector3(0.05f, 0.f, 0.1f);
+			renderer.FogColor = fogColor;
 			reverseTime = 1.f;
 			camera = Vector3(400, 256, 59.4f);
 			ori = Vector3(-.1f, 0, -.03f);
@@ -559,7 +593,7 @@ namespace spades {
 		
 		private void SetupBonfireScene() {//scene 1
 			renderer.FogDistance = 128.f;
-			renderer.FogColor = Vector3(0.f, 0.f, 0.f);
+			renderer.FogColor = fogColor;
 			reverseTime = 1.f;
 			camera = Vector3(208, 312, 59.4f);
 			ori = Vector3(-.1f, 0, 0);
