@@ -395,6 +395,8 @@ namespace spades {
 						SPLog("Using Canvas Map: '%s'", canvasFileName.c_str());
 					LoadLocalMapEditor();
 					SPLog("Started local Map Editor. new Map: '%s'", mapFileName.c_str());
+				} catch (const std::exception &e) {
+					SPLog("MapEditor Error: %s", e.what());
 				} catch (...) {
 					SPRaise("MapEditor Error: couldnt start local MapEditor");
 				}
