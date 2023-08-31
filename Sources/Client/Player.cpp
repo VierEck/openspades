@@ -1035,7 +1035,7 @@ namespace spades {
 				} else {
 					triWave = 3.0f - triWave * 4.0f;
 				}
-				o += GetRight() * rec.x * triWave * (input.crouch ? 0.5f : 1.0f);
+				o += GetRight() * rec.x * triWave * (input.crouch ? 0.5f : 1.0f) * 150.f;
 				o = o.Normalize();
 				SetOrientation(o);
 			}
