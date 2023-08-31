@@ -37,6 +37,9 @@ namespace spades {
 		
 		GameMap @map = GameMap("Maps/TitleHallWeeb.vxl");
 		
+		private IntVector3 currentColor = IntVector3(255, 0, 255);
+		private int currentColorValue = 0;
+		
 		private bool isFree = false;
 		private Vector2 mouseMove = Vector2(0, 0);
 		private Vector3 ori = Vector3(1, 0, 0);
@@ -48,10 +51,14 @@ namespace spades {
 		private bool crouch = false;
 		private bool sprint = false;
 
+		private bool arrowUp = false;
+		private bool arrowDown = false;
+
 		private float time = -1.f;
 		private float reverseTime = 1.f;
 		
 		private float lastBlockActionTime = 0;
+		private float lastEditCurrentColorTime = 0;
 		
 		private ConfigItem cg_lastMainMenuScene("cg_lastMainMenuScene", "-1");
 		private int sceneState = -1;
@@ -126,7 +133,7 @@ namespace spades {
 				mainMenu.Visible = mainMenu.Enable = !isFree;
 				if (!isFree)
 					SetupNextScene();
-				lastBlockActionTime = time;
+				lastBlockActionTime = lastEditCurrentColorTime = time;
 			}
 			if (isFree)
 				FreeKeyEvent(key, down);
@@ -233,6 +240,14 @@ namespace spades {
 			Image @img = renderer.RegisterImage("Gfx/Title/Logo.png");
 			renderer.ColorNP = Vector4(1.f, 1.f, 1.f, 1.f);
 			renderer.DrawImage(img, Vector2((renderer.ScreenWidth - img.Width) * 0.5f, 64.f));
+			
+			if (isFree) {
+				DrawCurrentColor();
+				if (arrowUp)
+					EditCurrentColorValue(arrowUp);
+				else if (arrowDown)
+					EditCurrentColorValue(!arrowDown);
+			}
 
 			if (!isFree) {
 				manager.RunFrame(dt);
@@ -272,10 +287,19 @@ namespace spades {
 			if (key == "Shift")
 				sprint = down;
 			
-			if (key == "LeftMouseButton")
+			if (down && key == "LeftMouseButton")
 				CreateBlock();
-			if (key == "RightMouseButton")
+			if (down && key == "RightMouseButton")
 				DestroyBlock();
+			
+			if (key == "Up")
+				arrowUp = down;
+			if (key == "Down")
+				arrowDown = down;
+			if (key == "Right")
+				SwitchCurrentColorValue(true);
+			if (key == "Left")
+				SwitchCurrentColorValue(false);
 		}
 		
 		private SceneDefinition FreeScene(SceneDefinition sceneDef, float dt) {
@@ -343,10 +367,10 @@ namespace spades {
 			if (!IsValidBuildCoord(blockCursor))
 				return;
 			
-			map.SetSolid(blockCursor.x, blockCursor.y, blockCursor.z, 0);
+			uint iCol = currentColor.x | (currentColor.y << 8) | (currentColor.z << 16) | (255 << 24);
+			map.SetSolid(blockCursor.x, blockCursor.y, blockCursor.z, iCol);
 			lastBlockActionTime = time;
 		}
-		
 		private void DestroyBlock() {
 			if (time - lastBlockActionTime < 0.2f)
 				return;
@@ -366,12 +390,90 @@ namespace spades {
 		private GameMapRayCastResult GetRayCastResult() {
 			return map.CastRay(camera, ori, 128);
 		}
-		
 		private bool IsValidBuildCoord(IntVector3 block) {
 			return 
 				   block.x >= 0 && block.x < 512
 				&& block.y >= 0 && block.y < 512
 				&& block.z <= 63 && block.z >= 0;
+		}
+		
+		private void DrawCurrentColor() {
+			int sH = int(renderer.ScreenHeight);
+			int sW = int(renderer.ScreenWidth);
+		
+			//currentcolor
+			int xPos1 = 40;
+			int xPos2 = 8;
+			int yPos1 = 40;
+			int yPos2 = 8;
+			DrawCurrentColorUIElement(currentColor, sW - xPos1, sH - yPos1, sW - xPos2, sH - yPos2);
+			
+			//selected slider
+			yPos1 = 72;
+			yPos2 = 8;
+			xPos1 += 16;
+			xPos2 += 46;
+			int modxPos = 16 * currentColorValue;
+			int xPosSel1 = xPos1 + modxPos + 3;
+			int xPosSel2 = xPos2 + modxPos - 3;
+			DrawCurrentColorUIElement(IntVector3(255, 255, 255), sW - xPosSel1, sH - yPos1 - 3, sW - xPosSel2, sH - yPos2 + 3);
+			
+			//blue slider
+			int yPos1Col = 8 + (float(currentColor.z) * (64.f / 255.f));
+			DrawCurrentColorUIElement(IntVector3(0, 0,   0), sW - xPos1, sH - yPos1, sW - xPos2, sH - yPos2);
+			DrawCurrentColorUIElement(IntVector3(0, 0, 255), sW - xPos1, sH - yPos1Col, sW - xPos2, sH - yPos2);
+			
+			//green slider 64 = 255 / x
+			xPos1 += 16;
+			xPos2 += 16;
+			yPos1Col = 8 + (float(currentColor.y) * (64.f / 255.f));
+			DrawCurrentColorUIElement(IntVector3(0,   0, 0), sW - xPos1, sH - yPos1, sW - xPos2, sH - yPos2);
+			DrawCurrentColorUIElement(IntVector3(0, 255, 0), sW - xPos1, sH - yPos1Col, sW - xPos2, sH - yPos2);
+			
+			//red slider
+			xPos1 += 16;
+			xPos2 += 16;
+			yPos1Col = 8 + (float(currentColor.x) * (64.f / 255.f));
+			DrawCurrentColorUIElement(IntVector3(  0, 0, 0), sW - xPos1, sH - yPos1, sW - xPos2, sH - yPos2);
+			DrawCurrentColorUIElement(IntVector3(255, 0, 0), sW - xPos1, sH - yPos1Col, sW - xPos2, sH - yPos2);
+		}
+		private void DrawCurrentColorUIElement(IntVector3 col, int x1, int y1, int x2, int y2) {
+			renderer.ColorNP = Vector4(0, 0, 0, 1);
+			DrawFilledRect(renderer, x1 - 2, y1 - 2, x2 + 2, y2 + 2);
+			renderer.ColorNP = ConvertColorRGBA(col);
+			DrawFilledRect(renderer, x1, y1, x2, y2);
+		}
+		
+		private void EditCurrentColorValue(bool up) {//down if false
+			if (time - lastEditCurrentColorTime < 0.005f)
+				return;
+				
+			int edit = up ? 1 : -1;
+			switch (currentColorValue) {
+				case 2: {//red
+					currentColor.x = Max(0, Min(255, currentColor.x + edit));
+				} break;
+				case 1: {//green
+					currentColor.y = Max(0, Min(255, currentColor.y + edit));
+				} break;
+				case 0: {//blue
+					currentColor.z = Max(0, Min(255, currentColor.z + edit));
+				} break;
+			}
+			
+			lastEditCurrentColorTime = time;
+		}
+		private void SwitchCurrentColorValue(bool right) {//left if false
+			if (time - lastEditCurrentColorTime < 0.1f)
+				return;
+			
+			currentColorValue += right ? -1 : 1;
+			if (currentColorValue > 2)
+				currentColorValue = 2;
+			if (currentColorValue < 0)
+				currentColorValue = 0;
+			
+			lastEditCurrentColorTime = time;
 		}
 		
 		private void FadeOut() { 
