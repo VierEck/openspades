@@ -196,4 +196,30 @@ namespace spades {
 
 		return charIndex;
 	}
- }
+
+	uint8 ToLower(uint8 c) {
+		if (c >= uint8(0x41) and c <= uint8(0x5a)) {
+			return uint8(c - 0x41 + 0x61);
+		} else {
+			return c;
+		}
+	}
+	bool StringContainsCaseInsensitive(string text, string pattern) {
+		if (text.length < pattern.length)
+			return false;
+		for (int i = text.length - 1; i >= 0; i--)
+			text[i] = ToLower(text[i]);
+		for (int i = pattern.length - 1; i >= 0; i--)
+			pattern[i] = ToLower(pattern[i]);
+		return text.findFirst(pattern) >= 0;
+	}
+	bool StringCompareCaseInsensitive(string text, string pattern) {
+		if (text.length != pattern.length)
+			return false;
+		for (int i = text.length - 1; i >= 0; i--)
+			text[i] = ToLower(text[i]);
+		for (int i = pattern.length - 1; i >= 0; i--)
+			pattern[i] = ToLower(pattern[i]);
+		return text == pattern;
+	}
+}

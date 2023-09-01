@@ -44,21 +44,6 @@ namespace spades {
 		}
 	}
 
-	uint8 ToLower(uint8 c) {
-		if (c >= uint8(0x41) and c <= uint8(0x5a)) {
-			return uint8(c - 0x41 + 0x61);
-		} else {
-			return c;
-		}
-	}
-	bool StringContainsCaseInsensitive(string text, string pattern) {
-		for (int i = text.length - 1; i >= 0; i--)
-			text[i] = ToLower(text[i]);
-		for (int i = pattern.length - 1; i >= 0; i--)
-			pattern[i] = ToLower(pattern[i]);
-		return text.findFirst(pattern) >= 0;
-	}
-
 	class OpenButton : spades::ui::Button {
 		void PlayActivateSound() { Manager.PlaySound("Sounds/Feedback/Open.wav"); }
 
