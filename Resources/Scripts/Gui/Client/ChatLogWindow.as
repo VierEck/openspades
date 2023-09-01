@@ -150,6 +150,9 @@ namespace spades {
 			@Manager.ActiveElement = wnd.field;
 		}
 
+		private ConfigItem cg_keyGlobalChat("cg_keyGlobalChat");
+		private ConfigItem cg_keyTeamChat("cg_keyTeamChat");
+
 		void HotKey(string key) {
 			if (sayWindow !is null) {
 				UIElement::HotKey(key);
@@ -157,9 +160,9 @@ namespace spades {
 			}
 			if (IsEnabled and(key == "Escape")) {
 				Close();
-			} else if (IsEnabled and(key == "y")) {
+			} else if (IsEnabled and StringCompareCaseInsensitive(key, cg_keyTeamChat.StringValue)) {
 				OnTeamChat(this);
-			} else if (IsEnabled and(key == "t")) {
+			} else if (IsEnabled and StringCompareCaseInsensitive(key, cg_keyGlobalChat.StringValue)) {
 				OnGlobalChat(this);
 			} else {
 				UIElement::HotKey(key);
