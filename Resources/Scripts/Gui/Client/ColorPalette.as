@@ -176,7 +176,7 @@ namespace spades {
 				ui.helper.PaletteKeyInput(key);
 				return;
 				} 
-			if (IsEnabled and (key == "Escape" or key == "Enter" or key == cg_keyEditColor.StringValue)) {
+			if (IsEnabled and (key == "Escape" or key == "Enter" or StringCompareCaseInsensitive(key, cg_keyEditColor.StringValue))) {
 				Close();
 				return;
 			}
