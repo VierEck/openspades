@@ -59,6 +59,22 @@ namespace spades {
 		return text.findFirst(pattern) >= 0;
 	}
 
+	class OpenButton : spades::ui::Button {
+		void PlayActivateSound() { Manager.PlaySound("Sounds/Feedback/Open.wav"); }
+
+		OpenButton(spades::ui::UIManager @manager) {
+			super(manager);
+		}
+	}
+
+	class QuitButton : spades::ui::Button {
+		void PlayActivateSound() { Manager.PlaySound("Sounds/Feedback/Close.wav"); }
+
+		QuitButton(spades::ui::UIManager @manager) {
+			super(manager);
+		}
+	}
+
 	class MainScreenMainMenu : spades::ui::UIElement {
 
 		MainScreenUI @ui;
@@ -176,21 +192,21 @@ namespace spades {
 				AddChild(protocol4Button);
 			}
 			{
-				spades::ui::Button button(Manager);
+				QuitButton button(Manager);
 				button.Caption = _Tr("MainScreen", "Quit");
 				button.Bounds = AABB2(contentsLeft + contentsWidth - 100.f, footerPos, 100.f, 30.f);
 				@button.Activated = spades::ui::EventHandler(this.OnQuitPressed);
 				AddChild(button);
 			}
 			{
-				spades::ui::Button button(Manager);
+				OpenButton button(Manager);
 				button.Caption = _Tr("MainScreen", "Credits");
 				button.Bounds = AABB2(contentsLeft + contentsWidth - 202.f, footerPos, 100.f, 30.f);
 				@button.Activated = spades::ui::EventHandler(this.OnCreditsPressed);
 				AddChild(button);
 			}
 			{
-				spades::ui::Button button(Manager);
+				OpenButton button(Manager);
 				button.Caption = _Tr("MainScreen", "Setup");
 				button.Bounds = AABB2(contentsLeft + contentsWidth - 304.f, footerPos, 100.f, 30.f);
 				@button.Activated = spades::ui::EventHandler(this.OnSetupPressed);

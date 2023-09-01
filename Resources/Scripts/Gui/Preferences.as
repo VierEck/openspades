@@ -91,7 +91,7 @@ namespace spades {
 			AddTab(MiscOptionsPanel(Manager, options, fontManager), _Tr("Preferences", "Misc"));
 
 			{
-				PreferenceTabButton button(Manager);
+				PreferenceTabBackButton button(Manager);
 				button.Caption = _Tr("Preferences", "Back");
 				button.HotKeyText = "[Esc]";
 				button.Bounds = AABB2(ContentsLeft + 10.0F,
@@ -179,6 +179,18 @@ namespace spades {
 			super(manager);
 			Alignment = Vector2(0.0F, 0.5F);
 		}
+		
+		void PlayMouseEnterSound() { Manager.PlaySound("Sounds/Feedback/Limbo/Hover.opus"); }
+        void PlayActivateSound() { Manager.PlaySound("Sounds/Feedback/ChangeTab.wav"); }
+	}
+
+	class PreferenceTabBackButton : PreferenceTabButton {
+		PreferenceTabBackButton(spades::ui::UIManager @manager) {
+			super(manager);
+		}
+
+		void PlayMouseEnterSound() { Manager.PlaySound("Sounds/Feedback/Limbo/Hover.opus"); }
+		void PlayActivateSound() { Manager.PlaySound("Sounds/Feedback/Close.wav"); }
 	}
 
 	class PreferenceTab {
@@ -393,7 +405,12 @@ namespace spades {
 			label.Bounds = AABB2(0.0F, 0.0F, Size.x, Size.y);
 		}
 
-		void UpdateLabel() { label.Text = formatter.Format(config.FloatValue); }
+		void UpdateLabel() { 
+			string oldText = label.Text;
+			label.Text = formatter.Format(config.FloatValue); 
+			if (oldText != "" && label.Text != oldText)
+				Manager.PlaySound("Sounds/Feedback/ValueChanged.wav");
+		}
 
 		void DoRounding() {
 			float v = float(this.Value - this.MinValue);
