@@ -22,6 +22,7 @@
 #include <cstdarg>
 #include <cstdlib>
 #include <ctime>
+#include <iomanip>
 
 #include "Client.h"
 #include "Fonts.h"
@@ -92,27 +93,27 @@ namespace spades {
 		      worldSubFrame(0.f),
 		      frameToRendererInit(5),
 		      timeSinceInit(0.f),
+		      lastShotTime(0.f),
 		      hasLastTool(false),
 		      lastPosSentTime(0.f),
-			  lastOriSentTime(0.f),
-			  lastShotTime(0.f),
+		      lastOriSentTime(0.f),
 		      lastAliveTime(0.f),
 		      lastKills(0),
 
-			  shotsCount(0),
-			  clicksPlayer(0),
-			  hitsPlayer(0),
-			  clicksHead(0),
-			  hitsHead(0),
-			  curKills(0),
-			  meleeKills(0),
+		      hasDelayedReload(false),
+		      shotsCount(0),
+		      clicksPlayer(0),
+		      hitsPlayer(0),
+		      clicksHead(0),
+		      hitsHead(0),
+		      curKills(0),
+		      meleeKills(0),
 		      nadeKills(0),
 		      curDeaths(0),
 		      curStreak(0),
 		      bestStreak(0),
-			  placedBlocks(0),
+		      placedBlocks(0),
 
-		      hasDelayedReload(false),
 		      localFireVibrationTime(-1.f),
 		      grenadeVibration(0.f),
 		      grenadeVibrationSlow(0.f),
@@ -123,8 +124,7 @@ namespace spades {
 		      focalLength(20.f),
 		      targetFocalLength(20.f),
 		      autoFocusEnabled(true),
-			  hitTestSizeToggle(false),
-			  followedPlayerId(0),
+		      followedPlayerId(0),
 
 		      inGameLimbo(false),
 		      fontManager(fontManager),
@@ -134,7 +134,8 @@ namespace spades {
 		      corpseSoftLimit(6),
 		      corpseHardLimit(16),
 		      nextScreenShotIndex(0),
-		      nextMapShotIndex(0) {
+		      nextMapShotIndex(0),
+		      hitTestSizeToggle(false) {
 			SPADES_MARK_FUNCTION();
 			SPLog("Initializing...");
 
@@ -425,8 +426,10 @@ namespace spades {
 				::time(&t);
 				tm = *localtime(&t);
 				char buf[256];
-				sprintf(buf, "%04d%02d%02d%02d%02d%02d_", tm.tm_year + 1900, tm.tm_mon + 1,
-				        tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+				snprintf(
+					buf, sizeof(buf), "%04d%02d%02d%02d%02d%02d_", tm.tm_year + 1900,
+					tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec
+				);
 				fn2 = buf;
 			}
 
@@ -747,16 +750,18 @@ namespace spades {
 		std::string Client::MapShotPath() {
 			char buf[256];
 			for (int i = 0; i < 10000; i++) {
-				sprintf(buf, "Mapshots/shot%04d.vxl", nextScreenShotIndex);
-				if (FileManager::FileExists(buf)) {
+				std::ostringstream oss;
+				oss << "Mapshots/shot" << std::setw(4) << std::setfill('0') << nextScreenShotIndex << ".vxl";
+				std::string path = oss.str();
+				if (FileManager::FileExists(path.c_str())) {
 					nextScreenShotIndex++;
 					if (nextScreenShotIndex >= 10000)
 						nextScreenShotIndex = 0;
 					continue;
 				}
-
-				return buf;
+				return path;
 			}
+
 
 			SPRaise("No free file name");
 		}
@@ -928,7 +933,8 @@ namespace spades {
 
 			char buf[64];
 			IntVector3 fogColor = world->GetFogColor();
-			sprintf(buf, "fog = (%d, %d, %d)\n", fogColor.x, fogColor.y, fogColor.z);
+			snprintf(buf, sizeof(buf), "fog = (%d, %d, %d)\n", fogColor.x, fogColor.y, fogColor.z);
+			buf[sizeof(buf) - 1] = '\0'; // Ensure null-termination
 			txt += buf;
 
 			stream->Write(txt);
