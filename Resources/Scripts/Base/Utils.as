@@ -222,4 +222,22 @@ namespace spades {
 			pattern[i] = ToLower(pattern[i]);
 		return text == pattern;
 	}
+	int StringFindFirstCaseInsensitive(string text, string pattern) {
+		if (text.length < pattern.length)
+			return -1;
+		for (int i = text.length - 1; i >= 0; i--)
+			text[i] = ToLower(text[i]);
+		for (int i = pattern.length - 1; i >= 0; i--)
+			pattern[i] = ToLower(pattern[i]);
+		return text.findFirst(pattern);
+	}
+	int StringFindLastCaseInsensitive(string text, string pattern) {
+		if (text.length < pattern.length)
+			return -1;
+		for (int i = text.length - 1; i >= 0; i--)
+			text[i] = ToLower(text[i]);
+		for (int i = pattern.length - 1; i >= 0; i--)
+			pattern[i] = ToLower(pattern[i]);
+		return text.findLast(pattern);
+	}
 }
