@@ -368,8 +368,9 @@ namespace spades {
 						blockCursorDragging = blockCursorActive = false;
 					}
 				} else {
-					if (listener && this == world.GetLocalPlayer())
+					if (listener && this == world.GetLocalPlayer() && world.GetTime() >= nextBlockTime)
 						listener->LocalPlayerBuildError(BuildFailureReason::InvalidPosition);
+					nextBlockTime = world.GetTime() + delay;
 				}
 			} else if ((newWInp.primary || newWInp.secondary) && world.GetTime() >= nextBlockTime) {
 				if (IsBlockCursorActive()) {
@@ -385,8 +386,9 @@ namespace spades {
 						nextBlockTime = world.GetTime() + delay;
 					}
 				} else {
-					if (listener && this == world.GetLocalPlayer())
+					if (listener && this == world.GetLocalPlayer() && world.GetTime() >= nextBlockTime)
 						listener->LocalPlayerBuildError(BuildFailureReason::InvalidPosition);
+					nextBlockTime = world.GetTime() + delay;
 				}
 			}
 
