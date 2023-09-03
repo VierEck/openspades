@@ -641,7 +641,7 @@ namespace spades {
 		uint infoLineCount;
 		spades::ui::Label @InfoLabel;
 		spades::ui::Label @InfoBorder;
-		spades::ui::Button @InfoCloseButton;
+		CancelButton @InfoCloseButton;
 		bool IsInfoFieldVisible = false;
 		void InfoFieldOpen(string headLine, string info) {
 			if (IsInfoFieldVisible)
@@ -698,7 +698,7 @@ namespace spades {
 				}
 			}
 			{
-				@InfoCloseButton = spades::ui::Button(Manager);
+				@InfoCloseButton = CancelButton(Manager);
 				InfoCloseButton.Caption = _Tr("Glitter", "X");
 				InfoCloseButton.Bounds = AABB2(xPos + width - 25, yPos, 25, 25);
 				@InfoCloseButton.Activated = spades::ui::EventHandler(this.OnInfoFieldClose);

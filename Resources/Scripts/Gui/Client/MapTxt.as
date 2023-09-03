@@ -50,7 +50,7 @@ namespace spades {
 				AddChild(button);
 			}
 			{
-				spades::ui::Button button(Manager);
+				CancelButton button(Manager);
 				button.Caption = _Tr("Client", "X");
 				button.Bounds = AABB2(contentsLeft + contentsWidth - 30.f, contentsTop + contentsHeight - 15.f, 30.f, 30.f);
 				@button.Activated = spades::ui::EventHandler(this.OnClose);

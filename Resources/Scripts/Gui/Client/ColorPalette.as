@@ -67,7 +67,7 @@ namespace spades {
 			}
 			
 			{
-				spades::ui::Button button(Manager);
+				CancelButton button(Manager);
 				button.Caption = _Tr("Client", "Undo");
 				button.Bounds = AABB2(winX * 0.48f - 50.f, winY * 0.5f - 15.f, 50.f, 30.f);
 				@button.Activated = spades::ui::EventHandler(this.OnUndo);
