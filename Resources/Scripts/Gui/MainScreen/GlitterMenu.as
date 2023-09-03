@@ -7,8 +7,25 @@ namespace spades {
 			super(manager);
 			this.Toggled = false;
 		}
+		
+		void PlayActivateSound() { 
+			if (this.Toggled)
+				PlayCloseSound(); 
+			else
+				spades::ui::Button::PlayActivateSound();
+		}
 
 		void OnActivated() { this.Toggled = !this.Toggled; }
+	}
+	
+	class CancelButton : spades::ui::Button {
+		CancelButton(spades::ui::UIManager manager) {
+			super(manager);
+		}
+		
+		void PlayActivateSound() { 
+			PlayCloseSound(); 
+		}
 	}
 	
 	class GlitterMenu : spades::ui::UIElement {
@@ -112,7 +129,7 @@ namespace spades {
 				AddChild(button);
 			}
 			{
-				spades::ui::Button button(Manager);
+				CancelButton button(Manager);
 				button.Caption = _Tr("MainScreen", "Cancel");
 				button.Bounds = AABB2(ContentsLeft + ContentsWidth - 130, ContentsTop + ContentsHeight - 40, 60, 35);
 				button.Enable = true;
