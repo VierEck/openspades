@@ -1711,6 +1711,10 @@ namespace spades {
 			layouter.AddHeading(_Tr("Preferences", "Effects"));
 			layouter.AddToggleField(_Tr("Preferences", "KillFeed Images"), "cg_killFeedImg");
 			layouter.AddToggleField(_Tr("Preferences", "Glow Blocks"), "cg_glowBlocks");
+			layouter.AddChoiceField(_Tr("Preferences", "Block Cursor"), "cg_drawBlockCursorMode",
+									array<string> = {_Tr("Preferences", "DebugLines"),
+													 _Tr("Preferences", "GhostModel")},
+									array<int> = {1, 0});
 			layouter.AddToggleField(_Tr("Preferences", "Damage indicators"), "cg_damageIndicators");
 			layouter.AddToggleField(_Tr("Preferences", "Blood"), "cg_blood");
 			layouter.AddToggleField(_Tr("Preferences", "Tracers"), "cg_tracers");

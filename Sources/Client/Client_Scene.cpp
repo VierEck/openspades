@@ -49,6 +49,7 @@ DEFINE_SPADES_SETTING(cg_shake, "1", "0");
 DEFINE_SPADES_SETTING(cg_specEsp, "1");
 DEFINE_SPADES_SETTING(cg_specNoFogMix, "1");
 DEFINE_SPADES_SETTING(cg_glowBlocks, "1", "0");
+DEFINE_SPADES_SETTING(cg_drawBlockCursorMode, "0");
 
 namespace spades {
 	namespace client {
@@ -646,44 +647,181 @@ namespace spades {
 					if (p->IsBuilder() && p->IsReadyToUseTool() && p->GetTool() == Player::ToolBlock) {
 						DrawBuilderBlockCursor();
 
-					} else if (p->IsReadyToUseTool() && p->GetTool() == Player::ToolBlock &&
-					    p->IsAlive()) {
-						std::vector<IntVector3> blocks;
-						if (p->IsBlockCursorDragging()) {
-							blocks = world->CubeLine(p->GetBlockCursorDragPos(),
-							                         p->GetBlockCursorPos(), 256);
+					} else if (p->IsReadyToUseTool() && p->GetTool() == Player::ToolBlock && p->IsAlive()) {
+						if (!cg_drawBlockCursorMode) {
+							std::vector<IntVector3> blocks;
+							if (p->IsBlockCursorDragging()) {
+								blocks = world->CubeLine(p->GetBlockCursorDragPos(),
+									p->GetBlockCursorPos(), 256);
+							}
+							else {
+								blocks.push_back(p->GetBlockCursorPos());
+							}
+
+							bool active = p->IsBlockCursorActive() && CanLocalPlayerUseToolNow();
+
+							Vector3 color = { 1.f, 1.f, 1.f };
+							if (!active)
+								color = MakeVector3(1.f, 1.f, 0.f);
+							if ((int)blocks.size() > p->GetNumBlocks())
+								color = MakeVector3(1.f, 0.f, 0.f);
+
+							Handle<IModel> curLine =
+								renderer->RegisterModel("Models/MapObjects/BlockCursorLine.kv6");
+							Handle<IModel> curSingle =
+								renderer->RegisterModel("Models/MapObjects/BlockCursorSingle.kv6");
+							for (size_t i = 0; i < blocks.size(); i++) {
+								IntVector3& v = blocks[i];
+								bool solid = blocks.size() > 2 && map->IsSolid(v.x, v.y, v.z);
+								ModelRenderParam param;
+								param.ghost = true;
+								param.opacity = active && !solid ? .7f : .3f;
+								param.customColor = color;
+								param.matrix =
+									Matrix4::Translate(MakeVector3(v.x + .5f, v.y + .5f, v.z + .5f));
+								param.matrix =
+									param.matrix *
+									Matrix4::Scale(
+										1.f / 24.f +
+										(solid ? 0.0005f
+											: 0.f)); // make cursor larger if needed to stop z-fighting
+								renderer->RenderModel(blocks.size() > 1 ? *curLine : *curSingle, param);
+							}
 						} else {
-							blocks.push_back(p->GetBlockCursorPos());
-						}
+							std::vector<IntVector3> blocks;
+							if (p->IsBlockCursorDragging()) {
+								blocks = world->CubeLine(p->GetBlockCursorDragPos(),
+														 p->GetBlockCursorPos(), 256);
+							} else {
+								blocks.push_back(p->GetBlockCursorPos());
+							}
 
-						bool active = p->IsBlockCursorActive() && CanLocalPlayerUseToolNow();
+							bool active = p->IsBlockCursorActive() && CanLocalPlayerUseToolNow();
 
-						Vector3 color = {1.f, 1.f, 1.f};
-						if (!active)
-							color = MakeVector3(1.f, 1.f, 0.f);
-						if ((int)blocks.size() > p->GetNumBlocks())
-							color = MakeVector3(1.f, 0.f, 0.f);
+							Vector4 color = {1, 1, 1, 1};
+							if (!active)
+								color = Vector4(1, 1, 0, 1);
+							if ((int)blocks.size() > p->GetNumBlocks())
+								color = MakeVector4(1, 0, 0, 1);
+							if (!active)
+								color.w *= 0.5f;
 
-						Handle<IModel> curLine =
-						  renderer->RegisterModel("Models/MapObjects/BlockCursorLine.kv6");
-						Handle<IModel> curSingle =
-						  renderer->RegisterModel("Models/MapObjects/BlockCursorSingle.kv6");
-						for (size_t i = 0; i < blocks.size(); i++) {
-							IntVector3 &v = blocks[i];
-							bool solid = blocks.size() > 2 && map->IsSolid(v.x, v.y, v.z);
-							ModelRenderParam param;
-							param.ghost = true;
-							param.opacity = active && !solid ? .7f : .3f;
-							param.customColor = color;
-							param.matrix =
-							  Matrix4::Translate(MakeVector3(v.x + .5f, v.y + .5f, v.z + .5f));
-							param.matrix =
-							  param.matrix *
-							  Matrix4::Scale(
-							    1.f / 24.f +
-							    (solid ? 0.0005f
-							           : 0.f)); // make cursor larger if needed to stop z-fighting
-							renderer->RenderModel(blocks.size() > 1 ? *curLine : *curSingle, param);
+							for (size_t i = 0; i < blocks.size(); i++) {
+								IntVector3 &v = blocks[i];
+
+								if (active) {
+
+									renderer->AddDebugLine(MakeVector3(v.x, v.y, v.z),
+														   MakeVector3(v.x + 1, v.y, v.z), color);
+									renderer->AddDebugLine(MakeVector3(v.x, v.y + 1, v.z),
+														   MakeVector3(v.x + 1, v.y + 1, v.z), color);
+									renderer->AddDebugLine(MakeVector3(v.x, v.y, v.z + 1),
+														   MakeVector3(v.x + 1, v.y, v.z + 1), color);
+									renderer->AddDebugLine(MakeVector3(v.x, v.y + 1, v.z + 1),
+														   MakeVector3(v.x + 1, v.y + 1, v.z + 1),
+														   color);
+									renderer->AddDebugLine(MakeVector3(v.x, v.y, v.z),
+														   MakeVector3(v.x + 1, v.y, v.z), color);
+
+									renderer->AddDebugLine(MakeVector3(v.x, v.y, v.z),
+														   MakeVector3(v.x, v.y + 1, v.z), color);
+									renderer->AddDebugLine(MakeVector3(v.x, v.y, v.z + 1),
+														   MakeVector3(v.x, v.y + 1, v.z + 1), color);
+									renderer->AddDebugLine(MakeVector3(v.x + 1, v.y, v.z),
+														   MakeVector3(v.x + 1, v.y + 1, v.z), color);
+									renderer->AddDebugLine(MakeVector3(v.x + 1, v.y, v.z + 1),
+														   MakeVector3(v.x + 1, v.y + 1, v.z + 1),
+														   color);
+
+									renderer->AddDebugLine(MakeVector3(v.x, v.y, v.z),
+														   MakeVector3(v.x, v.y, v.z + 1), color);
+									renderer->AddDebugLine(MakeVector3(v.x, v.y + 1, v.z),
+														   MakeVector3(v.x, v.y + 1, v.z + 1), color);
+									renderer->AddDebugLine(MakeVector3(v.x + 1, v.y, v.z),
+														   MakeVector3(v.x + 1, v.y, v.z + 1), color);
+									renderer->AddDebugLine(MakeVector3(v.x + 1, v.y + 1, v.z),
+														   MakeVector3(v.x + 1, v.y + 1, v.z + 1),
+														   color);
+								} else {
+									// not active
+
+									const float ln = 0.1f;
+									{
+										float xx = v.x, yy = v.y, zz = v.z;
+										renderer->AddDebugLine(Vector3(xx, yy, zz),
+															   Vector3(xx + ln, yy, zz), color);
+										renderer->AddDebugLine(Vector3(xx, yy, zz),
+															   Vector3(xx, yy + ln, zz), color);
+										renderer->AddDebugLine(Vector3(xx, yy, zz),
+															   Vector3(xx, yy, zz + ln), color);
+									}
+									{
+										float xx = v.x + 1, yy = v.y, zz = v.z;
+										renderer->AddDebugLine(Vector3(xx, yy, zz),
+															   Vector3(xx - ln, yy, zz), color);
+										renderer->AddDebugLine(Vector3(xx, yy, zz),
+															   Vector3(xx, yy + ln, zz), color);
+										renderer->AddDebugLine(Vector3(xx, yy, zz),
+															   Vector3(xx, yy, zz + ln), color);
+									}
+									{
+										float xx = v.x, yy = v.y + 1, zz = v.z;
+										renderer->AddDebugLine(Vector3(xx, yy, zz),
+															   Vector3(xx + ln, yy, zz), color);
+										renderer->AddDebugLine(Vector3(xx, yy, zz),
+															   Vector3(xx, yy - ln, zz), color);
+										renderer->AddDebugLine(Vector3(xx, yy, zz),
+															   Vector3(xx, yy, zz + ln), color);
+									}
+									{
+										float xx = v.x + 1, yy = v.y + 1, zz = v.z;
+										renderer->AddDebugLine(Vector3(xx, yy, zz),
+															   Vector3(xx - ln, yy, zz), color);
+										renderer->AddDebugLine(Vector3(xx, yy, zz),
+															   Vector3(xx, yy - ln, zz), color);
+										renderer->AddDebugLine(Vector3(xx, yy, zz),
+															   Vector3(xx, yy, zz + ln), color);
+									}
+									{
+										float xx = v.x, yy = v.y, zz = v.z + 1;
+										renderer->AddDebugLine(Vector3(xx, yy, zz),
+															   Vector3(xx + ln, yy, zz), color);
+										renderer->AddDebugLine(Vector3(xx, yy, zz),
+															   Vector3(xx, yy + ln, zz), color);
+										renderer->AddDebugLine(Vector3(xx, yy, zz),
+															   Vector3(xx, yy, zz - ln), color);
+									}
+									{
+										float xx = v.x + 1, yy = v.y, zz = v.z + 1;
+										renderer->AddDebugLine(Vector3(xx, yy, zz),
+															   Vector3(xx - ln, yy, zz), color);
+										renderer->AddDebugLine(Vector3(xx, yy, zz),
+															   Vector3(xx, yy + ln, zz), color);
+										renderer->AddDebugLine(Vector3(xx, yy, zz),
+															   Vector3(xx, yy, zz - ln), color);
+									}
+									{
+										float xx = v.x, yy = v.y + 1, zz = v.z + 1;
+										renderer->AddDebugLine(Vector3(xx, yy, zz),
+															   Vector3(xx + ln, yy, zz), color);
+										renderer->AddDebugLine(Vector3(xx, yy, zz),
+															   Vector3(xx, yy - ln, zz), color);
+										renderer->AddDebugLine(Vector3(xx, yy, zz),
+															   Vector3(xx, yy, zz - ln), color);
+									}
+									{
+										float xx = v.x + 1, yy = v.y + 1, zz = v.z + 1;
+										renderer->AddDebugLine(Vector3(xx, yy, zz),
+															   Vector3(xx - ln, yy, zz), color);
+										renderer->AddDebugLine(Vector3(xx, yy, zz),
+															   Vector3(xx, yy - ln, zz), color);
+										renderer->AddDebugLine(Vector3(xx, yy, zz),
+															   Vector3(xx, yy, zz - ln), color);
+									}
+								}
+								// --- one block drawn
+							} // end for
+
 						}
 					}
 				}
@@ -731,24 +869,159 @@ namespace spades {
 			switch (p->GetCurrentVolumeType()) {
 				case VolumeSingle:
 				case VolumeLine: {
-					std::vector<IntVector3> blocks;
-					if (p->IsBlockCursorDragging()) {
-						blocks = world->CubeLine(p->GetBlockCursorDragPos(), p->GetBlockCursorPos(), 1088);
+					if (!cg_drawBlockCursorMode) {
+						std::vector<IntVector3> blocks;
+						if (p->IsBlockCursorDragging()) {
+							blocks = world->CubeLine(p->GetBlockCursorDragPos(), p->GetBlockCursorPos(), 1088);
+						}
+						else {
+							blocks.push_back(p->GetBlockCursorPos());
+						}
+						Handle<IModel> curLine = renderer->RegisterModel("Models/MapObjects/BlockCursorLine.kv6");
+						Handle<IModel> curSingle = renderer->RegisterModel("Models/MapObjects/BlockCursorSingle.kv6");
+						for (size_t i = 0; i < blocks.size(); i++) {
+							IntVector3& v = blocks[i];
+							bool solid = blocks.size() > 2 && map->IsSolid(v.x, v.y, v.z);
+							ModelRenderParam param;
+							param.ghost = true;
+							param.opacity = active && !solid ? .7f : .3f;
+							param.customColor = color;
+							param.matrix = Matrix4::Translate(MakeVector3(v.x + .5f, v.y + .5f, v.z + .5f));
+							param.matrix = param.matrix * Matrix4::Scale(1.f / 24.f + (solid ? 0.0005f : 0.f));
+							renderer->RenderModel(blocks.size() > 1 ? *curLine : *curSingle, param);
+						}
 					} else {
-						blocks.push_back(p->GetBlockCursorPos());
-					}
-					Handle<IModel> curLine = renderer->RegisterModel("Models/MapObjects/BlockCursorLine.kv6");
-					Handle<IModel> curSingle = renderer->RegisterModel("Models/MapObjects/BlockCursorSingle.kv6");
-					for (size_t i = 0; i < blocks.size(); i++) {
-						IntVector3 &v = blocks[i];
-						bool solid = blocks.size() > 2 && map->IsSolid(v.x, v.y, v.z);
-						ModelRenderParam param;
-						param.ghost = true;
-						param.opacity = active && !solid ? .7f : .3f;
-						param.customColor = color;
-						param.matrix = Matrix4::Translate(MakeVector3(v.x + .5f, v.y + .5f, v.z + .5f));
-						param.matrix = param.matrix * Matrix4::Scale(1.f / 24.f + (solid ? 0.0005f : 0.f));
-						renderer->RenderModel(blocks.size() > 1 ? *curLine : *curSingle, param);
+						std::vector<IntVector3> blocks;
+						if (p->IsBlockCursorDragging()) {
+							blocks = world->CubeLine(p->GetBlockCursorDragPos(), p->GetBlockCursorPos(), 1088);
+						}
+						else {
+							blocks.push_back(p->GetBlockCursorPos());
+						}
+
+						bool active = p->IsBlockCursorActive() && CanLocalPlayerUseToolNow();
+
+						Vector4 color = {1, 1, 1, 1};
+						if (!active)
+							color = Vector4(1, 1, 0, 1);
+						if (!active)
+							color.w *= 0.5f;
+
+						for (size_t i = 0; i < blocks.size(); i++) {
+							IntVector3 &v = blocks[i];
+
+							if (active) {
+
+								renderer->AddDebugLine(MakeVector3(v.x, v.y, v.z),
+														MakeVector3(v.x + 1, v.y, v.z), color);
+								renderer->AddDebugLine(MakeVector3(v.x, v.y + 1, v.z),
+														MakeVector3(v.x + 1, v.y + 1, v.z), color);
+								renderer->AddDebugLine(MakeVector3(v.x, v.y, v.z + 1),
+														MakeVector3(v.x + 1, v.y, v.z + 1), color);
+								renderer->AddDebugLine(MakeVector3(v.x, v.y + 1, v.z + 1),
+														MakeVector3(v.x + 1, v.y + 1, v.z + 1),
+														color);
+								renderer->AddDebugLine(MakeVector3(v.x, v.y, v.z),
+														MakeVector3(v.x + 1, v.y, v.z), color);
+
+								renderer->AddDebugLine(MakeVector3(v.x, v.y, v.z),
+														MakeVector3(v.x, v.y + 1, v.z), color);
+								renderer->AddDebugLine(MakeVector3(v.x, v.y, v.z + 1),
+														MakeVector3(v.x, v.y + 1, v.z + 1), color);
+								renderer->AddDebugLine(MakeVector3(v.x + 1, v.y, v.z),
+														MakeVector3(v.x + 1, v.y + 1, v.z), color);
+								renderer->AddDebugLine(MakeVector3(v.x + 1, v.y, v.z + 1),
+														MakeVector3(v.x + 1, v.y + 1, v.z + 1),
+														color);
+
+								renderer->AddDebugLine(MakeVector3(v.x, v.y, v.z),
+														MakeVector3(v.x, v.y, v.z + 1), color);
+								renderer->AddDebugLine(MakeVector3(v.x, v.y + 1, v.z),
+														MakeVector3(v.x, v.y + 1, v.z + 1), color);
+								renderer->AddDebugLine(MakeVector3(v.x + 1, v.y, v.z),
+														MakeVector3(v.x + 1, v.y, v.z + 1), color);
+								renderer->AddDebugLine(MakeVector3(v.x + 1, v.y + 1, v.z),
+														MakeVector3(v.x + 1, v.y + 1, v.z + 1),
+														color);
+							} else {
+								// not active
+
+								const float ln = 0.1f;
+								{
+									float xx = v.x, yy = v.y, zz = v.z;
+									renderer->AddDebugLine(Vector3(xx, yy, zz),
+															Vector3(xx + ln, yy, zz), color);
+									renderer->AddDebugLine(Vector3(xx, yy, zz),
+															Vector3(xx, yy + ln, zz), color);
+									renderer->AddDebugLine(Vector3(xx, yy, zz),
+															Vector3(xx, yy, zz + ln), color);
+								}
+								{
+									float xx = v.x + 1, yy = v.y, zz = v.z;
+									renderer->AddDebugLine(Vector3(xx, yy, zz),
+															Vector3(xx - ln, yy, zz), color);
+									renderer->AddDebugLine(Vector3(xx, yy, zz),
+															Vector3(xx, yy + ln, zz), color);
+									renderer->AddDebugLine(Vector3(xx, yy, zz),
+															Vector3(xx, yy, zz + ln), color);
+								}
+								{
+									float xx = v.x, yy = v.y + 1, zz = v.z;
+									renderer->AddDebugLine(Vector3(xx, yy, zz),
+															Vector3(xx + ln, yy, zz), color);
+									renderer->AddDebugLine(Vector3(xx, yy, zz),
+															Vector3(xx, yy - ln, zz), color);
+									renderer->AddDebugLine(Vector3(xx, yy, zz),
+															Vector3(xx, yy, zz + ln), color);
+								}
+								{
+									float xx = v.x + 1, yy = v.y + 1, zz = v.z;
+									renderer->AddDebugLine(Vector3(xx, yy, zz),
+															Vector3(xx - ln, yy, zz), color);
+									renderer->AddDebugLine(Vector3(xx, yy, zz),
+															Vector3(xx, yy - ln, zz), color);
+									renderer->AddDebugLine(Vector3(xx, yy, zz),
+															Vector3(xx, yy, zz + ln), color);
+								}
+								{
+									float xx = v.x, yy = v.y, zz = v.z + 1;
+									renderer->AddDebugLine(Vector3(xx, yy, zz),
+															Vector3(xx + ln, yy, zz), color);
+									renderer->AddDebugLine(Vector3(xx, yy, zz),
+															Vector3(xx, yy + ln, zz), color);
+									renderer->AddDebugLine(Vector3(xx, yy, zz),
+															Vector3(xx, yy, zz - ln), color);
+								}
+								{
+									float xx = v.x + 1, yy = v.y, zz = v.z + 1;
+									renderer->AddDebugLine(Vector3(xx, yy, zz),
+															Vector3(xx - ln, yy, zz), color);
+									renderer->AddDebugLine(Vector3(xx, yy, zz),
+															Vector3(xx, yy + ln, zz), color);
+									renderer->AddDebugLine(Vector3(xx, yy, zz),
+															Vector3(xx, yy, zz - ln), color);
+								}
+								{
+									float xx = v.x, yy = v.y + 1, zz = v.z + 1;
+									renderer->AddDebugLine(Vector3(xx, yy, zz),
+															Vector3(xx + ln, yy, zz), color);
+									renderer->AddDebugLine(Vector3(xx, yy, zz),
+															Vector3(xx, yy - ln, zz), color);
+									renderer->AddDebugLine(Vector3(xx, yy, zz),
+															Vector3(xx, yy, zz - ln), color);
+								}
+								{
+									float xx = v.x + 1, yy = v.y + 1, zz = v.z + 1;
+									renderer->AddDebugLine(Vector3(xx, yy, zz),
+															Vector3(xx - ln, yy, zz), color);
+									renderer->AddDebugLine(Vector3(xx, yy, zz),
+															Vector3(xx, yy - ln, zz), color);
+									renderer->AddDebugLine(Vector3(xx, yy, zz),
+															Vector3(xx, yy, zz - ln), color);
+								}
+							}
+							// --- one block drawn
+						} // end for
 					}
 				} break;
 				case VolumeBall: // todo. draw actual ellipsoid
