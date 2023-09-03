@@ -51,6 +51,17 @@ namespace spades {
 					return nullptr;
 				}
 			}
+
+			static int Save(const std::string& fn, GameMap *m){
+				try{
+					std::unique_ptr<spades::IStream> stream{FileManager::OpenForWriting(fn.c_str())};
+					m->Save(stream.get());
+					return 0;
+				}catch(const std::exception& ex) {
+					ScriptContextUtils().SetNativeException(ex);
+					return -1;
+				}
+			}
 			
 			static uint32_t GetColor(int x, int y, int z,
 									 GameMap *m) {
@@ -146,6 +157,11 @@ namespace spades {
 														 "GameMap @f(const string& in)",
 														 asFUNCTION(LoadFactory),
 														 asCALL_CDECL);
+						manager->CheckError(r);
+						r = eng->RegisterObjectMethod("GameMap",
+													  "int Save(const string&in)",
+													  asFUNCTION(Save),
+													  asCALL_CDECL_OBJLAST);
 						manager->CheckError(r);
 						r = eng->RegisterObjectMethod("GameMap",
 													  "uint GetColor(int, int, int)",
