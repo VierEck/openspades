@@ -248,6 +248,7 @@ namespace spades {
 			
 			if (isFree) {
 				DrawCurrentColor();
+				DrawTarget();
 				if (arrowUp)
 					EditCurrentColorValue(arrowUp);
 				else if (arrowDown)
@@ -422,6 +423,22 @@ namespace spades {
 				   block.x >= 0 && block.x < 512
 				&& block.y >= 0 && block.y < 512
 				&& block.z <= 63 && block.z >= 0;
+		}
+		
+		private void DrawTarget() {
+			float sw = renderer.ScreenWidth;
+			float sh = renderer.ScreenHeight;
+			Vector2 scrCenter = Vector2(sw, sh) * 0.5F;
+			
+			float brightness = currentColor.x + currentColor.y + currentColor.z;
+			brightness = (765 - brightness) / 765;
+			
+			renderer.ColorNP = Vector4(brightness, brightness, brightness, 1);
+			DrawFilledRect(renderer, scrCenter.x - 11, scrCenter.y - 2, scrCenter.x + 11, scrCenter.y + 2);
+			DrawFilledRect(renderer, scrCenter.x - 2, scrCenter.y - 11, scrCenter.x + 2, scrCenter.y + 11);
+			renderer.ColorNP = ConvertColorRGBA(currentColor);
+			DrawFilledRect(renderer, scrCenter.x - 10, scrCenter.y - 1, scrCenter.x + 10, scrCenter.y + 1);
+			DrawFilledRect(renderer, scrCenter.x - 1, scrCenter.y - 10, scrCenter.x + 1, scrCenter.y + 10);
 		}
 		
 		private void DrawCurrentColor() {
