@@ -45,7 +45,9 @@ namespace spades {
 	}
 
 	class OpenButton : spades::ui::Button {
-		void PlayActivateSound() { Manager.PlaySound("Sounds/Feedback/Open.wav"); }
+		void PlayActivateSound() { 
+			PlayOpenSound();
+		}
 
 		OpenButton(spades::ui::UIManager @manager) {
 			super(manager);
@@ -53,7 +55,9 @@ namespace spades {
 	}
 
 	class QuitButton : spades::ui::Button {
-		void PlayActivateSound() { Manager.PlaySound("Sounds/Feedback/Close.wav"); }
+		void PlayActivateSound() { 
+			PlayCloseSound(); 
+		}
 
 		QuitButton(spades::ui::UIManager @manager) {
 			super(manager);

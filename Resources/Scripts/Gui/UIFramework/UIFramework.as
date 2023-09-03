@@ -295,9 +295,9 @@ namespace spades {
 					timers.removeAt(idx);
 			}
 
-			void PlaySound(string filename) {
+			void PlaySound(string filename, AudioParam param = AudioParam()) {
 				if (audioDevice !is null)
-					audioDevice.PlayLocal(audioDevice.RegisterSound(filename), AudioParam());
+					audioDevice.PlayLocal(audioDevice.RegisterSound(filename), param);
 			}
 
 			void RunFrame(float dt) {

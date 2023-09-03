@@ -240,4 +240,5 @@ namespace spades {
 			pattern[i] = ToLower(pattern[i]);
 		return text.findLast(pattern);
 	}
+
 }

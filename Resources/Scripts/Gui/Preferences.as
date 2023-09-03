@@ -180,8 +180,9 @@ namespace spades {
 			Alignment = Vector2(0.0F, 0.5F);
 		}
 		
-		void PlayMouseEnterSound() { Manager.PlaySound("Sounds/Feedback/Limbo/Hover.opus"); }
-        void PlayActivateSound() { Manager.PlaySound("Sounds/Feedback/ChangeTab.wav"); }
+        void PlayActivateSound() { 
+			PlayChangetabSound();
+		}
 	}
 
 	class PreferenceTabBackButton : PreferenceTabButton {
@@ -189,8 +190,9 @@ namespace spades {
 			super(manager);
 		}
 
-		void PlayMouseEnterSound() { Manager.PlaySound("Sounds/Feedback/Limbo/Hover.opus"); }
-		void PlayActivateSound() { Manager.PlaySound("Sounds/Feedback/Close.wav"); }
+		void PlayActivateSound() { 
+			PlayCloseSound();
+		}
 	}
 
 	class PreferenceTab {
@@ -408,8 +410,12 @@ namespace spades {
 		void UpdateLabel() { 
 			string oldText = label.Text;
 			label.Text = formatter.Format(config.FloatValue); 
-			if (oldText != "" && label.Text != oldText)
-				Manager.PlaySound("Sounds/Feedback/ValueChanged.wav");
+			if (oldText != "" && label.Text != oldText) {
+				ConfigItem cg_valueChangedSoundGain("cg_valueChangedSoundGain", "1");
+				AudioParam param;
+				param.volume = cg_valueChangedSoundGain.FloatValue;
+				Manager.PlaySound("Sounds/Feedback/ValueChanged.wav", param);
+			}
 		}
 
 		void DoRounding() {
@@ -1615,14 +1621,25 @@ namespace spades {
 			layouter.AddToggleField(_Tr("Preferences", "Environmental Audio"), "cg_environmentalAudio");
 			layouter.AddHeading(_Tr("Preferences", " "));
 
+			layouter.AddHeading(_Tr("Preferences", "UI"));
+			layouter.AddSliderField(_Tr("Preferences", "Button Hover Sound"), "cg_buttonHoverSoundGain", 
+				0.0, 1.5, 0.01, ConfigNumberFormatter(0, " %", "", 100));
+			layouter.AddSliderField(_Tr("Preferences", "Button Select Sound"), "cg_buttonSelectSoundGain", 
+				0.0, 1.5, 0.01, ConfigNumberFormatter(0, " %", "", 100));
+			layouter.AddSliderField(_Tr("Preferences", "Button Open Sound"), "cg_buttonOpenSoundGain", 
+				0.0, 1.5, 0.01, ConfigNumberFormatter(0, " %", "", 100));
+			layouter.AddSliderField(_Tr("Preferences", "Button Close Sound"), "cg_buttonCloseSoundGain", 
+				0.0, 1.5, 0.01, ConfigNumberFormatter(0, " %", "", 100));
+			layouter.AddSliderField(_Tr("Preferences", "Slider Change Sound"), "cg_valueChangedSoundGain", 
+				0.0, 1.5, 0.01, ConfigNumberFormatter(0, " %", "", 100));
+			layouter.AddSliderField(_Tr("Preferences", "Tab Change Sound"), "cg_changeTabSoundGain", 
+				0.0, 1.5, 0.01, ConfigNumberFormatter(0, " %", "", 100));
+			layouter.AddHeading(_Tr("Preferences", " "));
+
 			layouter.AddHeading(_Tr("Preferences", "Feedback"));
 			layouter.AddSliderField(_Tr("Preferences", "Chat Beep Sound"), "cg_chatBeep", 
 				0.0, 1.5, 0.01, ConfigNumberFormatter(0, " %", "", 100));
 			layouter.AddSliderField(_Tr("Preferences", "Alert Sound"), "cg_alertSounds", 
-				0.0, 1.5, 0.01, ConfigNumberFormatter(0, " %", "", 100));
-			layouter.AddSliderField(_Tr("Preferences", "UI Button Hover Sound"), "cg_buttonHoverSoundGain", 
-				0.0, 1.5, 0.01, ConfigNumberFormatter(0, " %", "", 100));
-			layouter.AddSliderField(_Tr("Preferences", "UI Button Select Sound"), "cg_buttonSelectSoundGain", 
 				0.0, 1.5, 0.01, ConfigNumberFormatter(0, " %", "", 100));
 			layouter.AddSliderField(_Tr("Preferences", "Screenshot Sound"), "cg_screenShotSoundGain", 
 				0.0, 1.5, 0.01, ConfigNumberFormatter(0, " %", "", 100));

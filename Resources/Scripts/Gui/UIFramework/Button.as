@@ -50,8 +50,36 @@ namespace spades {
 				@repeatTimer.Tick = TimerTickEventHandler(this.RepeatTimerFired);
 			}
 
-			void PlayMouseEnterSound() { Manager.PlaySound("Sounds/Feedback/Limbo/Hover.opus"); }
-			void PlayActivateSound() { Manager.PlaySound("Sounds/Feedback/Limbo/Select.opus"); }
+			void PlayMouseEnterSound() { 
+				ConfigItem cg_buttonHoverSoundGain("cg_buttonHoverSoundGain");
+				AudioParam param;
+				param.volume = cg_buttonHoverSoundGain.FloatValue;
+				Manager.PlaySound("Sounds/Feedback/Limbo/Hover.opus", param); 
+			}
+			void PlayActivateSound() { 
+				ConfigItem cg_buttonSelectSoundGain("cg_buttonSelectSoundGain");
+				AudioParam param;
+				param.volume = cg_buttonSelectSoundGain.FloatValue;
+				Manager.PlaySound("Sounds/Feedback/Limbo/Select.opus", param); 
+			}
+			void PlayOpenSound() {
+				ConfigItem cg_buttonOpenSoundGain("cg_buttonOpenSoundGain", "1");
+				AudioParam param;
+				param.volume = cg_buttonOpenSoundGain.FloatValue;
+				Manager.PlaySound("Sounds/Feedback/Open.wav", param); 
+			}
+			void PlayCloseSound() {
+				ConfigItem cg_buttonCloseSoundGain("cg_buttonCloseSoundGain", "1");
+				AudioParam param;
+				param.volume = cg_buttonCloseSoundGain.FloatValue;
+				Manager.PlaySound("Sounds/Feedback/Close.wav", param);
+			}
+			void PlayChangetabSound() {
+				ConfigItem cg_changeTabSoundGain("cg_changeTabSoundGain", "1");
+				AudioParam param;
+				param.volume = cg_changeTabSoundGain.FloatValue;
+				Manager.PlaySound("Sounds/Feedback/ChangeTab.wav", param); 
+			}
 
 			void OnActivated() {
 				if (Activated !is null)
