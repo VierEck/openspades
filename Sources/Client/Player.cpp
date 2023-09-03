@@ -1572,9 +1572,9 @@ namespace spades {
 			float ny = f * velocity.y + position.y;
 			float nz = f * velocity.z + position.z;
 
-			nx += 512.f * (nx < 0.f) - 512.f * (nx > 513.f);
+			nx += 512.f * (nx < 0.f) - 512.f * (nx > 512.f);
 			position.x = nx;
-			ny += 512.f * (ny < 0.f) - 512.f * (ny > 513.f);
+			ny += 512.f * (ny < 0.f) - 512.f * (ny > 512.f);
 			position.y = ny;
 			if (nz < 62.5f)
 				position.z = nz;
