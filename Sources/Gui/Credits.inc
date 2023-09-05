@@ -48,6 +48,8 @@ PubOVL
 aos_replay, throttle send orientatian time, HitTest Debug display, pickaxe when single digging
 "Liza":
 Block color Inverting and Mixing
+"utf":
+MacOs 9 Platinum Sounds for GUI and Alert, Headshot sound.
 "ptrstr":
 next Spawn Loadout
 "paratrooper":
