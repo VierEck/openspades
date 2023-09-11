@@ -60,7 +60,7 @@ std::string VersionInfo::GetOperatingSystemInfo() {
 }
 
 std::string VersionInfo::GetVersionInfo() {
-	std::string version4spades = "  |  IV of Spades  " GIT_COMMIT_HASH;
+	std::string version4spades = "  ¦   IV of Spades  " GIT_COMMIT_HASH;
 	std::string git = " https://github.com/VierEck/openspades/tree/4";
 	return version4spades + git;
 }
