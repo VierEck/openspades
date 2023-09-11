@@ -81,7 +81,6 @@ DEFINE_SPADES_SETTING(cg_playerNames, "4");
 DEFINE_SPADES_SETTING(cg_playerNameX, "0");
 DEFINE_SPADES_SETTING(cg_playerNameY, "0");
 DEFINE_SPADES_SETTING(cg_specNames, "1");
-DEFINE_SPADES_SETTING(cg_enemyNames, "0");
 
 SPADES_SETTING(cg_distCalculation);
 DEFINE_SPADES_SETTING(cg_hudTransparency, "1", "0.8");
@@ -348,16 +347,14 @@ namespace spades {
 				Player &hottrackedPlayer = std::get<0>(*hottracked);
 
 				Vector3 diff = hottrackedPlayer.GetEye() - p.GetEye();
-				float dist2d = sqrtf(diff.x * diff.x + diff.y * diff.y);
-
-				if ((!cg_enemyNames || dist2d > 128) && hottrackedPlayer.GetTeamId() != p.GetTeamId())
+				if (diff.x * diff.x + diff.y * diff.y > 128 * 128)
 					return;
 
 				float dist;
 				if (!cg_distCalculation) {
-					dist = (hottrackedPlayer.GetEye() - p.GetEye()).GetLength();
+					dist = diff.GetLength();
 				} else {
-					dist = dist2d;
+					dist = sqrtf(diff.x * diff.x + diff.y * diff.y);
 				}
 
 				Vector3 posxyz = Project(hottrackedPlayer.GetEye());

@@ -1490,7 +1490,6 @@ namespace spades {
 													 _Tr("Preferences", "ON"),
 													 _Tr("Preferences", "OFF")},
 									array<int> = {4, 3, 2, 1, 0});
-			layouter.AddToggleField(_Tr("Preferences", "Hottrack Enemies"), "cg_enemyNames");
 			layouter.AddSliderField(_Tr("Preferences", "Hottracked X Height"), "cg_playerNameX", -20, 20, 0.1,
 									ConfigNumberFormatter(1, "px"));
 			layouter.AddSliderField(_Tr("Preferences", "Hottracked Y Height"), "cg_playerNameY", -20, 20, 0.1,
