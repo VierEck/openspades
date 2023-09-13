@@ -2101,6 +2101,7 @@ namespace spades {
 			layouter.AddControl(_Tr("Preferences", "Equip Paint"), "cg_keyToolPaint");
 			layouter.AddControl(_Tr("Preferences", "Equip Brush"), "cg_keyToolBrush");
 			layouter.AddControl(_Tr("Preferences", "Equip Copy"), "cg_keyToolCopy");
+			layouter.AddControl(_Tr("Preferences", "Equip Move"), "cg_keyToolMove");
 			layouter.AddControl(_Tr("Preferences", "Equip MapObject"), "cg_keyToolMapObject");
 			layouter.AddHeading(_Tr("Preferences", " "));
 
