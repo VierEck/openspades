@@ -95,6 +95,7 @@ DEFINE_SPADES_SETTING(cg_playerStatsTransparency, "1", "0.8");
 DEFINE_SPADES_SETTING(cg_respawnSoundGain, "1");
 DEFINE_SPADES_SETTING(cg_screenShotSoundGain, "1");
 DEFINE_SPADES_SETTING(cg_hurtScreenEffect, "1", "0");
+DEFINE_SPADES_SETTING(cg_hudPlayerCount, "1");
 
 DEFINE_SPADES_SETTING(cg_DemoProgressBarOnlyInUi, "0");
 DEFINE_SPADES_SETTING(cg_DrawDragCursorPos, "1");
@@ -272,6 +273,48 @@ namespace spades {
 			Vector2 size = font.Measure(buf);
 			Vector2 pos = MakeVector2((sw - size.x) * 0.5F, 68.0F - size.y);
 			font.DrawShadow(buf, pos, 1.0F, MakeVector4(1, 1, 1, 1), MakeVector4(0, 0, 0, 0.5));
+		}
+
+		void Client::DrawAlivePlayersCount() {
+			float sw = renderer->ScreenWidth();
+			float sh = renderer->ScreenHeight();
+
+			float contentsHeight = sh - 56.0F;
+			float teamBarTop = (sh - contentsHeight) * 0.5F;
+			float teamBarWidth = 30.0F;
+			float teamBarHeight = 30.0F;
+
+			Handle<IImage> img;
+			IFont& font = fontManager->GetMediumFont();
+			Vector2 pos, size;
+			std::string str;
+
+			// draw team bar
+			renderer->SetColorAlphaPremultiplied(AdjustColor(ConvertColorRGBA(world->GetTeam(0).color), 1, 0.2F));
+			renderer->DrawImage(nullptr, AABB2(sw * 0.5F, teamBarTop, -teamBarWidth, teamBarHeight));
+			renderer->SetColorAlphaPremultiplied(AdjustColor(ConvertColorRGBA(world->GetTeam(1).color), 1, 0.2F));
+			renderer->DrawImage(nullptr, AABB2((sw * 0.5F) + teamBarWidth, teamBarTop, -teamBarWidth, teamBarHeight));
+
+			// draw outline
+			renderer->SetColorAlphaPremultiplied(MakeVector4(0, 0, 0, 0.2F));
+			renderer->DrawOutlinedRect((sw * 0.5F) - teamBarWidth, teamBarTop,
+			                           (sw * 0.5F) + teamBarWidth,
+			                           teamBarHeight + 28.0F);
+
+			// draw player count
+			str = ToString(world->GetNumPlayersAlive(0));
+			size = font.Measure(str);
+			pos.x = (sw * 0.5F) - (teamBarWidth * 0.5F) - size.x * 0.5F;
+			pos.y = teamBarTop;
+			font.Draw(str, pos + MakeVector2(0, 2), 1.0F, MakeVector4(0, 0, 0, 0.5));
+			font.Draw(str, pos, 1.0F, MakeVector4(1, 1, 1, 1));
+
+			str = ToString(world->GetNumPlayersAlive(1));
+			size = font.Measure(str);
+			pos.x = (sw * 0.5F) + (teamBarWidth * 0.5F) - size.x * 0.5F;
+			pos.y = teamBarTop;
+			font.Draw(str, pos + MakeVector2(0, 2), 1.0F, MakeVector4(0, 0, 0, 0.5));
+			font.Draw(str, pos, 1.0F, MakeVector4(1, 1, 1, 1));
 		}
 
 		void Client::DrawHurtSprites() {
@@ -1411,6 +1454,9 @@ namespace spades {
 			if (scoreboardVisible || !p) {
 				scoreboard->Draw();
 				DrawPlayingTime();
+			} else {
+				if (cg_hudPlayerCount)
+					DrawAlivePlayersCount();
 			}
 
 			if (IsLimboViewActive())

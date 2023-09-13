@@ -1554,6 +1554,7 @@ namespace spades {
 									ConfigNumberFormatter(0, "px"));
 			layouter.AddSliderField(_Tr("Preferences", "KillFeed Height"), "cg_killfeedHeight", 0, 100, 1,
 									ConfigNumberFormatter(0, "px"));
+			layouter.AddToggleField(_Tr("Preferences", "Show Alive Player Count"), "cg_hudPlayerCount");
 			layouter.AddHeading(_Tr("Preferences", " "));
 
 			layouter.AddHeading(_Tr("Preferences", "MiniMap"));
