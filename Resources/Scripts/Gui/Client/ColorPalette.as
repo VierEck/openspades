@@ -170,9 +170,19 @@ namespace spades {
 		private void Close() { @ui.ActiveUI = null; }
 		
 		private ConfigItem cg_keyEditColor("cg_keyEditColor");
+		private ConfigItem cg_keyPaletteLeft("cg_keyPaletteLeft");
+		private ConfigItem cg_keyPaletteRight("cg_keyPaletteRight");
+		private ConfigItem cg_keyPaletteUp("cg_keyPaletteUp");
+		private ConfigItem cg_keyPaletteDown("cg_keyPaletteDown");
 		
 		void HotKey(string key) {
-			if (IsEnabled and (key == "Up" or key == "Down" or key == "Left" or key == "Right")) {
+			if (IsEnabled 
+				and (StringCompareCaseInsensitive(key, cg_keyPaletteUp.StringValue) 
+						or StringCompareCaseInsensitive(key, cg_keyPaletteDown.StringValue) 
+						or StringCompareCaseInsensitive(key, cg_keyPaletteRight.StringValue) 
+						or StringCompareCaseInsensitive(key, cg_keyPaletteLeft.StringValue) 
+					)
+				) {
 				ui.helper.PaletteKeyInput(key);
 				return;
 				} 
