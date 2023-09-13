@@ -160,6 +160,16 @@ namespace spades {
 			                       const Vector2 &outTopRight, const Vector2 &outBottomLeft,
 			                       const AABB2 &inRect) = 0;
 
+			void DrawFilledRect(float x0, float y0, float x1, float y1) {
+				DrawImage(nullptr, AABB2(x0, y0, x1 - x0, y1 - y0));
+			}
+			void DrawOutlinedRect(float x0, float y0, float x1, float y1) {
+				DrawFilledRect(x0, y0, x1, y0 + 1);         // top
+				DrawFilledRect(x0, y1 - 1, x1, y1);         // bottom
+				DrawFilledRect(x0, y0 + 1, x0 + 1, y1 - 1); // left
+				DrawFilledRect(x1 - 1, y0 + 1, x1, y1 - 1); // right
+			}
+
 			virtual void UpdateFlatGameMap() = 0;
 			virtual void DrawFlatGameMap(const AABB2 &outRect, const AABB2 &inRect) = 0;
 
