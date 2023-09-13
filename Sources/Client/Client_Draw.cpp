@@ -95,7 +95,7 @@ DEFINE_SPADES_SETTING(cg_playerStatsTransparency, "1", "0.8");
 DEFINE_SPADES_SETTING(cg_respawnSoundGain, "1");
 DEFINE_SPADES_SETTING(cg_screenShotSoundGain, "1");
 DEFINE_SPADES_SETTING(cg_hurtScreenEffect, "1", "0");
-DEFINE_SPADES_SETTING(cg_hudPlayerCount, "1");
+DEFINE_SPADES_SETTING(cg_hudPlayerCount, "0");
 
 DEFINE_SPADES_SETTING(cg_DemoProgressBarOnlyInUi, "0");
 DEFINE_SPADES_SETTING(cg_DrawDragCursorPos, "1");
