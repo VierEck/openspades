@@ -514,6 +514,13 @@ namespace spades {
 		return Vector4::Make(x, y, z, w);
 	}
 
+	static inline Vector3 ConvertColorRGB(const IntVector3& v) {
+		return MakeVector3(v.x / 255.0F, v.y / 255.0F, v.z / 255.0F);
+	}
+	static inline Vector4 ConvertColorRGBA(const IntVector3& v) {
+		return MakeVector4(v.x / 255.0F, v.y / 255.0F, v.z / 255.0F, 1.0F);
+	}
+
 #pragma mark - Line
 
 	struct Line3 {
@@ -922,6 +929,17 @@ namespace spades {
 	float Mix(float a, float b, float frac);
 	Vector2 Mix(const Vector2 &a, const Vector2 &b, float frac);
 	Vector3 Mix(const Vector3 &a, const Vector3 &b, float frac);
+
+	static inline Vector4 AdjustColor(spades::Vector4 col, float bright, float saturation) {
+		col.x *= bright;
+		col.y *= bright;
+		col.z *= bright;
+		float avg = (col.x + col.y + col.z) / 3.0F;
+		col.x = Mix(avg, col.x, saturation);
+		col.y = Mix(avg, col.y, saturation);
+		col.z = Mix(avg, col.z, saturation);
+		return col;
+	}
 
 	/** @return true if any portion of the box is in the positive side of plane. */
 	bool PlaneCullTest(const Plane3 &, const AABB3 &);
