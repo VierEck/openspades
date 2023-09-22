@@ -303,7 +303,8 @@ namespace spades {
 					column = 0;
 				}
 
-				if (isPerformance)
+				bool usingPerformance = isPerformance;
+				if (usingPerformance)
 					SwitchAllItems();
 
 				for (const auto &item : items) {
@@ -318,6 +319,9 @@ namespace spades {
 					buffer += "\n";
 					column = 0;
 				}
+
+				if (usingPerformance)
+					SwitchAllItems();
 
 				for (const auto &item : itemsMacro) {
 					ItemMacro *itm = item.second;

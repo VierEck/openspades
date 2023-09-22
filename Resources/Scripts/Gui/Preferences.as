@@ -91,11 +91,21 @@ namespace spades {
 			AddTab(MiscOptionsPanel(Manager, options, fontManager), _Tr("Preferences", "Misc"));
 
 			{
+				ConfigSaveButton button(Manager);
+				button.Caption = _Tr("Preferences", "Save");
+				button.HotKeyText = " ";//so that "save" is bound on right side of button
+				button.Bounds = AABB2(ContentsLeft + 10.0F,
+					ContentsTop + 10.0F + float(tabs.length) * 32.0F + 5.0F, 150.0F, 30.0F);
+				@button.Activated = spades::ui::EventHandler(this.OnSavePressed);
+				AddChild(button);
+			}
+
+			{
 				PreferenceTabBackButton button(Manager);
 				button.Caption = _Tr("Preferences", "Back");
 				button.HotKeyText = "[Esc]";
 				button.Bounds = AABB2(ContentsLeft + 10.0F,
-					ContentsTop + 10.0F + float(tabs.length) * 32.0F + 5.0F, 150.0F, 30.0F);
+					ContentsTop + 10.0F + float(tabs.length + 1) * 32.0F + 5.0F, 150.0F, 30.0F);
 				@button.Activated = spades::ui::EventHandler(this.OnClosePressed);
 				AddChild(button);
 			}
@@ -133,6 +143,10 @@ namespace spades {
 				tab.TabButton.Toggled = selected;
 				tab.View.Visible = selected;
 			}
+		}
+
+		private void OnSavePressed(spades::ui::UIElement@ sender) {
+			SaveAllConfigItems();
 		}
 
 		private void OnClosePressed(spades::ui::UIElement@ sender) { Close(); }
@@ -203,6 +217,16 @@ namespace spades {
 			@View = view;
 			@TabButton = PreferenceTabButton(parent.Manager);
 			TabButton.Toggle = true;
+		}
+	}
+
+	class ConfigSaveButton : spades::ui::Button {
+		ConfigSaveButton(spades::ui::UIManager manager) {
+			super(manager);
+		}
+		
+		void PlayActivateSound() { 
+			PlayChangetabSound();//make more destinctive sound?
 		}
 	}
 

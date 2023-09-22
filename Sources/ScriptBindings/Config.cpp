@@ -158,6 +158,11 @@ namespace spades {
 			return array;
 		}
 
+		static void SaveAllConfigItems() {
+			Settings::GetInstance()->Save();
+			SPLog("Preferences Saved mid game");
+		}
+
 		virtual void Register(ScriptManager *manager, Phase phase) {
 			asIScriptEngine *eng = manager->GetEngine();
 			int r;
@@ -257,6 +262,10 @@ namespace spades {
 
 					r = eng->RegisterGlobalFunction("array<string>@ GetAllConfigNames()",
 												  asFUNCTION(GetAllConfigNames),
+												  asCALL_CDECL);
+					manager->CheckError(r);
+					r = eng->RegisterGlobalFunction("void SaveAllConfigItems()",
+												  asFUNCTION(SaveAllConfigItems),
 												  asCALL_CDECL);
 					manager->CheckError(r);
 					break;

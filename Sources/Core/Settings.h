@@ -98,8 +98,6 @@ namespace spades {
 		bool allowSwitch;
 		Item *GetPerformanceSetting(const SettingItemDescriptor *descriptor);
 
-		void Save(bool performance = false);
-
 		struct ItemSaved {
 			std::string name;
 			std::string string;
@@ -140,6 +138,7 @@ namespace spades {
 			void RemoveListener(ISettingItemListener *);
 		};
 
+		void Save(bool performance = false);
 		void Load(bool performance = false);
 		void Flush();
 		/** Return a list of all config variables, sorted by name. */
