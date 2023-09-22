@@ -183,7 +183,6 @@ namespace spades {
 							Vector3 p3 = p2 + vmAxis3 * (float)z;
 
 							{
-								SPLog("spawning dust");
 								auto ent = stmp::make_unique<SmokeSpriteEntity>(*client, col, 70.f);
 								ent->SetTrajectory(
 								  p3,
