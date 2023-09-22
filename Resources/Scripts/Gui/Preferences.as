@@ -1964,7 +1964,6 @@ namespace spades {
 			StandardPreferenceLayouter layouter(this, fontManager);
 			
 			layouter.AddHeading(_Tr("Preferences", "Mouse/Aim"));
-			layouter.AddToggleField(_Tr("Preferences", "Voxlap Mouse Sens. Filter"), "cg_classicZoom");
 			layouter.AddSliderField(_Tr("Preferences", "Mouse Sensitivity Global"), "cg_mouseSensitivity",
 									0.1, 10, 0.1, ConfigNumberFormatter(1, "x"));
 			layouter.AddChoiceField(_Tr("Preferences", "Apply Mouse Sens"), "cg_weapMouseSensitivity",
@@ -1980,6 +1979,7 @@ namespace spades {
 			layouter.AddHeading(_Tr("Preferences", " "));
 								
 			layouter.AddToggleField(_Tr("Preferences", "Hold Aim Down Sight"), "cg_holdAimDownSight");
+			layouter.AddToggleField(_Tr("Preferences", "Voxlap Zoom Filter"), "cg_classicZoom");
 			layouter.AddSliderField(_Tr("Preferences", "ADS Sens. Scale Global"),
 									"cg_zoomedMouseSensScale", 0.05, 3, 0.05,
 									ConfigNumberFormatter(2, "x"));
