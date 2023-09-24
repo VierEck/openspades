@@ -321,7 +321,6 @@ namespace spades {
 
 		void Client::PlayerJoinedTeam(Player &p) {
 			std::string teamName = world->GetTeam(p.GetTeamId()).name;
-			GetWorld()->GetPlayerPersistent(p.GetId()).kills = 0;
 
 			if (p.GetTeamId() >= 2) {
 				if (p.IsSpectator()) {
