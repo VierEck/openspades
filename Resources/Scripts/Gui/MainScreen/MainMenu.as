@@ -21,6 +21,7 @@
 #include "CreateProfileScreen.as"
 #include "ServerList.as"
 #include "GlitterMenu.as"
+#include "HeightMap.as"
 
 namespace spades {
 
@@ -87,7 +88,8 @@ namespace spades {
 		spades::ui::Label @renameLabel;
 		spades::ui::Field @renameField;
 		spades::ui::Button @glitterButton;
-		bool isGlitterButtonVisible = false;
+		spades::ui::Button @heightmapButton;
+		bool isMapButtonsVisible = false;
 		bool isContextMenuActive = false;
 		bool isRenameFieldActive = false;
 		string currentFileName, newCurrentFileName;
@@ -103,6 +105,8 @@ namespace spades {
 		int savedlistIdx = 0;
 		int mode = 0;
 		int isOnline = 0, isDemo = 1, isMap = 2;
+		
+		bool isHeightmap;
 
 		private ConfigItem cg_protocolVersion("cg_protocolVersion", "3");
 		private ConfigItem cg_lastQuickConnectHost("cg_lastQuickConnectHost", "127.0.0.1");
@@ -384,7 +388,7 @@ namespace spades {
 				spades::ui::Label label(Manager);
 				label.BackgroundColor = Vector4(0, 0, 0, 0.8f);
 				if (mode == isMap)
-					label.Bounds = AABB2(xPos, yPos, 70.f, 165.f);
+					label.Bounds = AABB2(xPos, yPos, 70.f, 205.f);
 				else
 					label.Bounds = AABB2(xPos, yPos, 70.f, 125.f);
 				@contextMenuLabel = label;
@@ -418,14 +422,26 @@ namespace spades {
 				AddChild(renameButton);
 			}
 			if (mode == isMap) {
-				spades::ui::Button button(Manager);
-				button.Caption = _Tr("MainScreen", "Glitter");
-				button.Bounds = AABB2(xPos + 5, yPos + 125.f, 60.f, 35.f);
-				button.Toggled = false;
-				@button.Activated = spades::ui::EventHandler(this.OnGlitter);
-				@glitterButton = button;
-				AddChild(glitterButton);
-				isGlitterButtonVisible = true;
+				{
+					spades::ui::Button button(Manager);
+					button.Caption = _Tr("MainScreen", "Glitter");
+					button.Bounds = AABB2(xPos + 5, yPos + 125.f, 60.f, 35.f);
+					button.Toggled = false;
+					@button.Activated = spades::ui::EventHandler(this.OnGlitter);
+					@glitterButton = button;
+					AddChild(glitterButton);
+				}
+				{
+					spades::ui::Button button(Manager);
+					button.Caption = _Tr("MainScreen", "H-Map");
+					button.Bounds = AABB2(xPos + 5, yPos + 165.f, 60.f, 35.f);
+					button.Toggled = false;
+					@button.Activated = spades::ui::EventHandler(this.OnHeightmap);
+					@heightmapButton = button;
+					AddChild(heightmapButton);
+				}
+				
+				isMapButtonsVisible = true;
 			}
 		}
 		
@@ -439,6 +455,13 @@ namespace spades {
 			RightClickContextMenuClose();
 			GlitterMenu gm(ui, this, currentFileName);
 			gm.Run();
+		}
+		
+		void OnHeightmap(spades::ui::UIElement @sender) {
+			isHeightmap = true;
+			RightClickContextMenuClose();
+			spades::ui::HeightMapUI hm(ui, this, Manager.Renderer, currentFileName);
+			hm.Run();
 		}
 		
 		void OnCopy(spades::ui::UIElement @sender) {
@@ -546,9 +569,11 @@ namespace spades {
 			RemoveChild(renameButton);
 			isContextMenuActive = false;
 			
-			if (isGlitterButtonVisible)
+			if (isMapButtonsVisible) {
 				RemoveChild(glitterButton);
-			isGlitterButtonVisible = false;
+				RemoveChild(heightmapButton);
+			}
+			isMapButtonsVisible = false;
 			
 			if (!isRenameFieldActive)
 				return;
