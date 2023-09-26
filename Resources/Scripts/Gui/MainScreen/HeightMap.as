@@ -1,5 +1,3 @@
-#include "MainMenu.as"
-
 namespace spades {
 	
 	class HeightMap {
@@ -694,7 +692,6 @@ namespace spades {
 				uint newVal = parseUInt(this.Text);
 				if (newVal <= 0) {
 					newVal = 1;
-					this.Text = formatUInt(newVal, "l", 3);
 				}
 				
 				hMap.thickness = newVal;

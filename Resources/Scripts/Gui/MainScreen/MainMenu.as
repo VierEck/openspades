@@ -105,8 +105,6 @@ namespace spades {
 		int savedlistIdx = 0;
 		int mode = 0;
 		int isOnline = 0, isDemo = 1, isMap = 2;
-		
-		bool isHeightmap;
 
 		private ConfigItem cg_protocolVersion("cg_protocolVersion", "3");
 		private ConfigItem cg_lastQuickConnectHost("cg_lastQuickConnectHost", "127.0.0.1");
@@ -458,7 +456,6 @@ namespace spades {
 		}
 		
 		void OnHeightmap(spades::ui::UIElement @sender) {
-			isHeightmap = true;
 			RightClickContextMenuClose();
 			spades::ui::HeightMapUI hm(ui, this, Manager.Renderer, currentFileName);
 			hm.Run();
