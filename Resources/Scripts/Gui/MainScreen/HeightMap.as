@@ -5,7 +5,7 @@ namespace spades {
 		Bitmap @bitmap;
 		
 		IntVector3 color;
-		uint tool; //circle = 0, square = 1,
+		uint tool;
 		uint thickness;
 		
 		HeightMap(string fN) {
@@ -117,15 +117,39 @@ namespace spades {
 		}
 		
 		void PaintAction(Vector2 pos, bool destroy = false) {
-			uint xStart = pos.x - thickness / 2;
-			uint yStart = pos.y - thickness / 2;
-			for (uint x = xStart; x < xStart + thickness; x++)
-				for (uint y = yStart; y < yStart + thickness; y++) {
-					if (!destroy)
-						Build(x, y);
-					else
-						Destroy(x, y);
-				}
+			switch (tool) {
+				case 0: {//square
+					uint xStart = uint(pos.x) - thickness / 2;
+					uint yStart = uint(pos.y) - thickness / 2;
+					for (uint x = xStart; x < xStart + thickness; x++)
+						for (uint y = yStart; y < yStart + thickness; y++) {
+							if (!destroy)
+								Build(x, y);
+							else
+								Destroy(x, y);
+						}
+				} break;
+				case 1: {//circle
+					uint xStart = uint(pos.x) - thickness / 2;
+					uint yStart = uint(pos.y) - thickness / 2;
+					uint xEnd = xStart + thickness;
+					uint yEnd = yStart + thickness;
+					float radius = float(xEnd - xStart) / 2.f;
+					float xMid = xStart + radius;
+					float yMid = yStart + radius;
+					for (uint x = xStart; x < xEnd; x++)
+						for (uint y = yStart; y < yEnd; y++) {
+							float xPow = (xMid - float(x)) * (xMid - float(x));
+							float yPow = (yMid - float(y)) * (yMid - float(y));
+							if (radius * radius < xPow + yPow)
+								continue;
+							if (!destroy)
+								Build(x, y);
+							else
+								Destroy(x, y);
+						}
+				} break;
+			}
 		}
 		
 		void Build(uint x, uint y) {
@@ -287,11 +311,58 @@ namespace spades {
 				}
 				
 				{
+					xPos = ContentsLeft + 15;
+					yPos = ContentsDown - 15 - 240;
+					
+					{
+						Label label(Manager);
+						label.Bounds = AABB2(xPos, yPos, 0, 0);
+						label.Text = "Brush";
+						AddChild(label);
+					}
+					{
+						yPos += 30;
+					
+						HeightMapToolButton squareToolButton(this, hMap, 0);
+						squareToolButton.Caption = _Tr("HeightMap", "Square");
+						squareToolButton.GroupName = "HeightMapToolButton";
+						squareToolButton.Bounds = AABB2(xPos, yPos, 70, 30);
+						squareToolButton.Toggled = true;
+						AddChild(squareToolButton);
+					}
+					{
+						xPos += 70;
+					
+						HeightMapToolButton circleToolButton(this, hMap, 1);
+						circleToolButton.Caption = _Tr("HeightMap", "Circle");
+						circleToolButton.GroupName = "HeightMapToolButton";
+						circleToolButton.Bounds = AABB2(xPos, yPos, 70, 30);
+						AddChild(circleToolButton);
+					}
+				
+					{
+						xPos = ContentsLeft + 15;
+						yPos += 35;
+						
+						Label label(Manager);
+						label.Bounds = AABB2(xPos, yPos, 0, 0);
+						label.Text = "Size";
+						AddChild(label);
+						
+						HeightMapThicknessField thicknessField(this, hMap);
+						thicknessField.Bounds = AABB2(xPos + 30, yPos, 40, 25);
+						thicknessField.Placeholder = _Tr("HeightMap", "1");
+						AddChild(thicknessField);
+					}
+				
+				}
+				
+				{
 					xPos = ContentsLeft + 15 + 256 - 60;
 					yPos = ContentsTop + 15;
 					
 					spades::ui::Button button(Manager);
-					button.Caption = _Tr("MainScreen", "Save");
+					button.Caption = _Tr("HeightMap", "Save");
 					button.Bounds = AABB2(xPos, yPos, 60, 30);
 					@button.Activated = spades::ui::EventHandler(this.OnSave);
 					AddChild(button);
@@ -300,26 +371,12 @@ namespace spades {
 					yPos += 30;
 					
 					spades::ui::Button button(Manager);
-					button.Caption = _Tr("MainScreen", "Cancel");
+					button.Caption = _Tr("HeightMap", "Cancel");
 					button.Bounds = AABB2(xPos, yPos, 60, 30);
 					@button.Activated = spades::ui::EventHandler(this.OnCancel);
 					AddChild(button);
 				}
 				
-				{
-					xPos = ContentsLeft + 15;
-					yPos = ContentsDown - 15 - 180;
-					
-					Label label(Manager);
-					label.Bounds = AABB2(xPos, yPos, 0, 0);
-					label.Text = "Brush Thickness";
-					AddChild(label);
-					
-					HeightMapThicknessField thicknessField(this, hMap);
-					thicknessField.Bounds = AABB2(xPos + 120, yPos, 40, 25);
-					thicknessField.Placeholder = _Tr("HeightMap", "1");
-					AddChild(thicknessField);
-				}
 				
 			}
 			
@@ -700,6 +757,23 @@ namespace spades {
 				hMap.thickness = newVal;
 			}
 			
+		}
+		
+		class HeightMapToolButton : RadioButton {
+			private HeightMap @hMap;
+			uint tool;
+			
+			HeightMapToolButton(HeightMapUI @o, HeightMap @hM, uint t) {
+				super(o.Manager);
+				@hMap = hM;
+				this.tool = t;
+			}
+			
+			void OnActivated() {
+				RadioButton::OnActivated();
+				
+				hMap.tool = this.tool;
+			}
 		}
 		
 	}
