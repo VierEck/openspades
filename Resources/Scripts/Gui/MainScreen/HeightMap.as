@@ -130,6 +130,7 @@ namespace spades {
 						}
 				} break;
 				case 1: {//circle
+					//todo fix: resulting circles not even
 					uint xStart = uint(pos.x) - thickness / 2;
 					uint yStart = uint(pos.y) - thickness / 2;
 					uint xEnd = xStart + thickness;
@@ -430,6 +431,13 @@ namespace spades {
 			void HotKey(string key) {
 				if (key == "Escape") {
 					Close();
+				} else if (key == "Enter") {
+					SaveMap();
+					Close();
+				} else if (Manager.IsControlPressed) {
+					if (key == "S")
+						SaveMap();
+					//todo: undo redo
 				} else {
 					UIElement::HotKey(key);
 				}
