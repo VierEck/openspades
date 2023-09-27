@@ -1404,7 +1404,7 @@ namespace spades {
 				if (p->GetTeamId() < 2) {
 					// player is not spectator
 					if (cg_playerStats)
-							DrawPlayerStats();
+						DrawPlayerStats();
 					if (cg_debugHitTest && p->IsToolWeapon() &&
 						(float)cg_hitTestTransparency > 0)
 						DrawHitTestDebugger();
@@ -1455,7 +1455,7 @@ namespace spades {
 				scoreboard->Draw();
 				DrawPlayingTime();
 			} else {
-				if (cg_hudPlayerCount)
+				if (cg_hudPlayerCount && !IsLocalMapEditor())
 					DrawAlivePlayersCount();
 			}
 
