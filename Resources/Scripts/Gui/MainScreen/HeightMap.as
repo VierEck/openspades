@@ -428,21 +428,6 @@ namespace spades {
 					hMap.ReloadBitMap(a, currentAxis);
 			}
 			
-			void HotKey(string key) {
-				if (key == "Escape") {
-					Close();
-				} else if (key == "Enter") {
-					SaveMap();
-					Close();
-				} else if (Manager.IsControlPressed) {
-					if (key == "S")
-						SaveMap();
-					//todo: undo redo
-				} else {
-					UIElement::HotKey(key);
-				}
-			}
-			
 			void MouseDown(MouseButton button, Vector2 clientPosition) {
 				dragging = true;
 				if (IsInMapImageBounds(clientPosition)) {
@@ -521,11 +506,15 @@ namespace spades {
 			void Render() {
 				UIElement::Render();
 				
-				//draw map
+				DrawMap();
+				DrawColorPicker();
+			}
+			
+			private void DrawMap() {
+				//todo: zoom via mousewheel
+				//todo: draw sector grid?
 				r.ColorNP = Vector4(1, 1, 1, 1);
 				r.DrawImage(r.CreateImage(hMap.bitmap), TopLeft());
-				
-				DrawColorPicker();
 			}
 			
 			private void DrawColorPicker() {
@@ -574,6 +563,21 @@ namespace spades {
 			private void DrawColoredRect(IntVector3 col, int x1, int y1, int x2, int y2) {
 				r.ColorNP = ConvertColorRGBA(col);
 				DrawFilledRect(r, x1, y1, x2, y2);
+			}
+			
+			void HotKey(string key) {
+				if (key == "Escape") {
+					Close();
+				} else if (key == "Enter") {
+					SaveMap();
+					Close();
+				} else if (Manager.IsControlPressed) {
+					if (key == "S")
+						SaveMap();
+					//todo: undo redo
+				} else {
+					UIElement::HotKey(key);
+				}
 			}
 			
 			void Run() {
@@ -636,8 +640,6 @@ namespace spades {
 				
 				uint newCoord = parseUInt(this.field.Text);
 				
-				if (newCoord == this.coord)
-					return;
 				if (IsZ()) {
 					if (newCoord > 63)
 						return;
