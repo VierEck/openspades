@@ -339,6 +339,8 @@ namespace spades {
 			private void OnCancel(spades::ui::UIElement @sender) { Close(); }
 			
 			private void PaintAction(Vector2 clientPosition, bool destroy = false) {
+				if (destroy && IsWater())
+					return;
 				hMap.PaintAction(TranslatePosToHmap(clientPosition), destroy);
 			}
 			
@@ -449,6 +451,7 @@ namespace spades {
 			}
 			
 			private bool IsZ() { return currentAxis >= 2; }
+			private bool IsWater() { return IsZ() && zUI.coord == 63; }
 			
 			void Render() {
 				UIElement::Render();
