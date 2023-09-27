@@ -651,7 +651,7 @@ namespace spades {
 				@field = Field(o.Manager);
 				field.Bounds = AABB2(xPos + 15, yPos - 2, 50, 25);
 				field.Placeholder = _Tr("HeightMap", IsZ() ? "0 - 63" : "0 - 511");
-				field.Text = formatUInt(coord, "l", 3);
+				field.Text = formatUInt(coord, "l", 1);
 				o.AddChild(field);
 				
 				@button = Button(o.Manager);
@@ -731,7 +731,7 @@ namespace spades {
 				owner.UIColorChanged(); 
 			}
 			
-			void ValChanged() { this.Text = formatUInt(val, "l", 3); }
+			void ValChanged() { this.Text = formatUInt(val, "l", 1); }
 			
 			private bool IsNumber(string text) {
 				if (text.findFirst("0") < 0
