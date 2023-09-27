@@ -162,6 +162,28 @@ namespace spades {
 			bitmap.SetPixel(x, y, iCol);
 		}
 		
+		void MirrorHoriz() {
+			//todo
+		}
+		void MirrorVert() {
+			//todo
+		}
+		void MirrorBoth() {
+			MirrorHoriz();
+			MirrorVert();
+		}
+		
+		void RotateRight() {
+			//todo
+		}
+		void RotateLeft() {
+			//todo
+		}
+		void Rotate180() {
+			RotateRight();
+			RotateRight();
+		}
+		
 	}
 	
 	namespace ui {
@@ -404,10 +426,18 @@ namespace spades {
 			
 			void UIAxisConfirm(uint axis, uint oldCoord) {
 				//save previous layer
-				switch (currentAxis) {
-					case 0: hMap.SetLayerX(oldCoord); break;
-					case 1: hMap.SetLayerY(oldCoord); break;
-					default: hMap.SetLayerZ(oldCoord); break;
+				if (currentAxis != axis) {
+					switch (currentAxis) {
+						case 0: hMap.SetLayerX(xUI.coord); break;
+						case 1: hMap.SetLayerY(yUI.coord); break;
+						default: hMap.SetLayerZ(zUI.coord); break;
+					}
+				} else {
+					switch (currentAxis) {
+						case 0: hMap.SetLayerX(oldCoord); break;
+						case 1: hMap.SetLayerY(oldCoord); break;
+						default: hMap.SetLayerZ(oldCoord); break;
+					}
 				}
 				
 				//load next layer
@@ -617,14 +647,11 @@ namespace spades {
 					default: label.Text = "Z"; break;
 				}
 				o.AddChild(label);
-					
+				
 				@field = Field(o.Manager);
 				field.Bounds = AABB2(xPos + 15, yPos - 2, 50, 25);
 				field.Placeholder = _Tr("HeightMap", IsZ() ? "0 - 63" : "0 - 511");
-				if (IsZ())//starting off with z map at water level
-					field.Text = "63";
-				else
-					field.Text = "0";
+				field.Text = formatUInt(coord, "l", 3);
 				o.AddChild(field);
 				
 				@button = Button(o.Manager);
