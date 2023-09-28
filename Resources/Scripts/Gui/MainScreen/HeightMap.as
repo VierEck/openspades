@@ -5,6 +5,7 @@ namespace spades {
 		Bitmap @bitmap;
 		
 		uint currentAxis;
+		uint currentCoord;
 		
 		IntVector3 color;
 		uint tool;
@@ -15,6 +16,7 @@ namespace spades {
 			@this.map = GameMap(fN);
 			
 			currentAxis = 2;
+			currentCoord = 63;
 			
 			color = IntVector3(0, 0, 0);
 			tool = 0;
@@ -184,14 +186,24 @@ namespace spades {
 			bitmap.SetPixel(x, y, iCol);
 		}
 		
-		void MirrorHoriz() {
-			//todo
+		void MirrorHorz() {
+			Bitmap mirror(bitmap.Width, bitmap.Height);
+			for (int x = 0; x < bitmap.Width; x++)
+				for (int y = 0; y < bitmap.Height; y++) {
+					mirror.SetPixel(bitmap.Width - x - 1, y, bitmap.GetPixel(x, y));
+				}
+			@bitmap = mirror;
 		}
 		void MirrorVert() {
-			//todo
+			Bitmap mirror(bitmap.Width, bitmap.Height);
+			for (int x = 0; x < bitmap.Width; x++)
+				for (int y = 0; y < bitmap.Height; y++) {
+					mirror.SetPixel(x, bitmap.Height - y - 1, bitmap.GetPixel(x, y));
+				}
+			@bitmap = mirror;
 		}
 		void MirrorBoth() {
-			MirrorHoriz();
+			MirrorHorz();
 			MirrorVert();
 		}
 		
@@ -355,7 +367,7 @@ namespace spades {
 				}
 				
 				{
-					xPos = ContentsLeft + 15;
+					xPos = ContentsLeft + 10;
 					yPos = ContentsDown - 15 - 240;
 					
 					{
@@ -402,6 +414,38 @@ namespace spades {
 				}
 				
 				{
+					xPos = ContentsLeft + 10;
+					yPos = ContentsTop + 15 + 100;
+					
+					{
+						spades::ui::Button button(Manager);
+						button.Caption = _Tr("HeightMap", "Mirror Horz.");
+						button.Bounds = AABB2(xPos, yPos, 90, 25);
+						@button.Activated = spades::ui::EventHandler(this.OnMirrorHorz);
+						AddChild(button);
+						
+						yPos += 30;
+					}
+					{
+						spades::ui::Button button(Manager);
+						button.Caption = _Tr("HeightMap", "Mirror Vert.");
+						button.Bounds = AABB2(xPos, yPos, 90, 25);
+						@button.Activated = spades::ui::EventHandler(this.OnMirrorVert);
+						AddChild(button);
+						
+						yPos += 30;
+					}
+					{
+						spades::ui::Button button(Manager);
+						button.Caption = _Tr("HeightMap", "Mirror Both");
+						button.Bounds = AABB2(xPos, yPos, 90, 25);
+						@button.Activated = spades::ui::EventHandler(this.OnMirrorBoth);
+						AddChild(button);
+					}
+					
+				}
+				
+				{
 					xPos = ContentsLeft + 15 + 256 - 60;
 					yPos = ContentsTop + 15;
 					
@@ -445,6 +489,10 @@ namespace spades {
 				hMap.PaintAction(TranslatePosToHmap(clientPosition), destroy);
 			}
 			
+			private void OnMirrorHorz(spades::ui::UIElement @sender) { hMap.MirrorHorz(); }
+			private void OnMirrorVert(spades::ui::UIElement @sender) { hMap.MirrorVert(); }
+			private void OnMirrorBoth(spades::ui::UIElement @sender) { hMap.MirrorBoth(); }
+			
 			void UIAxisConfirm(uint axis, uint oldCoord) {
 				//save previous layer
 				if (hMap.currentAxis != axis) {
@@ -464,9 +512,15 @@ namespace spades {
 				//load next layer
 				hMap.currentAxis = axis;
 				switch (axis) {
-					case 0: ReloadMapImage(xUI.coord); break;
-					case 1: ReloadMapImage(yUI.coord); break;
-					default: ReloadMapImage(zUI.coord); break;
+					case 0: 
+						hMap.currentCoord = xUI.coord;
+						ReloadMapImage(xUI.coord); break;
+					case 1:
+						hMap.currentCoord = yUI.coord;
+						ReloadMapImage(yUI.coord); break;
+					default: 
+						hMap.currentCoord = zUI.coord;
+						ReloadMapImage(zUI.coord); break;
 				}
 			}
 			
@@ -553,7 +607,7 @@ namespace spades {
 				}
 			}
 			
-			private bool IsZ() { return hMap.currentAxis >= 2; }
+			private bool IsZ() { return hMap.IsZ(); }
 			private bool IsWater() { return IsZ() && zUI.coord == 63; }
 			
 			void Render() {
