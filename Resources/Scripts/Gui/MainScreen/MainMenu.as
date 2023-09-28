@@ -21,7 +21,7 @@
 #include "CreateProfileScreen.as"
 #include "ServerList.as"
 #include "GlitterMenu.as"
-#include "HeightMap.as"
+#include "../MapEditor/HeightMap.as"
 
 namespace spades {
 
