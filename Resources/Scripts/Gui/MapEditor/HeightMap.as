@@ -123,6 +123,8 @@ namespace spades {
 		}
 		
 		void PaintAction(Vector2 pos, bool destroy = false) {
+			if (destroy && IsWater())
+				return;
 			switch (tool) {
 				case 0: {//square
 					int xStart = int(pos.x) - thickness / 2;
@@ -219,6 +221,7 @@ namespace spades {
 		}
 		
 		bool IsZ() { return currentAxis >= 2; }
+		bool IsWater() { return IsZ() && currentCoord == 63; }
 		
 	}
 	
@@ -514,8 +517,6 @@ namespace spades {
 			private void OnCancel(spades::ui::UIElement @sender) { Close(); }
 			
 			private void PaintAction(Vector2 clientPosition, bool destroy = false) {
-				if (destroy && IsWater())
-					return;
 				hMap.PaintAction(TranslatePosToHmap(clientPosition), destroy);
 			}
 			
@@ -642,7 +643,7 @@ namespace spades {
 			}
 			
 			private bool IsZ() { return hMap.IsZ(); }
-			private bool IsWater() { return IsZ() && zUI.coord == 63; }
+			private bool IsWater() { return hMap.IsWater(); }
 			
 			void Render() {
 				UIElement::Render();
@@ -653,7 +654,7 @@ namespace spades {
 			
 			private void DrawMap() {
 				//todo: draw sector grid?
-				//todo: draw outline border?
+				DrawOutlinedRect(r, TopLeft().x - 2, TopLeft().y - 2, DownRight().x + 2, DownRight().y + 2);
 				r.ColorNP = Vector4(1, 1, 1, 1);
 				r.DrawImage(r.CreateImage(hMap.bitmap), TopLeft());
 			}
