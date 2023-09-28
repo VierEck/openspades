@@ -4,6 +4,8 @@ namespace spades {
 		GameMap @map;
 		Bitmap @bitmap;
 		
+		uint currentAxis;
+		
 		IntVector3 color;
 		uint tool;
 		uint thickness;
@@ -12,13 +14,15 @@ namespace spades {
 			@this.bitmap = Bitmap(512, 512);
 			@this.map = GameMap(fN);
 			
+			currentAxis = 2;
+			
 			color = IntVector3(0, 0, 0);
 			tool = 0;
 			thickness = 1;
 		}
 		
-		void ReloadBitMap(int a, int whichAxis) {
-			switch (whichAxis) {
+		void ReloadBitMap(int a) {
+			switch (currentAxis) {
 				case 0: GetLayerX(a); break;
 				case 1: GetLayerY(a); break;
 				default: GetLayerZ(a); break;
@@ -119,10 +123,10 @@ namespace spades {
 		void PaintAction(Vector2 pos, bool destroy = false) {
 			switch (tool) {
 				case 0: {//square
-					uint xStart = uint(pos.x) - thickness / 2;
-					uint yStart = uint(pos.y) - thickness / 2;
-					for (uint x = xStart; x < xStart + thickness; x++)
-						for (uint y = yStart; y < yStart + thickness; y++) {
+					int xStart = int(pos.x) - thickness / 2;
+					int yStart = int(pos.y) - thickness / 2;
+					for (int x = xStart; x < xStart + thickness; x++)
+						for (int y = yStart; y < yStart + thickness; y++) {
 							if (!destroy)
 								Build(x, y);
 							else
@@ -130,16 +134,16 @@ namespace spades {
 						}
 				} break;
 				case 1: {//circle
-					//todo fix: resulting circles not even
-					uint xStart = uint(pos.x) - thickness / 2;
-					uint yStart = uint(pos.y) - thickness / 2;
-					uint xEnd = xStart + thickness;
-					uint yEnd = yStart + thickness;
+					//fixme: resulting circles not even
+					int xStart = int(pos.x) - thickness / 2;
+					int yStart = int(pos.y) - thickness / 2;
+					int xEnd = xStart + thickness;
+					int yEnd = yStart + thickness;
 					float radius = float(xEnd - xStart) / 2.f;
 					float xMid = xStart + radius;
 					float yMid = yStart + radius;
-					for (uint x = xStart; x < xEnd; x++)
-						for (uint y = yStart; y < yEnd; y++) {
+					for (int x = xStart; x < xEnd; x++)
+						for (int y = yStart; y < yEnd; y++) {
 							float xPow = (xMid - float(x)) * (xMid - float(x));
 							float yPow = (yMid - float(y)) * (yMid - float(y));
 							if (radius * radius < xPow + yPow)
@@ -153,11 +157,29 @@ namespace spades {
 			}
 		}
 		
-		void Build(uint x, uint y) {
+		void Build(int x, int y) {
+			if (x < 0 || x > 511 || y < 0)
+				return;
+			if (IsZ()) {
+				if (y > 511) 
+					return;
+			} else {
+				if (y > 63)
+					return;
+			}
 			uint iCol = color.x | (color.y << 8) | (color.z << 16) | (255 << 24);
 			bitmap.SetPixel(x, y, iCol);
 		}
-		void Destroy(uint x, uint y) {
+		void Destroy(int x, int y) {
+			if (x < 0 || x > 511 || y < 0)
+				return;
+			if (IsZ()) {
+				if (y > 511) 
+					return;
+			} else {
+				if (y > 62)//protect water level
+					return;
+			}
 			uint iCol = 0 | (0 << 8) | (0 << 16) | (0 << 24);
 			bitmap.SetPixel(x, y, iCol);
 		}
@@ -184,6 +206,8 @@ namespace spades {
 			RotateRight();
 		}
 		
+		bool IsZ() { return currentAxis >= 2; }
+		
 	}
 	
 	namespace ui {
@@ -203,7 +227,6 @@ namespace spades {
 			
 			private string mapFileName;
 			private HeightMap @hMap;
-			int currentAxis;
 			
 			private HeightMapUIAxis @xUI;
 			private HeightMapUIAxis @yUI;
@@ -235,8 +258,6 @@ namespace spades {
 				ContentsDown = ContentsTop + ContentsHeight;
 				ContentsMid = ContentsLeft + ContentsWidth * 0.5f;
 				
-				//start off with a z map at water level
-				currentAxis = 2;
 				mapFileName = fN;
 				@hMap = HeightMap("MapEditor/Maps/" + fN);
 				ReloadMapImage(63);
@@ -406,7 +427,7 @@ namespace spades {
 			private void OnSave(spades::ui::UIElement @sender) { SaveMap(); }
 			private void SaveMap() { 
 				//save current layer
-				switch (currentAxis) {
+				switch (hMap.currentAxis) {
 					case 0: hMap.SetLayerX(xUI.coord); break;
 					case 1: hMap.SetLayerY(yUI.coord); break;
 					default: hMap.SetLayerZ(zUI.coord); break;
@@ -426,14 +447,14 @@ namespace spades {
 			
 			void UIAxisConfirm(uint axis, uint oldCoord) {
 				//save previous layer
-				if (currentAxis != axis) {
-					switch (currentAxis) {
+				if (hMap.currentAxis != axis) {
+					switch (hMap.currentAxis) {
 						case 0: hMap.SetLayerX(xUI.coord); break;
 						case 1: hMap.SetLayerY(yUI.coord); break;
 						default: hMap.SetLayerZ(zUI.coord); break;
 					}
 				} else {
-					switch (currentAxis) {
+					switch (hMap.currentAxis) {
 						case 0: hMap.SetLayerX(oldCoord); break;
 						case 1: hMap.SetLayerY(oldCoord); break;
 						default: hMap.SetLayerZ(oldCoord); break;
@@ -441,7 +462,7 @@ namespace spades {
 				}
 				
 				//load next layer
-				currentAxis = axis;
+				hMap.currentAxis = axis;
 				switch (axis) {
 					case 0: ReloadMapImage(xUI.coord); break;
 					case 1: ReloadMapImage(yUI.coord); break;
@@ -453,9 +474,8 @@ namespace spades {
 				hMap.color = IntVector3(redField.val, greenField.val, blueField.val);
 			}
 			
-			private void ReloadMapImage(int a = -1) {
-				if (a != -1)
-					hMap.ReloadBitMap(a, currentAxis);
+			private void ReloadMapImage(uint a) {
+				hMap.ReloadBitMap(a);
 			}
 			
 			void MouseDown(MouseButton button, Vector2 clientPosition) {
@@ -481,6 +501,9 @@ namespace spades {
 				
 				if (dragging)
 					CheckColorSliderBounds(clientPosition);
+			}
+			void MouseWheel(float delta) {
+				//todo zoom
 			}
 			
 			private void CheckColorSliderBounds(Vector2 clientPosition) {
@@ -530,7 +553,7 @@ namespace spades {
 				}
 			}
 			
-			private bool IsZ() { return currentAxis >= 2; }
+			private bool IsZ() { return hMap.currentAxis >= 2; }
 			private bool IsWater() { return IsZ() && zUI.coord == 63; }
 			
 			void Render() {
@@ -541,8 +564,8 @@ namespace spades {
 			}
 			
 			private void DrawMap() {
-				//todo: zoom via mousewheel
 				//todo: draw sector grid?
+				//todo: draw outline border?
 				r.ColorNP = Vector4(1, 1, 1, 1);
 				r.DrawImage(r.CreateImage(hMap.bitmap), TopLeft());
 			}
