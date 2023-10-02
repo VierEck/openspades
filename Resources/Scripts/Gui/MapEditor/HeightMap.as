@@ -210,12 +210,28 @@ namespace spades {
 		}
 		
 		void RotateRight() {
-			//todo
+			if (!IsZ()) //rotation only viable in z map since both dimensions r equally long
+				return; //if implemented in x or y map, map height would become 512 (width -> height)
+			Bitmap rotate(bitmap.Width, bitmap.Height);
+			for (int x = 0; x < bitmap.Width; x++)
+				for (int y = 0; y < bitmap.Height; y++) {
+					rotate.SetPixel(bitmap.Width - y - 1, x, bitmap.GetPixel(x, y));
+				}
+			@bitmap = rotate;
 		}
 		void RotateLeft() {
-			//todo
+			if (!IsZ())
+				return;
+			Bitmap rotate(bitmap.Width, bitmap.Height);
+			for (int x = 0; x < bitmap.Width; x++)
+				for (int y = 0; y < bitmap.Height; y++) {
+					rotate.SetPixel(y, bitmap.Width - x - 1, bitmap.GetPixel(x, y));
+				}
+			@bitmap = rotate;
 		}
 		void Rotate180() {
+			if (!IsZ())
+				return;
 			RotateRight();
 			RotateRight();
 		}
