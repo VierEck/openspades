@@ -386,6 +386,35 @@ namespace spades {
 		static void NotImplemented() {
 			Raise("Not implemented");
 		}
+
+		static bool FileExists(const std::string &in) {
+			return FileManager::FileExists(in.c_str());
+		}
+
+		static void RemoveFile(const std::string &in) {
+			FileManager::RemoveFile(in.c_str());
+		}
+
+		static void RenameFile(const std::string &oldIn, const std::string &newIn) {
+			FileManager::RenameFile(oldIn.c_str(), newIn.c_str());
+		}
+
+		static std::string ReadAllBytes(const std::string &in) {
+			return FileManager::ReadAllBytes(in.c_str());
+		}
+
+		static CScriptArray *EnumFiles(const std::string &in) {
+			auto *ctx = asGetActiveContext();
+			auto *engine = ctx->GetEngine();
+			auto *arrayType = engine->GetTypeInfoByDecl("array<string>");
+			auto *array = CScriptArray::Create(arrayType);
+			auto names = FileManager::EnumFiles(in.c_str());
+			array->Resize(static_cast<asUINT>(names.size()));
+			for(std::size_t i = 0; i < names.size(); i++) {
+				reinterpret_cast<std::string *>(array->At(static_cast<asUINT>(i)))->assign(names[i]);
+			}
+			return array;
+		}
 		
 		virtual void Register(ScriptManager *manager, Phase phase){
 			asIScriptEngine *eng = manager->GetEngine();
@@ -398,6 +427,28 @@ namespace spades {
 												asCALL_CDECL);
 					eng->RegisterGlobalFunction("void NotImplemented()", asFUNCTION(NotImplemented),
 												asCALL_CDECL);
+
+					eng->RegisterGlobalFunction(
+						"bool FileExists(const string &in)",
+						asFUNCTION(FileExists), asCALL_CDECL
+					);
+					eng->RegisterGlobalFunction(
+						"array<string>@ EnumFiles(const string &in)",
+						asFUNCTION(EnumFiles), asCALL_CDECL
+					);
+					eng->RegisterGlobalFunction(
+						"string ReadAllBytes(const string &in)",
+						asFUNCTION(ReadAllBytes), asCALL_CDECL
+					);
+					eng->RegisterGlobalFunction(
+						"void RemoveFile(const string &in)",
+						asFUNCTION(RemoveFile), asCALL_CDECL
+					);
+					eng->RegisterGlobalFunction(
+						"void RenameFile(const string &in, const string &in)",
+						asFUNCTION(RenameFile), asCALL_CDECL
+					);
+
 					break;
 				default:
 					break;
