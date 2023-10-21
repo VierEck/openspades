@@ -1544,7 +1544,7 @@ namespace spades {
 					if (fps > 60)
 						fps = 60.f;
 					fps *= 0.016f;
-					fpsColor = MakeVector4(1.f - fps, fps, 0.f, (float)cg_statsTransparency);
+					fpsColor = MakeVector4(fps < 0.5f ? 1 : (1 - fps) * 2.f, fps > 0.5f ? 1 : fps * 2.f, 0.f, (float)cg_statsTransparency);
 				}
 			}
 			{
@@ -1560,7 +1560,7 @@ namespace spades {
 					if (ups > 20) //upperlimit for voxlap
 						ups = 20.f;
 					ups *= 0.05f;
-					upsColor = MakeVector4(1.f - ups, ups, 0.f, (float)cg_statsTransparency);
+					upsColor = MakeVector4(ups < 0.5f ? 1 : (1 - ups) * 2.f, ups > 0.5f ? 1 : ups * 2.f, 0.f, (float)cg_statsTransparency);
 				}
 			}
 
@@ -1575,7 +1575,7 @@ namespace spades {
 					if (ping > 300) //this is very generous
 						ping = 300;
 					ping *= 0.0033f;
-					pingColor = MakeVector4(ping, 1.f - ping, 0.f, (float)cg_statsTransparency);
+					pingColor = MakeVector4(ping > 0.5f ? 1 : ping * 2.f, ping < 0.5f ? 1 : (1 - ping) * 2.f, 0.f, (float)cg_statsTransparency);
 				}
 
 				sprintf(buf, "up/down: %.02f/%.02fkbps", upbps / 1000.0, downbps / 1000.0);
