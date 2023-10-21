@@ -20,7 +20,7 @@
 
 #include "CreateProfileScreen.as"
 #include "ServerList.as"
-#include "GlitterMenu.as"
+#include "../MapEditor/Glitter.as"
 #include "../MapEditor/HeightMap.as"
 
 namespace spades {
@@ -45,6 +45,32 @@ namespace spades {
 		}
 	}
 
+	class ToggleButton : spades::ui::Button {
+			ToggleButton(spades::ui::UIManager manager) {
+				super(manager);
+				this.Toggled = false;
+			}
+			
+			void PlayActivateSound() { 
+				if (this.Toggled)
+					PlayCloseSound(); 
+				else
+					spades::ui::Button::PlayActivateSound();
+			}
+
+			void OnActivated() { this.Toggled = !this.Toggled; }
+		}
+		
+	class CancelButton : spades::ui::Button {
+			CancelButton(spades::ui::UIManager manager) {
+				super(manager);
+			}
+			
+			void PlayActivateSound() { 
+				PlayCloseSound(); 
+			}
+		}
+	
 	class OpenButton : spades::ui::Button {
 		void PlayActivateSound() { 
 			PlayOpenSound();
@@ -451,7 +477,7 @@ namespace spades {
 		
 		void OnGlitter(spades::ui::UIElement @sender) {
 			RightClickContextMenuClose();
-			GlitterMenu gm(ui, this, currentFileName);
+			spades::ui::GlitterUI gm(ui, this, currentFileName);
 			gm.Run();
 		}
 		
