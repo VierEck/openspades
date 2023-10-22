@@ -24,7 +24,7 @@
 #include <vector>
 #include <memory>
 
-#include "Glitter.h"
+#include <Core/Glitter.h>
 #include <Core/RefCountedObject.h>
 #include <Core/TMPUtils.h>
 #include <ScriptBindings/ScriptManager.h>

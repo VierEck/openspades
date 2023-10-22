@@ -21,8 +21,8 @@
 
 #include "Glitter.h"
 #include <Client/GameMap.h>
-#include <Core/FileManager.h>
-#include <Core/IStream.h>
+#include "FileManager.h"
+#include "IStream.h"
 
 namespace spades {
 	namespace gui {
@@ -157,11 +157,12 @@ namespace spades {
 										vCol.z -= (float)vCol.z * rainFactor;
 									}
 								if (shadow)
-									//openspades already renders shadows btw which makes this
-									//kinda even worse since shadows r rendered at a 45-ish
-									//degree while this here projects shadows at a direct 90
-									//degree angle, so these two shadows visually clash with
-									//each other. 
+									/*
+									* openspades already renders shadows btw
+									* but at a 45 degree angle. this here will
+									* build shadows at a right angle which may
+									* visually clash with rendered shadows
+									*/
 									if (zRestSurfaces) {
 										vCol.x -= shadowColor.x;
 										vCol.y -= shadowColor.y;
