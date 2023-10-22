@@ -216,7 +216,6 @@ namespace spades {
 				float ContentsMid = ContentsLeft + ContentsWidth * 0.5f;
 				
 				fileName = fN;
-				@glitter = Glitter();
 				@inMap = GameMap("MapEditor/Maps/" + fN);
 				@outMap = GameMap("MapEditor/Maps/" + fN);
 				
