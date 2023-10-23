@@ -24,7 +24,6 @@
 #include <vector>
 #include <memory>
 
-#include <Core/Glitter.h>
 #include <Core/RefCountedObject.h>
 #include <Core/TMPUtils.h>
 #include <ScriptBindings/ScriptManager.h>
@@ -36,7 +35,6 @@ namespace spades {
 	class PackageUpdateManager;
 	namespace gui {
 		class MainScreen;
-		class Glitter;
 
 		class MainScreenServerItem : public RefCountedObject {
 			std::string name;
@@ -80,7 +78,6 @@ namespace spades {
 			friend class MainScreen;
 			class ServerListQuery;
 
-			std::unique_ptr<Glitter> glitter;
 			MainScreen *mainScreen;
 			std::unique_ptr<MainScreenServerList> result;
 			stmp::atomic_unique_ptr<MainScreenServerList> resultCell;
@@ -117,9 +114,6 @@ namespace spades {
 			void RemoveFile(const std::string &);
 			void RenameFile(const std::string &, const std::string &);
 			void MainScreenCopyFile(const std::string &);
-
-			void GlitterMap(const std::string &);
-			void GlitterAddArg(int);
 		};
 	}
 }

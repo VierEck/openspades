@@ -20,6 +20,7 @@
 #include <memory>
 #include <Client/GameMap.h>
 #include "ScriptManager.h"
+#include <Core/Glitter.h>
 #include <Core/IStream.h>
 #include <Core/FileManager.h>
 
@@ -115,6 +116,15 @@ namespace spades {
 												  GameMap *m) {
 				return m->CastRay2(v0, dir, maxSteps);
 			}
+
+			static Glitter *FactoryGlitter() {
+				try{
+					return new Glitter();
+				}catch(const std::exception& ex){
+					ScriptContextUtils().SetNativeException(ex);
+					return nullptr;
+				}
+			}
 			
 		public:
 			GameMapRegistrar():
@@ -131,6 +141,9 @@ namespace spades {
 						manager->CheckError(r);
 						r = eng->RegisterObjectType("GameMapRayCastResult",
 													sizeof(GameMap::RayCastResult), asOBJ_VALUE|asOBJ_POD|asOBJ_APP_CLASS_CDAK);
+						manager->CheckError(r);
+						r = eng->RegisterObjectType("Glitter",
+													0, asOBJ_REF);
 						manager->CheckError(r);
 						break;
 					case PhaseObjectMember:
@@ -253,6 +266,35 @@ namespace spades {
 						r = eng->RegisterObjectProperty("GameMapRayCastResult",
 														"IntVector3 normal",
 														asOFFSET(GameMap::RayCastResult, normal));
+						manager->CheckError(r);
+
+						r = eng->RegisterObjectBehaviour("Glitter",
+														 asBEHAVE_ADDREF,
+														 "void f()",
+														 asMETHOD(Glitter, AddRef),
+														 asCALL_THISCALL);
+						manager->CheckError(r);
+						r = eng->RegisterObjectBehaviour("Glitter",
+														 asBEHAVE_RELEASE,
+														 "void f()",
+														 asMETHOD(Glitter, Release),
+														 asCALL_THISCALL);
+						manager->CheckError(r);
+						r = eng->RegisterObjectBehaviour("Glitter",
+														 asBEHAVE_FACTORY,
+														 "Glitter @f()",
+														 asFUNCTION(FactoryGlitter),
+														 asCALL_CDECL);
+						manager->CheckError(r);
+						r = eng->RegisterObjectMethod("Glitter",
+													  "int DoGlitter(GameMap @+)",
+													  asMETHOD(Glitter, DoGlitter),
+													  asCALL_THISCALL);
+						manager->CheckError(r);
+						r = eng->RegisterObjectMethod("Glitter",
+													  "void GlitterAddArg(int, int)",
+													  asMETHOD(Glitter, GlitterAddArg),
+													  asCALL_THISCALL);
 						manager->CheckError(r);
 						
 						break;

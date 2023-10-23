@@ -29,7 +29,6 @@
 
 #include "MainScreen.h"
 #include "MainScreenHelper.h"
-#include <Core/Glitter.h>
 #include <Core/FileManager.h>
 #include <Core/IStream.h>
 #include <Core/Settings.h>
@@ -361,7 +360,6 @@ namespace spades {
 		MainScreenHelper::MainScreenHelper(MainScreen *scr) : mainScreen(scr), query(NULL) {
 			SPADES_MARK_FUNCTION();
 			LoadFavorites();
-			glitter = stmp::make_unique<Glitter>();
 		}
 
 		MainScreenHelper::~MainScreenHelper() {
@@ -369,7 +367,6 @@ namespace spades {
 			if (query) {
 				query->MarkForAutoDeletion();
 			}
-			glitter.reset();
 		}
 
 		void MainScreenHelper::MainScreenDestroyed() {
@@ -654,14 +651,5 @@ namespace spades {
 		}
 
 		MainScreenServerItem::~MainScreenServerItem() { SPADES_MARK_FUNCTION(); }
-
-		void MainScreenHelper::GlitterMap(const std::string &fileName) {
-			SPADES_MARK_FUNCTION();
-			glitter->GlitterMap(fileName);
-		}
-		void MainScreenHelper::GlitterAddArg(int i) {
-			SPADES_MARK_FUNCTION();
-			glitter->GlitterAddArg(i);
-		}
 	} // namespace gui
 } // namespace spades

@@ -23,12 +23,12 @@ namespace spades {
 	
 	//should work too, but its slower than the one implemented in source.
 	//u may use this instead if u want to quickly add and test stuff
-	class Glitter {
+	class GlitterScript {
 		
-		Glitter() {}
+		GlitterScript() {}
 		
 		int DoGlitter(
-			GameMap @inMap, GameMap @outMap,
+			GameMap @map,
 			IntVector3 gradeColor, IntVector3 shadowColor, 
 			IntVector3 xRampColor, int xRampRange,
 			IntVector3 yRampColor, int yRampRange,
@@ -65,8 +65,8 @@ namespace spades {
 						zCountSolid = 0;
 						zFirstSurface = true;
 						for (int z = 0; z < 64; z++) {
-							if (inMap.IsSolid(x, y, z)) {
-								iCol = inMap.GetColor(x, y, z);
+							if (map.IsSolid(x, y, z)) {
+								iCol = map.GetColor(x, y, z);
 								vCol.x = uint8(iCol);
 								vCol.y = uint8(iCol >> 8);
 								vCol.z = uint8(iCol >> 16);
@@ -157,7 +157,7 @@ namespace spades {
 								vCol.z = Max(Min(vCol.z, 255), 0);
 								
 								iCol = vCol.x | (vCol.y << 8) | (vCol.z << 16) | (alpha << 24);
-								outMap.SetSolid(x, y, z, iCol);
+								map.SetSolid(x, y, z, iCol);
 							} else {
 								zRestSurfaces = !zFirstSurface;
 							}
@@ -182,8 +182,7 @@ namespace spades {
 			
 			private string fileName;
 			
-			GameMap @inMap;
-			GameMap @outMap;
+			GameMap @map;
 			
 			private spades::ui::Button @mileButton;
 			private bool mileButtonToggled = false;
@@ -216,8 +215,7 @@ namespace spades {
 				float ContentsMid = ContentsLeft + ContentsWidth * 0.5f;
 				
 				fileName = fN;
-				@inMap = GameMap("MapEditor/Maps/" + fN);
-				@outMap = GameMap("MapEditor/Maps/" + fN);
+				@map = GameMap("MapEditor/Maps/" + fN);
 				
 				{ //ui elements
 					
@@ -384,15 +382,16 @@ namespace spades {
 				
 			}
 			
-			private int DoGlitter(GameMap @inMap, GameMap @outMap) {
+			private int DoGlitter(GameMap @map) {
 				if (useGlitterFromSource) {
-					//todo
-					//return 0;
+					Glitter glitter();
+					AddGlitterArgsSource(@glitter);
+					return glitter.DoGlitter(@map);
 				}
 				
-				Glitter glitter();
+				GlitterScript glitter();
 				return glitter.DoGlitter(
-					inMap, outMap,
+					map, 
 					IntVector3(grade.r, grade.g, grade.b),
 					IntVector3(shadow.r, shadow.g, shadow.b),
 					IntVector3(xRamp.r, xRamp.g, xRamp.b), xRamp.range,
@@ -402,6 +401,37 @@ namespace spades {
 					snow.active, glowClamp.active, glowStay.active, 
 					debug.active, repair.active
 				);
+			}
+			
+			private void AddGlitterArgsSource(Glitter @glitter) {
+				int i = 0;
+				
+				glitter.GlitterAddArg(i++, int(grade.r));
+				glitter.GlitterAddArg(i++, int(grade.g));
+				glitter.GlitterAddArg(i++, int(grade.b));
+				glitter.GlitterAddArg(i++, int(shadow.r));
+				glitter.GlitterAddArg(i++, int(shadow.g));
+				glitter.GlitterAddArg(i++, int(shadow.b));
+				glitter.GlitterAddArg(i++, int(xRamp.r));
+				glitter.GlitterAddArg(i++, int(xRamp.g));
+				glitter.GlitterAddArg(i++, int(xRamp.b));
+				glitter.GlitterAddArg(i++, int(xRamp.range));
+				glitter.GlitterAddArg(i++, int(yRamp.r));
+				glitter.GlitterAddArg(i++, int(yRamp.g));
+				glitter.GlitterAddArg(i++, int(yRamp.b));
+				glitter.GlitterAddArg(i++, int(yRamp.range));
+				glitter.GlitterAddArg(i++, int(zRamp.r));
+				glitter.GlitterAddArg(i++, int(zRamp.g));
+				glitter.GlitterAddArg(i++, int(zRamp.b));
+				glitter.GlitterAddArg(i++, int(zRamp.range));
+				glitter.GlitterAddArg(i++, int(noiseMono.val));
+				glitter.GlitterAddArg(i++, int(noiseColor.val));
+				glitter.GlitterAddArg(i++, int(rain.val));
+				glitter.GlitterAddArg(i++, snow.active ? 1 : 0);
+				glitter.GlitterAddArg(i++, repair.active ? 1 : 0);
+				glitter.GlitterAddArg(i++, glowStay.active ? 1 : 0);
+				glitter.GlitterAddArg(i++, glowClamp.active ? 1 : 0);
+				glitter.GlitterAddArg(i++, debug.active ? 1 : 0);
 			}
 			
 			private void HotKey(string key) {
@@ -424,7 +454,7 @@ namespace spades {
 			private void OnDone(spades::ui::UIElement @sender) { Done(); }
 			
 			private void Done() {
-				if (DoGlitter(inMap, outMap) < 0) {
+				if (DoGlitter(map) < 0) {
 					GlitterUIInfo warning(this, "!", " Glitter canceled. no arguments given. ");
 					warning.Run();
 					return;
@@ -437,7 +467,7 @@ namespace spades {
 					newName += "(" + formatUInt(i, "l", 1) + ")" + ".vxl";
 				}
 				
-				outMap.Save(newName);
+				map.Save(newName);
 				owner.LoadServerList();
 				Close();
 			}

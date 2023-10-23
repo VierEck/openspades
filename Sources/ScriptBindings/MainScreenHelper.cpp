@@ -116,18 +116,6 @@ namespace spades {
 												  asMETHOD(gui::MainScreenHelper, MainScreenCopyFile),
 												  asCALL_THISCALL);
 					manager->CheckError(r);
-
-					r = eng->RegisterObjectMethod("MainScreenHelper",
-												  "void GlitterMap(const string &in)",
-												  asMETHOD(gui::MainScreenHelper, GlitterMap),
-												  asCALL_THISCALL);
-					manager->CheckError(r);
-					r = eng->RegisterObjectMethod("MainScreenHelper",
-												  "void GlitterAddArg(int i)",
-												  asMETHOD(gui::MainScreenHelper, GlitterAddArg),
-												  asCALL_THISCALL);
-					manager->CheckError(r);
-					
 					
 					r = eng->RegisterObjectBehaviour("MainScreenServerItem",
 													 asBEHAVE_ADDREF,

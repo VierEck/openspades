@@ -23,22 +23,27 @@
 
 #include <vector>
 #include <Client/GameMap.h>
+#include <Core/RefCountedObject.h>
 
 namespace spades {
-	namespace gui {
-		class GameMap;
+	class GameMap;
 
-		class Glitter {
-			std::vector<int> glitArgs;
-			Handle<client::GameMap> map;
+	class Glitter : public RefCountedObject {
+		std::vector<short> glitArgs;
 
-		public:
-			Glitter();
-			~Glitter();
+	public:
+		Glitter();
+		~Glitter();
 			
-			void GlitterAddArg(int arg) { glitArgs.push_back(arg); }
-			void GlitterMap(const std::string &);
-			void GlitterProcess(const std::string &, const std::string &);
-		};
-	}
+		void GlitterAddArg(int pos, int arg) { 
+			if (pos < 0)
+				return;
+			
+			if (pos >= glitArgs.size())
+				glitArgs.resize(pos + 1);
+			glitArgs[pos] = arg;
+		}
+		void GlitterMap(const std::string &);
+		int DoGlitter(spades::client::GameMap *map);
+	};
 }
