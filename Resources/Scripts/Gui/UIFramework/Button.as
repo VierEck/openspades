@@ -377,5 +377,52 @@ namespace spades {
 					Vector4(0.0F, 0.0F, 0.0F, IsEnabled ? 0.1F : 0.05F));
 			}
 		}
+	
+		class ToggleButton : spades::ui::Button {
+			ToggleButton(spades::ui::UIManager manager) {
+				super(manager);
+				this.Toggled = false;
+			}
+			
+			void PlayActivateSound() { 
+				if (this.Toggled)
+					PlayCloseSound(); 
+				else
+					spades::ui::Button::PlayActivateSound();
+			}
+
+			void OnActivated() { this.Toggled = !this.Toggled; }
+		}
+		
+		class CancelButton : spades::ui::Button {
+				CancelButton(spades::ui::UIManager manager) {
+					super(manager);
+				}
+				
+				void PlayActivateSound() { 
+					PlayCloseSound(); 
+				}
+			}
+		
+		class OpenButton : spades::ui::Button {
+			void PlayActivateSound() { 
+				PlayOpenSound();
+			}
+
+			OpenButton(spades::ui::UIManager @manager) {
+				super(manager);
+			}
+		}
+
+		class QuitButton : spades::ui::Button {
+			void PlayActivateSound() { 
+				PlayCloseSound(); 
+			}
+
+			QuitButton(spades::ui::UIManager @manager) {
+				super(manager);
+			}
+		}
+
 	}
 }

@@ -49,7 +49,7 @@ namespace spades {
 				AddChild(label);
 			}
 			{
-				CancelButton button(Manager);
+				spades::ui::CancelButton button(Manager);
 				button.Caption = _Tr("Client", "Back to Game");
 				button.Bounds = AABB2(winX, winY, winW, 30.f);
 				@button.Activated = spades::ui::EventHandler(this.OnBackToGame);
@@ -70,7 +70,7 @@ namespace spades {
 				AddChild(button);
 			}
 			{
-				CancelButton button(Manager);
+				spades::ui::CancelButton button(Manager);
 				button.Caption = _Tr("Client", "Disconnect");
 				button.Bounds = AABB2(winX, winY + 96.f, winW, 30.f);
 				@button.Activated = spades::ui::EventHandler(this.OnDisconnect);

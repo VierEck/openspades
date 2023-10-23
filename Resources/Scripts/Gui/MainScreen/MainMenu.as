@@ -163,21 +163,21 @@ namespace spades {
 				AddChild(protocol4Button);
 			}
 			{
-				QuitButton button(Manager);
+				spades::ui::QuitButton button(Manager);
 				button.Caption = _Tr("MainScreen", "Quit");
 				button.Bounds = AABB2(contentsLeft + contentsWidth - 100.f, footerPos, 100.f, 30.f);
 				@button.Activated = spades::ui::EventHandler(this.OnQuitPressed);
 				AddChild(button);
 			}
 			{
-				OpenButton button(Manager);
+				spades::ui::OpenButton button(Manager);
 				button.Caption = _Tr("MainScreen", "Credits");
 				button.Bounds = AABB2(contentsLeft + contentsWidth - 202.f, footerPos, 100.f, 30.f);
 				@button.Activated = spades::ui::EventHandler(this.OnCreditsPressed);
 				AddChild(button);
 			}
 			{
-				OpenButton button(Manager);
+				spades::ui::OpenButton button(Manager);
 				button.Caption = _Tr("MainScreen", "Setup");
 				button.Bounds = AABB2(contentsLeft + contentsWidth - 304.f, footerPos, 100.f, 30.f);
 				@button.Activated = spades::ui::EventHandler(this.OnSetupPressed);

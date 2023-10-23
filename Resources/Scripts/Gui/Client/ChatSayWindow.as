@@ -180,7 +180,7 @@ namespace spades {
 				@sayButton = button;
 			}
 			{
-				CancelButton button(Manager);
+				spades::ui::CancelButton button(Manager);
 				button.Caption = _Tr("Client", "Cancel");
 				button.Bounds = AABB2(winX + winW - 105.f, winY + 36.f, 105.f, 30.f);
 				@button.Activated = spades::ui::EventHandler(this.OnCancel);

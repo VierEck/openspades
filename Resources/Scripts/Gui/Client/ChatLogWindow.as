@@ -73,7 +73,7 @@ namespace spades {
 				AddChild(label);
 			}
 			{
-				CancelButton button(Manager);
+				spades::ui::CancelButton button(Manager);
 				button.Caption = _Tr("Client", "Close");
 				button.Bounds = AABB2(contentsLeft + contentsWidth - 150.f,
 									  contentsTop + contentsHeight - 30.f, 150.f, 30.f);
