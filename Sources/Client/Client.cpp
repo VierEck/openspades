@@ -81,8 +81,7 @@ namespace spades {
 			Handle<IRenderer> r, Handle<IAudioDevice> audioDev,
 			const ServerAddress &host, Handle<FontManager> fontManager,
 			int mode, std::string map_demo, std::string canvas
-		)   : playerName(cg_playerName.operator std::string().substr(0, 15)),
-		      logStream(nullptr),
+		)   : logStream(nullptr),
 		      hostname(host),
 		      renderer(r),
 		      audioDevice(audioDev),
@@ -386,7 +385,7 @@ namespace spades {
 				SPLog("Mumble link failed");
 
 			mumbleLink.setContext(hostname.ToString(false));
-			mumbleLink.setIdentity(playerName);
+			mumbleLink.setIdentity(cg_playerName.operator std::string().substr(0, 15));
 
 			net = stmp::make_unique<NetClient>(this);
 
@@ -599,7 +598,7 @@ namespace spades {
 					// NetClient doesn't like invalid weapon ID
 					weap = WeaponType::RIFLE_WEAPON;
 				}
-				net->SendJoin(team, weap, playerName, lastKills);
+				net->SendJoin(team, weap, cg_playerName.operator std::string().substr(0, 15), lastKills);
 			} else {
 				Player &p = world->GetLocalPlayer().value();
 				if (p.GetTeamId() != team) {

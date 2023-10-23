@@ -1473,9 +1473,8 @@ namespace spades {
 
 			layouter.AddHeading(_Tr("Preferences", "Player Information"));
 			ConfigField @nameField = layouter.AddInputField(
-				_Tr("Preferences", "Player Name"), "cg_playerName", not options.GameActive);
+				_Tr("Preferences", "Player Name"), "cg_playerName");
 			nameField.MaxLength = 15;
-			nameField.DenyNonAscii = true;
 			ConfigField @mentionField = layouter.AddInputField(
 				_Tr("Preferences", "Mention Word"), "cg_mentionWord");
 			mentionField.MaxLength = 15;

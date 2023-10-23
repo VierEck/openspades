@@ -105,7 +105,6 @@ namespace spades {
 			FPSCounter upsCounter;
 
 			std::unique_ptr<NetClient> net;
-			std::string playerName;
 			std::unique_ptr<IStream> logStream;
 
 			Handle<ClientUI> scriptedUI;
