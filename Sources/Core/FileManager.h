@@ -36,6 +36,7 @@ namespace spades {
 		static bool FileExists(const char *);
 		static void RemoveFile(const char *);
 		static void RenameFile(const char *, const char *);
+		static void CopyToFile(const char *, const char *);
 		static void AddFileSystem(IFileSystem *);
 		static void AppendFileSystem(IFileSystem *);
 		static void PrependFileSystem(IFileSystem *);

@@ -52,6 +52,10 @@ namespace spades {
 				FileManager::RenameFile(oldIn.c_str(), newIn.c_str());
 			}
 
+			void CopyToFile(const std::string &oldIn, const std::string &newIn) {
+				FileManager::CopyToFile(oldIn.c_str(), newIn.c_str());
+			}
+
 		};
 
 		static FileHandler *Factory() {
@@ -121,6 +125,11 @@ namespace spades {
 					r = eng->RegisterObjectMethod("FileHandler",
 												  "void RenameFile(const string &in, const string &in)",
 												  asMETHOD(FileHandler, RenameFile),
+												  asCALL_THISCALL);
+					manager->CheckError(r);
+					r = eng->RegisterObjectMethod("FileHandler",
+												  "void CopyToFile(const string &in, const string &in)",
+												  asMETHOD(FileHandler, CopyToFile),
 												  asCALL_THISCALL);
 					manager->CheckError(r);
 					break;
