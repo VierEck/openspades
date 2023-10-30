@@ -460,8 +460,10 @@ namespace spades {
 					return;
 				}
 				
+				FileHandler fH();
+				
 				string newName = "MapEditor/Maps/" + fileName + " - Glitter.vxl";
-				for (int i = 0; FileExists(newName); i++) {
+				for (int i = 0; fH.FileExists(newName); i++) {
 					int glitExt = newName.findFirst("- Glitter");
 					newName = newName.substr(0, glitExt + 1) + " Glitter";
 					newName += "(" + formatUInt(i, "l", 1) + ")" + ".vxl";
