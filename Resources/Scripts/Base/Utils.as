@@ -264,5 +264,23 @@ namespace spades {
 		
 		return 0;
 	}
+	int RenameFile(string oldName, string newName) {
+		FileHandler fH();
+		if (!fH.FileExists(oldName))
+			return -1;
+		if (fH.FileExists(newName))
+			return -1;
+		
+		fH.RenameFile(oldName, newName);
+		return 0;
+	}
+	int RemoveFile(string fName) {
+		FileHandler fH();
+		if (!fH.FileExists(fName))
+			return -1;
+		
+		fH.RemoveFile(fName);
+		return 0;
+	}
 	
 }
