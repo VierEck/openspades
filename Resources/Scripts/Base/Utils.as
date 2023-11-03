@@ -241,4 +241,28 @@ namespace spades {
 		return text.findLast(pattern);
 	}
 
+	int CopyFile(string oldName) {
+		FileHandler fH();
+		if (!fH.FileExists(oldName))
+			return -1;
+		
+		int extPos = StringFindLastCaseInsensitive(oldName, '.');
+		string ext = "";
+		if (extPos >= 0)
+			ext = oldName.substr(extPos, oldName.length - extPos);
+		 
+		string stump = extPos >= 0 
+			? oldName.substr(0, extPos)
+			: oldName;
+		
+		string newName = stump + " - Copy";
+		for (int i = 0; fH.FileExists(newName + ext); i++)
+			newName = stump + " - Copy (" + formatUInt(i, "l", 1) + ")";
+		newName += ext;
+		
+		fH.CopyToFile(oldName, newName);
+		
+		return 0;
+	}
+	
 }
