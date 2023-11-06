@@ -437,7 +437,7 @@ namespace spades {
 		
 		void OnHeightmap(spades::ui::UIElement @sender) {
 			RightClickContextMenuClose();
-			spades::ui::HeightMapUI hm(ui, this, Manager.Renderer, currentFileName);
+			spades::ui::HeightMapUI hm(this, "MapEditor/Maps/" + currentFileName);
 			hm.Run();
 		}
 		

@@ -11,12 +11,14 @@ namespace spades {
 		uint tool;
 		uint thickness;
 		
-		HeightMap(string fN) {
-			@this.bitmap = Bitmap(512, 512);
-			@this.map = GameMap(fN);
+		HeightMap(GameMap @m) {
+			@this.map = m;
+			@this.bitmap = Bitmap(map.Width, map.Height);
 			
 			currentAxis = 2;
-			currentCoord = 63;
+			currentCoord = map.Depth - 1;
+			
+			ReloadBitMap(currentCoord);
 			
 			color = IntVector3(0, 0, 0);
 			tool = 0;
@@ -70,12 +72,7 @@ namespace spades {
 					bitmap.SetPixel(x, y, iCol);
 				}
 		}
-		
-		void SaveMap(string fN) { 
-			int saved = map.Save(fN);
-			//saved == -1 -> failed ?
-		}
-		
+
 		void SetLayerX(int x) {
 			for (int y = 0; y < 512; y++)
 				for (int z = 0; z < 64; z++) {
@@ -245,9 +242,7 @@ namespace spades {
 	
 		class HeightMapUI : UIElement {
 			Renderer @r;
-			private MainScreenUI @ui;
-			private MainScreenHelper @helper;
-			private MainScreenMainMenu @owner;
+			private spades::ui::UIElement @owner;
 			private float ContentsLeft, ContentsRight, ContentsWidth;
 			private float ContentsTop, ContentsDown, ContentsHeight;
 			private float ContentsMid;
@@ -271,27 +266,24 @@ namespace spades {
 			private HeightMapColorSliderBounds @greenBounds;
 			private HeightMapColorSliderBounds @blueBounds;
 			
-			HeightMapUI(MainScreenUI @ui, MainScreenMainMenu @owner, Renderer @renderer,string fN) {
-				super(ui.manager);
-				@this.r = renderer;
-				@this.owner = owner;
-				@this.ui = ui;
-				@this.helper = ui.helper;
+			HeightMapUI(spades::ui::UIElement @o, string fN) {
+				super(o.Manager);
+				@r = Manager.Renderer;
+				@this.owner = o;
 				this.Bounds = owner.Bounds;
 				IsMouseInteractive = true;
 				AcceptsFocus = true;
 				
 				ContentsWidth = 800.f;
-				ContentsLeft = (Manager.Renderer.ScreenWidth - ContentsWidth) * 0.5f;
+				ContentsLeft = (r.ScreenWidth - ContentsWidth) * 0.5f;
 				ContentsRight = ContentsLeft + ContentsWidth;
 				ContentsHeight = 550.f;
-				ContentsTop = (Manager.Renderer.ScreenHeight - ContentsHeight) * 0.5f;
+				ContentsTop = (r.ScreenHeight - ContentsHeight) * 0.5f;
 				ContentsDown = ContentsTop + ContentsHeight;
 				ContentsMid = ContentsLeft + ContentsWidth * 0.5f;
 				
 				mapFileName = fN;
-				@hMap = HeightMap("MapEditor/Maps/" + fN);
-				ReloadMapImage(63);
+				@hMap = HeightMap(GameMap(mapFileName));
 				
 				dragging = destroying = false;
 				
@@ -519,7 +511,7 @@ namespace spades {
 			
 			private void OnSave(spades::ui::UIElement @sender) { SaveMap(); }
 			private void SaveMap() { 
-				//save current layer
+				//set current layer
 				switch (hMap.currentAxis) {
 					case 0: hMap.SetLayerX(xUI.coord); break;
 					case 1: hMap.SetLayerY(yUI.coord); break;
@@ -527,7 +519,9 @@ namespace spades {
 				}
 				
 				//now save the entire map
-				hMap.SaveMap("MapEditor/Maps/" + mapFileName); 
+				if(hMap.map.Save(mapFileName) < 0) {
+					//todo: display warning msg
+				}
 			}
 			
 			private void OnCancel(spades::ui::UIElement @sender) { Close(); }
