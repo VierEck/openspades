@@ -175,13 +175,11 @@ namespace spades {
 		class GlitterUI : UIElement {
 			bool useGlitterFromSource = true;
 		
-			private MainScreenMainMenu @owner;
-			MainScreenUI @ui;
+			private spades::ui::UIElement @owner;
 			private spades::ui::EventHandler @Closed;
-			Font @font = ui.fontManager.GuiFont;
+			Font @font;
 			
 			private string fileName;
-			
 			GameMap @map;
 			
 			private spades::ui::Button @mileButton;
@@ -201,11 +199,10 @@ namespace spades {
 			private GlitterUIToggleElement @debug;
 			private GlitterUIToggleElement @repair;
 			
-			GlitterUI(MainScreenUI @ui, MainScreenMainMenu @o, string fN) {
-				super(ui.manager);
-				
-				@this.ui = ui;
+			GlitterUI(spades::ui::UIElement @o, FontManager @fM, string fN) {
+				super(o.Manager);
 				@this.owner = o;
+				@font = fM.GuiFont;
 				this.Bounds = owner.Bounds;
 				
 				float ContentsWidth = 800.f;
@@ -215,7 +212,7 @@ namespace spades {
 				float ContentsMid = ContentsLeft + ContentsWidth * 0.5f;
 				
 				fileName = fN;
-				@map = GameMap("MapEditor/Maps/" + fN);
+				@map = GameMap(fN);
 				
 				{ //ui elements
 					
@@ -452,7 +449,6 @@ namespace spades {
 			}
 			
 			private void OnDone(spades::ui::UIElement @sender) { Done(); }
-			
 			private void Done() {
 				if (DoGlitter(map) < 0) {
 					GlitterUIInfo warning(this, "!", " Glitter canceled. no arguments given. ");
@@ -462,7 +458,7 @@ namespace spades {
 				
 				FileHandler fH();
 				
-				string newName = "MapEditor/Maps/" + fileName + " - Glitter.vxl";
+				string newName = fileName + " - Glitter.vxl";
 				for (int i = 0; fH.FileExists(newName); i++) {
 					int glitExt = newName.findFirst("- Glitter");
 					newName = newName.substr(0, glitExt + 1) + " Glitter";
@@ -470,7 +466,6 @@ namespace spades {
 				}
 				
 				map.Save(newName);
-				owner.LoadServerList();
 				Close();
 			}
 			
@@ -480,7 +475,6 @@ namespace spades {
 				owner.Enable = false;
 				owner.Parent.AddChild(this);
 			}
-			
 			void Close() {
 				owner.Enable = true;
 				@this.Parent = null;
@@ -637,7 +631,7 @@ namespace spades {
 			bool isWarning;
 			
 			GlitterUIInfo(GlitterUI @o, string caption, string infoText) {
-				super(o.ui.manager);
+				super(o.Manager);
 				@owner = o;
 				this.Bounds = o.Bounds;
 				

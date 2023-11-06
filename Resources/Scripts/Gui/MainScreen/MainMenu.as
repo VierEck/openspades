@@ -306,6 +306,14 @@ namespace spades {
 			LoadServerList();
 		}
 
+		bool wasEnabled = Enable;
+		private void CheckEnable() {
+			if (wasEnabled != Enable) {
+				wasEnabled = Enable;
+				LoadServerList();
+			}
+		}
+
 		void LoadServerList() {
 			if (loading) {
 				return;
@@ -431,7 +439,7 @@ namespace spades {
 		
 		void OnGlitter(spades::ui::UIElement @sender) {
 			RightClickContextMenuClose();
-			spades::ui::GlitterUI gm(ui, this, currentFileName);
+			spades::ui::GlitterUI gm(this, ui.fontManager, "MapEditor/Maps/" + currentFileName);
 			gm.Run();
 		}
 		
@@ -901,6 +909,7 @@ namespace spades {
 
 		void Render() {
 			CheckServerList();
+			CheckEnable();
 			UIElement::Render();
 
 			// check for client error message.
