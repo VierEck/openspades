@@ -218,7 +218,7 @@ namespace spades {
 				}
 			}
 			Vector3 GetRecoil() override {
-				return MakeVector3(0.0001f, 0.05f, 0.f);
+				return MakeVector3(0.025f, 0.05f, 0.f);
 			}
 			float GetSpread() override { return 0.006f; }
 			int GetPelletSize() override { return 1; }
@@ -245,7 +245,7 @@ namespace spades {
 				}
 			}
 			Vector3 GetRecoil() override {
-				return MakeVector3(0.00005f, 0.0120f, 0.f);
+				return MakeVector3(0.01f, 0.0120f, 0.f);
 			}
 			float GetSpread() override { return 0.012f; }
 			int GetPelletSize() override { return 1; }
@@ -275,7 +275,7 @@ namespace spades {
 				}
 			}
 			Vector3 GetRecoil() override {
-				return MakeVector3(0.0002f, 0.1f, 0.f);
+				return MakeVector3(0.05f, 0.1f, 0.f);
 			}
 			float GetSpread() override { return 0.024f; }
 			int GetPelletSize() override { return 8; }
@@ -307,7 +307,7 @@ namespace spades {
 				}
 			}
 			Vector3 GetRecoil() override {
-				return MakeVector3(0.0002f, 0.075f, 0.f);
+				return MakeVector3(0.0001f, 0.075f, 0.f);
 			}
 			float GetSpread() override { return 0.004f; }
 			int GetPelletSize() override { return 1; }
