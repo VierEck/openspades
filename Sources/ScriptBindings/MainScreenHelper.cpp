@@ -101,21 +101,6 @@ namespace spades {
 												  asMETHOD(gui::MainScreenHelper, GetPackageUpdateManager),
 												  asCALL_THISCALL);
 					manager->CheckError(r);
-					r = eng->RegisterObjectMethod("MainScreenHelper",
-												  "void RemoveFile(const string &in)",
-												  asMETHOD(gui::MainScreenHelper, RemoveFile),
-												  asCALL_THISCALL);
-					manager->CheckError(r);
-					r = eng->RegisterObjectMethod("MainScreenHelper",
-												  "void RenameFile(const string &in, const string &in)",
-												  asMETHOD(gui::MainScreenHelper, RenameFile),
-												  asCALL_THISCALL);
-					manager->CheckError(r);
-					r = eng->RegisterObjectMethod("MainScreenHelper",
-												  "void MainScreenCopyFile(const string &in)",
-												  asMETHOD(gui::MainScreenHelper, MainScreenCopyFile),
-												  asCALL_THISCALL);
-					manager->CheckError(r);
 					
 					r = eng->RegisterObjectBehaviour("MainScreenServerItem",
 													 asBEHAVE_ADDREF,
