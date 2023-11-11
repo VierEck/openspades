@@ -413,7 +413,7 @@ namespace spades {
 					color = ConvertColorRGBA(col);
 					color.w = Clamp(cg_scopeDotAlpha.IntValue, 0, 255) / 255.0F;
 					param.dotColor = color;
-					float dotThickness = Max(1.0F, cg_scopeDotThickness.FloatValue);
+					param.dotThickness = Max(1.0F, cg_scopeDotThickness.FloatValue);
 
 					param.drawOutline = cg_scopeOutline.IntValue == 1;
 					param.useRoundedStyle = cg_scopeOutlineRoundedStyle.IntValue == 1;
