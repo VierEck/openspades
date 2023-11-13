@@ -185,19 +185,19 @@ namespace spades {
 			private spades::ui::Button @mileButton;
 			private bool mileButtonToggled = false;
 			
-			private GlitterUIColorFields @grade;
-			private GlitterUIColorFields @shadow;
-			private GlitterUIRampUI @xRamp;
-			private GlitterUIRampUI @yRamp;
-			private GlitterUIRampUI @zRamp;
-			private GlitterUIFieldElement @noiseMono;
-			private GlitterUIFieldElement @noiseColor;
-			private GlitterUIFieldElement @rain;
-			private GlitterUIToggleElement @snow;
-			private GlitterUIToggleElement @glowClamp;
-			private GlitterUIToggleElement @glowStay;
-			private GlitterUIToggleElement @debug;
-			private GlitterUIToggleElement @repair;
+			private spades::ui::GlitterUI::GlitterUIColorFields @grade;
+			private spades::ui::GlitterUI::GlitterUIColorFields @shadow;
+			private spades::ui::GlitterUI::GlitterUIRampUI @xRamp;
+			private spades::ui::GlitterUI::GlitterUIRampUI @yRamp;
+			private spades::ui::GlitterUI::GlitterUIRampUI @zRamp;
+			private spades::ui::GlitterUI::GlitterUIFieldElement @noiseMono;
+			private spades::ui::GlitterUI::GlitterUIFieldElement @noiseColor;
+			private spades::ui::GlitterUI::GlitterUIFieldElement @rain;
+			private spades::ui::GlitterUI::GlitterUIToggleElement @snow;
+			private spades::ui::GlitterUI::GlitterUIToggleElement @glowClamp;
+			private spades::ui::GlitterUI::GlitterUIToggleElement @glowStay;
+			private spades::ui::GlitterUI::GlitterUIToggleElement @debug;
+			private spades::ui::GlitterUI::GlitterUIToggleElement @repair;
 			
 			GlitterUI(spades::ui::UIElement @o, FontManager @fM, string fN) {
 				super(o.Manager);
@@ -276,13 +276,13 @@ namespace spades {
 								"Will assume 0 for empty fields if at least one field is given. \n"
 								+ "Wont have any effect if all fields are empty. \n";
 							@grade = 
-								GlitterUIColorFields(
+								spades::ui::GlitterUI::GlitterUIColorFields(
 									this, pos, "Grade", 
 									"Multiplies the map\'s colors with a RGB value. \n" + info
 								);
 							pos.y += ySpacing;
 							@shadow = 
-								GlitterUIColorFields(
+								spades::ui::GlitterUI::GlitterUIColorFields(
 									this, pos, "Shadow", 
 									"Substracts input as shadows. \n" + info
 								);
@@ -295,19 +295,19 @@ namespace spades {
 							pos.y += ySpacing;
 							ySpacing += 30;
 							@xRamp = 
-								GlitterUIRampUI(
+								spades::ui::GlitterUI::GlitterUIRampUI(
 									this, pos, "Ramp X", 
 									"Ramps X axis of the map. \n" + info
 								);
 							pos.y += ySpacing;
 							@yRamp = 
-								GlitterUIRampUI(
+								spades::ui::GlitterUI::GlitterUIRampUI(
 									this, pos, "Ramp Y", 
 									"Ramps Y axis of the map. \n" + info
 								);
 							pos.y += ySpacing;
 							@zRamp = 
-								GlitterUIRampUI(
+								spades::ui::GlitterUI::GlitterUIRampUI(
 									this, pos, "Ramp Z", 
 									"Ramps Z axis of the map. \n" + info
 								);
@@ -324,50 +324,50 @@ namespace spades {
 							info = 
 								"No effect if field is 0 or empty";
 							@noiseMono = 
-								GlitterUIFieldElement(
+								spades::ui::GlitterUI::GlitterUIFieldElement(
 									this, pos, "NoiseMono", 
 									"Adds monochromatic noise to map. \n" + info
 								);
 							pos.y += ySpacing;
 							@noiseColor = 
-								GlitterUIFieldElement(
+								spades::ui::GlitterUI::GlitterUIFieldElement(
 									this, pos, "NoiseColor", 
 									"Adds chromatic noise to map. \n" + info
 								);
 							pos.y += ySpacing;
 							@rain = 
-								GlitterUIFieldElement(
+								spades::ui::GlitterUI::GlitterUIFieldElement(
 									this, pos, "Rain", 
 									"Adds rain to the map. \n" + info
 								);
 							
 							pos.y += ySpacing;
 							@snow =
-								GlitterUIToggleElement(
+								spades::ui::GlitterUI::GlitterUIToggleElement(
 									this, pos, "Snow", 
 									"Adds snow to the map."
 								);
 							pos.y += ySpacing;
 							@glowClamp =
-								GlitterUIToggleElement(
+								spades::ui::GlitterUI::GlitterUIToggleElement(
 									this, pos, "GlowClamp", 
 									"Removes all glow blocks by clamping all color values to 254."
 								);
 							pos.y += ySpacing;
 							@glowStay =
-								GlitterUIToggleElement(
+								spades::ui::GlitterUI::GlitterUIToggleElement(
 									this, pos, "GlowStay", 
 									"Ensures the fed glow map keeps"
 								);
 							pos.y += ySpacing;
 							@debug =
-								GlitterUIToggleElement(
+								spades::ui::GlitterUI::GlitterUIToggleElement(
 									this, pos, "Debug", 
 									"Replaces colors with a P-map gradient."
 								);
 							pos.y += ySpacing;
 							@repair =
-								GlitterUIToggleElement(
+								spades::ui::GlitterUI::GlitterUIToggleElement(
 									this, pos, "Repair", 
 									"Fixes alpha channel issue with some file editors."
 								);
@@ -451,7 +451,7 @@ namespace spades {
 			private void OnDone(spades::ui::UIElement @sender) { Done(); }
 			private void Done() {
 				if (DoGlitter(map) < 0) {
-					GlitterUIInfo warning(this, "!", " Glitter canceled. no arguments given. ");
+					spades::ui::GlitterUI::GlitterUIInfo warning(this, "!", " Glitter canceled. no arguments given. ");
 					warning.Run();
 					return;
 				}
@@ -484,228 +484,232 @@ namespace spades {
 			
 		}
 		
-		class GlitterUIElement {
-			private GlitterUI @owner;
-			private GlitterUIInfo @info;
-			
-			GlitterUIElement(GlitterUI @o, Vector2 pos, string caption, string infoText) {
-				@owner = o;
-				@info = GlitterUIInfo(o, caption, infoText);
-				
-				{
-					spades::ui::Label label(o.Manager);
-					label.Bounds = AABB2(pos.x, pos.y, 0, 0);
-					label.Text = caption;
-					o.AddChild(label);
-				}
-				
-				pos.x += 90 - o.font.Measure(" ? ").x;
-				{
-					spades::ui::Button button(o.Manager);
-					button.Caption = _Tr("Glitter", " ? ");
-					button.Bounds = 
-						AABB2(pos.x, pos.y - 2.5f, o.font.Measure(button.Caption).x + 5, 30);
-					@button.Activated = spades::ui::EventHandler(this.OnInfo);
-					o.AddChild(button);
-				}
-				
-			}
-			
-			private void OnInfo(spades::ui::UIElement @sender) { info.Run(); }
-			
-		}
+		namespace GlitterUI {
 		
-		class GlitterUIToggleElement : GlitterUIElement {
-			private ToggleButton @button;
-			
-			GlitterUIToggleElement(GlitterUI @o, Vector2 pos, string caption, string infoText) {
-				super(o, pos, caption, infoText);
-				pos.x += 100;
+			class GlitterUIElement {
+				private GlitterUI @owner;
+				private GlitterUIInfo @info;
 				
-				{
-					@button = ToggleButton(o.Manager);
-					button.Caption = _Tr("Glitter", "Enabled");
-					button.Bounds = AABB2(pos.x, pos.y, o.font.Measure(button.Caption).x + 5, 30);
-					button.Enable = true;
-					o.AddChild(button);
-				}
-			}
-			
-			bool active { get { return button.Toggled; } }
-			
-		}
-		
-		class GlitterUIFieldElement : GlitterUIElement {
-			private spades::ui::Field @valField;
-			
-			GlitterUIFieldElement(GlitterUI @o, Vector2 pos, string caption, string infoText) {
-				super(o, pos, caption, infoText);
-				pos.x += 100;
-				
-				{
-					@valField = spades::ui::Field(o.Manager);
-					float width = o.font.Measure("1-100%").x + 5;
-					valField.Bounds = AABB2(pos.x, pos.y, width, 25);
-					valField.Placeholder = _Tr("Glitter", "0-100%");
-					o.AddChild(valField);
-				}
-				
-			}
-			
-			int val { get { return Min(100, parseInt(valField.Text)); } }
-			
-		}
-		
-		class GlitterUIColorFields : GlitterUIElement {
-			private spades::ui::Field @rField;
-			private spades::ui::Field @gField;
-			private spades::ui::Field @bField;
-			
-			GlitterUIColorFields(GlitterUI @o, Vector2 pos, string caption, string infoText) {
-				super(o, pos, caption, infoText);
-				pos.x += 100; //caption and infobutton
-				
-				{
-					@rField = spades::ui::Field(o.Manager);
-					float width = o.font.Measure("0-255 R").x + 5;
-					rField.Bounds = AABB2(pos.x, pos.y, width, 25);
-					rField.Placeholder = _Tr("Glitter", "0-255 R");
-					o.AddChild(rField);
-					
-					pos.x += width + 5;
-				}
-				{
-					@gField = spades::ui::Field(o.Manager);
-					float width = o.font.Measure("0-255 G").x + 5;
-					gField.Bounds = AABB2(pos.x, pos.y, width, 25);
-					gField.Placeholder = _Tr("Glitter", "0-255 G");
-					o.AddChild(gField);
-					
-					pos.x += width + 5;
-				}
-				{
-					@bField = spades::ui::Field(o.Manager);
-					float width = o.font.Measure("0-255 B").x + 5;
-					bField.Bounds = AABB2(pos.x, pos.y, width, 25);
-					bField.Placeholder = _Tr("Glitter", "0-255 B");
-					o.AddChild(bField);
-					
-					pos.x += width + 5;
-				}
-				
-			}
-			
-			int r { get { return rField.Text.length == 0 ? -1 : Min(parseUInt(rField.Text), 255); } }
-			int g { get { return gField.Text.length == 0 ? -1 : Min(parseUInt(gField.Text), 255); } }
-			int b { get { return bField.Text.length == 0 ? -1 : Min(parseUInt(bField.Text), 255); } }
-			
-		}
-		
-		class GlitterUIRampUI : GlitterUIColorFields {
-			private spades::ui::Field @rangeField;
-			
-			GlitterUIRampUI(GlitterUI @o, Vector2 pos, string caption, string infoText) {
-				super(o, pos, caption, infoText);
-				//caption, info and color fields
-				pos.x += 100;
-				pos.y += 30;
-				
-				{
-					@rangeField = spades::ui::Field(o.Manager);
-					float width = o.font.Measure("(-512)-512").x + 5;
-					rangeField.Bounds = AABB2(pos.x, pos.y, width, 25);
-					rangeField.Placeholder = _Tr("Glitter", "(-512)-512");
-					o.AddChild(rangeField);
-				}
-				
-			}
-			
-			//if range < 0 then reversed
-			int range { get { return Max(-512, Min(512, parseInt(rangeField.Text))); } }
-			
-		}
-		
-		class GlitterUIInfo : UIElement {
-			private GlitterUI @owner;
-			private spades::ui::EventHandler @Closed;
-			bool isWarning;
-			
-			GlitterUIInfo(GlitterUI @o, string caption, string infoText) {
-				super(o.Manager);
-				@owner = o;
-				this.Bounds = o.Bounds;
-				
-				isWarning = caption == "!";
-				
-				float width = Max(400, int(o.font.Measure(infoText).x) + 10);
-				float height = Max(125, int(o.font.Measure(infoText).y) + 10);
-				Vector2 pos = 
-					Vector2(
-						(Manager.Renderer.ScreenWidth - width) * 0.5f,
-						(Manager.Renderer.ScreenHeight - height) * 0.5f
-					);
-				
-				{
+				GlitterUIElement(GlitterUI @o, Vector2 pos, string caption, string infoText) {
+					@owner = o;
+					@info = GlitterUIInfo(o, caption, infoText);
 					
 					{
-						spades::ui::Label label(Manager);
-						label.BackgroundColor = Vector4(1, 1, 1, 1);
-						label.Bounds = 
-							AABB2(pos.x - 1, pos.y - 1, width + 2, height + 2);
-						AddChild(label);
-					}
-					{
-						spades::ui::Label label(Manager);
-						label.BackgroundColor = Vector4(0, 0, 0, 1);
-						label.Bounds = AABB2(pos.x, pos.y, width, height);
-						AddChild(label);
-					}
-					{
-						CancelButton button(Manager);
-						button.Caption = _Tr("Glitter", "X");
-						button.Bounds = AABB2(pos.x + width - 30, pos.y, 30, 30);
-						@button.Activated = spades::ui::EventHandler(this.OnClose);
-						AddChild(button);
-					}
-					{
-						spades::ui::Label label(Manager);
-						label.Bounds = AABB2(pos.x + 5, pos.y + 5, 0, 0);
+						spades::ui::Label label(o.Manager);
+						label.Bounds = AABB2(pos.x, pos.y, 0, 0);
 						label.Text = caption;
-						AddChild(label);
+						o.AddChild(label);
 					}
+					
+					pos.x += 90 - o.font.Measure(" ? ").x;
 					{
-						spades::ui::Label label(Manager);
-						label.Bounds = AABB2(pos.x + 5, pos.y + 40, 0, 0);
-						label.Text = infoText;
-						AddChild(label);
+						spades::ui::Button button(o.Manager);
+						button.Caption = _Tr("Glitter", " ? ");
+						button.Bounds = 
+							AABB2(pos.x, pos.y - 2.5f, o.font.Measure(button.Caption).x + 5, 30);
+						@button.Activated = spades::ui::EventHandler(this.OnInfo);
+						o.AddChild(button);
 					}
 					
 				}
 				
+				private void OnInfo(spades::ui::UIElement @sender) { info.Run(); }
+				
 			}
 			
-			private void HotKey(string key) {
-				if (key == "Escape" || key == "Enter") {
-					Close();
-				} else {
-					UIElement::HotKey(key);
+			class GlitterUIToggleElement : GlitterUIElement {
+				private ToggleButton @button;
+				
+				GlitterUIToggleElement(GlitterUI @o, Vector2 pos, string caption, string infoText) {
+					super(o, pos, caption, infoText);
+					pos.x += 100;
+					
+					{
+						@button = ToggleButton(o.Manager);
+						button.Caption = _Tr("Glitter", "Enabled");
+						button.Bounds = AABB2(pos.x, pos.y, o.font.Measure(button.Caption).x + 5, 30);
+						button.Enable = true;
+						o.AddChild(button);
+					}
 				}
+				
+				bool active { get { return button.Toggled; } }
+				
 			}
 			
-			private void OnClose(spades::ui::UIElement @sender) { Close(); }
-			
-			void Run() {
-				owner.Parent.AddChild(this);
-				owner.Enable = false;
+			class GlitterUIFieldElement : GlitterUIElement {
+				private spades::ui::Field @valField;
+				
+				GlitterUIFieldElement(GlitterUI @o, Vector2 pos, string caption, string infoText) {
+					super(o, pos, caption, infoText);
+					pos.x += 100;
+					
+					{
+						@valField = spades::ui::Field(o.Manager);
+						float width = o.font.Measure("1-100%").x + 5;
+						valField.Bounds = AABB2(pos.x, pos.y, width, 25);
+						valField.Placeholder = _Tr("Glitter", "0-100%");
+						o.AddChild(valField);
+					}
+					
+				}
+				
+				int val { get { return Min(100, parseInt(valField.Text)); } }
+				
 			}
 			
-			void Close() {
-				owner.Enable = true;
-				if (isWarning)
-					owner.Close();
-				@this.Parent = null;
-				if (Closed !is null)
-					Closed(this);
+			class GlitterUIColorFields : GlitterUIElement {
+				private spades::ui::Field @rField;
+				private spades::ui::Field @gField;
+				private spades::ui::Field @bField;
+				
+				GlitterUIColorFields(GlitterUI @o, Vector2 pos, string caption, string infoText) {
+					super(o, pos, caption, infoText);
+					pos.x += 100; //caption and infobutton
+					
+					{
+						@rField = spades::ui::Field(o.Manager);
+						float width = o.font.Measure("0-255 R").x + 5;
+						rField.Bounds = AABB2(pos.x, pos.y, width, 25);
+						rField.Placeholder = _Tr("Glitter", "0-255 R");
+						o.AddChild(rField);
+						
+						pos.x += width + 5;
+					}
+					{
+						@gField = spades::ui::Field(o.Manager);
+						float width = o.font.Measure("0-255 G").x + 5;
+						gField.Bounds = AABB2(pos.x, pos.y, width, 25);
+						gField.Placeholder = _Tr("Glitter", "0-255 G");
+						o.AddChild(gField);
+						
+						pos.x += width + 5;
+					}
+					{
+						@bField = spades::ui::Field(o.Manager);
+						float width = o.font.Measure("0-255 B").x + 5;
+						bField.Bounds = AABB2(pos.x, pos.y, width, 25);
+						bField.Placeholder = _Tr("Glitter", "0-255 B");
+						o.AddChild(bField);
+						
+						pos.x += width + 5;
+					}
+					
+				}
+				
+				int r { get { return rField.Text.length == 0 ? -1 : Min(parseUInt(rField.Text), 255); } }
+				int g { get { return gField.Text.length == 0 ? -1 : Min(parseUInt(gField.Text), 255); } }
+				int b { get { return bField.Text.length == 0 ? -1 : Min(parseUInt(bField.Text), 255); } }
+				
+			}
+			
+			class GlitterUIRampUI : GlitterUIColorFields {
+				private spades::ui::Field @rangeField;
+				
+				GlitterUIRampUI(GlitterUI @o, Vector2 pos, string caption, string infoText) {
+					super(o, pos, caption, infoText);
+					//caption, info and color fields
+					pos.x += 100;
+					pos.y += 30;
+					
+					{
+						@rangeField = spades::ui::Field(o.Manager);
+						float width = o.font.Measure("(-512)-512").x + 5;
+						rangeField.Bounds = AABB2(pos.x, pos.y, width, 25);
+						rangeField.Placeholder = _Tr("Glitter", "(-512)-512");
+						o.AddChild(rangeField);
+					}
+					
+				}
+				
+				//if range < 0 then reversed
+				int range { get { return Max(-512, Min(512, parseInt(rangeField.Text))); } }
+				
+			}
+			
+			class GlitterUIInfo : UIElement {
+				private GlitterUI @owner;
+				private spades::ui::EventHandler @Closed;
+				bool isWarning;
+				
+				GlitterUIInfo(GlitterUI @o, string caption, string infoText) {
+					super(o.Manager);
+					@owner = o;
+					this.Bounds = o.Bounds;
+					
+					isWarning = caption == "!";
+					
+					float width = Max(400, int(o.font.Measure(infoText).x) + 10);
+					float height = Max(125, int(o.font.Measure(infoText).y) + 10);
+					Vector2 pos = 
+						Vector2(
+							(Manager.Renderer.ScreenWidth - width) * 0.5f,
+							(Manager.Renderer.ScreenHeight - height) * 0.5f
+						);
+					
+					{
+						
+						{
+							spades::ui::Label label(Manager);
+							label.BackgroundColor = Vector4(1, 1, 1, 1);
+							label.Bounds = 
+								AABB2(pos.x - 1, pos.y - 1, width + 2, height + 2);
+							AddChild(label);
+						}
+						{
+							spades::ui::Label label(Manager);
+							label.BackgroundColor = Vector4(0, 0, 0, 1);
+							label.Bounds = AABB2(pos.x, pos.y, width, height);
+							AddChild(label);
+						}
+						{
+							CancelButton button(Manager);
+							button.Caption = _Tr("Glitter", "X");
+							button.Bounds = AABB2(pos.x + width - 30, pos.y, 30, 30);
+							@button.Activated = spades::ui::EventHandler(this.OnClose);
+							AddChild(button);
+						}
+						{
+							spades::ui::Label label(Manager);
+							label.Bounds = AABB2(pos.x + 5, pos.y + 5, 0, 0);
+							label.Text = caption;
+							AddChild(label);
+						}
+						{
+							spades::ui::Label label(Manager);
+							label.Bounds = AABB2(pos.x + 5, pos.y + 40, 0, 0);
+							label.Text = infoText;
+							AddChild(label);
+						}
+						
+					}
+					
+				}
+				
+				private void HotKey(string key) {
+					if (key == "Escape" || key == "Enter") {
+						Close();
+					} else {
+						UIElement::HotKey(key);
+					}
+				}
+				
+				private void OnClose(spades::ui::UIElement @sender) { Close(); }
+				
+				void Run() {
+					owner.Parent.AddChild(this);
+					owner.Enable = false;
+				}
+				
+				void Close() {
+					owner.Enable = true;
+					if (isWarning)
+						owner.Close();
+					@this.Parent = null;
+					if (Closed !is null)
+						Closed(this);
+				}
+				
 			}
 			
 		}
