@@ -8,7 +8,7 @@ namespace spades {
 
 		ClientUI @ui;
 		private ClientUIHelper @helper;
-		spades::ui::TxtViewer @viewer;
+		spades::MapTxtEditor::TxtViewer @viewer;
 
 		private spades::ui::UIElement @genButton;
 
@@ -79,7 +79,7 @@ namespace spades {
 				@genButton = button;
 			}
 			{
-				spades::ui::TxtViewer viewer(Manager, ui);
+				spades::MapTxtEditor::TxtViewer viewer(Manager, ui);
 				AddChild(viewer);
 				viewer.Bounds = AABB2(contentsLeft + 10.f, contentsTop + 10.f, contentsWidth - 20.f, contentsHeight - 50.f);
 				@this.viewer = viewer;
@@ -168,7 +168,7 @@ namespace spades {
 		}
 	};
 	
-	namespace ui { 
+	namespace MapTxtEditor { 
 	
 		class TxtAction {
 			int start;
@@ -177,7 +177,7 @@ namespace spades {
 		}
 		
 		class TxtViewerSelectionState {
-			UIElement @FocusElement;
+			spades::ui::UIElement @FocusElement;
 			int MarkPosition = 0;
 			int CursorPosition = 0;
 			int currentLine = 0;
@@ -191,7 +191,7 @@ namespace spades {
 			}
 		};
 
-		class TxtViewerItemUI : UIElement {
+		class TxtViewerItemUI : spades::ui::UIElement {
 			private string text;
 			private Vector4 textColor;
 			private int index;
@@ -199,7 +199,7 @@ namespace spades {
 
 			private TxtViewerSelectionState @selection;
 
-			TxtViewerItemUI(UIManager @manager, TxtViewerItem @item,
+			TxtViewerItemUI(spades::ui::UIManager @manager, TxtViewerItem @item,
 							 TxtViewerSelectionState @selection) {
 				super(manager);
 
@@ -288,8 +288,8 @@ namespace spades {
 			}
 		};
 
-		class TxtViewerModel : ListViewModel {
-			UIManager @manager;
+		class TxtViewerModel : spades::ui::ListViewModel {
+			spades::ui::UIManager @manager;
 			TxtViewerItem @[] lines = {};
 			Font @font;
 			float width;
@@ -373,7 +373,7 @@ namespace spades {
 				selection.CursorPosition = Max(selection.CursorPosition, contentStart);
 			}
 
-			TxtViewerModel(UIManager @manager, string text, Font @font, float width,
+			TxtViewerModel(spades::ui::UIManager @manager, string text, Font @font, float width,
 							TxtViewerSelectionState @selection) {
 				@this.manager = manager;
 				@this.font = font;
@@ -388,14 +388,14 @@ namespace spades {
 				get { return int(lines.length); }
 			}
 
-			UIElement @CreateElement(int row) {
+			spades::ui::UIElement @CreateElement(int row) {
 				return TxtViewerItemUI(manager, lines[row], selection);
 			}
 
-			void RecycleElement(UIElement @elem) {}
+			void RecycleElement(spades::ui::UIElement @elem) {}
 		};
 
-		class TxtViewer : ListViewBase {
+		class TxtViewer : spades::ui::ListViewBase {
 			private string text;
 			TxtViewerModel @textmodel;
 			TxtViewerSelectionState selection;
@@ -413,7 +413,7 @@ namespace spades {
 			 */
 			int MaxNumLines = 0;
 
-			TxtViewer(UIManager @manager, ClientUI @ui) {
+			TxtViewer(spades::ui::UIManager @manager, ClientUI @ui) {
 				super(manager);
 				
 				@this.ui = @ui;
@@ -421,7 +421,7 @@ namespace spades {
 				@selection.FocusElement = this;
 				AcceptsFocus = true;
 				IsMouseInteractive = true;
-				@this.Cursor = Cursor(Manager, manager.Renderer.RegisterImage("Gfx/UI/IBeam.png"), Vector2(16.f, 16.f));
+				@this.Cursor = spades::ui::Cursor(Manager, manager.Renderer.RegisterImage("Gfx/UI/IBeam.png"), Vector2(16.f, 16.f));
 			}
 
 			/**
@@ -490,7 +490,7 @@ namespace spades {
 				return len + lineStartIndex;
 			}
 
-			void MouseDown(MouseButton button, Vector2 clientPosition) {
+			void MouseDown(spades::ui::MouseButton button, Vector2 clientPosition) {
 				if (button != spades::ui::MouseButton::LeftMouseButton) {
 					return;
 				}
@@ -509,7 +509,7 @@ namespace spades {
 				}
 			}
 
-			void MouseUp(MouseButton button, Vector2 clientPosition) {
+			void MouseUp(spades::ui::MouseButton button, Vector2 clientPosition) {
 				if (button != spades::ui::MouseButton::LeftMouseButton) {
 					return;
 				}
@@ -958,5 +958,7 @@ namespace spades {
 				}
 			}
 		};
+		
 	}
+	
 }
