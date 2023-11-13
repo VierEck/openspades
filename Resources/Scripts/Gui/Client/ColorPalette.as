@@ -5,8 +5,6 @@ namespace spades {
 		private ClientUI @ui;
 		private ClientUIHelper @helper;
 
-		spades::ui::Button @doButton;
-
 		ClientPaletteWindow(ClientUI @ui) {
 			super(ui.manager);
 			@this.ui = ui;
@@ -15,15 +13,12 @@ namespace spades {
 			float winX = (Manager.Renderer.ScreenWidth);
 			float winY = (Manager.Renderer.ScreenHeight);
 			
-			PaletteConfigLayouter layouter(this, ui.fontManager, winX, winY - 80.f);
-			
 			{
 				spades::ui::Button button(Manager);
 				button.Caption = _Tr("Client", ">");
 				button.Bounds = AABB2(winX - 35.f - 20.f, winY - 80.f, 20.f, 20.f);
 				@button.Activated = spades::ui::EventHandler(this.OnNext);
 				AddChild(button);
-				@doButton = button;
 			}
 			{
 				spades::ui::Button button(Manager);
@@ -31,7 +26,6 @@ namespace spades {
 				button.Bounds = AABB2(winX - 57.f - 20.f, winY - 80.f, 20.f, 20.f);
 				@button.Activated = spades::ui::EventHandler(this.OnPrev);
 				AddChild(button);
-				@doButton = button;
 			}
 			{
 				spades::ui::Button button(Manager);
@@ -39,7 +33,6 @@ namespace spades {
 				button.Bounds = AABB2(winX - 110.f - 20.f, winY - 80.f, 50.f, 30.f);
 				@button.Activated = spades::ui::EventHandler(this.OnSave);
 				AddChild(button);
-				@doButton = button;
 			}
 			{
 				spades::ui::Button button(Manager);
@@ -47,7 +40,6 @@ namespace spades {
 				button.Bounds = AABB2(winX - 110.f - 20.f, winY + 33.f - 80.f, 50.f, 30.f);
 				@button.Activated = spades::ui::EventHandler(this.OnReload);
 				AddChild(button);
-				@doButton = button;
 			}
 			{
 				spades::ui::Button button(Manager);
@@ -55,7 +47,6 @@ namespace spades {
 				button.Bounds = AABB2(winX - 163.f - 20.f, winY - 80.f, 50.f, 30.f);
 				@button.Activated = spades::ui::EventHandler(this.OnNew);
 				AddChild(button);
-				@doButton = button;
 			}
 			{
 				spades::ui::Button button(Manager);
@@ -63,7 +54,26 @@ namespace spades {
 				button.Bounds = AABB2(winX - 163.f - 20.f, winY + 33.f - 80.f, 50.f, 30.f);
 				@button.Activated = spades::ui::EventHandler(this.OnDel);
 				AddChild(button);
-				@doButton = button;
+			}
+			
+			{
+				spades::ui::Label label(Manager);
+				label.BackgroundColor = Vector4(0, 0, 0, 0.8f);
+				label.Bounds = AABB2(winX - 235.f - 256.f, winY - 80.f, 265, 48.f + 25.f);
+				AddChild(label);
+				
+				AddColorSliderField(_Tr("Preferences", ""),
+										"cg_CurrentColorRed", 0, 255, 1,
+										ConfigNumberFormatter(0, " R"),
+										winX - 235.f - 256.f, winY - 80.f);
+				AddColorSliderField(_Tr("Preferences", ""),
+										"cg_CurrentColorGreen", 0, 255, 1,
+										ConfigNumberFormatter(0, " G"),
+										winX - 235.f - 256.f, winY - 64.f + 5.f);
+				AddColorSliderField(_Tr("Preferences", ""),
+										"cg_CurrentColorBlue", 0, 255, 1,
+										ConfigNumberFormatter(0, " B"),
+										winX - 235.f - 256.f, winY - 48.f + 10.f);
 			}
 			
 			{
@@ -72,7 +82,6 @@ namespace spades {
 				button.Bounds = AABB2(winX * 0.48f - 50.f, winY * 0.5f - 15.f, 50.f, 30.f);
 				@button.Activated = spades::ui::EventHandler(this.OnUndo);
 				AddChild(button);
-				@doButton = button;
 			}
 			{
 				spades::ui::Button button(Manager);
@@ -80,7 +89,6 @@ namespace spades {
 				button.Bounds = AABB2(winX * 0.48f - 103.f, winY * 0.5f - 15.f, 50.f, 30.f);
 				@button.Activated = spades::ui::EventHandler(this.OnRedo);
 				AddChild(button);
-				@doButton = button;
 			}
 			{
 				spades::ui::Button button(Manager);
@@ -88,7 +96,6 @@ namespace spades {
 				button.Bounds = AABB2(winX * 0.48f - 103.f, winY * 0.5f - 15.f + 60.f, 103.f, 30.f);
 				@button.Activated = spades::ui::EventHandler(this.OnRespawn);
 				AddChild(button);
-				@doButton = button;
 			}
 			{
 				spades::ui::Button button(Manager);
@@ -96,7 +103,6 @@ namespace spades {
 				button.Bounds = AABB2(winX * 0.48f - 103.f, winY * 0.5f - 15.f + 60.f + 33.f, 103.f, 30.f);
 				@button.Activated = spades::ui::EventHandler(this.OnSetRespawn);
 				AddChild(button);
-				@doButton = button;
 			}
 			{
 				spades::ui::Button button(Manager);
@@ -104,7 +110,6 @@ namespace spades {
 				button.Bounds = AABB2(winX * 0.48f - 236.f, winY * 0.5f - 15.f + 60.f, 130.f, 30.f);
 				@button.Activated = spades::ui::EventHandler(this.OnSwitchGameMode);
 				AddChild(button);
-				@doButton = button;
 			}
 			{
 				spades::ui::Button button(Manager);
@@ -112,19 +117,8 @@ namespace spades {
 				button.Bounds = AABB2(winX * 0.48f - 236.f, winY * 0.5f - 15.f + 60.f + 33.f, 130.f, 30.f);
 				@button.Activated = spades::ui::EventHandler(this.OnSwitchTeam);
 				AddChild(button);
-				@doButton = button;
 			}
 			
-			layouter.AddSliderField(_Tr("Preferences", ""),
-									"cg_CurrentColorRed", 0, 255, 1,
-									ConfigNumberFormatter(0, " R"));
-			layouter.AddSliderField(_Tr("Preferences", ""),
-									"cg_CurrentColorGreen", 0, 255, 1,
-									ConfigNumberFormatter(0, " G"));
-			layouter.AddSliderField(_Tr("Preferences", ""),
-									"cg_CurrentColorBlue", 0, 255, 1,
-									ConfigNumberFormatter(0, " B"));
-			layouter.FinishLayout();
 		}
 		
 		private void OnSave(spades::ui::UIElement @sender) {
@@ -211,57 +205,24 @@ namespace spades {
 				ui.helper.SayGlobal("/g");
 			}
 		}
+		
+		void AddColorSliderField(string caption, string configName, float minRange, float maxRange,
+							float step, ConfigNumberFormatter @formatter,
+							float x, float y, bool enabled = true) {
+
+			spades::ui::Label label(Manager);
+			label.Text = caption;
+			label.Alignment = Vector2(x, y + 0.5f);
+			label.Bounds = AABB2(x + 10.f, y + 0.f, 10.f, 32.f);
+			AddChild(label);
+
+			ConfigSlider slider(Manager, configName, minRange, maxRange, step, formatter);
+			slider.Bounds = AABB2(x + 5.f, y + 8.f, 256.f, 16.f);
+			slider.Enable = enabled;
+
+			AddChild(slider);
+		}
+		
 	}
 	
-	class PaletteConfigLayouter { //tbh i dont know wtf im doing but this works out. 
-		spades::ui::UIElement @Parent;
-		private float FieldX = 5.f;
-		private float FieldWidth = 256.f;
-		private spades::ui::UIElement @[] items;
-		private ConfigHotKeyField @[] hotkeyItems;
-		private FontManager @fontManager;
-		float winX;
-		float winY;
-
-		PaletteConfigLayouter(spades::ui::UIElement @parent, FontManager @fontManager, float x, float y) {
-			@Parent = parent;
-			@this.fontManager = fontManager;
-			winX = x;
-			winY = y;
-		}
-
-		private spades::ui::UIElement @CreateItem() {
-			spades::ui::UIElement elem(Parent.Manager);
-			elem.Size = Vector2(300.f, 32.f);
-			items.insertLast(elem);
-			return elem;
-		}
-
-		ConfigSlider
-			@AddSliderField(string caption, string configName, float minRange, float maxRange,
-							float step, ConfigNumberFormatter @formatter, bool enabled = true) {
-			spades::ui::UIElement @container = CreateItem();
-
-			spades::ui::Label label(Parent.Manager);
-			label.Text = caption;
-			label.Alignment = Vector2(0.f, 0.5f);
-			label.Bounds = AABB2(10.f, 0.f, 10.f, 32.f);
-			container.AddChild(label);
-
-			ConfigSlider slider(Parent.Manager, configName, minRange, maxRange, step, formatter);
-			slider.Bounds = AABB2(FieldX, 8.f, FieldWidth, 16.f);
-			slider.Enable = enabled;
-			container.AddChild(slider);
-
-			return slider;
-		}
-
-		void FinishLayout() {
-			spades::ui::ListView list(Parent.Manager);
-			@list.Model = StandardPreferenceLayouterModel(items);
-			list.RowHeight = 20.f;
-			list.Bounds = AABB2(winX - 550.0f, winY + 2.0f, 360.f, 70.f);
-			Parent.AddChild(list);
-		}
-	}
 }
