@@ -241,6 +241,10 @@ namespace spades {
 		return text.findLast(pattern);
 	}
 
+	bool FileExists(string fName) { 
+		FileHandler fH();
+		return fH.FileExists(fName); 
+	}
 	int CopyFile(string oldName) {
 		FileHandler fH();
 		if (!fH.FileExists(oldName))
@@ -280,6 +284,28 @@ namespace spades {
 			return -1;
 		
 		fH.RemoveFile(fName);
+		return 0;
+	}
+	string ReadAllBytes(string fName) {
+		FileHandler fH();
+		if (!fH.FileExists(fName))
+			return "";
+		
+		return fH.ReadAllBytes(fName);
+	}
+	int WriteAllBytes(string fName, string text) {//protective
+		FileHandler fH();
+		if (!fH.FileExists(fName))
+			return -1; //dont if file already exists
+		
+		fH.WriteAllBytes(fName, text);
+		return 0;
+	}
+	int OverwriteAllBytes(string fName, string text) {//destructive
+		FileHandler fH();
+		if (fH.FileExists(fName))
+			fH.RemoveFile(fName);
+		fH.WriteAllBytes(fName, text);
 		return 0;
 	}
 	
