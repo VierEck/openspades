@@ -21,6 +21,7 @@
 #include "ScriptManager.h"
 #include <Core/RefCountedObject.h>
 #include <Core/FileManager.h>
+#include <Core/IStream.h>
 
 namespace spades {
 	class FileHandlerRegistrar : public ScriptObjectRegistrar {
@@ -45,6 +46,11 @@ namespace spades {
 			}
 
 			std::string ReadAllBytes(const std::string &in) { return FileManager::ReadAllBytes(in.c_str()); }
+
+			void WriteAllBytes(const std::string &fN, const std::string &text) {
+				auto file = FileManager::OpenForWriting(fN.c_str());
+				file->Write(text.c_str());
+			}
 
 			void RemoveFile(const std::string &in) { FileManager::RemoveFile(in.c_str()); }
 
@@ -113,8 +119,13 @@ namespace spades {
 												  asCALL_THISCALL);
 					manager->CheckError(r);
 					r = eng->RegisterObjectMethod("FileHandler",
-												  "void ReadAllBytes(const string &in)",
+												  "string ReadAllBytes(const string &in)",
 												  asMETHOD(FileHandler, ReadAllBytes),
+												  asCALL_THISCALL);
+					manager->CheckError(r);
+					r = eng->RegisterObjectMethod("FileHandler",
+												  "void WriteAllBytes(const string &in, const string &in)",
+												  asMETHOD(FileHandler, WriteAllBytes),
 												  asCALL_THISCALL);
 					manager->CheckError(r);
 					r = eng->RegisterObjectMethod("FileHandler",
