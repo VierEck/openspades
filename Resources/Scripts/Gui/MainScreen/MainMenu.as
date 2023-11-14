@@ -373,9 +373,7 @@ namespace spades {
 		}
 		
 		private void SortServerListByPing(spades::ui::UIElement @sender) { SortServerList(0); }
-		private void SortServerListByNumPlayers(spades::ui::UIElement @sender) {
-			SortServerList(1);
-		}
+		private void SortServerListByNumPlayers(spades::ui::UIElement @sender) { SortServerList(1); }
 		private void SortServerListByName(spades::ui::UIElement @sender) { SortServerList(2); }
 		private void SortServerListByMapName(spades::ui::UIElement @sender) { SortServerList(3); }
 		private void SortServerListByGameMode(spades::ui::UIElement @sender) { SortServerList(4); }
@@ -383,7 +381,7 @@ namespace spades {
 		private void SortServerListByCountry(spades::ui::UIElement @sender) { SortServerList(6); }
 
 		private void SortServerList(int keyId) {
-			if (IsServer) {
+			if (!IsServer) {
 				return;
 			}
 			int sort = cg_serverlistSort.IntValue;
@@ -407,7 +405,7 @@ namespace spades {
 				case 5: key = "Protocol"; break;
 				case 6: key = "Country"; break;
 			}
-			if (IsServer) {
+			if (!IsServer) {
 				key = "Name";
 			}
 			MainScreenServerItem @[] @list =
