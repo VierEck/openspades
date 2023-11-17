@@ -254,17 +254,17 @@ namespace spades {
 			private string mapFileName;
 			private HeightMap @hMap;
 			
-			private HeightMapUIAxis @xUI;
-			private HeightMapUIAxis @yUI;
-			private HeightMapUIAxis @zUI;
+			private spades::ui::HeightMap::HeightMapUIAxis @xUI;
+			private spades::ui::HeightMap::HeightMapUIAxis @yUI;
+			private spades::ui::HeightMap::HeightMapUIAxis @zUI;
 			
-			private HeightMapUIColorField @redField;
-			private HeightMapUIColorField @greenField;
-			private HeightMapUIColorField @blueField;
+			private spades::ui::HeightMap::HeightMapUIColorField @redField;
+			private spades::ui::HeightMap::HeightMapUIColorField @greenField;
+			private spades::ui::HeightMap::HeightMapUIColorField @blueField;
 			
-			private HeightMapColorSliderBounds @redBounds;
-			private HeightMapColorSliderBounds @greenBounds;
-			private HeightMapColorSliderBounds @blueBounds;
+			private spades::ui::HeightMap::HeightMapColorSliderBounds @redBounds;
+			private spades::ui::HeightMap::HeightMapColorSliderBounds @greenBounds;
+			private spades::ui::HeightMap::HeightMapColorSliderBounds @blueBounds;
 			
 			HeightMapUI(spades::ui::UIElement @o, string fN) {
 				super(o.Manager);
@@ -304,20 +304,20 @@ namespace spades {
 				float yPos = ContentsTop + 15;
 				
 				{//coordinate fields
-					@xUI = HeightMapUIAxis(this, 0, xPos, yPos);
+					@xUI = spades::ui::HeightMap::HeightMapUIAxis(this, 0, xPos, yPos);
 					yPos += 30;
 					
-					@yUI = HeightMapUIAxis(this, 1, xPos, yPos);
+					@yUI = spades::ui::HeightMap::HeightMapUIAxis(this, 1, xPos, yPos);
 					yPos += 30;
 					
-					@zUI = HeightMapUIAxis(this, 2, xPos, yPos);
+					@zUI = spades::ui::HeightMap::HeightMapUIAxis(this, 2, xPos, yPos);
 				}
 				{//color fields
 					xPos = ContentsLeft + 10;
 					yPos = ContentsDown - 155;
 					
 					{//red
-						@redField = HeightMapUIColorField(this);
+						@redField = spades::ui::HeightMap::HeightMapUIColorField(this);
 						redField.Bounds = AABB2(xPos, yPos, 50, 25);
 						redField.Placeholder = _Tr("HeightMap", "0 - 255");
 						AddChild(redField);
@@ -330,7 +330,7 @@ namespace spades {
 						yPos += 30;
 					}
 					{
-						@greenField = HeightMapUIColorField(this);
+						@greenField = spades::ui::HeightMap::HeightMapUIColorField(this);
 						greenField.Bounds = AABB2(xPos, yPos, 50, 25);
 						greenField.Placeholder = _Tr("HeightMap", "0 - 255");
 						AddChild(greenField);
@@ -343,7 +343,7 @@ namespace spades {
 						yPos += 30;
 					}
 					{
-						@blueField = HeightMapUIColorField(this);
+						@blueField = spades::ui::HeightMap::HeightMapUIColorField(this);
 						blueField.Bounds = AABB2(xPos, yPos, 50, 25);
 						blueField.Placeholder = _Tr("HeightMap", "0 - 255");
 						AddChild(blueField);
@@ -362,17 +362,17 @@ namespace spades {
 					yPos = ContentsDown - 75;
 					
 					yPos += 20;
-					@redBounds = HeightMapColorSliderBounds(
+					@redBounds = spades::ui::HeightMap::HeightMapColorSliderBounds(
 						Vector2(xPos - 1, yPos - 9), Vector2(xPos + 256, yPos + 5)
 					);
 					
 					yPos += 20;
-					@greenBounds = HeightMapColorSliderBounds(
+					@greenBounds = spades::ui::HeightMap::HeightMapColorSliderBounds(
 						Vector2(xPos - 1, yPos - 9), Vector2(xPos + 256, yPos + 5)
 					);
 					
 					yPos += 20;
-					@blueBounds = HeightMapColorSliderBounds(
+					@blueBounds = spades::ui::HeightMap::HeightMapColorSliderBounds(
 						Vector2(xPos - 1, yPos - 9), Vector2(xPos + 256, yPos + 5)
 					);
 				}
@@ -390,9 +390,9 @@ namespace spades {
 					{
 						yPos += 30;
 					
-						HeightMapToolButton squareToolButton(this, hMap, 0);
+						spades::ui::HeightMap::HeightMapToolButton squareToolButton(this, hMap, 0);
 						squareToolButton.Caption = _Tr("HeightMap", "Square");
-						squareToolButton.GroupName = "HeightMapToolButton";
+						squareToolButton.GroupName = "spades::ui::HeightMap::HeightMapToolButton";
 						squareToolButton.Bounds = AABB2(xPos, yPos, 70, 30);
 						squareToolButton.Toggled = true;
 						AddChild(squareToolButton);
@@ -400,9 +400,9 @@ namespace spades {
 					{
 						xPos += 70;
 					
-						HeightMapToolButton circleToolButton(this, hMap, 1);
+						spades::ui::HeightMap::HeightMapToolButton circleToolButton(this, hMap, 1);
 						circleToolButton.Caption = _Tr("HeightMap", "Circle");
-						circleToolButton.GroupName = "HeightMapToolButton";
+						circleToolButton.GroupName = "spades::ui::HeightMap::HeightMapToolButton";
 						circleToolButton.Bounds = AABB2(xPos, yPos, 70, 30);
 						AddChild(circleToolButton);
 					}
@@ -416,7 +416,7 @@ namespace spades {
 						label.Text = "Size";
 						AddChild(label);
 						
-						HeightMapThicknessField thicknessField(this, hMap);
+						spades::ui::HeightMap::HeightMapThicknessField thicknessField(this, hMap);
 						thicknessField.Bounds = AABB2(xPos + 30, yPos, 40, 25);
 						thicknessField.Placeholder = _Tr("HeightMap", "1");
 						AddChild(thicknessField);
@@ -749,190 +749,194 @@ namespace spades {
 			
 		}
 		
-		class HeightMapUIAxis {
-			HeightMapUI @owner;
-			Field @field;
-			Button @button;
-			uint coord;
-			uint axis;
-			
-			HeightMapUIAxis(HeightMapUI @o, uint whichAxis, float xPos, float yPos) {
-				@this.owner = o;
-				axis = whichAxis;
-				coord = IsZ() ? 63 : 0;
+		namespace HeightMap {
+		
+			class HeightMapUIAxis {
+				HeightMapUI @owner;
+				Field @field;
+				Button @button;
+				uint coord;
+				uint axis;
 				
-				Label label(o.Manager);
-				label.Bounds = AABB2(xPos, yPos, 0, 0);
-				switch (axis) {
-					case 0: label.Text = "X"; break;
-					case 1: label.Text = "Y"; break;
-					default: label.Text = "Z"; break;
+				HeightMapUIAxis(HeightMapUI @o, uint whichAxis, float xPos, float yPos) {
+					@this.owner = o;
+					axis = whichAxis;
+					coord = IsZ() ? 63 : 0;
+					
+					Label label(o.Manager);
+					label.Bounds = AABB2(xPos, yPos, 0, 0);
+					switch (axis) {
+						case 0: label.Text = "X"; break;
+						case 1: label.Text = "Y"; break;
+						default: label.Text = "Z"; break;
+					}
+					o.AddChild(label);
+					
+					@field = Field(o.Manager);
+					field.Bounds = AABB2(xPos + 15, yPos - 2, 50, 25);
+					field.Placeholder = _Tr("HeightMap", IsZ() ? "0 - 63" : "0 - 511");
+					field.Text = formatUInt(coord, "l", 1);
+					o.AddChild(field);
+					
+					@button = Button(o.Manager);
+					button.Caption = _Tr("MainScreen", "Confirm");
+					button.Bounds = AABB2(xPos + 75, yPos - 2, 70, 25);
+					@button.Activated = EventHandler(this.OnConfirm);
+					o.AddChild(button);
 				}
-				o.AddChild(label);
 				
-				@field = Field(o.Manager);
-				field.Bounds = AABB2(xPos + 15, yPos - 2, 50, 25);
-				field.Placeholder = _Tr("HeightMap", IsZ() ? "0 - 63" : "0 - 511");
-				field.Text = formatUInt(coord, "l", 1);
-				o.AddChild(field);
-				
-				@button = Button(o.Manager);
-				button.Caption = _Tr("MainScreen", "Confirm");
-				button.Bounds = AABB2(xPos + 75, yPos - 2, 70, 25);
-				@button.Activated = EventHandler(this.OnConfirm);
-				o.AddChild(button);
-			}
-			
-			void OnConfirm(UIElement @sender) {
-				if (!IsNumber(this.field.Text))
-					return;
-				
-				uint newCoord = parseUInt(this.field.Text);
-				
-				if (IsZ()) {
-					if (newCoord > 63)
+				void OnConfirm(UIElement @sender) {
+					if (!IsNumber(this.field.Text))
 						return;
-				} else {
-					if (newCoord > 511)
-						return;
-				}
-				uint oldCoord = this.coord;
-				this.coord = newCoord;
-				owner.UIAxisConfirm(axis, oldCoord);
-			}
-			
-			private bool IsNumber(string text) {
-				if (text.findFirst("0") < 0
-					&& text.findFirst("1") < 0
-					&& text.findFirst("2") < 0
-					&& text.findFirst("3") < 0
-					&& text.findFirst("4") < 0
-					&& text.findFirst("5") < 0
-					&& text.findFirst("6") < 0
-					&& text.findFirst("7") < 0
-					&& text.findFirst("8") < 0
-					&& text.findFirst("9") < 0
-					) { //if string contains no number
-					return false;
-				}
-				return true;
-			}
-		
-			private bool IsZ() {
-				return axis >= 2;
-			}
-		
-		}
-		
-		class HeightMapUIColorField : Field {
-			HeightMapUI @owner;
-			uint val;
-			
-			HeightMapUIColorField(HeightMapUI @o) {
-				super(o.Manager);
-				@this.owner = o;
-				this.val = 0;
-				this.Text = "0";
-			}
-			
-			void OnChanged() {
-				if (this.Text.length == 0) {
-					val = 0;
-					owner.UIColorChanged();
-					return;
+					
+					uint newCoord = parseUInt(this.field.Text);
+					
+					if (IsZ()) {
+						if (newCoord > 63)
+							return;
+					} else {
+						if (newCoord > 511)
+							return;
+					}
+					uint oldCoord = this.coord;
+					this.coord = newCoord;
+					owner.UIAxisConfirm(axis, oldCoord);
 				}
 				
-				if (!IsNumber(this.Text))
-					return;
-				
-				uint newVal = parseUInt(this.Text);
-				if (newVal > 255)
-					newVal = 255;
-				
-				val = newVal;
-				owner.UIColorChanged(); 
-			}
-			
-			void ValChanged() { this.Text = formatUInt(val, "l", 1); }
-			
-			private bool IsNumber(string text) {
-				if (text.findFirst("0") < 0
-					&& text.findFirst("1") < 0
-					&& text.findFirst("2") < 0
-					&& text.findFirst("3") < 0
-					&& text.findFirst("4") < 0
-					&& text.findFirst("5") < 0
-					&& text.findFirst("6") < 0
-					&& text.findFirst("7") < 0
-					&& text.findFirst("8") < 0
-					&& text.findFirst("9") < 0
-					) { //if string contains no number
-					return false;
-				}
-				return true;
-			}
-		}
-
-		class HeightMapColorSliderBounds {
-			Vector2 TopLeft, DownRight;
-			
-			HeightMapColorSliderBounds(Vector2 tl, Vector2 dr) {
-				TopLeft = tl;
-				DownRight = dr;
-			}
-			
-			bool IsInSliderBounds(Vector2 clientPosition) {
-				if (clientPosition.x > TopLeft.x
-					&& clientPosition.y > TopLeft.y
-					&& clientPosition.x < DownRight.x
-					&& clientPosition.y < DownRight.y
-				) {
+				private bool IsNumber(string text) {
+					if (text.findFirst("0") < 0
+						&& text.findFirst("1") < 0
+						&& text.findFirst("2") < 0
+						&& text.findFirst("3") < 0
+						&& text.findFirst("4") < 0
+						&& text.findFirst("5") < 0
+						&& text.findFirst("6") < 0
+						&& text.findFirst("7") < 0
+						&& text.findFirst("8") < 0
+						&& text.findFirst("9") < 0
+						) { //if string contains no number
+						return false;
+					}
 					return true;
 				}
-				return false;
-			}
-			uint TranslatePosToVal(Vector2 clientPosition) {
-				return uint(clientPosition.x) - uint(TopLeft.x) - 1;
-			}
 			
-		}
-		
-		class HeightMapThicknessField : Field {
-			private HeightMap @hMap;
+				private bool IsZ() {
+					return axis >= 2;
+				}
 			
-			HeightMapThicknessField(HeightMapUI @o, HeightMap @hM) {
-				super(o.Manager);
-				@this.hMap = hM;
-				hMap.thickness = 1;
-				this.Text = "1";
 			}
 			
-			void OnChanged() {
-				uint newVal = parseUInt(this.Text);
-				if (newVal <= 0) {
-					newVal = 1;
+			class HeightMapUIColorField : Field {
+				HeightMapUI @owner;
+				uint val;
+				
+				HeightMapUIColorField(HeightMapUI @o) {
+					super(o.Manager);
+					@this.owner = o;
+					this.val = 0;
+					this.Text = "0";
 				}
 				
-				hMap.thickness = newVal;
-			}
-			
-		}
-		
-		class HeightMapToolButton : RadioButton {
-			private HeightMap @hMap;
-			uint tool;
-			
-			HeightMapToolButton(HeightMapUI @o, HeightMap @hM, uint t) {
-				super(o.Manager);
-				@hMap = hM;
-				this.tool = t;
-			}
-			
-			void OnActivated() {
-				RadioButton::OnActivated();
+				void OnChanged() {
+					if (this.Text.length == 0) {
+						val = 0;
+						owner.UIColorChanged();
+						return;
+					}
+					
+					if (!IsNumber(this.Text))
+						return;
+					
+					uint newVal = parseUInt(this.Text);
+					if (newVal > 255)
+						newVal = 255;
+					
+					val = newVal;
+					owner.UIColorChanged(); 
+				}
 				
-				hMap.tool = this.tool;
+				void ValChanged() { this.Text = formatUInt(val, "l", 1); }
+				
+				private bool IsNumber(string text) {
+					if (text.findFirst("0") < 0
+						&& text.findFirst("1") < 0
+						&& text.findFirst("2") < 0
+						&& text.findFirst("3") < 0
+						&& text.findFirst("4") < 0
+						&& text.findFirst("5") < 0
+						&& text.findFirst("6") < 0
+						&& text.findFirst("7") < 0
+						&& text.findFirst("8") < 0
+						&& text.findFirst("9") < 0
+						) { //if string contains no number
+						return false;
+					}
+					return true;
+				}
 			}
+
+			class HeightMapColorSliderBounds {
+				Vector2 TopLeft, DownRight;
+				
+				HeightMapColorSliderBounds(Vector2 tl, Vector2 dr) {
+					TopLeft = tl;
+					DownRight = dr;
+				}
+				
+				bool IsInSliderBounds(Vector2 clientPosition) {
+					if (clientPosition.x > TopLeft.x
+						&& clientPosition.y > TopLeft.y
+						&& clientPosition.x < DownRight.x
+						&& clientPosition.y < DownRight.y
+					) {
+						return true;
+					}
+					return false;
+				}
+				uint TranslatePosToVal(Vector2 clientPosition) {
+					return uint(clientPosition.x) - uint(TopLeft.x) - 1;
+				}
+				
+			}
+			
+			class HeightMapThicknessField : Field {
+				private HeightMap @hMap;
+				
+				HeightMapThicknessField(HeightMapUI @o, HeightMap @hM) {
+					super(o.Manager);
+					@this.hMap = hM;
+					hMap.thickness = 1;
+					this.Text = "1";
+				}
+				
+				void OnChanged() {
+					uint newVal = parseUInt(this.Text);
+					if (newVal <= 0) {
+						newVal = 1;
+					}
+					
+					hMap.thickness = newVal;
+				}
+				
+			}
+			
+			class HeightMapToolButton : RadioButton {
+				private HeightMap @hMap;
+				uint tool;
+				
+				HeightMapToolButton(HeightMapUI @o, HeightMap @hM, uint t) {
+					super(o.Manager);
+					@hMap = hM;
+					this.tool = t;
+				}
+				
+				void OnActivated() {
+					RadioButton::OnActivated();
+					
+					hMap.tool = this.tool;
+				}
+			}
+			
 		}
 		
 	}
