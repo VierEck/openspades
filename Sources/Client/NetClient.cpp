@@ -2379,25 +2379,22 @@ namespace spades {
 			demo.replaying = replay;
 			demo.paused = false;
 			if (replay) {
-				ProtocolVersion version;
-				int checkVersion;
 				if (fileName.size() > 6 && fileName.substr(fileName.size() - 6, 6) == ".demoz") {
 					DecompressDemo();
-					demo.stream = FileManager::OpenForReading("temp_demo_vier_was_here_69_420");
-					unsigned char ver;
-					if (demo.stream->Read(&ver, sizeof(ver)) != sizeof(ver))
-						SPRaise("failed reading demo file");
-					if (ver != (unsigned char)aos_replayVersion::v1)
-						SPRaise("Invalid aos_replay version: %d", ver);
-
-					if (demo.stream->Read(&ver, sizeof(ver)) != sizeof(ver))
-						SPRaise("failed reading demo file");
-					checkVersion = ver;
+					demo.stream = FileManager::OpenForReading("temp_file_vier_was_here_69_420.demo");
 				} else {
 					demo.stream = FileManager::OpenForReading(fileName.c_str());
-					checkVersion = (int)hostname.GetProtocolVersion();
 				}
-				switch (checkVersion) {
+				unsigned char ver;
+				if (demo.stream->Read(&ver, sizeof(ver)) != sizeof(ver))
+					SPRaise("failed reading demo file");
+				if (ver != (unsigned char)aos_replayVersion::v1)
+					SPRaise("Invalid aos_replay version: %d", ver);
+
+				if (demo.stream->Read(&ver, sizeof(ver)) != sizeof(ver))
+					SPRaise("failed reading demo file");
+				ProtocolVersion version;
+				switch ((int)ver) {
 					case (int)ProtocolVersion::v075:
 						SPLog("Using Ace of Spades 0.75 protocol");
 						protocolVersion = 3;
@@ -2410,6 +2407,7 @@ namespace spades {
 						break;
 					default: SPRaise("Invalid ProtocolVersion"); break;
 				}
+
 				demo.stream->SetPosition(2);
 				properties.reset(new GameProperties(version));
 
@@ -2470,7 +2468,8 @@ namespace spades {
 			demo.stream.reset();
 			if (cg_compressDemo && demo.recording)
 				CompressDemo();
-			FileManager::RemoveFile("temp_demo_vier_was_here_69_420");
+			FileManager::RemoveFile("temp_file_vier_was_here_69_420.demo");
+			FileManager::RemoveFile("temp_file_vier_was_here_69_420.demoz");
 			demo.recording = demo.replaying = false;
 		}
 
@@ -2498,7 +2497,7 @@ namespace spades {
 			std::string fn = client->GetDemoFileName();
 			{
 				auto readStream = FileManager::OpenForReading(fn.c_str());
-				auto writeStream = FileManager::OpenForWriting("temp_demo_vier_was_here_69_420");
+				auto writeStream = FileManager::OpenForWriting("temp_file_vier_was_here_69_420.demo");
 
 				DeflateStream inflate(readStream.get(), CompressModeDecompress, false);
 				auto demoLen = readStream->GetLength();

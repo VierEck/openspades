@@ -185,6 +185,9 @@ namespace {
 	bool g_printVersion = false;
 	bool g_printHelp = false;
 
+	bool g_autoDemo = false;
+	std::string g_autoDemoFileName;
+
 	void printHelp(char *binaryName) {
 		printf("usage: %s [server_address] [v=protocol_version] [-h|--help] [-v|--version] \n",
 		       binaryName);
@@ -193,10 +196,16 @@ namespace {
 	std::regex const hostNameRegex{"aos://.*"};
 	std::regex const v075Regex{"(?:v=)?0?\\.?75"};
 	std::regex const v076Regex{"(?:v=)?0?\\.?76"};
+	std::regex const demoFileRegex{"(.*?)\.(demo|demoz)$"};
 
 	int handleCommandLineArgument(int argc, char **argv, int &i) {
 		if (char *a = argv[i]) {
 
+			if (std::regex_match(a, demoFileRegex)) {
+				g_autoDemo = true;
+				g_autoDemoFileName = a;
+				return ++i;
+			}
 			if (std::regex_match(a, hostNameRegex)) {
 				g_autoconnect = true;
 				g_autoconnectHostName = a;
@@ -227,23 +236,27 @@ namespace {
 namespace spades {
 	std::string g_userResourceDirectory;
 
-	void StartClient(const spades::ServerAddress &addr) {
+	void StartClient(const spades::ServerAddress &addr, int mode = 0, const std::string &fileName = "") {
 		class ConcreteRunner : public spades::gui::Runner {
 			spades::ServerAddress addr;
+			int mode = 0;
+			std::string fileName = "";
 
 		protected:
 			spades::gui::View *CreateView(spades::client::IRenderer *renderer,
 			                              spades::client::IAudioDevice *audio) override {
 				auto fontManager = Handle<client::FontManager>::New(renderer);
-				auto innerView = Handle<client::Client>::New(renderer, audio, addr, fontManager, 0, "", "");
+				auto innerView = Handle<client::Client>::New(renderer, audio, addr, fontManager, mode, fileName, "");
 				return new spades::gui::ConsoleScreen(renderer, audio, fontManager,
 													  std::move(innerView).Cast<gui::View>());
 			}
 
 		public:
-			ConcreteRunner(const spades::ServerAddress &addr) : addr(addr) {}
+			ConcreteRunner() {}
+			ConcreteRunner(const spades::ServerAddress &addr, int mode, const std::string &fileName)
+				: addr(addr), mode(mode), fileName(fileName) {}
 		};
-		ConcreteRunner runner(addr);
+		ConcreteRunner runner(addr, mode, fileName);
 		runner.RunProtected();
 	}
 	void StartMainScreen() {
@@ -632,16 +645,33 @@ int main(int argc, char **argv) {
 
 		// everything is now ready!
 		if (!g_autoconnect) {
-			if (!((int)cl_showStartupWindow != 0 || splashWindow->IsStartupScreenRequested())) {
-				splashWindow.reset();
+			if (!g_autoDemo) {
+				if (!((int)cl_showStartupWindow != 0 || splashWindow->IsStartupScreenRequested())) {
+					splashWindow.reset();
 
-				SPLog("Starting main screen");
-				spades::StartMainScreen();
+					SPLog("Starting main screen");
+					spades::StartMainScreen();
+				} else {
+					splashWindow.reset();
+
+					SPLog("Starting startup window");
+					::spades::gui::StartupScreen::Run();
+				}
 			} else {
 				splashWindow.reset();
 
-				SPLog("Starting startup window");
-				::spades::gui::StartupScreen::Run();
+				std::string tmpName = "temp_file_vier_was_here_69_420.demo";
+				if (g_autoDemoFileName[g_autoDemoFileName.size() - 1] == 'z')
+					tmpName += 'z';
+
+				{
+					auto f = spades::DirectoryFileSystem::OpenForReadingAny(g_autoDemoFileName.c_str());
+					auto tmp = spades::FileManager::OpenForWriting(tmpName.c_str());
+					tmp->Write(f->ReadAllBytes());
+				} //tmp stream deleted after scope
+
+				spades::ServerAddress host("127.0.0.1", g_autoconnectProtocolVersion);
+				spades::StartClient(host, 1, tmpName);
 			}
 		} else {
 			splashWindow.reset();

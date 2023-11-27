@@ -190,6 +190,16 @@ namespace spades {
 		return stmp::make_unique<SdlFileStream>(f, true);
 	}
 
+	std::unique_ptr<IStream> DirectoryFileSystem::OpenForReadingAny(const char *fn) {
+		SPADES_MARK_FUNCTION();
+
+		SDL_RWops *f = SDL_RWFromFile(fn, "rb");
+		if (f == NULL) {
+			SPRaise("I/O error while opening %s for reading: %s", fn, SDL_GetError());
+		}
+		return stmp::make_unique<SdlFileStream>(f, true);
+	}
+
 	// TODO: open for appending?
 
 	bool DirectoryFileSystem::FileExists(const char *fn) {
