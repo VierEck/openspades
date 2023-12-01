@@ -597,7 +597,8 @@ int main(int argc, char **argv) {
 					stream->SetPosition(0);
 
 					spades::ZipFileSystem *fs = new spades::ZipFileSystem(stream.release());
-					if (name[0] == '_' && false) { // last resort for #198
+					if ((name[0] == '_' && false) // last resort for #198
+						|| name.find("4Spades") != std::string::npos) {
 						SPLog("Pak registered: %s: %08lx (marked as 'important')", name.c_str(),
 						      static_cast<unsigned long>(crc));
 						fssImportant.push_back(fs);
