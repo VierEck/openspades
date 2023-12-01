@@ -45,5 +45,6 @@ namespace spades {
 		void RenameFile(const char *, const char *) override;
 
 		static std::unique_ptr<IStream> OpenForReadingAny(const char *);
+		static std::unique_ptr<IStream> OpenForWritingAny(const char *);
 	};
 }

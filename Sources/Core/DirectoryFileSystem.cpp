@@ -200,6 +200,36 @@ namespace spades {
 		return stmp::make_unique<SdlFileStream>(f, true);
 	}
 
+	std::unique_ptr<IStream> DirectoryFileSystem::OpenForWritingAny(const char *fn) {
+		SPADES_MARK_FUNCTION();
+
+		std::string path = fn;
+
+		// create required directory
+		if (path.find_first_of("/\\") != std::string::npos) {
+			size_t pos = path.find_first_of("/\\") + 1;
+			while (pos < path.size()) {
+				size_t nextPos = pos;
+				while (nextPos < path.size() && path[nextPos] != '/' && path[nextPos] != '\\')
+					nextPos++;
+				if (nextPos == path.size())
+					break;
+#ifdef WIN32
+				CreateDirectoryW(Utf8ToWString(path.substr(0, nextPos).c_str()).c_str(), nullptr);
+#else
+				mkdir(path.substr(0, nextPos).c_str(), 0774);
+#endif
+				pos = nextPos + 1;
+			}
+		}
+
+		SDL_RWops *f = SDL_RWFromFile(path.c_str(), "wb+");
+		if (f == NULL) {
+			SPRaise("I/O error while opening %s for writing", fn);
+		}
+		return stmp::make_unique<SdlFileStream>(f, true);
+	}
+
 	// TODO: open for appending?
 
 	bool DirectoryFileSystem::FileExists(const char *fn) {

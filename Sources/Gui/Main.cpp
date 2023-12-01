@@ -188,6 +188,9 @@ namespace {
 	bool g_autoDemo = false;
 	std::string g_autoDemoFileName;
 
+	bool g_autoVxl = false;
+	std::string g_autoVxlFileName;
+
 	void printHelp(char *binaryName) {
 		printf("usage: %s [server_address] [v=protocol_version] [-h|--help] [-v|--version] \n",
 		       binaryName);
@@ -197,10 +200,16 @@ namespace {
 	std::regex const v075Regex{"(?:v=)?0?\\.?75"};
 	std::regex const v076Regex{"(?:v=)?0?\\.?76"};
 	std::regex const demoFileRegex{"(.*?)\.(demo|demoz)$"};
+	std::regex const vxlFileRegex{"(.*?)\.(vxl)$"};
 
 	int handleCommandLineArgument(int argc, char **argv, int &i) {
 		if (char *a = argv[i]) {
 
+			if (std::regex_match(a, vxlFileRegex)) {
+				g_autoVxl = true;
+				g_autoVxlFileName = a;
+				return ++i;
+			}
 			if (std::regex_match(a, demoFileRegex)) {
 				g_autoDemo = true;
 				g_autoDemoFileName = a;
@@ -645,40 +654,61 @@ int main(int argc, char **argv) {
 		pumpEvents();
 
 		// everything is now ready!
-		if (!g_autoconnect) {
-			if (!g_autoDemo) {
-				if (!((int)cl_showStartupWindow != 0 || splashWindow->IsStartupScreenRequested())) {
-					splashWindow.reset();
-
-					SPLog("Starting main screen");
-					spades::StartMainScreen();
-				} else {
-					splashWindow.reset();
-
-					SPLog("Starting startup window");
-					::spades::gui::StartupScreen::Run();
-				}
-			} else {
-				splashWindow.reset();
-
-				std::string tmpName = "temp_file_vier_was_here_69_420.demo";
-				if (g_autoDemoFileName[g_autoDemoFileName.size() - 1] == 'z')
-					tmpName += 'z';
-
-				{
-					auto f = spades::DirectoryFileSystem::OpenForReadingAny(g_autoDemoFileName.c_str());
-					auto tmp = spades::FileManager::OpenForWriting(tmpName.c_str());
-					tmp->Write(f->ReadAllBytes());
-				} //tmp stream deleted after scope
-
-				spades::ServerAddress host("127.0.0.1", g_autoconnectProtocolVersion);
-				spades::StartClient(host, 1, tmpName);
-			}
-		} else {
+		if (g_autoconnect) {
 			splashWindow.reset();
 
 			spades::ServerAddress host(g_autoconnectHostName, g_autoconnectProtocolVersion);
 			spades::StartClient(host);
+		} else if (g_autoDemo) {
+			splashWindow.reset();
+
+			std::string tmpName = "temp_file_vier_was_here_69_420.demo";
+			if (g_autoDemoFileName[g_autoDemoFileName.size() - 1] == 'z')
+				tmpName += 'z';
+
+			{
+				auto f = spades::DirectoryFileSystem::OpenForReadingAny(g_autoDemoFileName.c_str());
+				auto tmp = spades::FileManager::OpenForWriting(tmpName.c_str());
+				tmp->Write(f->ReadAllBytes());
+			} //tmp stream deleted after scope
+
+			spades::ServerAddress host("127.0.0.1", g_autoconnectProtocolVersion);
+			spades::StartClient(host, 1, tmpName);
+		} else if (g_autoVxl) {
+			splashWindow.reset();
+
+			std::string tmpName = "temp_file_vier_was_here_69_420.vxl";
+			{
+				auto f = spades::DirectoryFileSystem::OpenForReadingAny(g_autoVxlFileName.c_str());
+				auto tmp = spades::FileManager::OpenForWriting(tmpName.c_str());
+				tmp->Write(f->ReadAllBytes());
+			} //tmp stream deleted after scope
+
+			spades::ServerAddress host("127.0.0.1", g_autoconnectProtocolVersion);
+			spades::StartClient(host, 2, tmpName);
+		} else {
+			if (!((int)cl_showStartupWindow != 0 || splashWindow->IsStartupScreenRequested())) {
+				splashWindow.reset();
+
+				SPLog("Starting main screen");
+				spades::StartMainScreen();
+			} else {
+				splashWindow.reset();
+
+				SPLog("Starting startup window");
+				::spades::gui::StartupScreen::Run();
+			}
+		}
+
+		{
+			if (g_autoVxl) {
+				auto f = spades::DirectoryFileSystem::OpenForWritingAny(g_autoVxlFileName.c_str());
+				auto tmp = spades::FileManager::OpenForReading("temp_file_vier_was_here_69_420.vxl");
+				f->Write(tmp->ReadAllBytes());
+			} //streams deleted after scope
+			spades::FileManager::RemoveFile("temp_file_vier_was_here_69_420.vxl");
+			spades::FileManager::RemoveFile("temp_file_vier_was_here_69_420.demo");
+			spades::FileManager::RemoveFile("temp_file_vier_was_here_69_420.demoz");
 		}
 
 		spades::Settings::GetInstance()->Flush();
