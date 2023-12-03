@@ -53,7 +53,7 @@ function Make-Pak
 	Remove-Item $TempDir -Recurse -Force
 }
 
-Make-Pak -PakName pak001-Base4Spades.pak -RelativePaths `
+Make-Pak -PakName pak002-Base.pak -RelativePaths `
   License/Credits-pak002-Base.md,
   Gfx, Scripts/Main.as,
   Scripts/Gui, Scripts/Base, Shaders, Sounds/Feedback,
