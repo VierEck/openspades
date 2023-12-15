@@ -712,21 +712,24 @@ int main(int argc, char **argv) {
 		}
 
 		{
+			std::string tmpName = "temp_file_vier_was_here_69_420";
 			if (g_autoVxl) {
 				auto f = spades::DirectoryFileSystem::OpenForWritingAnyWhere(g_autoVxlFileName.c_str());
-				auto tmp = spades::FileManager::OpenForReading("temp_file_vier_was_here_69_420.vxl");
+				auto tmp = spades::FileManager::OpenForReading((tmpName + ".vxl").c_str());
 				f->Write(tmp->ReadAllBytes());
-				if (g_autoTxtFileName.size() > 0) {
-					auto f = spades::DirectoryFileSystem::OpenForWritingAnyWhere(g_autoTxtFileName.c_str());
-					auto tmp = spades::FileManager::OpenForReading("temp_file_vier_was_here_69_420.txt");
+				bool txtAlreadyExists = spades::FileManager::FileExists((tmpName + ".txt").c_str());
+				if (g_autoTxtFileName.size() > 0 || txtAlreadyExists) {
+					std::string txtName = g_autoVxlFileName.substr(0, g_autoVxlFileName.size() - 4) + ".txt";
+					auto f = spades::DirectoryFileSystem::OpenForWritingAnyWhere(txtName.c_str());
+					auto tmp = spades::FileManager::OpenForReading((tmpName + ".txt").c_str());
 					f->Write(tmp->ReadAllBytes());
 				}
 
 			} //streams deleted after scope
-			spades::FileManager::RemoveFile("temp_file_vier_was_here_69_420.vxl");
-			spades::FileManager::RemoveFile("temp_file_vier_was_here_69_420.txt");
-			spades::FileManager::RemoveFile("temp_file_vier_was_here_69_420.demo");
-			spades::FileManager::RemoveFile("temp_file_vier_was_here_69_420.demoz");
+			spades::FileManager::RemoveFile((tmpName + ".vxl").c_str());
+			spades::FileManager::RemoveFile((tmpName + ".txt").c_str());
+			spades::FileManager::RemoveFile((tmpName + ".demo").c_str());
+			spades::FileManager::RemoveFile((tmpName + ".demoz").c_str());
 		}
 
 		spades::Settings::GetInstance()->Flush();
