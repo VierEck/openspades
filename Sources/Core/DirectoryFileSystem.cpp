@@ -190,7 +190,32 @@ namespace spades {
 		return stmp::make_unique<SdlFileStream>(f, true);
 	}
 
-	std::unique_ptr<IStream> DirectoryFileSystem::OpenForReadingAny(const char *fn) {
+	// TODO: open for appending?
+
+	bool DirectoryFileSystem::FileExists(const char *fn) {
+		SPADES_MARK_FUNCTION();
+		std::string path = PathToPhysical(fn);
+		SDL_RWops *f = SDL_RWFromFile(path.c_str(), "rb");
+		if (f) {
+			SDL_RWclose(f);
+			return true;
+		}
+		return false;
+	}
+
+	void DirectoryFileSystem::RemoveFile(const char *fn) {
+		SPADES_MARK_FUNCTION();
+		if (std::remove(PathToPhysical(fn).c_str()) != 0)
+			SPLog("Failed to delete file: %s", fn);
+	}
+
+	void DirectoryFileSystem::RenameFile(const char *oldN, const char *newN) {
+		SPADES_MARK_FUNCTION();
+		if (std::rename(PathToPhysical(oldN).c_str(), PathToPhysical(newN).c_str()) != 0)
+			SPLog("Failed to rename file: %s", oldN);
+	}
+
+	std::unique_ptr<IStream> DirectoryFileSystem::OpenForReadingAnyWhere(const char *fn) {
 		SPADES_MARK_FUNCTION();
 
 		SDL_RWops *f = SDL_RWFromFile(fn, "rb");
@@ -200,7 +225,7 @@ namespace spades {
 		return stmp::make_unique<SdlFileStream>(f, true);
 	}
 
-	std::unique_ptr<IStream> DirectoryFileSystem::OpenForWritingAny(const char *fn) {
+	std::unique_ptr<IStream> DirectoryFileSystem::OpenForWritingAnyWhere(const char *fn) {
 		SPADES_MARK_FUNCTION();
 
 		std::string path = fn;
@@ -230,28 +255,14 @@ namespace spades {
 		return stmp::make_unique<SdlFileStream>(f, true);
 	}
 
-	// TODO: open for appending?
-
-	bool DirectoryFileSystem::FileExists(const char *fn) {
+	bool DirectoryFileSystem::FileExistsAnyWhere(const char *fn) {
 		SPADES_MARK_FUNCTION();
-		std::string path = PathToPhysical(fn);
+		std::string path = fn;
 		SDL_RWops *f = SDL_RWFromFile(path.c_str(), "rb");
 		if (f) {
 			SDL_RWclose(f);
 			return true;
 		}
 		return false;
-	}
-
-	void DirectoryFileSystem::RemoveFile(const char *fn) {
-		SPADES_MARK_FUNCTION();
-		if (std::remove(PathToPhysical(fn).c_str()) != 0)
-			SPLog("Failed to delete file: %s", fn);
-	}
-
-	void DirectoryFileSystem::RenameFile(const char *oldN, const char *newN) {
-		SPADES_MARK_FUNCTION();
-		if (std::rename(PathToPhysical(oldN).c_str(), PathToPhysical(newN).c_str()) != 0)
-			SPLog("Failed to rename file: %s", oldN);
 	}
 } // namespace spades
