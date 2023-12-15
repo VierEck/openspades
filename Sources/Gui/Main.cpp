@@ -745,19 +745,23 @@ int main(int argc, char **argv) {
 		}
 
 		std::string msg = ex.what();
-		msg = _Tr("Main",
-		          "A serious error caused OpenSpades to stop working:\n\n{0}\n\nSee "
-		          "SystemMessages.log for more details.",
-		          msg);
+		if (msg != "Demo Replay Ended: end of recording reached") {
+			//at least fatal error doesnt appear, still ugly tho
+			//how do i stop client without throwing an exception? lol, help pls
+			msg = _Tr("Main",
+					  "A serious error caused OpenSpades to stop working:\n\n{0}\n\nSee "
+					  "SystemMessages.log for more details.",
+					  msg);
 
-		SPLog("[!] Terminating due to the fatal error: %s", ex.what());
+			SPLog("[!] Terminating due to the fatal error: %s", ex.what());
 
-		SDL_InitSubSystem(SDL_INIT_VIDEO);
-		if (SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
-		                             _Tr("Main", "OpenSpades Fatal Error").c_str(), msg.c_str(),
-		                             nullptr)) {
-			// showing dialog failed.
-			// TODO: do appropriate action
+			SDL_InitSubSystem(SDL_INIT_VIDEO);
+			if (SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
+										 _Tr("Main", "OpenSpades Fatal Error").c_str(), msg.c_str(),
+										 nullptr)) {
+				// showing dialog failed.
+				// TODO: do appropriate action
+			}
 		}
 	}
 
