@@ -767,7 +767,7 @@ namespace spades {
 				clientPlayers[id] = Handle<ClientPlayer>::New(*p, *this);
 			}
 
-			if (id == world->GetLocalPlayerIndex());
+			if (id == world->GetLocalPlayerIndex())
 				lastHealth = 100;
 		}
 
