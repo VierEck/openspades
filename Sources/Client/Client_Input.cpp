@@ -626,6 +626,8 @@ namespace spades {
 						playerInput.crouch = down;
 					} else if (CheckKey(cg_keySprint, name)) {
 						playerInput.sprint = down;
+						if (p.IsToolWeapon() && !cg_holdAimDownSight)
+							weapInput.secondary = false;
 					} else if (CheckKey(cg_keySneak, name)) {
 						playerInput.sneak = down;
 					} else if (CheckKey(cg_keyJump, name)) {
