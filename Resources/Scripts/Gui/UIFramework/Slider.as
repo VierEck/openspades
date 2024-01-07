@@ -36,8 +36,18 @@ namespace spades {
 				IsMouseInteractive = true;
 			}
 
-			void PlayMouseEnterSound() { Manager.PlaySound("Sounds/Feedback/Limbo/Hover.opus"); }
-			void PlayActivateSound() { Manager.PlaySound("Sounds/Feedback/Limbo/Select.opus"); }
+			void PlayMouseEnterSound() { 
+				ConfigItem cg_buttonHoverSoundGain("cg_buttonHoverSoundGain");
+				AudioParam param;
+				param.volume = cg_buttonHoverSoundGain.FloatValue;
+				Manager.PlaySound("Sounds/Feedback/Limbo/Hover.opus", param);
+			}
+			void PlayActivateSound() {
+				ConfigItem cg_buttonSelectSoundGain("cg_buttonSelectSoundGain");
+				AudioParam param;
+				param.volume = cg_buttonSelectSoundGain.FloatValue;
+				Manager.PlaySound("Sounds/Feedback/Limbo/Select.opus", param); 
+			}
 
 			private float GetCursorPos(Vector2 pos) { return pos.x + Position.x; }
 
