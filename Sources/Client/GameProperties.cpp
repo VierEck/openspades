@@ -35,7 +35,7 @@ namespace spades {
 				SPLog("Enabled posUpgradeExtension based on a server message heuristics");
 			} else if (msg == "PosUpgrade extension could not be detected") {
 				posUpgradeExtension = false;
-				SPLog("Enabled posUpgradeExtension based on a server message heuristics");
+				SPLog("Disabled posUpgradeExtension based on a server message heuristics");
 			}
 		}
 	} // namespace client
