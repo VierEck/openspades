@@ -58,6 +58,8 @@ namespace spades {
 
 			bool clearCorpseOnRespawn = false;
 
+			bool posUpgradeExtension = false;
+
 			/**
 			 * Raises the upper limit of the number of player slots to 128.
 			 *

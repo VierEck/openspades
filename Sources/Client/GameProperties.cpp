@@ -30,6 +30,12 @@ namespace spades {
 			if (msg == "Game mode: Arena by Yourself") {
 				clearCorpseOnRespawn = true;
 				SPLog("Enabled clearCorpseOnRespawn based on a server message heuristics");
+			} else if (msg == "This server supports the PosUpgrade extension") {
+				posUpgradeExtension = true;
+				SPLog("Enabled posUpgradeExtension based on a server message heuristics");
+			} else if (msg == "PosUpgrade extension could not be detected") {
+				posUpgradeExtension = false;
+				SPLog("Enabled posUpgradeExtension based on a server message heuristics");
 			}
 		}
 	} // namespace client

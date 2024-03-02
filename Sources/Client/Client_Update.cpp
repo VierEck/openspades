@@ -641,7 +641,8 @@ namespace spades {
 				lastOriSentTime = time;
 			}
 			// send position
-			if (time > lastPosSentTime + 1.f) {
+			if (time > lastPosSentTime + 1.f
+				|| net->GetGameProperties()->posUpgradeExtension && time > lastPosSentTime + 0.017f) {
 				net->SendPosition();
 				lastPosSentTime = time;
 			}
