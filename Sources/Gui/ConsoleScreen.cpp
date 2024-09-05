@@ -19,6 +19,7 @@
  */
 #include <ScriptBindings/Config.h>
 #include <ScriptBindings/ScriptFunction.h>
+#include <Core/Settings.h>
 
 #include <Client/Fonts.h>
 
@@ -26,6 +27,8 @@
 #include "ConsoleCommand.h"
 #include "ConsoleHelper.h"
 #include "ConsoleScreen.h"
+
+DEFINE_SPADES_SETTING(cg_keyConsole, "F1");
 
 namespace spades {
 	namespace gui {
@@ -76,8 +79,7 @@ namespace spades {
 		void ConsoleScreen::KeyEvent(const std::string &key, bool down) {
 			SPADES_MARK_FUNCTION();
 
-			// TODO: Check if "`" is correct
-			if (key == "`" || key == "F1") {
+			if (key == cg_keyConsole) {
 				if (down) {
 					ToggleConsole();
 				}
