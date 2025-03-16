@@ -48,6 +48,7 @@
 #include <Core/PipeStream.h>
 
 DEFINE_SPADES_SETTING(cg_unicode, "1");
+DEFINE_SPADES_SETTING(cg_persistentBlockColor, "1");
 DEFINE_SPADES_SETTING(cg_compressDemo, "1");
 SPADES_SETTING(cg_playerName);
 
@@ -1204,10 +1205,15 @@ namespace spades {
 						default: SPRaise("Received invalid weapon: %d", weapon);
 					}
 
-					auto p =
-					  stmp::make_unique<Player>(*GetWorld(), pId, wType, team, savedPlayerPos[pId],
+					auto p = stmp::make_unique<Player>(*GetWorld(), pId, wType, team, savedPlayerPos[pId],
 					                            GetWorld()->GetTeam(team).color);
 					p->SetPosition(pos);
+					// Don't reset my block color when I respawn
+					if(cg_persistentBlockColor && GetLocalPlayerOrNull() && pId == GetWorld()->GetLocalPlayerIndex()) {
+						p->SetHeldBlockColor(GetWorld()->GetLocalPlayer()->GetBlockColor());
+						SendHeldBlockColor();
+					}
+
 					GetWorld()->SetPlayer(pId, std::move(p));
 
 					Player &pRef = GetWorld()->GetPlayer(pId).value();
