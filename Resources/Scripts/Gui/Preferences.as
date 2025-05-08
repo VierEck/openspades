@@ -1551,6 +1551,7 @@ namespace spades {
 									ConfigNumberFormatter(0, " %"));
 			layouter.AddToggleField(_Tr("Preferences", "Debug Aim Spread"), "cg_debugAim");
 			layouter.AddToggleField(_Tr("Preferences", "Debug Corpse"), "cg_debugCorpse");
+			layouter.AddToggleField(_Tr("Preferences", "Persistent Block Color"), "cg_persistentBlockColor");
 			layouter.AddHeading(_Tr("Preferences", " "));
 
 			layouter.AddHeading(_Tr("Preferences", "AoS 0.75/0.76 Compatibility"));
