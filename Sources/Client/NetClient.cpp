@@ -1213,15 +1213,8 @@ namespace spades {
 					}
 
 					auto p = stmp::make_unique<Player>(*GetWorld(), pId, wType, team, savedPlayerPos[pId],
-					auto p = stmp::make_unique<Player>(*GetWorld(), pId, wType, team, savedPlayerPos[pId],
 					                            GetWorld()->GetTeam(team).color);
 					p->SetPosition(pos);
-					// Don't reset my block color when I respawn
-					if(cg_persistentBlockColor && GetLocalPlayerOrNull() && pId == GetWorld()->GetLocalPlayerIndex()) {
-						p->SetHeldBlockColor(GetWorld()->GetLocalPlayer()->GetBlockColor());
-						SendHeldBlockColor();
-					}
-
 					// Don't reset my block color when I respawn
 					if(cg_persistentBlockColor && GetLocalPlayerOrNull() && pId == GetWorld()->GetLocalPlayerIndex()) {
 						p->SetHeldBlockColor(GetWorld()->GetLocalPlayer()->GetBlockColor());
