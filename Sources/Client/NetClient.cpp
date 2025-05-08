@@ -49,6 +49,7 @@
 
 DEFINE_SPADES_SETTING(cg_unicode, "1");
 DEFINE_SPADES_SETTING(cg_persistentBlockColor, "1");
+DEFINE_SPADES_SETTING(cg_ignoreSpectatorSpawnLoc, "1");
 DEFINE_SPADES_SETTING(cg_compressDemo, "1");
 SPADES_SETTING(cg_playerName);
 
@@ -1186,9 +1187,15 @@ namespace spades {
 					int weapon = reader.ReadByte();
 					int team = reader.ReadByte();
 					Vector3 pos;
-					pos.x = reader.ReadFloat();
-					pos.y = reader.ReadFloat();
-					pos.z = reader.ReadFloat() - 2.f;
+					if(cg_ignoreSpectatorSpawnLoc && team >= 2) { // Spawning in the corner as a spectator is frustrating
+						pos.x = 256.f;
+						pos.y = 256.f;
+						pos.z = -2.f;
+					} else {
+						pos.x = reader.ReadFloat();
+						pos.y = reader.ReadFloat();
+						pos.z = reader.ReadFloat() - 2.f;
+					}
 					std::string name = reader.ReadRemainingString();
 					// TODO: decode name?
 
