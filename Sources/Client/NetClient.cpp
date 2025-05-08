@@ -1478,6 +1478,7 @@ namespace spades {
 					Player &p = GetPlayer(reader.ReadByte());
 
 					client->PlayerLeaving(p);
+					GetWorld()->GetPlayerPersistent(p.GetId()).kills = 0;
 
 					savedPlayerTeam[p.GetId()] = -1;
 					GetWorld()->SetPlayer(p.GetId(), NULL);
@@ -1731,7 +1732,7 @@ namespace spades {
 							// over 100.000 bytes here already.
 							// wont make a client side limitation here though. the lag
 							// itself is already a hardlimit on the user lol. theyll
-							// know what they get themselves into. 
+							// know what they get themselves into.
 							// however checks should definetely happen at server level.
 							for (int i = 0, j = 0; i < remainingBytes; i++, j++) {
 								if (j >= cells.size())
@@ -2621,7 +2622,7 @@ namespace spades {
 						for (char &c : readStream->Read(8192))
 							//8192 = pique mapchunk pkt len
 							//we want to limit pkt len since demo stores len as an unsigned short.
-							//making one big chunk would exceed that. 
+							//making one big chunk would exceed that.
 							wri.Write((uint8_t)c);
 						DemoRegisterPacket(wri.CreatePacket());
 					}
@@ -2889,7 +2890,7 @@ namespace spades {
 				try {
 					DemoHandleCurrentData();
 				} catch (...) {
-					SPRaise("Error handling demo packet"); 
+					SPRaise("Error handling demo packet");
 				}
 			}
 			DemoSkimEnd();
@@ -2935,7 +2936,7 @@ namespace spades {
 				try {
 					DemoHandleCurrentData();
 				} catch (...) {
-					SPRaise("Error handling demo packet"); 
+					SPRaise("Error handling demo packet");
 				}
 			}
 			DemoSkimEnd();
