@@ -182,6 +182,9 @@ namespace spades {
 
 			PacketType GetType() { return (PacketType)data[0]; }
 
+			void Skip(int numBytes) {
+				pos += numBytes;
+			}
 			uint32_t ReadInt() {
 				SPADES_MARK_FUNCTION();
 
@@ -1191,6 +1194,7 @@ namespace spades {
 						pos.x = 256.f;
 						pos.y = 256.f;
 						pos.z = -2.f;
+						reader.Skip(12);
 					} else {
 						pos.x = reader.ReadFloat();
 						pos.y = reader.ReadFloat();
