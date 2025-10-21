@@ -48,6 +48,8 @@
 #include <Core/PipeStream.h>
 
 DEFINE_SPADES_SETTING(cg_unicode, "1");
+DEFINE_SPADES_SETTING(cg_persistentBlockColor, "1");
+DEFINE_SPADES_SETTING(cg_ignoreSpectatorSpawnLoc, "1");
 DEFINE_SPADES_SETTING(cg_compressDemo, "1");
 SPADES_SETTING(cg_playerName);
 
@@ -180,6 +182,9 @@ namespace spades {
 
 			PacketType GetType() { return (PacketType)data[0]; }
 
+			void Skip(int numBytes) {
+				pos += numBytes;
+			}
 			uint32_t ReadInt() {
 				SPADES_MARK_FUNCTION();
 
@@ -1185,9 +1190,16 @@ namespace spades {
 					int weapon = reader.ReadByte();
 					int team = reader.ReadByte();
 					Vector3 pos;
-					pos.x = reader.ReadFloat();
-					pos.y = reader.ReadFloat();
-					pos.z = reader.ReadFloat() - 2.f;
+					if(cg_ignoreSpectatorSpawnLoc && team >= 2) { // Spawning in the corner as a spectator is frustrating
+						pos.x = 256.f;
+						pos.y = 256.f;
+						pos.z = -2.f;
+						reader.Skip(12);
+					} else {
+						pos.x = reader.ReadFloat();
+						pos.y = reader.ReadFloat();
+						pos.z = reader.ReadFloat() - 2.f;
+					}
 					std::string name = reader.ReadRemainingString();
 					// TODO: decode name?
 
@@ -1204,10 +1216,15 @@ namespace spades {
 						default: SPRaise("Received invalid weapon: %d", weapon);
 					}
 
-					auto p =
-					  stmp::make_unique<Player>(*GetWorld(), pId, wType, team, savedPlayerPos[pId],
+					auto p = stmp::make_unique<Player>(*GetWorld(), pId, wType, team, savedPlayerPos[pId],
 					                            GetWorld()->GetTeam(team).color);
 					p->SetPosition(pos);
+					// Don't reset my block color when I respawn
+					if(cg_persistentBlockColor && GetLocalPlayerOrNull() && pId == GetWorld()->GetLocalPlayerIndex()) {
+						p->SetHeldBlockColor(GetWorld()->GetLocalPlayer()->GetBlockColor());
+						SendHeldBlockColor();
+					}
+
 					GetWorld()->SetPlayer(pId, std::move(p));
 
 					Player &pRef = GetWorld()->GetPlayer(pId).value();

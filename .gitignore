@@ -54,6 +54,9 @@ UserInterfaceState.xcuserstate
 *.sublime-workspace
 *.sublime-project
 
+# Vscode
+.vscode/
+
 # Windows related
 Thumbs.db
 

@@ -39,7 +39,9 @@ DEFINE_SPADES_SETTING(cg_minimapSize, "128");
 DEFINE_SPADES_SETTING(cg_minimapPlayerColor, "1", "0");
 DEFINE_SPADES_SETTING(cg_minimapPlayerIcon, "1");
 
+DEFINE_SPADES_SETTING(cg_minimapInfo, "1");
 DEFINE_SPADES_SETTING(cg_minimapCoords, "1");
+DEFINE_SPADES_SETTING(cg_minimapDirection, "1");
 DEFINE_SPADES_SETTING(cg_minimapTransparency, "1", "0.8");
 
 using std::pair;
@@ -652,18 +654,41 @@ namespace spades {
 				}
 			}
 
-			//draw current map sector
-			if (!largeMap && cg_minimapCoords) {
+			// Draw minimap info
+			if (!largeMap && cg_minimapInfo) {
 				IFont& font = client->fontManager->GetGuiFont();
+				std::string label;
 
-				auto letter = char(int('A') + int(focusPlayerPos.x / 64));
-				auto number = std::to_string(int(focusPlayerPos.y / 64) + 1);
-				std::string sector = letter + number;
-
-				Vector2 size = font.Measure(sector);
+				// Draw current coordinates
+				if (cg_minimapCoords) {
+					auto letter = char(int('A') + int(focusPlayerPos.x / 64));
+					auto number = std::to_string(int(focusPlayerPos.y / 64) + 1);
+					label.reserve(2);
+					label += letter;
+					label += number;
+				}
+				// Draw the direction you're facing
+				if (cg_minimapDirection) {
+					if (cg_minimapCoords) {
+						label += ' ';
+					}
+					const char *directions[] = {
+						"S",
+						"SE",
+						"E",
+						"NE",
+						"N",
+						"NW",
+						"W",
+						"SW",
+					};
+					int index = fminf(fmaxf(fmodf(focusPlayerAngle + M_PI + ((M_PI * 2) / 16.0F) ,(M_PI * 2)) / (M_PI * 2) * 8.0F, 0.0F), 8.0F); 
+					label += directions[index];
+				}
+				Vector2 size = font.Measure(label);
 
 				Vector2 pos = outRect.min;
-				if ((int)cg_minimapCoords < 2) {
+				if ((int)cg_minimapInfo < 2) {
 					pos.x += ((outRect.GetWidth() - size.x) * 0.5f);
 					pos.y = outRect.GetMaxY() + size.y * 0.5f - 8.0f;
 				} else {
@@ -679,7 +704,7 @@ namespace spades {
 					? MakeVector4(0, 0, 0, 0.8f * (float)cg_minimapTransparency)
 					: MakeVector4(1, 1, 1, 0.8f * (float)cg_minimapTransparency);
 
-				font.DrawShadow(sector, pos, 1.0f, color, shadowColor);
+				font.DrawShadow(label, pos, 1.0f, color, shadowColor);
 			}
 		}
 

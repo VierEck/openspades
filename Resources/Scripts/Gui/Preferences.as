@@ -1551,6 +1551,7 @@ namespace spades {
 									ConfigNumberFormatter(0, " %"));
 			layouter.AddToggleField(_Tr("Preferences", "Debug Aim Spread"), "cg_debugAim");
 			layouter.AddToggleField(_Tr("Preferences", "Debug Corpse"), "cg_debugCorpse");
+			layouter.AddToggleField(_Tr("Preferences", "Persistent Block Color"), "cg_persistentBlockColor");
 			layouter.AddHeading(_Tr("Preferences", " "));
 
 			layouter.AddHeading(_Tr("Preferences", "AoS 0.75/0.76 Compatibility"));
@@ -1585,11 +1586,19 @@ namespace spades {
 									ConfigNumberFormatter(0, " %", "", 100));
 			layouter.AddSliderField(_Tr("Preferences", "Minimap size"), "cg_minimapSize", 128, 256,
 									8, ConfigNumberFormatter(0, " px"));
-			layouter.AddChoiceField(_Tr("Preferences", "Show Current Map Sector"), "cg_minimapCoords",
+			layouter.AddChoiceField(_Tr("Preferences", "Show Minimap Info"), "cg_minimapInfo",
 									array<string> = {_Tr("Preferences", "Left"),
 													 _Tr("Preferences", "Beneath"),
 													 _Tr("Preferences", "OFF")},
 									array<int> = {2, 1, 0});
+			layouter.AddChoiceField(_Tr("Preferences", "Show Current Map Sector"), "cg_minimapCoords",
+									array<string> = {_Tr("Preferences", "ON"),
+													 _Tr("Preferences", "OFF")},
+									array<int> = {1, 0});
+			layouter.AddChoiceField(_Tr("Preferences", "Show Current Direction"), "cg_minimapDirection",
+									array<string> = {_Tr("Preferences", "ON"),
+													 _Tr("Preferences", "OFF")},
+									array<int> = {1, 0});
 			layouter.AddChoiceField(_Tr("Preferences", "Minimap Player Colors"), "cg_minimapPlayerColor",
 									array<string> = {_Tr("Preferences", "Random"),
 													 _Tr("Preferences", "Team")},
